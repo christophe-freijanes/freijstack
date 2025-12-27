@@ -1,0 +1,179 @@
+/* General Styles */
+body {
+    font-family: 'Montserrat', sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #1a1a1a; /* Dark background */
+    color: #f4f4f4; /* Light text */
+}
+
+.container {
+    max-width: 960px; /* Plus étroit pour un design épuré */
+    margin: auto;
+    overflow: hidden;
+    padding: 0 20px;
+}
+
+h1, h2, h3, h4 {
+    color: #e0e0e0; /* Couleur pour les titres */
+    font-weight: 700;
+}
+
+a {
+    color: #88b04b; /* Couleur d'accentuation subtile */
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Header & Navigation */
+header {
+    background: #0a0a0a; /* Encore plus sombre */
+    color: #f4f4f4;
+    padding: 20px 0;
+    min-height: 80px;
+    border-bottom: 1px solid #333;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+header h1 {
+    float: left;
+    margin: 0;
+    font-size: 1.8em;
+    padding: 0 20px;
+}
+
+header nav {
+    float: right;
+    margin-top: 5px;
+}
+
+header ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+header li {
+    display: inline;
+    padding: 0 20px;
+}
+
+header a {
+    color: #f4f4f4;
+    text-transform: uppercase;
+    font-size: 1em;
+    font-weight: 300;
+}
+
+header a:hover {
+    color: #88b04b;
+    font-weight: 400;
+}
+
+/* Hero Section */
+#hero {
+    min-height: 500px; /* Un peu plus grand */
+    background: #222 url('./img/hero-bg.jpg') no-repeat center center/cover; /* Placeholder background image */
+    text-align: center;
+    color: #f4f4f4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+#hero h2 {
+    font-size: 3.5em; /* Plus grand */
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+#hero p {
+    font-size: 1.4em; /* Plus grand */
+    max-width: 700px;
+}
+
+/* Sections */
+section {
+    padding: 60px 0;
+    border-bottom: 1px solid #333;
+    background-color: #1a1a1a; /* Fond sombre pour les sections */
+    margin-bottom: 0; /* Pas de marge entre les sections */
+}
+
+section:last-of-type {
+    border-bottom: none;
+}
+
+section h3 {
+    text-align: center;
+    color: #e0e0e0;
+    margin-bottom: 40px;
+    font-size: 2.5em; /* Plus grand */
+    text-transform: uppercase;
+}
+
+/* Project Grid */
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    padding: 0 20px;
+}
+
+.project-item {
+    background: #2a2a2a;
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.project-item:hover {
+    transform: translateY(-5px);
+}
+
+.project-item h4 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+.project-item p {
+    font-size: 1em;
+    color: #bbb;
+}
+
+/* Contact Section */
+#contact ul {
+    list-style: none;
+    padding: 0;
+    text-align: center;
+}
+
+#contact li {
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+#contact li a {
+    color: #88b04b;
+}
+
+/* Footer */
+footer {
+    padding: 30px;
+    margin-top: 0;
+    color: #f4f4f4;
+    background-color: #0a0a0a;
+    text-align: center;
+    border-top: 1px solid #333;
+    font-size: 0.9em;
+}
