@@ -259,7 +259,7 @@ jobs:
   notify:
     name: Notify Status
     runs-on: ubuntu-latest
-    needs: [validate, build, security, deploy-pages-staging, deploy-hostinger, deploy-hostinger-staging]
+    needs: [validate, build, security, deploy-pages-staging, deploy-hostinger-staging, deploy-hostinger]
     if: always()
     
     steps:
@@ -269,7 +269,7 @@ jobs:
             echo "🧪 STAGING Environment"
             if [ "${{ needs.deploy-pages-staging.result }}" == "success" ] || [ "${{ needs.deploy-hostinger-staging.result }}" == "success" ]; then
               echo "✅ Staging deployment successful!"
-              echo "📍 Test your changes before merging to main"
+              echo "📍 Test your changes before merging to master"
             else
               echo "⚠️ Staging deployment had issues. Check the logs above."
             fi
