@@ -2,6 +2,8 @@
 
 Portfolio et projets cloud & sécurité de **Christophe FREIJANES** - Senior Cloud & Security Specialist (DevSecOps).
 
+**Live**: https://freijstack.com/portfolio/
+
 ## 📋 Structure du Projet
 
 ```
@@ -9,6 +11,7 @@ freijstack/
 ├── portfolio/          # Portfolio web professionnel (HTML/CSS/JS)
 ├── saas/              # Applications SaaS démos (DevSecOps, Microservices)
 ├── docs/              # Documentation et architecture
+├── .github/workflows/ # CI/CD pipelines (GitHub Actions)
 ├── package.json       # Dépendances du projet
 └── README.md          # Ce fichier
 ```
@@ -26,8 +29,12 @@ Portfolio web multilingue (FR/EN) avec:
 - **Skills** 9 catégories (Cloud & Security, DevSecOps, Backup, Automation, Monitoring, OS, Virtualization, Storage, Methodologies)
 - **Expériences** 5 positions (HARDIS, DIGIMIND, ECONOCOM, SQUAD, ACENSI)
 - **Projets** 6 réalisations avec détails techniques
+- **Sécurité**: Content Security Policy, WCAG AA compliance
 
-**Accès**: Ouvrir `portfolio/index.html` dans un navigateur.
+**Accès**: 
+- 📍 **Production**: https://freijstack.com/portfolio/
+- 📍 **Staging**: https://freijstack.com/portfolio-staging/
+- 📍 **Local**: Ouvrir `portfolio/index.html` dans un navigateur
 
 ### SaaS Démos (`/saas`)
 
@@ -51,47 +58,143 @@ Voir [saas/README.md](saas/README.md) pour plus de détails.
 
 ### Documentation (`/docs`)
 
-- `architecture.md` - Vue d'ensemble de l'architecture technique
+- `architecture.md` - Vue d'ensemble de l'architecture technique et déploiement
+
+## 🚀 CI/CD Pipeline
+
+Le projet utilise **GitHub Actions** avec un pipeline complet:
+
+### Branches
+- `develop` - Staging (déploié vers `/portfolio-staging` + GitHub Pages)
+- `master` - Production (déploié vers `/portfolio` sur VPS)
+
+### Jobs
+1. **Validate & Lint** - HTML/CSS/JS linting
+2. **Build & Optimize** - Minification CSS/JS
+3. **Security Scan** - Trivy, Gitleaks, CodeQL
+4. **Deploy to GitHub Pages** (staging uniquement)
+5. **Deploy to Hostinger** (staging + production)
+6. **Notifications** - Status reports
+
+**Détails**: Voir `.github/workflows/main.yml`
+
+## 🏗️ Déploiement
+
+### Infrastructure
+- **VPS**: Hostinger (Ubuntu 22.04)
+- **Web Server**: nginx + Traefik (reverse proxy)
+- **TLS**: Let's Encrypt via ACME
+- **DNS**: Traefik path-based routing
+
+### Paths
+```
+/srv/www/
+├── portfolio/           # Production (master branch)
+└── portfolio-staging/   # Staging (develop branch)
+```
+
+### Déploiement Automatique
+- Chaque commit sur `develop` déploie vers `/portfolio-staging/`
+- Chaque commit sur `master` déploie vers `/portfolio/`
+- Utilise SSH + rsync pour transfert sécurisé
 
 ## 🚀 Démarrage Rapide
 
-### Portfolio
+### Portfolio (Local)
 
 ```bash
 cd portfolio
-# Ouvrir index.html dans un navigateur
-# ou servir avec un serveur local:
+
+# Option 1: Ouvrir directement le fichier
+# Double-cliquez sur index.html
+
+# Option 2: Serveur local Python
 python3 -m http.server 8000
 # Accès: http://localhost:8000
+
+# Option 3: Serveur local Node.js
+npx http-server .
+# Accès: http://localhost:8080
 ```
 
 ### Applications SaaS
 
 ```bash
+# App1
 cd saas/app1
 docker build -t app1 .
 docker run -p 8080:8080 app1
 
+# App2
 cd saas/app2
 docker build -t app2 .
 docker run -p 8081:8081 app2
 ```
 
+### En Développement
+
+```bash
+# Clone du repo
+git clone https://github.com/christophe-freijanes/freijstack.git
+cd freijstack
+
+# Installation
+npm install
+
+# Développement sur develop
+git checkout develop
+
+# Commit et push pour déclencher CI/CD
+git add .
+git commit -m "feat: mise à jour portfolio"
+git push origin develop
+
+# Vérifier https://freijstack.com/portfolio-staging/
+# Puis merger vers master quand prêt
+```
+
 ## 💻 Technologies
 
 ### Portfolio
-- HTML5, CSS3 (CSS Variables, Flexbox)
+- HTML5, CSS3 (CSS Variables, Flexbox, Grid)
 - JavaScript vanilla (pas de frameworks)
 - Font Awesome 6.4.0
 - Google Fonts
-- Responsive Design
+- Responsive Design, CSP, WCAG AA
 
 ### SaaS
 - Docker / Containerization
 - Node.js / Python (selon l'app)
 - Microservices
-- CI/CD (GitHub Actions / etc.)
+- CI/CD (GitHub Actions)
 - WebSockets / REST APIs
+
+### Infrastructure
+- Ubuntu 22.04 LTS
+- nginx + Traefik
+- Let's Encrypt / ACME
+- SSH + rsync
+- GitHub Actions
+
+## 🔐 Sécurité
+
+✅ **Portfolio**:
+- Content Security Policy (CSP) headers
+- No external tracking
+- WCAG AA compliance
+- HTML validation
+
+✅ **CI/CD**:
+- Gitleaks (secrets scanning)
+- Trivy (vulnerability scanning)
+- CodeQL (SAST)
+- GitHub token permissions (minimal)
+
+✅ **Infrastructure**:
+- TLS 1.3 (Let's Encrypt)
+- Firewall rules
+- Path-based routing (no root exposure)
+- SSH key-based auth
 
 ## 🌍 Langues
 
