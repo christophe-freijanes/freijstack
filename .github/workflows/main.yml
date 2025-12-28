@@ -213,6 +213,16 @@ jobs:
           ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
             'ls -lh /srv/www/portfolio-staging/ | head -10'
 
+      - name: Cleanup old staging backups (keep last 3)
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+            'ls -dt /srv/www/portfolio-staging.backup.* 2>/dev/null | tail -n +4 | xargs -r rm -rf || true'
+
+      - name: Restart Traefik on VPS
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+            'C=$(docker ps --filter "name=traefik" --format "{{.Names}}" | head -n1); if [ -n "$C" ]; then docker restart "$C"; fi'
+
   # Job 6: Deploy to Hostinger (Production - master)
   deploy-hostinger:
     name: Deploy to Hostinger (Production)
@@ -256,6 +266,16 @@ jobs:
           echo "📍 GitHub Pages: https://${{ github.repository_owner }}.github.io/freijstack/portfolio"
           ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
             'ls -lh /srv/www/portfolio/ | head -10'
+
+      - name: Cleanup old production backups (keep last 3)
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+            'ls -dt /srv/www/portfolio.backup.* 2>/dev/null | tail -n +4 | xargs -r rm -rf || true'
+
+      - name: Restart Traefik on VPS
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+            'C=$(docker ps --filter "name=traefik" --format "{{.Names}}" | head -n1); if [ -n "$C" ]; then docker restart "$C"; fi'
 
   # Job 7: Notifications
   notify:
