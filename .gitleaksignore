@@ -1,3 +1,6 @@
 # False positives: example API keys in README documentation
 saas/app1/README.md:generic-api-key:163
 saas/app1/README.md:generic-api-key:179
+# False positives: Google Drive public file ID in portfolio (not a secret)
+portfolio/index.html:generic-api-key:28
+portfolio/index.html:generic-api-key:535
