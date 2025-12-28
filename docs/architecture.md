@@ -33,8 +33,15 @@ freijstack/
 
 ### 2.2. Portfolio (`/portfolio`)
 
-*   **Description** : Présentation des projets, compétences et expériences professionnelles de Christophe, inspirée d'un design moderne.
-*   **Technologies** : HTML, CSS, JavaScript (actuellement pur, extensible vers React/Vue/Svelte pour plus d'interactivité).
+*   **Description** : Présentation des projets, compétences et expériences professionnelles de Christophe, inspirée d'un design moderne avec une disposition visuelle améliorée et des animations.
+*   **Technologies** : HTML, CSS, JavaScript (avec la bibliothèque ScrollReveal.js pour les animations).
+*   **Nouvelle Disposition Visuelle** :
+    *   **Section Hero** : Maintien de l'image de fond avec effet parallax au mouvement de la souris.
+    *   **Section "À Propos"** : Disposition en deux colonnes asymétriques avec un texte de présentation détaillé à gauche et une photo de profil/faits marquants à droite.
+    *   **Section "Compétences"** : Grille dynamique avec des compétences regroupées par catégories (Cloud & Infra, Sécurité, CI/CD & Automatisation, Développement) pour une meilleure organisation.
+    *   **Section "Projets"** : Grille de type "Portfolio Visuel" (Masonry/Mosaïque) avec des images de projets de tailles variées et des superpositions d'informations au survol.
+    *   **Section "Démos SaaS"** : Présentation sous forme de cartes d'aperçu avec image, titre, description et lien direct.
+    *   **Section "Contact"** : Formulaire de contact intégré dans une carte, avec des liens sociaux proéminents et stylisés.
 *   **Déploiement** : Fichiers statiques servis sous `freijstack.com/portfolio`.
 
 ### 2.3. Blog (`/blog`)

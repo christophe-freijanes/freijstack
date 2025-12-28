@@ -34,15 +34,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Reveal About section
     sr.reveal('.about-section h2', { origin: 'top' });
-    sr.reveal('.about-section p', { origin: 'left', delay: 200 });
+    sr.reveal('.about-text p', { origin: 'left', delay: 200 });
+    sr.reveal('.profile-pic', { origin: 'right', delay: 300 });
+    sr.reveal('.about-sidebar h3', { origin: 'right', delay: 400 });
+    sr.reveal('.facts-card', { origin: 'right', delay: 500 });
 
     // Reveal Skills section
     sr.reveal('.skills-section h2', { origin: 'top' });
-    sr.reveal('.skill-item', { interval: 100, origin: 'bottom', delay: 300 });
+    sr.reveal('.skill-category', { interval: 100, origin: 'bottom', delay: 300 });
 
     // Reveal Projects section
     sr.reveal('.projects-section h2', { origin: 'top' });
-    sr.reveal('.project-item', { interval: 100, origin: 'right', delay: 200 });
+    sr.reveal('.project-item', { interval: 100, origin: 'bottom', delay: 200 });
 
     // Reveal SaaS section
     sr.reveal('.saas-section h2', { origin: 'top' });
@@ -51,8 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Reveal Contact section
     sr.reveal('.contact-section h2', { origin: 'top' });
-    sr.reveal('.contact-section p', { origin: 'left', delay: 200 });
-    sr.reveal('.contact-form input, .contact-form textarea, .contact-form button', { interval: 100, origin: 'bottom', delay: 300 });
+    sr.reveal('.contact-form-card', { origin: 'left', delay: 200 });
+    sr.reveal('.social-contact-card', { origin: 'right', delay: 300 });
 
     // Reveal Footer
     sr.reveal('footer .container', { origin: 'bottom', delay: 200 });

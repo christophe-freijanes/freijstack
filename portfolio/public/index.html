@@ -34,36 +34,82 @@
         </section>
 
         <section id="about" class="about-section">
-            <div class="container">
-                <h2>À Propos de Moi</h2>
-                <p>En tant qu'ingénieur DevSecOps, je m'efforce de construire des systèmes robustes, sécurisés et efficaces. Mon expertise s'étend de l'automatisation de l'infrastructure à la mise en œuvre de pratiques de sécurité intégrées tout au long du cycle de vie du développement logiciel.</p>
-                <p>Je suis constamment à la recherche de nouvelles technologies et de meilleures pratiques pour améliorer les processus de développement et garantir la résilience des applications.</p>
+            <div class="container about-grid">
+                <div class="about-text">
+                    <h2>À Propos de Moi</h2>
+                    <p>En tant qu'ingénieur DevSecOps, je m'efforce de construire des systèmes robustes, sécurisés et efficaces. Mon expertise s'étend de l'automatisation de l'infrastructure à la mise en œuvre de pratiques de sécurité intégrées tout au long du cycle de vie du développement logiciel.</p>
+                    <p>Je suis constamment à la recherche de nouvelles technologies et de meilleures pratiques pour améliorer les processus de développement et garantir la résilience des applications.</p>
+                </div>
+                <div class="about-sidebar">
+                    <img src="https://via.placeholder.com/200" alt="Christophe FREIJANES" class="profile-pic">
+                    <h3>Christophe FREIJANES</h3>
+                    <div class="facts-card">
+                        <h4>Faits Marquants</h4>
+                        <ul>
+                            <li>Ingénieur DevSecOps expérimenté</li>
+                            <li>Spécialiste Cloud (AWS, Azure)</li>
+                            <li>Expert en Automatisation CI/CD</li>
+                            <li>Passionné par la Cybersécurité</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </section>
 
         <section id="skills" class="skills-section">
             <div class="container">
                 <h2>Mes Compétences</h2>
-                <div class="skills-grid">
-                    <div class="skill-item">
-                        <i class="fas fa-cloud"></i>
-                        <h3>Cloud & Infrastructure</h3>
-                        <p>AWS, Azure, Google Cloud, Terraform, Ansible, Kubernetes, Docker</p>
+                <div class="skills-categories">
+                    <div class="skill-category">
+                        <h3><i class="fas fa-cloud"></i> Cloud & Infrastructure</h3>
+                        <div class="skills-grid">
+                            <div class="skill-item">
+                                <p>AWS, Azure, Google Cloud</p>
+                            </div>
+                            <div class="skill-item">
+                                <p>Terraform, Ansible</p>
+                            >
+                            </div>
+                            <div class="skill-item">
+                                <p>Kubernetes, Docker</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="skill-item">
-                        <i class="fas fa-shield-alt"></i>
-                        <h3>Sécurité</h3>
-                        <p>SAST, DAST, SCA, WAF, Gestion des vulnérabilités, Sécurité conteneurs</p>
+                    <div class="skill-category">
+                        <h3><i class="fas fa-shield-alt"></i> Sécurité</h3>
+                        <div class="skills-grid">
+                            <div class="skill-item">
+                                <p>SAST, DAST, SCA</p>
+                            </div>
+                            <div class="skill-item">
+                                <p>WAF, Gestion des vulnérabilités</p>
+                            </div>
+                            <div class="skill-item">
+                                <p>Sécurité conteneurs</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="skill-item">
-                        <i class="fas fa-cogs"></i>
-                        <h3>CI/CD & Automatisation</h3>
-                        <p>GitHub Actions, Jenkins, GitLab CI, Python, Bash, Scripting</p>
+                    <div class="skill-category">
+                        <h3><i class="fas fa-cogs"></i> CI/CD & Automatisation</h3>
+                        <div class="skills-grid">
+                            <div class="skill-item">
+                                <p>GitHub Actions, Jenkins, GitLab CI</p>
+                            </div>
+                            <div class="skill-item">
+                                <p>Python, Bash, Scripting</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="skill-item">
-                        <i class="fas fa-code"></i>
-                        <h3>Développement</h3>
-                        <p>Python, Go, Node.js, JavaScript, APIs RESTful</p>
+                    <div class="skill-category">
+                        <h3><i class="fas fa-code"></i> Développement</h3>
+                        <div class="skills-grid">
+                            <div class="skill-item">
+                                <p>Python, Go, Node.js</p>
+                            </div>
+                            <div class="skill-item">
+                                <p>JavaScript, APIs RESTful</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -72,17 +118,46 @@
         <section id="projects" class="projects-section">
             <div class="container">
                 <h2>Mes Projets</h2>
-                <div class="project-grid">
-                    <!-- Les projets seront ajoutés ici dynamiquement ou statiquement -->
+                <div class="project-grid-container">
                     <div class="project-item">
-                        <h3>Projet 1: Pipeline CI/CD Sécurisée</h3>
-                        <p>Mise en place d'une pipeline CI/CD avec des contrôles de sécurité intégrés (SAST, SCA) pour un déploiement automatisé sur AWS EKS.</p>
-                        <a href="#" class="btn-small">Voir le projet</a>
+                        <img src="https://via.placeholder.com/600x400/0000FF/FFFFFF?text=Pipeline+CI/CD" alt="Pipeline CI/CD Sécurisée">
+                        <div class="project-overlay">
+                            <h3>Projet 1: Pipeline CI/CD Sécurisée</h3>
+                            <p>Mise en place d'une pipeline CI/CD avec des contrôles de sécurité intégrés (SAST, SCA) pour un déploiement automatisé sur AWS EKS.</p>
+                            <a href="#" class="btn-small">Voir le projet</a>
+                        </div>
+                    </div>
+                    <div class="project-item wide">
+                        <img src="https://via.placeholder.com/800x400/FF0000/FFFFFF?text=Audit+Cloud" alt="Outil d'Audit de Sécurité Cloud">
+                        <div class="project-overlay">
+                            <h3>Projet 2: Outil d'Audit de Sécurité Cloud</h3>
+                            <p>Développement d'un script Python pour auditer la configuration de sécurité des ressources Azure et générer des rapports de conformité.</p>
+                            <a href="#" class="btn-small">Voir le projet</a>
+                        </div>
+                    </div>
+                    <div class="project-item tall">
+                        <img src="https://via.placeholder.com/400x800/00FF00/FFFFFF?text=Automation+Sec" alt="Automation de Sécurité Cloud">
+                        <div class="project-overlay">
+                            <h3>Projet 3: Automation de Sécurité Cloud</h3>
+                            <p>Scripts Terraform pour l'automatisation du déploiement d'infrastructures cloud sécurisées avec conformité (ex: AWS Security Hub).</p>
+                            <a href="#" class="btn-small">Voir le projet</a>
+                        </div>
                     </div>
                     <div class="project-item">
-                        <h3>Projet 2: Outil d'Audit de Sécurité Cloud</h3>
-                        <p>Développement d'un script Python pour auditer la configuration de sécurité des ressources Azure et générer des rapports de conformité.</p>
-                        <a href="#" class="btn-small">Voir le projet</a>
+                        <img src="https://via.placeholder.com/600x400/FFFF00/000000?text=K8s+Security" alt="Sécurité Kubernetes">
+                        <div class="project-overlay">
+                            <h3>Projet 4: Sécurité Kubernetes</h3>
+                            <p>Mise en œuvre de politiques de sécurité pour clusters Kubernetes (RBAC, Network Policies, Pod Security Standards).</p>
+                            <a href="#" class="btn-small">Voir le projet</a>
+                        </div>
+                    </div>
+                    <div class="project-item">
+                        <img src="https://via.placeholder.com/600x400/FF00FF/FFFFFF?text=DevSecOps+Tooling" alt="Intégration DevSecOps">
+                        <div class="project-overlay">
+                            <h3>Projet 5: Intégration DevSecOps</h3>
+                            <p>Intégration d'outils de sécurité (SonarQube, OWASP ZAP) dans les pipelines de CI/CD existantes.</p>
+                            <a href="#" class="btn-small">Voir le projet</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -92,16 +167,30 @@
             <div class="container">
                 <h2>Démos SaaS</h2>
                 <p>Voici quelques-unes des applications SaaS que j'ai développées pour démontrer mes compétences. Chaque application est hébergée indépendamment et utilise des technologies et des pratiques DevSecOps modernes.</p>
-                <div class="saas-grid">
+                <div class="saas-grid-container">
                     <div class="saas-item">
-                        <h3>App SaaS 1: Gestionnaire de Tâches Sécurisé</h3>
-                        <p>Application de gestion de tâches avec authentification, autorisation et API RESTful sécurisée. Déployée avec Docker et Kubernetes.</p>
-                        <a href="/saas/app1" class="btn-small">Voir la démo</a>
+                        <img src="https://via.placeholder.com/400x250/336699/FFFFFF?text=App1+Preview" alt="App SaaS 1 Preview">
+                        <div class="saas-content">
+                            <h3>App SaaS 1: Gestionnaire de Tâches Sécurisé</h3>
+                            <p>Application de gestion de tâches avec authentification, autorisation et API RESTful sécurisée. Déployée avec Docker et Kubernetes.</p>
+                            <a href="/saas/app1" class="btn-small">Voir la démo</a>
+                        </div>
                     </div>
                     <div class="saas-item">
-                        <h3>App SaaS 2: Service de Notification en Temps Réel</h3>
-                        <p>Microservice de notification en temps réel utilisant WebSockets et une base de données NoSQL. Sécurité par conception et déploiement automatisé.</p>
-                        <a href="/saas/app2" class="btn-small">Voir la démo</a>
+                        <img src="https://via.placeholder.com/400x250/993366/FFFFFF?text=App2+Preview" alt="App SaaS 2 Preview">
+                        <div class="saas-content">
+                            <h3>App SaaS 2: Service de Notification en Temps Réel</h3>
+                            <p>Microservice de notification en temps réel utilisant WebSockets et une base de données NoSQL. Sécurité par conception et déploiement automatisé.</p>
+                            <a href="/saas/app2" class="btn-small">Voir la démo</a>
+                        </div>
+                    </div>
+                    <div class="saas-item">
+                        <img src="https://via.placeholder.com/400x250/669933/FFFFFF?text=App3+Preview" alt="App SaaS 3 Preview">
+                        <div class="saas-content">
+                            <h3>App SaaS 3: Tableau de Bord DevSecOps</h3>
+                            <p>Un tableau de bord agrégant les métriques de sécurité des pipelines CI/CD et l'état de conformité de l'infrastructure cloud.</p>
+                            <a href="/saas/app3" class="btn-small">Voir la démo</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -110,13 +199,24 @@
         <section id="contact" class="contact-section">
             <div class="container">
                 <h2>Me Contacter</h2>
-                <p>N'hésitez pas à me contacter pour toute opportunité ou collaboration.</p>
-                <form class="contact-form">
-                    <input type="text" placeholder="Votre Nom">
-                    <input type="email" placeholder="Votre Email">
-                    <textarea placeholder="Votre Message"></textarea>
-                    <button type="submit" class="btn">Envoyer</button>
-                </form>
+                <div class="contact-content">
+                    <div class="contact-form-card">
+                        <p>N'hésitez pas à me contacter pour toute opportunité ou collaboration.</p>
+                        <form class="contact-form">
+                            <input type="text" placeholder="Votre Nom" required>
+                            <input type="email" placeholder="Votre Email" required>
+                            <textarea placeholder="Votre Message" rows="5" required></textarea>
+                            <button type="submit" class="btn">Envoyer</button>
+                        </form>
+                    </div>
+                    <div class="social-contact-card">
+                        <h3>Retrouvez-moi sur :</h3>
+                        <div class="social-links large-icons">
+                            <a href="https://www.linkedin.com/in/christophe-freijanes/" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                            <a href="https://github.com/christophe-freijanes" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </main>

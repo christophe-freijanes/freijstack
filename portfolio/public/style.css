@@ -138,10 +138,85 @@ section h2 {
     background-color: #2a2a2a;
 }
 
-.about-section p {
+.about-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* Asymmetrical columns */
+    gap: 50px;
+    text-align: left;
+}
+
+.about-text h2 {
+    text-align: center;
+}
+
+.about-text p {
     font-size: 1.1em;
-    max-width: 800px;
-    margin: 0 auto 20px auto;
+    margin-bottom: 20px;
+    max-width: none; /* Override previous max-width */
+}
+
+.about-sidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.profile-pic {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #00bfff;
+    box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+}
+
+.about-sidebar h3 {
+    color: #00bfff;
+    font-size: 1.8em;
+    margin: 0;
+}
+
+.facts-card {
+    background-color: #1a1a1a;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    width: 100%;
+    max-width: 300px;
+    text-align: left;
+}
+
+.facts-card h4 {
+    color: #00bfff;
+    font-size: 1.4em;
+    margin-top: 0;
+    border-bottom: 2px solid #00bfff;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.facts-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.facts-card ul li {
+    margin-bottom: 10px;
+    font-size: 1em;
+    color: #ccc;
+}
+
+@media (max-width: 768px) {
+    .about-grid {
+        grid-template-columns: 1fr; /* Stack columns on smaller screens */
+        text-align: center;
+    }
+
+    .about-text h2 {
+        text-align: center;
+    }
 }
 
 /* Skills Section */
@@ -149,55 +224,15 @@ section h2 {
     background-color: #1a1a1a;
 }
 
-.skills-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 30px;
-    margin-top: 40px;
-}
-
-.skill-item {
-    background-color: #2a2a2a;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-    transition: transform 0.3s ease;
-}
-
-.skill-item:hover {
-    transform: translateY(-10px);
-}
-
-.skill-item i {
-    font-size: 3em;
-    color: #00bfff;
-    margin-bottom: 15px;
-}
-
-.skill-item h3 {
-    font-size: 1.5em;
-    margin-bottom: 10px;
-}
-
-.skill-item p {
-    font-size: 1em;
-    color: #ccc;
-}
-
-/* Projects Section */
-.projects-section {
-    background-color: #2a2a2a;
-}
-
-.project-grid {
+.skills-categories {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
+    gap: 40px;
     margin-top: 40px;
 }
 
-.project-item {
-    background-color: #1a1a1a;
+.skill-category {
+    background-color: #2a2a2a;
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
@@ -205,34 +240,155 @@ section h2 {
     transition: transform 0.3s ease;
 }
 
-.project-item:hover {
+.skill-category:hover {
     transform: translateY(-10px);
 }
 
-.project-item h3 {
-    font-size: 1.6em;
+.skill-category h3 {
+    font-size: 1.8em;
+    color: #00bfff;
+    margin-top: 0;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.skill-category h3 i {
+    font-size: 1.2em;
+}
+
+.skills-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Compétences listées verticalement */
+    gap: 15px;
+}
+
+.skill-item {
+    background-color: #1a1a1a; /* Fond plus sombre pour les éléments individuels */
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.skill-item p {
+    font-size: 1em;
+    color: #ccc;
+    margin: 0;
+}
+
+/* Override previous skill-item styles */
+.skills-section .skill-item {
+    padding: 15px;
+    background-color: #1a1a1a; /* S'assurer que le style individuel est bien appliqué */
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: none; /* Pas de transform sur les items individuels */
+}
+
+.skills-section .skill-item:hover {
+    transform: none;
+}
+
+/* Projects Section */
+.projects-section {
+    background-color: #2a2a2a;
+}
+
+.project-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 40px;
+    /* Pour une vraie grille Masonry, des bibliothèques JS comme Masonry.js sont souvent utilisées.
+       Nous pouvons simuler un effet similaire avec CSS Grid pour la démonstration.
+       Si vous voulez une grille Masonry parfaite, l'intégration de JS sera nécessaire. */
+}
+
+.project-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+}
+
+.project-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.project-item.wide {
+    grid-column: span 2; /* Exemple pour prendre deux colonnes */
+}
+
+.project-item.tall {
+    grid-row: span 2; /* Exemple pour prendre deux lignes */
+}
+
+.project-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    text-align: center;
+}
+
+.project-item:hover .project-overlay {
+    opacity: 1;
+}
+
+.project-item:hover img {
+    transform: scale(1.05); /* Léger zoom sur l'image au survol */
+}
+
+.project-overlay h3 {
+    font-size: 1.8em;
     margin-bottom: 10px;
     color: #00bfff;
 }
 
-.project-item p {
+.project-overlay p {
     font-size: 1em;
     color: #ccc;
     margin-bottom: 20px;
 }
 
-.btn-small {
-    background-color: #00bfff;
-    color: #fff;
-    padding: 8px 15px;
-    text-decoration: none;
-    border-radius: 5px;
-    font-size: 0.9em;
-    transition: background-color 0.3s ease;
+/* Override previous project-item styles */
+.projects-section .project-item {
+    background-color: transparent; /* Supprime le fond précédent */
+    padding: 0; /* Supprime le padding précédent */
+    box-shadow: none; /* Supprime le shadow précédent */
+    transition: none; /* Pas de transform sur les items individuels */
 }
 
-.btn-small:hover {
-    background-color: #008cba;
+.projects-section .project-item:hover {
+    transform: none;
+}
+
+@media (max-width: 768px) {
+    .project-grid-container {
+        grid-template-columns: 1fr; /* Stack on smaller screens */
+    }
+
+    .project-item.wide,
+    .project-item.tall {
+        grid-column: span 1;
+        grid-row: span 1;
+    }
 }
 
 /* SaaS Demos Section */
@@ -240,7 +396,7 @@ section h2 {
     background-color: #1a1a1a;
 }
 
-.saas-grid {
+.saas-grid-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
@@ -249,9 +405,9 @@ section h2 {
 
 .saas-item {
     background-color: #2a2a2a;
-    padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    overflow: hidden; /* Pour que l'image ne dépasse pas */
     text-align: left;
     transition: transform 0.3s ease;
 }
@@ -260,27 +416,75 @@ section h2 {
     transform: translateY(-10px);
 }
 
-.saas-item h3 {
+.saas-item img {
+    width: 100%;
+    height: 200px; /* Hauteur fixe pour les images d'aperçu */
+    object-fit: cover;
+    display: block;
+}
+
+.saas-content {
+    padding: 25px;
+}
+
+.saas-content h3 {
     font-size: 1.6em;
+    margin-top: 0;
     margin-bottom: 10px;
     color: #00bfff;
 }
 
-.saas-item p {
+.saas-content p {
     font-size: 1em;
     color: #ccc;
     margin-bottom: 20px;
 }
 
+/* Override previous saas-item styles */
+.saas-section .saas-item {
+    padding: 0; /* Supprime le padding précédent */
+    box-shadow: none; /* Supprime le shadow précédent */
+    transition: none; /* Pas de transform sur les items individuels */
+}
+
+.saas-section .saas-item:hover {
+    transform: none;
+}
+
+@media (max-width: 768px) {
+    .saas-grid-container {
+        grid-template-columns: 1fr; /* Stack on smaller screens */
+    }
+}
+
 /* Contact Section */
 .contact-section {
     background-color: #2a2a2a;
-    padding-bottom: 100px; /* Extra padding for footer */
+    padding-bottom: 80px; /* Ajuste le padding pour le footer */
+}
+
+.contact-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Deux colonnes pour le formulaire et les liens sociaux */
+    gap: 50px;
+    margin-top: 40px;
+    text-align: left;
+}
+
+.contact-form-card {
+    background-color: #1a1a1a;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.contact-form-card p {
+    font-size: 1.1em;
+    margin-bottom: 30px;
+    text-align: center;
 }
 
 .contact-form {
-    max-width: 600px;
-    margin: 40px auto 0 auto;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -293,6 +497,7 @@ section h2 {
     background-color: #333;
     color: #f0f0f0;
     font-size: 1em;
+    width: 100%;
 }
 
 .contact-form input::placeholder,
@@ -302,6 +507,77 @@ section h2 {
 
 .contact-form button {
     align-self: flex-start;
+    margin-top: 10px;
+}
+
+.social-contact-card {
+    background-color: #1a1a1a;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.social-contact-card h3 {
+    color: #00bfff;
+    font-size: 2em;
+    margin-bottom: 30px;
+}
+
+.social-links.large-icons {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.social-links.large-icons a {
+    color: #f0f0f0;
+    font-size: 1.5em; /* Taille plus grande pour les icônes */
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.social-links.large-icons a:hover {
+    color: #00bfff;
+    transform: translateX(10px); /* Effet de glissement au survol */
+}
+
+.social-links.large-icons i {
+    font-size: 1.8em; /* Ajustement de la taille de l'icône */
+}
+
+/* Override previous contact-form styles */
+.contact-form {
+    max-width: none; /* Supprime le max-width précédent */
+    margin: 0; /* Supprime le margin auto précédent */
+}
+
+.contact-form button {
+    align-self: center;
+}
+
+@media (max-width: 768px) {
+    .contact-content {
+        grid-template-columns: 1fr; /* Stack columns on smaller screens */
+    }
+
+    .social-contact-card {
+        text-align: center;
+    }
+
+    .social-links.large-icons {
+        align-items: center;
+    }
+
+    .contact-form button {
+        align-self: center;
+    }
 }
 
 /* Footer */
