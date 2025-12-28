@@ -1,0 +1,27 @@
+{
+  "name": "freijstack",
+  "version": "1.0.0",
+  "description": "Portfolio et projets cloud & sécurité de Christophe FREIJANES - Senior Cloud & Security Specialist (DevSecOps)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/christophe-freijanes/freijstack.git"
+  },
+  "keywords": [
+    "portfolio",
+    "devops",
+    "devsecops",
+    "cloud",
+    "security"
+  ],
+  "author": "Christophe FREIJANES <christophe.freijanes@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/christophe-freijanes/freijstack/issues"
+  },
+  "homepage": "https://github.com/christophe-freijanes/freijstack#readme",
+  "devDependencies": {}
+}
