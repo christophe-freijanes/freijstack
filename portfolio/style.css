@@ -1,17 +1,91 @@
+.profile-photo-inline {
+    /* ...existing styles... */
+    opacity: 0;
+    transform: translateX(80px);
+    animation: slideInPhoto 0.8s cubic-bezier(0.6,0.2,0.2,1) 0.2s forwards;
+}
+
+@keyframes slideInPhoto {
+    from {
+        opacity: 0;
+        transform: translateX(80px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+/* Photo de profil à droite du nom dans le hero */
+.hero-title-with-photo {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 8px;
+}
+.profile-photo-inline {
+    width: 113px;
+    height: 113px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-left: 12px;
+    position: relative;
+    z-index: 1;
+    box-shadow:
+        0 0 0 0px rgba(var(--accent-rgb),0.14),
+        0 0 18px 6px rgba(var(--accent-rgb),0.16),
+        0 0 36px 10px rgba(var(--accent-rgb),0.08);
+    background: radial-gradient(circle, rgba(var(--accent-rgb),0.06) 60%, transparent 100%);
+    transition: box-shadow 0.28s, transform 0.25s;
+}
+
+.profile-photo-inline:hover {
+    transform: translateX(-6px) scale(1.03);
+    box-shadow:
+        0 0 0 2px rgba(var(--accent-rgb),0.06),
+        0 8px 30px 8px rgba(var(--accent-rgb),0.18);
+}
+/* Photo de profil à droite dans le hero */
+.profile-photo.right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-bottom: 18px;
+}
+/* ============================================
+   POINTER LUMINEUX SUIVEUR DE SOURIS
+   ============================================ */
+.pointer-lumineux {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 36px;
+    height: 36px;
+    pointer-events: none;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(var(--accent-rgb),0.30) 0%, rgba(var(--accent-rgb),0.10) 60%, transparent 100%);
+    box-shadow: 0 0 20px 6px rgba(var(--accent-rgb),0.18), 0 0 0 2px rgba(var(--accent-rgb),0.06);
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: background 0.2s, box-shadow 0.2s;
+    mix-blend-mode: lighten;
+    will-change: transform;
+}
 /* ============================================
    VARIABLES CSS & DESIGN TOKENS
    ============================================ */
 :root {
-    --primary-color: #28e070; /* luminous green */
+    --primary-color: #24c066; /* softened green */
     --primary-dark: #1ea85a;
     --secondary-color: #1affb3;
+    /* accent rgb for controlled glows */
+    --accent-rgb: 36,192,102; /* corresponds to #24c066 */
     --bg-primary: #04050a; /* darker background */
     --bg-secondary: #061018;
     --bg-tertiary: #09121c;
     --text-primary: #e6f7ea;
-    --text-secondary: #9fbfa8;
+    --text-secondary: #bcd8c9; /* slightly brighter for contrast */
     --border-color: #0f2a1a;
-    --accent: #28e070;
+    --accent: #24c066; /* softened accent */
     --success: #51cf66;
     
     --transition-fast: 0.2s ease-in-out;
@@ -26,6 +100,54 @@
 /* ============================================
    RESET & BASE STYLES
    ============================================ */
+
+/* Palette neutre (teinte professionnelle) - application via `body.palette-neutral` */
+body.palette-neutral {
+    --accent: #2b8db6; /* teal-blue */
+    --accent-rgb: 43,141,182;
+    --primary-color: #2b8db6;
+    --primary-dark: #2573a0;
+    --text-secondary: #b7cfe0;
+    --secondary-color: #8fd3ea;
+}
+
+/* Palettes saisonnières - appliquées automatiquement selon la date */
+body.season-winter {
+    --accent: #5ec4e8; /* bleu glacial */
+    --accent-rgb: 94,196,232;
+    --primary-color: #5ec4e8;
+    --primary-dark: #3ba4cc;
+    --text-secondary: #c4e3f0;
+    --secondary-color: #a8d8f0;
+}
+
+body.season-spring {
+    --accent: #5cd685; /* vert tendre */
+    --accent-rgb: 92,214,133;
+    --primary-color: #5cd685;
+    --primary-dark: #3fb969;
+    --text-secondary: #c8ecd6;
+    --secondary-color: #a0f5c1;
+}
+
+body.season-summer {
+    --accent: #f5a142; /* orange soleil */
+    --accent-rgb: 245,161,66;
+    --primary-color: #f5a142;
+    --primary-dark: #d98a2e;
+    --text-secondary: #f5dbb8;
+    --secondary-color: #ffcb7d;
+}
+
+body.season-autumn {
+    --accent: #d97845; /* orange automnal */
+    --accent-rgb: 217,120,69;
+    --primary-color: #d97845;
+    --primary-dark: #b8612f;
+    --text-secondary: #e8c4a8;
+    --secondary-color: #f5a76e;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -53,8 +175,8 @@ body::before {
     width: 100%;
     height: 100%;
     background: 
-        radial-gradient(circle at 20% 40%, rgba(40, 224, 112, 0.04) 0%, transparent 45%),
-        radial-gradient(circle at 80% 80%, rgba(40, 224, 112, 0.02) 0%, transparent 50%);
+        radial-gradient(circle at 20% 40%, rgba(var(--accent-rgb), 0.04) 0%, transparent 45%),
+        radial-gradient(circle at 80% 80%, rgba(var(--accent-rgb), 0.02) 0%, transparent 50%);
     pointer-events: none;
     z-index: -1;
 }
@@ -188,6 +310,40 @@ section {
 .btn-cv:hover {
     background: var(--primary-dark);
     transform: translateY(-2px);
+}
+
+.language-selector {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 3px;
+}
+
+.lang-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: transparent;
+    color: var(--text-secondary);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.lang-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--accent);
+}
+
+.lang-btn.active {
+    background: var(--accent);
+    color: var(--bg-primary);
 }
 
 .hamburger {
@@ -553,6 +709,23 @@ section {
 .cert-item img:hover {
     transform: translateY(-4px) scale(1.02);
     filter: drop-shadow(0 10px 30px rgba(0,0,0,0.55));
+}
+
+.cert-item {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 12px 18px;
+    transition: box-shadow var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cert-item:hover {
+    border-color: var(--accent);
+    box-shadow: 0 10px 30px rgba(0, 212, 255, 0.10);
+    transform: translateY(-5px) scale(1.03);
 }
 
 /* ============================================

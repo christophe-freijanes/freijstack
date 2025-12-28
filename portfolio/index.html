@@ -20,14 +20,22 @@
                 <span class="brand-text">Christophe FREIJANES</span>
             </div>
             <nav class="nav-menu" id="navMenu">
-                <a href="#accueil" class="nav-link" data-section="accueil">Accueil</a>
-                <a href="#competences" class="nav-link" data-section="competences">Compétences</a>
-                <a href="#projets" class="nav-link" data-section="projets">Projets</a>
-                <a href="#experience" class="nav-link" data-section="experience">Expérience</a>
-                <a href="#contact" class="nav-link" data-section="contact">Contact</a>
+                <a href="#accueil" class="nav-link" data-section="accueil" data-i18n="nav.home">Accueil</a>
+                <a href="#competences" class="nav-link" data-section="competences" data-i18n="nav.skills">Compétences</a>
+                <a href="#projets" class="nav-link" data-section="projets" data-i18n="nav.projects">Projets</a>
+                <a href="#experience" class="nav-link" data-section="experience" data-i18n="nav.experience">Expérience</a>
+                <a href="#contact" class="nav-link" data-section="contact" data-i18n="nav.contact">Contact</a>
                 <a href="https://drive.google.com/file/d/1WKTv123ZXFl1fO5jh6qGCK3ElArEpcki/view?usp=sharing" target="_blank" class="btn-cv" id="downloadCV">
                     <i class="fas fa-download"></i> CV
                 </a>
+                <div class="language-selector">
+                    <button class="lang-btn active" data-lang="fr" title="Français">
+                        <i class="fas fa-globe"></i> FR
+                    </button>
+                    <button class="lang-btn" data-lang="en" title="English">
+                        EN
+                    </button>
+                </div>
             </nav>
             <div class="hamburger" id="hamburger">
                 <span></span>
@@ -43,13 +51,16 @@
             <div class="container">
                 <div class="hero-content">
                     <div class="hero-text">
-                        <span class="greeting">👋 Bienvenue sur mon portfolio</span>
-                        <h1>Christophe FREIJANES</h1>
-                        <p class="title-main">Spécialiste senior Cloud & Sécurité - DevSecOps</p>
-                        <p class="subtitle">Sécurité infonuagique • DevSecOps • Infrastructure as Code • Automatisation</p>
+                        <span class="greeting" data-i18n="hero.greeting">👋 Bienvenue sur mon portfolio</span>
+                        <div class="hero-title-with-photo">
+                            <h1 style="display:inline-block;vertical-align:middle;" data-i18n="hero.title">Christophe FREIJANES</h1>
+                            <img src="https://media.licdn.com/dms/image/v2/D4E03AQHyCt861VGacw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1675225312705?e=1768435200&v=beta&t=s_3kn8z0iu8Pem2iP6fohEFwn8Def88I5Yv3qZJeshk" alt="Photo de profil LinkedIn Christophe Freijanes" class="profile-photo-inline">
+                        </div>
+                        <p class="title-main" data-i18n="hero.role">Spécialiste senior Cloud & Sécurité - DevSecOps</p>
+                        <p class="subtitle" data-i18n="hero.tagline">Sécurité infonuagique • DevSecOps • Infrastructure as Code • Automatisation</p>
                         <div class="hero-buttons">
-                            <a href="#projets" class="btn btn-primary">Voir mes projets</a>
-                            <a href="#contact" class="btn btn-secondary">Me contacter</a>
+                            <a href="#projets" class="btn btn-primary" data-i18n="hero.btn.projects">Voir mes projets</a>
+                            <a href="#contact" class="btn btn-secondary" data-i18n="hero.btn.contact">Me contacter</a>
                         </div>
                         <div class="hero-links">
                             <a href="https://github.com/christophe-freijanes" target="_blank" title="GitHub" class="social-icon">
@@ -103,8 +114,8 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
         <!-- Section Compétences -->
         <section id="competences" class="skills">
             <div class="container">
-                <h2 class="section-title">Compétences</h2>
-                <p class="section-subtitle">Technologies et outils que je maîtrise</p>
+                <h2 class="section-title" data-i18n="skills.title">Compétences</h2>
+                <p class="section-subtitle" data-i18n="skills.subtitle">Technologies et outils que je maîtrise</p>
                 
                 <div class="skills-grid">
                     <div class="skill-category">
@@ -178,16 +189,16 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
         <!-- Section Projets -->
         <section id="projets" class="projects">
             <div class="container">
-                <h2 class="section-title">Projets Récents</h2>
-                <p class="section-subtitle">Découvrez mes réalisations et contributions</p>
+                <h2 class="section-title" data-i18n="projects.title">Projets Récents</h2>
+                <p class="section-subtitle" data-i18n="projects.subtitle">Découvrez mes réalisations et contributions</p>
                 
                 <div class="projects-grid">
                     <div class="project-card">
                         <div class="project-header">
-                            <h3>Formation DevOps & CI/CD</h3>
+                            <h3 data-i18n="project.formation.title">Formation DevOps & CI/CD</h3>
                             <span class="project-badge">Education</span>
                         </div>
-                        <p class="project-description">Dépôt utilisé pour mes formations DevOps couvrant l'automatisation, l'intégration continue et le déploiement continu.</p>
+                        <p class="project-description" data-i18n="project.formation.desc">Dépôt utilisé pour mes formations DevOps couvrant l'automatisation, l'intégration continue et le déploiement continu.</p>
                         <div class="project-tags">
                             <span>Jenkins</span>
                             <span>GitLab CI</span>
@@ -196,17 +207,17 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
                         </div>
                         <div class="project-footer">
                             <a href="https://github.com/christophe-freijanes/formation" target="_blank" class="project-link">
-                                <i class="fab fa-github"></i> Voir sur GitHub
+                                <i class="fab fa-github"></i> <span data-i18n="project.formation.link">Voir sur GitHub</span>
                             </a>
                         </div>
                     </div>
 
                     <div class="project-card">
                         <div class="project-header">
-                            <h3>ansible-webapp</h3>
+                            <h3 data-i18n="project.ansible.title">ansible-webapp</h3>
                             <span class="project-badge">Automation</span>
                         </div>
-                        <p class="project-description">Playbooks Ansible pour le déploiement et la configuration automatisée d'applications web avec rôles modulaires.</p>
+                        <p class="project-description" data-i18n="project.ansible.desc">Playbooks Ansible pour le déploiement et la configuration automatisée d'applications web avec rôles modulaires.</p>
                         <div class="project-tags">
                             <span>Ansible</span>
                             <span>Infrastructure</span>
@@ -214,17 +225,17 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
                         </div>
                         <div class="project-footer">
                             <a href="https://github.com/christophe-freijanes/ansible-webapp" target="_blank" class="project-link">
-                                <i class="fab fa-github"></i> Voir sur GitHub
+                                <i class="fab fa-github"></i> <span data-i18n="project.ansible.link">Voir sur GitHub</span>
                             </a>
                         </div>
                     </div>
 
                     <div class="project-card">
                         <div class="project-header">
-                            <h3>student-list</h3>
+                            <h3 data-i18n="project.student.title">student-list</h3>
                             <span class="project-badge">Fullstack</span>
                         </div>
-                        <p class="project-description">Application fullstack démontrant l'interaction entre une API backend et une webapp frontend pour la gestion d'étudiants.</p>
+                        <p class="project-description" data-i18n="project.student.desc">Application fullstack démontrant l'interaction entre une API backend et une webapp frontend pour la gestion d'étudiants.</p>
                         <div class="project-tags">
                             <span>API REST</span>
                             <span>Frontend</span>
@@ -232,17 +243,17 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
                         </div>
                         <div class="project-footer">
                             <a href="https://github.com/christophe-freijanes/student-list" target="_blank" class="project-link">
-                                <i class="fab fa-github"></i> Voir sur GitHub
+                                <i class="fab fa-github"></i> <span data-i18n="project.student.link">Voir sur GitHub</span>
                             </a>
                         </div>
                     </div>
 
                     <div class="project-card">
                         <div class="project-header">
-                            <h3>freijstack</h3>
+                            <h3 data-i18n="project.freijstack.title">freijstack</h3>
                             <span class="project-badge">Stack</span>
                         </div>
-                        <p class="project-description">Stack personnalisée regroupant mes outils et configurations préférés pour les projets DevSecOps et infrastructure.</p>
+                        <p class="project-description" data-i18n="project.freijstack.desc">Stack personnalisée regroupant mes outils et configurations préférés pour les projets DevSecOps et infrastructure.</p>
                         <div class="project-tags">
                             <span>Infrastructure</span>
                             <span>Tools</span>
@@ -250,17 +261,17 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
                         </div>
                         <div class="project-footer">
                             <a href="https://github.com/christophe-freijanes/freijstack" target="_blank" class="project-link">
-                                <i class="fab fa-github"></i> Voir sur GitHub
+                                <i class="fab fa-github"></i> <span data-i18n="project.freijstack.link">Voir sur GitHub</span>
                             </a>
                         </div>
                     </div>
 
                     <div class="project-card">
                         <div class="project-header">
-                            <h3>Docker Applications</h3>
+                            <h3 data-i18n="project.docker.title">Docker Applications</h3>
                             <span class="project-badge">Container</span>
                         </div>
-                        <p class="project-description">Collection d'images Docker et configurations pour déployer rapidement des applications en environnements conteneurisés.</p>
+                        <p class="project-description" data-i18n="project.docker.desc">Collection d'images Docker et configurations pour déployer rapidement des applications en environnements conteneurisés.</p>
                         <div class="project-tags">
                             <span>Docker</span>
                             <span>Container</span>
@@ -268,17 +279,17 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
                         </div>
                         <div class="project-footer">
                             <a href="https://hub.docker.com/u/cfreijanes" target="_blank" class="project-link">
-                                <i class="fab fa-docker"></i> Docker Hub
+                                <i class="fab fa-docker"></i> <span data-i18n="project.docker.link">Docker Hub</span>
                             </a>
                         </div>
                     </div>
 
                     <div class="project-card">
                         <div class="project-header">
-                            <h3>Infrastructure as Code</h3>
+                            <h3 data-i18n="project.iac.title">Infrastructure as Code</h3>
                             <span class="project-badge">IaC</span>
                         </div>
-                        <p class="project-description">Templates Terraform et CloudFormation pour provisionner et gérer l'infrastructure cloud de manière déclarative et versionnable.</p>
+                        <p class="project-description" data-i18n="project.iac.desc">Templates Terraform et CloudFormation pour provisionner et gérer l'infrastructure cloud de manière déclarative et versionnable.</p>
                         <div class="project-tags">
                             <span>Terraform</span>
                             <span>CloudFormation</span>
@@ -286,7 +297,7 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
                         </div>
                         <div class="project-footer">
                                 <a href="#" class="project-link" data-alert="Dépôts en cours de création">
-                                <i class="fas fa-code-branch"></i> Bientôt disponible
+                                <i class="fas fa-code-branch"></i> <span data-i18n="project.iac.link">Bientôt disponible</span>
                             </a>
                         </div>
                     </div>
@@ -297,20 +308,20 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
         <!-- Section Expérience -->
         <section id="experience" class="experience">
             <div class="container">
-                <h2 class="section-title">Expérience Professionnelle</h2>
-                <p class="section-subtitle">Mes parcours et réalisations</p>
+                <h2 class="section-title" data-i18n="experience.title">Expérience Professionnelle</h2>
+                <p class="section-subtitle" data-i18n="experience.subtitle">Mes parcours et réalisations</p>
                 
                 <div class="timeline">
                     <div class="timeline-item">
                         <div class="timeline-marker"></div>
                         <div class="timeline-content">
-                            <h3>Spécialiste Cloud & Sécurité – DevSecOps | ACENSI</h3>
-                            <p class="timeline-subtitle">2023 – Aujourd'hui</p>
+                            <h3 data-i18n="exp.acensi.title">Spécialiste Cloud & Sécurité – DevSecOps | ACENSI</h3>
+                            <p class="timeline-subtitle" data-i18n="exp.acensi.period">2023 – Aujourd'hui</p>
                             <ul class="timeline-list">
-                                <li>Conception et déploiement d'une stratégie de sauvegarde « as-code » (Terraform, AWS S3, Commvault/Clumio), réduction des interventions manuelles et temps d'exploitation.</li>
-                                <li>Automatisation end-to-end CI/CD (Jenkins, GitHub Actions, Ansible AAP) pour pipelines sécurisés et déploiements reproductibles, amélioration des cycles de livraison.</li>
-                                <li>Renforcement de la sécurité cloud (IAM, SAML, scans Tenable, hardening CIS), réduction majeure des vulnérabilités critiques détectées.</li>
-                                <li>Mise en place d'observabilité (Prometheus, Grafana) et playbooks d'incident pour réduire le MTTR et améliorer la disponibilité.</li>
+                                <li data-i18n="exp.acensi.item1">Conception et déploiement d'une stratégie de sauvegarde « as-code » (Terraform, AWS S3, Commvault/Clumio), réduction des interventions manuelles et temps d'exploitation.</li>
+                                <li data-i18n="exp.acensi.item2">Automatisation end-to-end CI/CD (Jenkins, GitHub Actions, Ansible AAP) pour pipelines sécurisés et déploiements reproductibles, amélioration des cycles de livraison.</li>
+                                <li data-i18n="exp.acensi.item3">Renforcement de la sécurité cloud (IAM, SAML, scans Tenable, hardening CIS), réduction majeure des vulnérabilités critiques détectées.</li>
+                                <li data-i18n="exp.acensi.item4">Mise en place d'observabilité (Prometheus, Grafana) et playbooks d'incident pour réduire le MTTR et améliorer la disponibilité.</li>
                             </ul>
                             <div class="timeline-tags">
                                 <span>DevSecOps</span>
@@ -326,13 +337,13 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
                     <div class="timeline-item">
                         <div class="timeline-marker"></div>
                         <div class="timeline-content">
-                            <h3>Ingénieur Systèmes – DevSecOps | SQUAD</h3>
-                            <p class="timeline-subtitle">2022 – 2023</p>
+                            <h3 data-i18n="exp.squad.title">Ingénieur Systèmes – DevSecOps | SQUAD</h3>
+                            <p class="timeline-subtitle" data-i18n="exp.squad.period">2022 – 2023</p>
                             <ul class="timeline-list">
-                                <li>Administration et sécurisation de 3000+ VM dans un contexte SMSI/eIDAS ; mise en place de contrôles et revues de sécurité.</li>
-                                <li>Automatisation du hardening RedHat via Ansible, accélération des mises en conformité et réduction des corrections manuelles.</li>
-                                <li>Containerisation et orchestration de services (Docker, Kubernetes) avec pipelines CI/CD sécurisés.</li>
-                                <li>Accompagnement et formation des équipes DevOps sur les bonnes pratiques DevSecOps et la sécurité du pipeline.</li>
+                                <li data-i18n="exp.squad.item1">Administration et sécurisation de 3000+ VM dans un contexte SMSI/eIDAS ; mise en place de contrôles et revues de sécurité.</li>
+                                <li data-i18n="exp.squad.item2">Automatisation du hardening RedHat via Ansible, accélération des mises en conformité et réduction des corrections manuelles.</li>
+                                <li data-i18n="exp.squad.item3">Containerisation et orchestration de services (Docker, Kubernetes) avec pipelines CI/CD sécurisés.</li>
+                                <li data-i18n="exp.squad.item4">Accompagnement et formation des équipes DevOps sur les bonnes pratiques DevSecOps et la sécurité du pipeline.</li>
                             </ul>
                             <div class="timeline-tags">
                                 <span>DevSecOps</span>
@@ -348,13 +359,13 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
                     <div class="timeline-item">
                         <div class="timeline-marker"></div>
                         <div class="timeline-content">
-                            <h3>Ingénieur Infrastructure – DevSecOps | ECONOCOM (Projet ITER)</h3>
-                            <p class="timeline-subtitle">2020 – 2022</p>
+                            <h3 data-i18n="exp.econocom.title">Ingénieur Infrastructure – DevSecOps | ECONOCOM (Projet ITER)</h3>
+                            <p class="timeline-subtitle" data-i18n="exp.econocom.period">2020 – 2022</p>
                             <ul class="timeline-list">
-                                <li>Déploiement d'Ansible AWX/AAP et création de playbooks modulaires pour le provisioning et la configuration.</li>
-                                <li>Automatisation des contrôles d'accès (intégration LDAP) et des procédures de sécurité pour environnements réglementés.</li>
-                                <li>Mise en place de workflows d'automatisation pour provisioning et gestion du stockage, avec procédures auditables.</li>
-                                <li>Standardisation des templates et réduction significative du temps de provisionnement et des erreurs manuelles.</li>
+                                <li data-i18n="exp.econocom.item1">Déploiement d'Ansible AWX/AAP et création de playbooks modulaires pour le provisioning et la configuration.</li>
+                                <li data-i18n="exp.econocom.item2">Automatisation des contrôles d'accès (intégration LDAP) et des procédures de sécurité pour environnements réglementés.</li>
+                                <li data-i18n="exp.econocom.item3">Mise en place de workflows d'automatisation pour provisioning et gestion du stockage, avec procédures auditables.</li>
+                                <li data-i18n="exp.econocom.item4">Standardisation des templates et réduction significative du temps de provisionnement et des erreurs manuelles.</li>
                             </ul>
                             <div class="timeline-tags">
                                 <span>Automation</span>
@@ -369,13 +380,13 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
                     <div class="timeline-item">
                         <div class="timeline-marker"></div>
                         <div class="timeline-content">
-                            <h3>Ingénieur Système R&D - DevOps | DIGIMIND</h3>
-                            <p class="timeline-subtitle">Avril 2020 – Août 2020</p>
+                            <h3 data-i18n="exp.digimind.title">Ingénieur Système R&D - DevOps | DIGIMIND</h3>
+                            <p class="timeline-subtitle" data-i18n="exp.digimind.period">Avril 2020 – Août 2020</p>
                             <ul class="timeline-list">
-                                <li>Modernisation d'infrastructures multi-datacenters, gain de performance mesurable de +30% (CPU/RPS) livré en 6 mois.</li>
-                                <li>Mise en place de supervision et gestion des incidents (Centreon, Prometheus) pour améliorer la résilience et réduire le MTTR.</li>
-                                <li>Traitement et optimisation Big Data (SolrCloud) : tuning d'index et d'architectures pour réduire la latence des requêtes.</li>
-                                <li>Conduite de migrations et optimisation CDN pour les utilisateurs asiatiques afin d'améliorer l'expérience et la latence réseau.</li>
+                                <li data-i18n="exp.digimind.item1">Modernisation d'infrastructures multi-datacenters, gain de performance mesurable de +30% (CPU/RPS) livré en 6 mois.</li>
+                                <li data-i18n="exp.digimind.item2">Mise en place de supervision et gestion des incidents (Centreon, Prometheus) pour améliorer la résilience et réduire le MTTR.</li>
+                                <li data-i18n="exp.digimind.item3">Traitement et optimisation Big Data (SolrCloud) : tuning d'index et d'architectures pour réduire la latence des requêtes.</li>
+                                <li data-i18n="exp.digimind.item4">Conduite de migrations et optimisation CDN pour les utilisateurs asiatiques afin d'améliorer l'expérience et la latence réseau.</li>
                             </ul>
                             <div class="timeline-tags">
                                 <span>Virtualisation</span>
@@ -390,13 +401,13 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
                     <div class="timeline-item">
                         <div class="timeline-marker"></div>
                         <div class="timeline-content">
-                            <h3>Administrateur Systèmes - CloudOps | HARDIS</h3>
-                            <p class="timeline-subtitle">Août 2019 – Mars 2020</p>
+                            <h3 data-i18n="exp.hardis.title">Administrateur Systèmes - CloudOps | HARDIS</h3>
+                            <p class="timeline-subtitle" data-i18n="exp.hardis.period">Août 2019 – Mars 2020</p>
                             <ul class="timeline-list">
-                                <li>Gestion des incidents et demandes de niveau 2 avec respect des SLA et réduction des escalades vers les équipes d'expertise.</li>
-                                <li>Automatisation des tâches récurrentes via scripts Shell et PowerShell, diminuant le travail manuel et accélérant les opérations.</li>
-                                <li>Optimisation des performances serveurs (ESX) et répartition de charge des VMs pour améliorer l'efficience des ressources.</li>
-                                <li>Rédaction de procédures d'intégration et participation aux actions de conformité (ISO 27001) pour renforcer la gouvernance.</li>
+                                <li data-i18n="exp.hardis.item1">Gestion des incidents et demandes de niveau 2 avec respect des SLA et réduction des escalades vers les équipes d'expertise.</li>
+                                <li data-i18n="exp.hardis.item2">Automatisation des tâches récurrentes via scripts Shell et PowerShell, diminuant le travail manuel et accélérant les opérations.</li>
+                                <li data-i18n="exp.hardis.item3">Optimisation des performances serveurs (ESX) et répartition de charge des VMs pour améliorer l'efficience des ressources.</li>
+                                <li data-i18n="exp.hardis.item4">Rédaction de procédures d'intégration et participation aux actions de conformité (ISO 27001) pour renforcer la gouvernance.</li>
                             </ul>
                             <div class="timeline-tags">
                                 <span>Virtualisation</span>
@@ -411,8 +422,8 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
                     <div class="timeline-item timeline-note">
                         <div class="timeline-marker"></div>
                         <div class="timeline-content">
-                            <h3>Et d'autres expériences...</h3>
-                            <p class="timeline-description">D'autres missions et projets disponibles sur demande ou dans le CV complet. Contactez-moi pour obtenir la liste complète des réalisations et cas clients.</p>
+                            <h3 data-i18n="exp.more.title">Et d'autres expériences...</h3>
+                            <p class="timeline-description" data-i18n="exp.more.description">D'autres missions et projets disponibles sur demande ou dans le CV complet. Contactez-moi pour obtenir la liste complète des réalisations et cas clients.</p>
                         </div>
                     </div>
                 </div>
@@ -423,8 +434,8 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
         <!-- Section Accréditations -->
         <section id="accréditations" class="accréditations">
             <div class="container">
-                <h2 class="section-title">Accréditations</h2>
-                <p class="section-subtitle">Formations et certifications récentes</p>
+                <h2 class="section-title" data-i18n="accreditations.title">Accréditations</h2>
+                <p class="section-subtitle" data-i18n="accreditations.subtitle">Formations et certifications récentes</p>
 
                 <div class="cert-grid">
                     <a class="cert-item" rel="noopener">
@@ -455,8 +466,8 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
         <!-- Section Contact -->
         <section id="contact" class="contact">
             <div class="container">
-                <h2 class="section-title">Parlons Ensemble</h2>
-                <p class="section-subtitle">Vous avez un projet ? Contactez-moi</p>
+                <h2 class="section-title" data-i18n="contact.title">Parlons Ensemble</h2>
+                <p class="section-subtitle" data-i18n="contact.subtitle">Vous avez un projet ? Contactez-moi</p>
                 <div class="contact-content">
                     <div class="contact-icons" aria-label="Contact links">
                         <a href="#" id="emailLink" data-user="cfr.pro" data-domain="gmx.ca" title="Envoyer un e-mail" aria-label="Envoyer un e-mail" class="social-icon">
@@ -487,13 +498,13 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
                 </div>
 
                 <nav class="footer-nav" aria-label="Footer navigation">
-                    <a href="#accueil">Accueil</a>
-                    <a href="#projets">Projets</a>
+                    <a href="#accueil" data-i18n="footer.home">Accueil</a>
+                    <a href="#projets" data-i18n="footer.projects">Projets</a>
                     <a href="https://drive.google.com/file/d/1WKTv123ZXFl1fO5jh6qGCK3ElArEpcki/view?usp=sharing" target="_blank" rel="noopener">CV</a>
                 </nav>
 
                 <div class="footer-contact">
-                    <p class="footer-copy">&copy; 2026 Christophe FREIJANES. Tous droits réservés.</p>
+                    <p class="footer-copy">&copy; 2026 Christophe FREIJANES. <span data-i18n="footer.rights">Tous droits réservés.</span></p>
                 </div>
             </div>
         </div>
