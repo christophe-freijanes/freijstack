@@ -112,7 +112,7 @@ jobs:
           output: 'trivy-results.sarif'
 
       - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         continue-on-error: true
         with:
           sarif_file: 'trivy-results.sarif'
@@ -120,6 +120,8 @@ jobs:
       - name: Check for hardcoded secrets
         uses: gitleaks/gitleaks-action@v2
         continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
   # Job 4: Deploy to GitHub Pages (Staging - develop)
   deploy-pages-staging:
@@ -163,41 +165,7 @@ jobs:
         continue-on-error: true
         uses: actions/deploy-pages@v4
 
-  # Job 5: Deploy to GitHub Pages (Production - master) DISABLED (keep Pages on develop only)
-  # deploy-pages:
-  #   name: Deploy to GitHub Pages (Production)
-  #   runs-on: ubuntu-latest
-  #   needs: [validate, build, security]
-  #   if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-  #   permissions:
-  #     contents: read
-  #     pages: write
-  #     id-token: write
-  #   environment:
-  #     name: github-pages
-  #     url: ${{ steps.deployment.outputs.page_url }}
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-  #     - name: Setup Pages
-  #       continue-on-error: true
-  #       uses: actions/configure-pages@v4
-  #     - name: Build static site
-  #       run: |
-  #         mkdir -p _site/portfolio
-  #         cp -r portfolio/* _site/portfolio/
-  #         echo "✅ Static site built"
-  #     - name: Upload artifact
-  #       continue-on-error: true
-  #       uses: actions/upload-pages-artifact@v3
-  #       with:
-  #         path: '_site'
-  #     - name: Deploy to GitHub Pages
-  #       id: deployment
-  #       continue-on-error: true
-  #       uses: actions/deploy-pages@v4
-
-  # Job 6: Deploy to Hostinger (Staging - develop)
+  # Job 5: Deploy to Hostinger (Staging - develop)
   deploy-hostinger-staging:
     name: Deploy to Hostinger (Staging)
     runs-on: ubuntu-latest
@@ -240,7 +208,7 @@ jobs:
           ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
             'ls -lh /srv/www/portfolio-staging/ | head -10'
 
-  # Job 7: Deploy to Hostinger (Production - master)
+  # Job 6: Deploy to Hostinger (Production - master)
   deploy-hostinger:
     name: Deploy to Hostinger (Production)
     runs-on: ubuntu-latest
@@ -284,7 +252,7 @@ jobs:
           ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
             'ls -lh /srv/www/portfolio/ | head -10'
 
-  # Job 8: Notifications
+  # Job 7: Notifications
   notify:
     name: Notify Status
     runs-on: ubuntu-latest
