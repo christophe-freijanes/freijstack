@@ -1,9 +1,0 @@
-/* Palette neutre (teinte professionnelle) - application via `body.palette-neutral` */
-body.palette-neutral {
-    --accent: #2b8db6; /* teal-blue */
-    --accent-rgb: 43,141,182;
-    --primary-color: #2b8db6;
-    --primary-dark: #2573a0;
-    --text-secondary: #b7cfe0;
-    --secondary-color: #8fd3ea;
-}
