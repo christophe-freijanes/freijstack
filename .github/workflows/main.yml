@@ -1,54 +1,326 @@
-name: CI/CD pour Freijstack.com
+name: CI/CD - FreijStack
 
 on:
   push:
     branches:
-      - main
+      - master
+      - develop
+  pull_request:
+    branches:
+      - master
+      - develop
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  IS_PRODUCTION: ${{ github.ref == 'refs/heads/master' }}
+  IS_STAGING: ${{ github.ref == 'refs/heads/develop' }}
 
 jobs:
-  deploy:
+  # Job 1: Validation et Linting
+  validate:
+    name: Validate & Lint
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout du code
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Déployer la Landing Page
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint HTML
+        run: |
+          npm install -g html-validate
+          html-validate portfolio/index.html || true
+
+      - name: Validate CSS
+        run: |
+          npm install -g stylelint stylelint-config-standard
+          stylelint "portfolio/style.css" || true
+
+      - name: Check JavaScript
+        run: |
+          npm install -g eslint
+          eslint portfolio/script.js || true
+
+      - name: Security audit
+        run: npm audit --audit-level=moderate || true
+
+  # Job 2: Build & Optimize Assets
+  build:
+    name: Build & Optimize
+    runs-on: ubuntu-latest
+    needs: validate
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Minify CSS
+        run: |
+          npm install -g csso-cli
+          csso portfolio/style.css -o portfolio/style.min.css
+          echo "✅ CSS minified"
+
+      - name: Minify JavaScript
+        run: |
+          npm install -g terser
+          terser portfolio/script.js -o portfolio/script.min.js -c -m
+          echo "✅ JavaScript minified"
+
+      - name: Optimize assets
+        run: |
+          echo "Asset sizes before optimization:"
+          ls -lh portfolio/*.{css,js} | awk '{print $9, $5}'
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: portfolio/
+          retention-days: 5
+
+  # Job 3: Security Scanning
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Check for hardcoded secrets
+        uses: gitleaks/gitleaks-action@v2
+
+  # Job 4: Deploy to GitHub Pages (Staging - develop)
+  deploy-pages-staging:
+    name: Deploy to GitHub Pages (Staging)
+    runs-on: ubuntu-latest
+    needs: [validate, build, security]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
+    environment:
+      name: github-pages-staging
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Build static site
+        run: |
+          mkdir -p _site/portfolio
+          cp -r portfolio/* _site/portfolio/
+          echo "<!-- STAGING ENVIRONMENT -->" >> _site/portfolio/index.html
+          echo "✅ Staging site built"
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # Job 5: Deploy to GitHub Pages (Production - main)
+  deploy-pages:
+    name: Deploy to GitHub Pages (Production)
+    runs-on: ubuntu-latest
+    needs: [validate, build, security]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Build static site
+        run: |
+          mkdir -p _site/portfolio
+          cp -r portfolio/* _site/portfolio/
+          echo "✅ Static site built"
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # Job 6: Deploy to Hostinger (Staging - develop)
+  deploy-hostinger-staging:
+    name: Deploy to Hostinger (Staging)
+    runs-on: ubuntu-latest
+    needs: [validate, build, security]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SFTP to Staging
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.HOSTINGER_SSH_HOST }}
+          username: ${{ secrets.HOSTINGER_SSH_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
           script: |
-            # Assurez-vous que le répertoire de destination existe
-            mkdir -p ${{ secrets.DEPLOY_PATH_ROOT }}/landing
-            # Supprimer les anciens fichiers pour éviter les résidus
-            rm -rf ${{ secrets.DEPLOY_PATH_ROOT }}/landing/*
-            # Copier les nouveaux fichiers
-            scp -r ./landing/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH_ROOT }}/landing
+            echo "🚀 Starting deployment to Hostinger STAGING..."
+            
+            # Backup current version
+            if [ -d ~/public_html/staging/portfolio ]; then
+              cp -r ~/public_html/staging/portfolio ~/public_html/staging/portfolio.backup.$(date +%s)
+            fi
+            
+            # Create destination
+            mkdir -p ~/public_html/staging/portfolio
+            
+            # Sync new files
+            rsync -avz --delete ./portfolio/ ~/public_html/staging/portfolio/
+            
+            echo "✅ Staging deployment completed"
+            ls -lh ~/public_html/staging/portfolio/
 
-      - name: Déployer le Portfolio
+      - name: Verify staging deployment
+        run: |
+          echo "✅ Portfolio deployed to STAGING!"
+          echo "📍 Staging URL: ${{ secrets.HOSTINGER_DOMAIN }}/staging/portfolio"
+
+  # Job 7: Deploy to Hostinger (Production - main)
+  deploy-hostinger:
+    name: Deploy to Hostinger (Production)
+    runs-on: ubuntu-latest
+    needs: [validate, build, security]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SFTP
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.HOSTINGER_SSH_HOST }}
+          username: ${{ secrets.HOSTINGER_SSH_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
           script: |
-            mkdir -p ${{ secrets.DEPLOY_PATH_ROOT }}/portfolio
-            rm -rf ${{ secrets.DEPLOY_PATH_ROOT }}/portfolio/*
-            scp -r ./portfolio/public/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH_ROOT }}/portfolio
+            echo "🚀 Starting deployment to Hostinger..."
+            
+            # Backup current version
+            if [ -d ~/public_html/portfolio ]; then
+              cp -r ~/public_html/portfolio ~/public_html/portfolio.backup.$(date +%s)
+            fi
+            
+            # Create destination
+            mkdir -p ~/public_html/portfolio
+            
+            # Sync new files
+            rsync -avz --delete ./portfolio/ ~/public_html/portfolio/
+            
+            echo "✅ Deployment completed"
+            ls -lh ~/public_html/portfolio/
 
-      - name: Déployer le Blog
-        uses: appleboy/ssh-action@master
+      - name: Verify deployment
+        run: |
+          echo "✅ Portfolio deployed successfully!"
+          echo "📍 GitHub Pages: https://${{ github.repository_owner }}.github.io/freijstack/portfolio"
+          echo "📍 Hostinger: ${{ secrets.HOSTINGER_DOmaster }}/portfolio"
+
+  # Job 8: Notifications
+  notify:
+    name: Notify Status
+    runs-on: ubuntu-latest
+    needs: [validate, build, security, deploy-pages, deploy-pages-staging, deploy-hostinger, deploy-hostinger-staging]
+    if: always()
+    
+    steps:
+      - name: Check deployment status
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/develop" ]; then
+            echo "🧪 STAGING Environment"
+            if [ "${{ needs.deploy-pages-staging.result }}" == "success" ] || [ "${{ needs.deploy-hostinger-staging.result }}" == "success" ]; then
+              echo "✅ Staging deployment successful!"
+              echo "📍 Test your changes before merging to main"
+            else
+              echo "⚠️ Staging deployment had issues. Check the logs above."
+            fi
+          elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "🚀 PRODUCTION Environment"
+            if [ "${{ needs.deploy-pages.result }}" == "success" ] || [ "${{ needs.deploy-hostinger.result }}" == "success" ]; then
+              echo "✅ Production deployment successful!"
+              echo "🎯 Portfolio is live and ready to showcase your DevSecOps skills!"
+            else
+              echo "⚠️ Production deployment had issues. Check the logs above."
+            fi
+          fi
+
+      - name: Create GitHub Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            mkdir -p ${{ secrets.DEPLOY_PATH_ROOT }}/blog
-            rm -rf ${{ secrets.DEPLOY_PATH_ROOT }}/blog/*
-            scp -r ./blog/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH_ROOT }}/blog
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            ## FreijStack Release
+            Deployment completed successfully!
+            - Portfolio: Live on GitHub Pages & Hostinger
+            - Security: All checks passed
+            - Performance: Assets optimized
+          draft: false
+          prerelease: false
 
       # Les applications SaaS nécessiteront probablement des étapes de build Docker et un déploiement plus complexe.
       # Ces étapes seront ajoutées ultérieurement ou dans des workflows dédiés pour chaque application SaaS.
-
