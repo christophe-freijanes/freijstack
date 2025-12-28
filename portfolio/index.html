@@ -13,7 +13,7 @@
 </head>
 <body>
     <!-- Navigation -->
-    <header class="navbar">
+    <header class="navbar" role="banner" aria-label="Navigation principale">
         <div class="container">
             <div class="nav-brand">
                 <span class="logo">CF</span>
@@ -29,10 +29,10 @@
                     <i class="fas fa-download"></i> CV
                 </a>
                 <div class="language-selector">
-                    <button class="lang-btn active" data-lang="fr" title="Français">
+                    <button type="button" class="lang-btn active" data-lang="fr" title="Français">
                         <i class="fas fa-globe"></i> FR
                     </button>
-                    <button class="lang-btn" data-lang="en" title="English">
+                    <button type="button" class="lang-btn" data-lang="en" title="English">
                         EN
                     </button>
                 </div>
@@ -53,8 +53,8 @@
                     <div class="hero-text">
                         <span class="greeting" data-i18n="hero.greeting">👋 Bienvenue sur mon portfolio</span>
                         <div class="hero-title-with-photo">
-                            <h1 style="display:inline-block;vertical-align:middle;" data-i18n="hero.title">Christophe FREIJANES</h1>
-                            <img src="https://media.licdn.com/dms/image/v2/D4E03AQHyCt861VGacw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1675225312705?e=1768435200&v=beta&t=s_3kn8z0iu8Pem2iP6fohEFwn8Def88I5Yv3qZJeshk" alt="Photo de profil LinkedIn Christophe Freijanes" class="profile-photo-inline">
+                            <h1 data-i18n="hero.title">Christophe FREIJANES</h1>
+                            <img src="https://media.licdn.com/dms/image/v2/D4E03AQHyCt861VGacw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1675225312705?e=1768435200&amp;v=beta&amp;t=s_3kn8z0iu8Pem2iP6fohEFwn8Def88I5Yv3qZJeshk" alt="Photo de profil LinkedIn Christophe Freijanes" class="profile-photo-inline">
                         </div>
                         <p class="title-main" data-i18n="hero.role">Spécialiste senior Cloud & Sécurité - DevSecOps</p>
                         <p class="subtitle" data-i18n="hero.tagline">Sécurité infonuagique • DevSecOps • Infrastructure as Code • Automatisation</p>
@@ -63,19 +63,19 @@
                             <a href="#contact" class="btn btn-secondary" data-i18n="hero.btn.contact">Me contacter</a>
                         </div>
                         <div class="hero-links">
-                            <a href="https://github.com/christophe-freijanes" target="_blank" title="GitHub" class="social-icon">
+                            <a href="https://github.com/christophe-freijanes" target="_blank" title="GitHub" class="social-icon" aria-label="Profil GitHub">
                                 <i class="fab fa-github"></i>
                             </a>
-                            <a href="https://www.linkedin.com/in/christophe-freijanes/" target="_blank" title="LinkedIn" class="social-icon">
+                            <a href="https://www.linkedin.com/in/christophe-freijanes/" target="_blank" title="LinkedIn" class="social-icon" aria-label="Profil LinkedIn">
                                 <i class="fab fa-linkedin"></i>
                             </a>
-                            <a href="https://app.wisemapping.com/c/maps/1451212/public" target="_blank" title="WiseMapping" class="social-icon">
+                            <a href="https://app.wisemapping.com/c/maps/1451212/public" target="_blank" title="WiseMapping" class="social-icon" aria-label="Carte mentale WiseMapping">
                                 <i class="fas fa-sitemap"></i>
                             </a>
-                                <a href="https://www.credly.com/users/christophe-freijanes" target="_blank" title="Credly" class="social-icon">
-                                    <i class="fas fa-award"></i>
-                                </a>
-                            <a href="mailto:cfr.pro@gmx.ca" title="Email" class="social-icon">
+                            <a href="https://www.credly.com/users/christophe-freijanes" target="_blank" title="Credly" class="social-icon" aria-label="Badges Credly">
+                                <i class="fas fa-award"></i>
+                            </a>
+                            <a href="mailto:cfr.pro@gmx.ca" title="Email" class="social-icon" aria-label="Envoyer un email">
                                 <i class="fas fa-envelope"></i>
                             </a>
                         </div>
