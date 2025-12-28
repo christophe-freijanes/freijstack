@@ -56,26 +56,27 @@ services:
     image: nginx:alpine
     restart: unless-stopped
     volumes:
-      - /srv/www:/usr/share/nginx/html:ro
+      - /srv/www/portfolio:/usr/share/nginx/html:ro
     labels:
       - traefik.enable=true
       - traefik.http.services.portfolio.loadbalancer.server.port=80
-      
-      # Production subdomain: portfolio.freijstack.com → /srv/www/portfolio
       - traefik.http.routers.portfolio-subdomain.rule=Host(`${SUBDOMAIN_PORTFOLIO}.${DOMAIN_NAME}`)
       - traefik.http.routers.portfolio-subdomain.entrypoints=websecure
       - traefik.http.routers.portfolio-subdomain.tls.certresolver=mytlschallenge
       - traefik.http.routers.portfolio-subdomain.service=portfolio
-      - traefik.http.routers.portfolio-subdomain.middlewares=portfolio-subdomain-prefix
-      - traefik.http.middlewares.portfolio-subdomain-prefix.addprefix.prefix=/portfolio
-      
-      # Staging subdomain: portfolio-staging.freijstack.com → /srv/www/portfolio-staging
+
+  portfolio-staging:
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - /srv/www/portfolio-staging:/usr/share/nginx/html:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.portfolio-staging.loadbalancer.server.port=80
       - traefik.http.routers.portfolio-staging-subdomain.rule=Host(`${SUBDOMAIN_PORTFOLIO_STAGING}.${DOMAIN_NAME}`)
       - traefik.http.routers.portfolio-staging-subdomain.entrypoints=websecure
       - traefik.http.routers.portfolio-staging-subdomain.tls.certresolver=mytlschallenge
-      - traefik.http.routers.portfolio-staging-subdomain.service=portfolio
-      - traefik.http.routers.portfolio-staging-subdomain.middlewares=portfolio-staging-subdomain-prefix
-      - traefik.http.middlewares.portfolio-staging-subdomain-prefix.addprefix.prefix=/portfolio-staging
+      - traefik.http.routers.portfolio-staging-subdomain.service=portfolio-staging
 
 volumes:
   traefik_data:
