@@ -61,9 +61,14 @@ services:
       - /srv/www:/usr/share/nginx/html:ro
     labels:
       - traefik.enable=true
-      - traefik.http.routers.portfolio.rule=Host(`freijstack.com`)
+      - traefik.http.services.portfolio.loadbalancer.server.port=80
+      - traefik.http.routers.portfolio.rule=Host(`freijstack.com`) && PathPrefix(`/portfolio`)
       - traefik.http.routers.portfolio.entrypoints=websecure
       - traefik.http.routers.portfolio.tls.certresolver=mytlschallenge
+      - traefik.http.routers.portfolio-staging.rule=Host(`freijstack.com`) && PathPrefix(`/portfolio-staging`)
+      - traefik.http.routers.portfolio-staging.entrypoints=websecure
+      - traefik.http.routers.portfolio-staging.tls.certresolver=mytlschallenge
+      - traefik.http.routers.portfolio-staging.service=portfolio
 
 volumes:
   traefik_data:
