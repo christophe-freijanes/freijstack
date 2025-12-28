@@ -2,8 +2,8 @@
 
 Portfolio web professionnel multilingue (FR/EN) mettant en avant les compétences Cloud & Security / DevSecOps.
 
-**Live**: https://freijstack.com/portfolio/  
-**Staging**: https://freijstack.com/portfolio-staging/
+**Live**: https://portfolio.freijstack.com/  
+**Staging**: https://portfolio-staging.freijstack.com/
 
 ## 📌 Caractéristiques
 
@@ -191,8 +191,8 @@ Le portfolio est déployé automatiquement via GitHub Actions:
 2. **Build** - Minification CSS/JS
 3. **Security Scan** - Gitleaks, Trivy, CodeQL
 4. **Deploy**:
-   - `develop` branch → `/portfolio-staging/`
-   - `master` branch → `/portfolio/`
+   - `develop` branch → `portfolio-staging.freijstack.com`
+   - `master` branch → `portfolio.freijstack.com`
 
 ### Branches
 - `develop` - Staging (test avant production)
@@ -211,7 +211,7 @@ git push origin develop
 git checkout master
 git merge develop
 git push origin master
-# https://freijstack.com/portfolio/ mis à jour automatiquement
+# https://portfolio.freijstack.com/ mis à jour automatiquement
 ```
 
 ## 📝 Maintenance

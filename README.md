@@ -2,7 +2,7 @@
 
 Portfolio et projets cloud & sécurité de **Christophe FREIJANES** - Senior Cloud & Security Specialist (DevSecOps).
 
-**Live**: https://freijstack.com/portfolio/
+**Live**: https://portfolio.freijstack.com/
 
 ## 📋 Structure du Projet
 
@@ -32,8 +32,8 @@ Portfolio web multilingue (FR/EN) avec:
 - **Sécurité**: Content Security Policy, WCAG AA compliance
 
 **Accès**: 
-- 📍 **Production**: https://freijstack.com/portfolio/
-- 📍 **Staging**: https://freijstack.com/portfolio-staging/
+- 📍 **Production**: https://portfolio.freijstack.com/
+- 📍 **Staging**: https://portfolio-staging.freijstack.com/
 - 📍 **Local**: Ouvrir `portfolio/index.html` dans un navigateur
 
 ### SaaS Démos (`/saas`)
@@ -94,8 +94,8 @@ Le projet utilise **GitHub Actions** avec un pipeline complet:
 ```
 
 ### Déploiement Automatique
-- Chaque commit sur `develop` déploie vers `/portfolio-staging/`
-- Chaque commit sur `master` déploie vers `/portfolio/`
+- Chaque commit sur `develop` déploie vers `portfolio-staging.freijstack.com`
+- Chaque commit sur `master` déploie vers `portfolio.freijstack.com`
 - Utilise SSH + rsync pour transfert sécurisé
 
 ## 🚀 Démarrage Rapide
@@ -149,7 +149,7 @@ git add .
 git commit -m "feat: mise à jour portfolio"
 git push origin develop
 
-# Vérifier https://freijstack.com/portfolio-staging/
+# Vérifier https://portfolio-staging.freijstack.com/
 # Puis merger vers master quand prêt
 ```
 
