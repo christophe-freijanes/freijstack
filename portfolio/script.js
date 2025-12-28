@@ -51,6 +51,15 @@ document.addEventListener('DOMContentLoaded', function() {
             // Compétences
             'skills.title': 'Compétences Techniques',
             'skills.subtitle': 'Technologies et outils maîtrisés',
+            'skills.cloud': 'Cloud & Sécurité',
+            'skills.devsecops': 'DevSecOps & CI/CD',
+            'skills.backup': 'Sauvegarde & DRP',
+            'skills.automation': 'Automatisation & Développement',
+            'skills.monitoring': 'Monitoring & Observabilité',
+            'skills.os': 'Systèmes d\'Exploitation',
+            'skills.virtualization': 'Virtualisation & Infrastructure',
+            'skills.storage': 'Stockage & Données',
+            'skills.methodologies': 'Méthodologies',
             // Projets
             'projects.title': 'Projets Récents',
             'projects.subtitle': 'Réalisations et contributions',
@@ -146,6 +155,15 @@ document.addEventListener('DOMContentLoaded', function() {
             // Skills
             'skills.title': 'Technical Skills',
             'skills.subtitle': 'Technologies and tools mastered',
+            'skills.cloud': 'Cloud & Security',
+            'skills.devsecops': 'DevSecOps & CI/CD',
+            'skills.backup': 'Backup & DRP',
+            'skills.automation': 'Automation & Development',
+            'skills.monitoring': 'Monitoring & Observability',
+            'skills.os': 'Operating Systems',
+            'skills.virtualization': 'Virtualization & Infrastructure',
+            'skills.storage': 'Storage & Data',
+            'skills.methodologies': 'Methodologies',
             // Projects
             'projects.title': 'Recent Projects',
             'projects.subtitle': 'Achievements and contributions',
