@@ -142,6 +142,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Pages
+        continue-on-error: true
         uses: actions/configure-pages@v4
 
       - name: Build static site
@@ -152,12 +153,14 @@ jobs:
           echo "✅ Staging site built"
 
       - name: Upload artifact
+        continue-on-error: true
         uses: actions/upload-pages-artifact@v3
         with:
           path: '_site'
 
       - name: Deploy to GitHub Pages
         id: deployment
+        continue-on-error: true
         uses: actions/deploy-pages@v4
 
   # Job 5: Deploy to GitHub Pages (Production - master)
@@ -181,6 +184,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Pages
+        continue-on-error: true
         uses: actions/configure-pages@v4
 
       - name: Build static site
@@ -190,12 +194,14 @@ jobs:
           echo "✅ Static site built"
 
       - name: Upload artifact
+        continue-on-error: true
         uses: actions/upload-pages-artifact@v3
         with:
           path: '_site'
 
       - name: Deploy to GitHub Pages
         id: deployment
+        continue-on-error: true
         uses: actions/deploy-pages@v4
 
   # Job 6: Deploy to Hostinger (Staging - develop)
