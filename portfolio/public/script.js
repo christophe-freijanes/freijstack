@@ -23,6 +23,15 @@ document.addEventListener('DOMContentLoaded', () => {
     sr.reveal('.hero-content p', { origin: 'left', delay: 300 });
     sr.reveal('.hero-content .btn', { origin: 'bottom', delay: 400 });
 
+    // Parallax effect for hero background
+    document.querySelector('.hero-section').addEventListener('mousemove', (e) => {
+        const heroBackground = document.querySelector('.hero-background');
+        const speed = 0.03; // Ajustez cette valeur pour contrôler la vitesse du parallax
+        const x = (window.innerWidth - e.pageX * speed) / 20;
+        const y = (window.innerHeight - e.pageY * speed) / 20;
+        heroBackground.style.transform = `translate(${x}px, ${y}px)`;
+    });
+
     // Reveal About section
     sr.reveal('.about-section h2', { origin: 'top' });
     sr.reveal('.about-section p', { origin: 'left', delay: 200 });
