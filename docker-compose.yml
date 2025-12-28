@@ -58,7 +58,7 @@ services:
     image: nginx:alpine
     restart: unless-stopped
     volumes:
-      - /srv/portfolio:/usr/share/nginx/html:ro
+      - /srv/www:/usr/share/nginx/html:ro
     labels:
       - traefik.enable=true
       - traefik.http.routers.portfolio.rule=Host(`freijstack.com`)
