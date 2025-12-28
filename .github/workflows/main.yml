@@ -338,3 +338,4 @@ jobs:
 
       # Les applications SaaS nécessiteront probablement des étapes de build Docker et un déploiement plus complexe.
       # Ces étapes seront ajoutées ultérieurement ou dans des workflows dédiés pour chaque application SaaS.
+      # Restez à l'écoute pour les futures mises à jour !
