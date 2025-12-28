@@ -160,12 +160,12 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-  # Job 5: Deploy to GitHub Pages (Production - main)
+  # Job 5: Deploy to GitHub Pages (Production - master)
   deploy-pages:
     name: Deploy to GitHub Pages (Production)
     runs-on: ubuntu-latest
     needs: [validate, build, security]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     
     permissions:
       contents: read
@@ -209,73 +209,81 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy via SFTP to Staging
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOSTINGER_SSH_HOST }}
-          username: ${{ secrets.HOSTINGER_SSH_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          script: |
-            echo "🚀 Starting deployment to Hostinger STAGING..."
-            
-            # Backup current version
-            if [ -d ~/public_html/staging/portfolio ]; then
-              cp -r ~/public_html/staging/portfolio ~/public_html/staging/portfolio.backup.$(date +%s)
-            fi
-            
-            # Create destination
-            mkdir -p ~/public_html/staging/portfolio
-            
-            # Sync new files
-            rsync -avz --delete ./portfolio/ ~/public_html/staging/portfolio/
-            
-            echo "✅ Staging deployment completed"
-            ls -lh ~/public_html/staging/portfolio/
+      - name: Prepare SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.HOSTINGER_SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create staging directory on VPS
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+            'mkdir -p /srv/portfolio-staging && echo "📁 Staging directory ready"'
+
+      - name: Backup existing staging (if exists)
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+            'if [ -d /srv/portfolio-staging ] && [ "$(ls -A /srv/portfolio-staging)" ]; then \
+               cp -r /srv/portfolio-staging /srv/portfolio-staging.backup.$(date +%s); \
+               echo "💾 Backup created"; \
+             fi'
+
+      - name: Deploy portfolio to staging
+        run: |
+          rsync -avz --delete -e "ssh -i ~/.ssh/deploy_key" \
+            portfolio/ ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:/srv/portfolio-staging/
 
       - name: Verify staging deployment
         run: |
-          echo "✅ Portfolio deployed to STAGING!"
-          echo "📍 Staging URL: ${{ secrets.HOSTINGER_DOMAIN }}/staging/portfolio"
+          echo "✅ Portfolio déployé vers STAGING!"
+          echo "📍 Path: /srv/portfolio-staging"
+          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+            'ls -lh /srv/portfolio-staging/ | head -10'
 
-  # Job 7: Deploy to Hostinger (Production - main)
+  # Job 7: Deploy to Hostinger (Production - master)
   deploy-hostinger:
     name: Deploy to Hostinger (Production)
     runs-on: ubuntu-latest
     needs: [validate, build, security]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy via SFTP
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOSTINGER_SSH_HOST }}
-          username: ${{ secrets.HOSTINGER_SSH_USER }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          script: |
-            echo "🚀 Starting deployment to Hostinger..."
-            
-            # Backup current version
-            if [ -d ~/public_html/portfolio ]; then
-              cp -r ~/public_html/portfolio ~/public_html/portfolio.backup.$(date +%s)
-            fi
-            
-            # Create destination
-            mkdir -p ~/public_html/portfolio
-            
-            # Sync new files
-            rsync -avz --delete ./portfolio/ ~/public_html/portfolio/
-            
-            echo "✅ Deployment completed"
-            ls -lh ~/public_html/portfolio/
-
-      - name: Verify deployment
+      - name: Prepare SSH key
         run: |
-          echo "✅ Portfolio deployed successfully!"
+          mkdir -p ~/.ssh
+          echo "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.HOSTINGER_SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create production directory on VPS
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+            'mkdir -p /srv/portfolio && echo "📁 Production directory ready"'
+
+      - name: Backup existing production (if exists)
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+            'if [ -d /srv/portfolio ] && [ "$(ls -A /srv/portfolio)" ]; then \
+               cp -r /srv/portfolio /srv/portfolio.backup.$(date +%s); \
+               echo "💾 Backup created"; \
+             fi'
+
+      - name: Deploy portfolio to production
+        run: |
+          rsync -avz --delete -e "ssh -i ~/.ssh/deploy_key" \
+            portfolio/ ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:/srv/portfolio/
+
+      - name: Verify production deployment
+        run: |
+          echo "✅ Portfolio déployé vers PRODUCTION!"
+          echo "📍 Production: https://${{ secrets.HOSTINGER_DOMAIN }}"
           echo "📍 GitHub Pages: https://${{ github.repository_owner }}.github.io/freijstack/portfolio"
-          echo "📍 Hostinger: ${{ secrets.HOSTINGER_DOmaster }}/portfolio"
+          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+            'ls -lh /srv/portfolio/ | head -10'
 
   # Job 8: Notifications
   notify:
@@ -295,7 +303,7 @@ jobs:
             else
               echo "⚠️ Staging deployment had issues. Check the logs above."
             fi
-          elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
+          elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
             echo "🚀 PRODUCTION Environment"
             if [ "${{ needs.deploy-pages.result }}" == "success" ] || [ "${{ needs.deploy-hostinger.result }}" == "success" ]; then
               echo "✅ Production deployment successful!"
