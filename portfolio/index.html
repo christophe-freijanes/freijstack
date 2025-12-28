@@ -3,69 +3,497 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Christophe Freijanes - Portfolio</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; connect-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'self';">
+    <title>Christophe FREIJANES - DevSecOps Engineer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <nav>
-            <h1>Christophe Freijanes</h1>
-            <ul>
-                <li><a href="#about">À Propos</a></li>
-                <li><a href="#projects">Projets</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-        </nav>
+    <!-- Navigation -->
+    <header class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <span class="logo">CF</span>
+                <span class="brand-text">Christophe FREIJANES</span>
+            </div>
+            <nav class="nav-menu" id="navMenu">
+                <a href="#accueil" class="nav-link" data-section="accueil">Accueil</a>
+                <a href="#competences" class="nav-link" data-section="competences">Compétences</a>
+                <a href="#projets" class="nav-link" data-section="projets">Projets</a>
+                <a href="#experience" class="nav-link" data-section="experience">Expérience</a>
+                <a href="#contact" class="nav-link" data-section="contact">Contact</a>
+                <a href="https://drive.google.com/file/d/1WKTv123ZXFl1fO5jh6qGCK3ElArEpcki/view?usp=sharing" target="_blank" class="btn-cv" id="downloadCV">
+                    <i class="fas fa-download"></i> CV
+                </a>
+            </nav>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
     </header>
 
     <main>
-        <section id="hero">
-            <h2>Ingénieur DevSecOps & Développeur Fullstack</h2>
-            <p>Bienvenue sur mon portfolio. Découvrez mes compétences et mes réalisations.</p>
-        </section>
+        <!-- Section Accueil/Hero -->
+        <section id="accueil" class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <span class="greeting">👋 Bienvenue sur mon portfolio</span>
+                        <h1>Christophe FREIJANES</h1>
+                        <p class="title-main">Spécialiste senior Cloud & Sécurité - DevSecOps</p>
+                        <p class="subtitle">Sécurité infonuagique • DevSecOps • Infrastructure as Code • Automatisation</p>
+                        <div class="hero-buttons">
+                            <a href="#projets" class="btn btn-primary">Voir mes projets</a>
+                            <a href="#contact" class="btn btn-secondary">Me contacter</a>
+                        </div>
+                        <div class="hero-links">
+                            <a href="https://github.com/christophe-freijanes" target="_blank" title="GitHub" class="social-icon">
+                                <i class="fab fa-github"></i>
+                            </a>
+                            <a href="https://www.linkedin.com/in/christophe-freijanes/" target="_blank" title="LinkedIn" class="social-icon">
+                                <i class="fab fa-linkedin"></i>
+                            </a>
+                            <a href="https://app.wisemapping.com/c/maps/1451212/public" target="_blank" title="WiseMapping" class="social-icon">
+                                <i class="fas fa-sitemap"></i>
+                            </a>
+                            <a href="mailto:cfr.pro@gmx.ca" title="Email" class="social-icon">
+                                <i class="fas fa-envelope"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span></span><span></span><span></span>
+                            </div>
+                            <pre><code>$ whoami
+Christophe FREIJANES
 
-        <section id="about">
-            <h3>À Propos de Moi</h3>
-            <p>Je suis Christophe Freijanes, un ingénieur DevSecOps axé sur l'agilité et passionné par le développement et la sécurité des applications. Mon expertise s'étend du développement fullstack à l'implémentation de pratiques DevSecOps, assurant des systèmes robustes, performants et sécurisés. Je suis un fervent adepte des méthodologies agiles et j'aime explorer les nouvelles technologies pour construire des solutions innovantes et sécurisées.</p>
-        </section>
+$ summary --role
+Spécialiste Cloud & Sécurité • 20+ ans d'expérience • Montréal (Rive-Sud)
 
-        <section id="projects">
-            <h3>Mes Projets</h3>
-            <div class="project-grid">
-                <div class="project-item">
-                    <h4>Formation DevOps & CI/CD</h4>
-                    <p>Ce dépôt est utilisé pour mes formations DevOps et pour suivre mes travaux. Il couvre des sujets tels que l'automatisation, l'intégration continue et le déploiement continu.</p>
-                    <a href="https://github.com/christophe-freijanes/formation" target="_blank">Voir sur GitHub</a>
+$ expertise --list
+• AWS (IAM, EC2, S3, CloudWatch) • Kubernetes • GCP
+• Terraform • Ansible (AWX/AAP) • Docker / Podman
+• GitHub Actions • GitLab CI • Jenkins • Helm
+• Commvault • Clumio • Cohesity • Veeam
+• Grafana • Prometheus • Nagios • Centreon
+
+$ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
+                        </div>
+                    </div>
                 </div>
-                <div class="project-item">
-                    <h4>ansible-webapp</h4>
-                    <p>Dépôt utilisé pour la formation au déploiement avec le rôle Ansible.</p>
-                    <a href="https://github.com/christophe-freijanes/ansible-webapp" target="_blank">Voir sur GitHub</a>
-                </div>
-                <div class="project-item">
-                    <h4>student-list</h4>
-                    <p>Application simple pour montrer comment interroger une API à partir d'une webapp (Eazytraining).</p>
-                    <a href="https://github.com/christophe-freijanes/student-list" target="_blank">Voir sur GitHub</a>
+            </div>
+            <div class="scroll-indicator">
+                <span>Scroll</span>
+                <div class="mouse">
+                    <div class="wheel"></div>
                 </div>
             </div>
         </section>
 
-        <section id="contact">
-            <h3>Contact</h3>
-            <p>N'hésitez pas à me contacter via les réseaux sociaux ou par email.</p>
-            <ul>
-                <li>LinkedIn: <a href="https://fr.linkedin.com/in/christophe-freijanes/" target="_blank">christophe-freijanes</a></li>
-                <li>GitHub: <a href="https://github.com/christophe-freijanes" target="_blank">christophe-freijanes</a></li>
-                <li>Docker Hub: <a href="https://hub.docker.com/u/cfreijanes" target="_blank">cfreijanes</a></li>
-            </ul>
+        <!-- Section Compétences -->
+        <section id="competences" class="skills">
+            <div class="container">
+                <h2 class="section-title">Compétences</h2>
+                <p class="section-subtitle">Technologies et outils que je maîtrise</p>
+                
+                <div class="skills-grid">
+                    <div class="skill-category">
+                        <h3><i class="fas fa-cloud"></i> Cloud & Sécurité</h3>
+                        <div class="skill-tags">
+                            <span class="tag">AWS (IAM, EC2, S3, CloudWatch)</span>
+                            <span class="tag">GCP</span>
+                            <span class="tag">Kubernetes</span>
+                            <span class="tag">Hardening / CIS</span>
+                            <span class="tag">Tenable</span>
+                            <span class="tag">SSO / SAML</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-category">
+                        <h3><i class="fas fa-cogs"></i> DevSecOps & CI/CD</h3>
+                        <div class="skill-tags">
+                            <span class="tag">Terraform</span>
+                            <span class="tag">Ansible (AWX / AAP)</span>
+                            <span class="tag">Docker / Podman</span>
+                            <span class="tag">GitHub Actions</span>
+                            <span class="tag">GitLab CI</span>
+                            <span class="tag">Jenkins</span>
+                            <span class="tag">Helm</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-category">
+                        <h3><i class="fas fa-shield-alt"></i> Sauvegarde & DRP</h3>
+                        <div class="skill-tags">
+                            <span class="tag">Commvault (on-prem & cloud)</span>
+                            <span class="tag">Clumio</span>
+                            <span class="tag">Cohesity</span>
+                            <span class="tag">Veeam</span>
+                            <span class="tag">AWS S3</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-category">
+                        <h3><i class="fas fa-code"></i> Automatisation & Développement</h3>
+                        <div class="skill-tags">
+                            <span class="tag">Python</span>
+                            <span class="tag">Bash / PowerShell</span>
+                            <span class="tag">YAML</span>
+                            <span class="tag">n8n</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-category">
+                        <h3><i class="fas fa-chart-line"></i> Monitoring & Observabilité</h3>
+                        <div class="skill-tags">
+                            <span class="tag">Grafana</span>
+                            <span class="tag">Prometheus</span>
+                            <span class="tag">Nagios</span>
+                            <span class="tag">Centreon</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-category">
+                        <h3><i class="fas fa-project-diagram"></i> Méthodologies</h3>
+                        <div class="skill-tags">
+                            <span class="tag">DevSecOps</span>
+                            <span class="tag">Agile (SAFe)</span>
+                            <span class="tag">ITIL v4</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Projets -->
+        <section id="projets" class="projects">
+            <div class="container">
+                <h2 class="section-title">Projets Récents</h2>
+                <p class="section-subtitle">Découvrez mes réalisations et contributions</p>
+                
+                <div class="projects-grid">
+                    <div class="project-card">
+                        <div class="project-header">
+                            <h3>Formation DevOps & CI/CD</h3>
+                            <span class="project-badge">Education</span>
+                        </div>
+                        <p class="project-description">Dépôt utilisé pour mes formations DevOps couvrant l'automatisation, l'intégration continue et le déploiement continu.</p>
+                        <div class="project-tags">
+                            <span>Jenkins</span>
+                            <span>GitLab CI</span>
+                            <span>Ansible</span>
+                            <span>Docker</span>
+                        </div>
+                        <div class="project-footer">
+                            <a href="https://github.com/christophe-freijanes/formation" target="_blank" class="project-link">
+                                <i class="fab fa-github"></i> Voir sur GitHub
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <h3>ansible-webapp</h3>
+                            <span class="project-badge">Automation</span>
+                        </div>
+                        <p class="project-description">Playbooks Ansible pour le déploiement et la configuration automatisée d'applications web avec rôles modulaires.</p>
+                        <div class="project-tags">
+                            <span>Ansible</span>
+                            <span>Infrastructure</span>
+                            <span>Configuration</span>
+                        </div>
+                        <div class="project-footer">
+                            <a href="https://github.com/christophe-freijanes/ansible-webapp" target="_blank" class="project-link">
+                                <i class="fab fa-github"></i> Voir sur GitHub
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <h3>student-list</h3>
+                            <span class="project-badge">Fullstack</span>
+                        </div>
+                        <p class="project-description">Application fullstack démontrant l'interaction entre une API backend et une webapp frontend pour la gestion d'étudiants.</p>
+                        <div class="project-tags">
+                            <span>API REST</span>
+                            <span>Frontend</span>
+                            <span>Backend</span>
+                        </div>
+                        <div class="project-footer">
+                            <a href="https://github.com/christophe-freijanes/student-list" target="_blank" class="project-link">
+                                <i class="fab fa-github"></i> Voir sur GitHub
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <h3>freijstack</h3>
+                            <span class="project-badge">Stack</span>
+                        </div>
+                        <p class="project-description">Stack personnalisée regroupant mes outils et configurations préférés pour les projets DevSecOps et infrastructure.</p>
+                        <div class="project-tags">
+                            <span>Infrastructure</span>
+                            <span>Tools</span>
+                            <span>Configuration</span>
+                        </div>
+                        <div class="project-footer">
+                            <a href="https://github.com/christophe-freijanes/freijstack" target="_blank" class="project-link">
+                                <i class="fab fa-github"></i> Voir sur GitHub
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <h3>Docker Applications</h3>
+                            <span class="project-badge">Container</span>
+                        </div>
+                        <p class="project-description">Collection d'images Docker et configurations pour déployer rapidement des applications en environnements conteneurisés.</p>
+                        <div class="project-tags">
+                            <span>Docker</span>
+                            <span>Container</span>
+                            <span>Registry</span>
+                        </div>
+                        <div class="project-footer">
+                            <a href="https://hub.docker.com/u/cfreijanes" target="_blank" class="project-link">
+                                <i class="fab fa-docker"></i> Docker Hub
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <h3>Infrastructure as Code</h3>
+                            <span class="project-badge">IaC</span>
+                        </div>
+                        <p class="project-description">Templates Terraform et CloudFormation pour provisionner et gérer l'infrastructure cloud de manière déclarative et versionnable.</p>
+                        <div class="project-tags">
+                            <span>Terraform</span>
+                            <span>CloudFormation</span>
+                            <span>AWS</span>
+                        </div>
+                        <div class="project-footer">
+                                <a href="#" class="project-link" data-alert="Dépôts en cours de création">
+                                <i class="fas fa-code-branch"></i> Bientôt disponible
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Expérience -->
+        <section id="experience" class="experience">
+            <div class="container">
+                <h2 class="section-title">Expérience Professionnelle</h2>
+                <p class="section-subtitle">Mes parcours et réalisations</p>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3>Spécialiste Cloud & Sécurité – DevSecOps | ACENSI</h3>
+                            <p class="timeline-subtitle">2023 – Aujourd'hui</p>
+                            <ul class="timeline-list">
+                                <li>Conception et déploiement d'une stratégie de sauvegarde « as-code » (Terraform, AWS S3, Commvault/Clumio), réduction des interventions manuelles et temps d'exploitation.</li>
+                                <li>Automatisation end-to-end CI/CD (Jenkins, GitHub Actions, Ansible AAP) pour pipelines sécurisés et déploiements reproductibles, amélioration des cycles de livraison.</li>
+                                <li>Renforcement de la sécurité cloud (IAM, SAML, scans Tenable, hardening CIS), réduction majeure des vulnérabilités critiques détectées.</li>
+                                <li>Mise en place d'observabilité (Prometheus, Grafana) et playbooks d'incident pour réduire le MTTR et améliorer la disponibilité.</li>
+                            </ul>
+                            <div class="timeline-tags">
+                                <span>DevSecOps</span>
+                                <span>Terraform</span>
+                                <span>CI/CD</span>
+                                <span>Security</span>
+                                <span>DRP / Backup</span>
+                                <span>Automation</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3>Ingénieur Systèmes – DevSecOps | SQUAD</h3>
+                            <p class="timeline-subtitle">2022 – 2023</p>
+                            <ul class="timeline-list">
+                                <li>Administration et sécurisation de 3000+ VM dans un contexte SMSI/eIDAS ; mise en place de contrôles et revues de sécurité.</li>
+                                <li>Automatisation du hardening RedHat via Ansible, accélération des mises en conformité et réduction des corrections manuelles.</li>
+                                <li>Containerisation et orchestration de services (Docker, Kubernetes) avec pipelines CI/CD sécurisés.</li>
+                                <li>Accompagnement et formation des équipes DevOps sur les bonnes pratiques DevSecOps et la sécurité du pipeline.</li>
+                            </ul>
+                            <div class="timeline-tags">
+                                <span>DevSecOps</span>
+                                <span>Hardening</span>
+                                <span>CI/CD</span>
+                                <span>Security</span>
+                                <span>Automation</span>
+                                <span>Containers</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3>Ingénieur Infrastructure – DevSecOps | ECONOCOM (Projet ITER)</h3>
+                            <p class="timeline-subtitle">2020 – 2022</p>
+                            <ul class="timeline-list">
+                                <li>Déploiement d'Ansible AWX/AAP et création de playbooks modulaires pour le provisioning et la configuration.</li>
+                                <li>Automatisation des contrôles d'accès (intégration LDAP) et des procédures de sécurité pour environnements réglementés.</li>
+                                <li>Mise en place de workflows d'automatisation pour provisioning et gestion du stockage, avec procédures auditables.</li>
+                                <li>Standardisation des templates et réduction significative du temps de provisionnement et des erreurs manuelles.</li>
+                            </ul>
+                            <div class="timeline-tags">
+                                <span>Automation</span>
+                                <span>Ansible</span>
+                                <span>Provisioning</span>
+                                <span>Storage</span>
+                                <span>Security</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3>Ingénieur Système R&D - DevOps | DIGIMIND</h3>
+                            <p class="timeline-subtitle">Avril 2020 – Août 2020</p>
+                            <ul class="timeline-list">
+                                <li>Modernisation d'infrastructures multi-datacenters, gain de performance mesurable de +30% (CPU/RPS) livré en 6 mois.</li>
+                                <li>Mise en place de supervision et gestion des incidents (Centreon, Prometheus) pour améliorer la résilience et réduire le MTTR.</li>
+                                <li>Traitement et optimisation Big Data (SolrCloud) : tuning d'index et d'architectures pour réduire la latence des requêtes.</li>
+                                <li>Conduite de migrations et optimisation CDN pour les utilisateurs asiatiques afin d'améliorer l'expérience et la latence réseau.</li>
+                            </ul>
+                            <div class="timeline-tags">
+                                <span>Virtualisation</span>
+                                <span>Automation</span>
+                                <span>Monitoring</span>
+                                <span>Big Data</span>
+                                <span>Security</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3>Administrateur Systèmes | HARDIS</h3>
+                            <p class="timeline-subtitle">Août 2019 – Mars 2020</p>
+                            <ul class="timeline-list">
+                                <li>Gestion des incidents et demandes de niveau 2 avec respect des SLA et réduction des escalades vers les équipes d'expertise.</li>
+                                <li>Automatisation des tâches récurrentes via scripts Shell et PowerShell, diminuant le travail manuel et accélérant les déploiements.</li>
+                                <li>Optimisation des performances serveurs (ESX) et répartition de charge des VMs pour améliorer l'efficience des ressources.</li>
+                                <li>Rédaction de procédures d'intégration et participation aux actions de conformité (ISO 27001) pour renforcer la gouvernance.</li>
+                            </ul>
+                            <div class="timeline-tags">
+                                <span>Virtualisation</span>
+                                <span>DRP / Backup</span>
+                                <span>Automation</span>
+                                <span>Scripting</span>
+                                <span>Compliance</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item timeline-note">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3>Et d'autres expériences...</h3>
+                            <p class="timeline-description">D'autres missions et projets disponibles sur demande ou dans le CV complet. Contactez-moi pour obtenir la liste complète des réalisations et cas clients.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <!-- Section Contact -->
+        </section>
+
+        <!-- Section Certifications -->
+        <section id="certifications" class="certifications">
+            <div class="container">
+                <h2 class="section-title">Accréditations</h2>
+                <p class="section-subtitle">Formations et certifications récentes</p>
+
+                <div class="cert-grid">
+                    <a class="cert-item" href="#" target="_blank" rel="noopener">
+                        <img alt="AWS Cloud Practitioner" src="https://img.shields.io/badge/AWS-Cloud%20Practitioner-F7931A?logo=amazon-aws&logoColor=white">
+                    </a>
+                    <a class="cert-item" href="#" target="_blank" rel="noopener">
+                        <img alt="Ansible Automation Platform" src="https://img.shields.io/badge/Ansible-Automation%20Platform-DD0000?logo=ansible&logoColor=white">
+                    </a>
+                    <a class="cert-item" href="#" target="_blank" rel="noopener">
+                        <img alt="CompTIA Security+" src="https://img.shields.io/badge/CompTIA-Security%2B-4AA1F3?logo=compTIA&logoColor=white">
+                    </a>
+                    <a class="cert-item" href="#" target="_blank" rel="noopener">
+                        <img alt="TEF Canada (Français C2)" src="https://img.shields.io/badge/TEF-Canada%20(C2)-0072C6?logo=canada&logoColor=white">
+                    </a>
+                    <a class="cert-item" href="#" target="_blank" rel="noopener">
+                        <img alt="KCNA" src="https://img.shields.io/badge/KCNA-Kubernetes-326CE5?logo=kubernetes&logoColor=white">
+                    </a>
+                    <a class="cert-item" href="#" target="_blank" rel="noopener">
+                        <img alt="ITIL v4 Foundation" src="https://img.shields.io/badge/ITIL-v4%20Foundation-7B61FF?logo=itil&logoColor=white">
+                    </a>
+                    <a class="cert-item" href="#" target="_blank" rel="noopener">
+                        <img alt="LFCS" src="https://img.shields.io/badge/LFCS-Linux%20Foundations-000000?logo=linuxfoundation&logoColor=white">
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Contact -->
+        <section id="contact" class="contact">
+            <div class="container">
+                <h2 class="section-title">Parlons Ensemble</h2>
+                <p class="section-subtitle">Vous avez un projet ? Contactez-moi</p>
+                <div class="contact-content">
+                    <div class="contact-icons" aria-label="Contact links">
+                        <a href="#" id="emailLink" data-user="cfr.pro" data-domain="gmx.ca" title="Envoyer un e-mail" aria-label="Envoyer un e-mail" class="social-icon">
+                            <i class="fas fa-envelope"></i>
+                        </a>
+                        <a href="https://github.com/christophe-freijanes" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub" class="social-icon">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/in/christophe-freijanes/" target="_blank" rel="noopener noreferrer" title="LinkedIn" aria-label="LinkedIn" class="social-icon">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="https://app.wisemapping.com/c/maps/1451212/public" target="_blank" rel="noopener noreferrer" title="WiseMapping" aria-label="WiseMapping" class="social-icon">
+                            <i class="fas fa-sitemap"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </section>
     </main>
 
-    <footer>
-        <p>&copy; 2025 Christophe Freijanes. Tous droits réservés.</p>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span class="logo">CF</span>
+                    <span class="brand-text">Christophe FREIJANES</span>
+                </div>
+
+                <nav class="footer-nav" aria-label="Footer navigation">
+                    <a href="#accueil">Accueil</a>
+                    <a href="#projets">Projets</a>
+                    <a href="https://drive.google.com/file/d/1WKTv123ZXFl1fO5jh6qGCK3ElArEpcki/view?usp=sharing" target="_blank" rel="noopener">CV</a>
+                </nav>
+
+                <div class="footer-contact">
+                    <p class="footer-copy">&copy; 2026 Christophe FREIJANES. Tous droits réservés.</p>
+                </div>
+            </div>
+        </div>
     </footer>
 
     <script src="script.js"></script>
