@@ -30,6 +30,26 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/securevault
+  # Paths
+  PROJECT_PATH: saas/securevault
+  VPS_DEPLOY_DIR_PROD: /srv/www/securevault
+  VPS_DEPLOY_DIR_STAGING: /srv/www/securevault-staging
+  VPS_ENV_FILE_PROD: /srv/www/securevault/.env
+  VPS_ENV_FILE_STAGING: /srv/www/securevault-staging/.env
+  # Branches
+  BRANCH_PROD: master
+  BRANCH_STAGING: develop
+  # Container names
+  CONTAINER_PREFIX_PROD: securevault
+  CONTAINER_PREFIX_STAGING: securevault-staging
+  # Networks
+  NETWORK_PROD: securevault_network
+  NETWORK_STAGING: securevault_staging_network
+  # Domains
+  FRONTEND_DOMAIN_PROD: vault.freijstack.com
+  BACKEND_DOMAIN_PROD: vault-api.freijstack.com
+  FRONTEND_DOMAIN_STAGING: vault-staging.freijstack.com
+  BACKEND_DOMAIN_STAGING: vault-api-staging.freijstack.com
 
 jobs:
   validate:
@@ -56,8 +76,10 @@ jobs:
           echo "::add-mask::${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
 
       - name: 🌐 Check DNS Configuration
+        env:
+          TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
         run: |
-          echo "🔍 Checking DNS records..."
+          echo "🔍 Checking DNS records for $TARGET_ENV..."
           
           # Fonction pour vérifier un DNS
           check_dns() {
@@ -73,15 +95,14 @@ jobs:
             fi
           }
           
-          ENV=${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
           FAILED=0
           
-          if [ "$ENV" = "production" ]; then
-            check_dns "vault.freijstack.com" || FAILED=1
-            check_dns "vault-api.freijstack.com" || FAILED=1
+          if [ "$TARGET_ENV" = "production" ]; then
+            check_dns "${{ env.FRONTEND_DOMAIN_PROD }}" || FAILED=1
+            check_dns "${{ env.BACKEND_DOMAIN_PROD }}" || FAILED=1
           else
-            check_dns "vault-staging.freijstack.com" || FAILED=1
-            check_dns "vault-api-staging.freijstack.com" || FAILED=1
+            check_dns "${{ env.FRONTEND_DOMAIN_STAGING }}" || FAILED=1
+            check_dns "${{ env.BACKEND_DOMAIN_STAGING }}" || FAILED=1
           fi
           
           if [ $FAILED -eq 1 ]; then
@@ -95,30 +116,29 @@ jobs:
           echo "✅ All DNS records configured correctly"
 
       - name: 🔍 Check VPS Prerequisites
+        env:
+          TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
         run: |
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'VPS_CHECK'
+          # Déterminer les chemins selon l'environnement
+          if [ "$TARGET_ENV" = "production" ]; then
+            ENV_FILE="${{ env.VPS_ENV_FILE_PROD }}"
+          else
+            ENV_FILE="${{ env.VPS_ENV_FILE_STAGING }}"
+          fi
+          
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << VPS_CHECK
             set -e
             echo "🔍 Checking VPS configuration..."
-            
-            # Déterminer l'environnement
-            if [ "${{ github.ref }}" = "refs/heads/master" ]; then
-              ENV="production"
-              ENV_FILE="/srv/www/securevault/.env"
-            else
-              ENV="staging"
-              ENV_FILE="/srv/www/securevault-staging/.env"
-            fi
-            
-            echo "Environment: $ENV"
+            echo "Environment: $TARGET_ENV"
             echo ""
 
             # Mask sensitive values from existing .env if present
             echo "🔒 Applying runtime masks for sensitive values..."
             if [ -f "$ENV_FILE" ]; then
-              for VAR in DB_PASSWORD JWT_SECRET ENCRYPTION_KEY; do
-                VALUE=$(grep -E "^$VAR=" "$ENV_FILE" | cut -d'=' -f2-)
-                if [ -n "$VALUE" ]; then
-                  echo "::add-mask::$VALUE"
+              for VAR in DB_PASSWORD JWT_SECRET ENCRYPTION_KEY POSTGRES_PASSWORD; do
+                VALUE=\$(grep -E "^\$VAR=" "$ENV_FILE" | cut -d'=' -f2-)
+                if [ -n "\$VALUE" ]; then
+                  echo "::add-mask::\$VALUE"
                 fi
               done
             fi
@@ -425,29 +445,27 @@ jobs:
         run: |
           echo "🎯 Cleanup for environment: $TARGET_ENV"
           
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'CLEANUP_SCRIPT'
+          # Déterminer les conteneurs et réseaux selon l'environnement
+          if [ "$TARGET_ENV" = "production" ]; then
+            CONTAINERS="${{ env.CONTAINER_PREFIX_PROD }}-backend ${{ env.CONTAINER_PREFIX_PROD }}-frontend ${{ env.CONTAINER_PREFIX_PROD }}-postgres"
+            NETWORKS="${{ env.NETWORK_PROD }}"
+          else
+            CONTAINERS="${{ env.CONTAINER_PREFIX_STAGING }}-backend ${{ env.CONTAINER_PREFIX_STAGING }}-frontend ${{ env.CONTAINER_PREFIX_STAGING }}-postgres"
+            NETWORKS="${{ env.NETWORK_STAGING }}"
+          fi
+          
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << CLEANUP_SCRIPT
             set -e
             echo "🧹 Cleaning up old containers and networks..."
-            
-            # Déterminer l'environnement
-            TARGET_ENV="${{ env.TARGET_ENV }}"
-            if [ "$TARGET_ENV" = "production" ]; then
-              CONTAINERS="securevault-backend securevault-frontend securevault-postgres"
-              NETWORKS="securevault_network"
-              echo "Environment: production"
-            else
-              CONTAINERS="securevault-staging-backend securevault-staging-frontend securevault-staging-postgres"
-              NETWORKS="securevault_staging_network"
-              echo "Environment: staging"
-            fi
+            echo "Environment: $TARGET_ENV"
             
             # Arrêter et supprimer les conteneurs s'ils existent
             for CONTAINER in $CONTAINERS; do
-              if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER}$"; then
-                echo "Removing container: $CONTAINER"
-                docker rm -f "$CONTAINER" || true
+              if docker ps -a --format '{{.Names}}' | grep -q "^\${CONTAINER}\$"; then
+                echo "Removing container: \$CONTAINER"
+                docker rm -f "\$CONTAINER" || true
               else
-                echo "Container $CONTAINER does not exist, skipping"
+                echo "Container \$CONTAINER does not exist, skipping"
               fi
             done
             
@@ -492,29 +510,27 @@ jobs:
 
       - name: 🚀 Deploy to VPS
         env:
-          # Pour workflow_dispatch: utiliser inputs.environment, sinon détecter depuis la branche
           TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
         run: |
           echo "🎯 Target environment: $TARGET_ENV"
           
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'DEPLOY_SCRIPT'
+          # Déterminer les chemins selon l'environnement
+          if [ "$TARGET_ENV" = "production" ]; then
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
+            ENV_FILE="${{ env.VPS_ENV_FILE_PROD }}"
+            BRANCH="${{ env.BRANCH_PROD }}"
+            ENV_TEMPLATE=".env.production"
+          else
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
+            ENV_FILE="${{ env.VPS_ENV_FILE_STAGING }}"
+            BRANCH="${{ env.BRANCH_STAGING }}"
+            ENV_TEMPLATE=".env.staging"
+          fi
+          
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << DEPLOY_SCRIPT
             set -e
             echo "🚀 Starting SecureVault deployment..."
-            
-            # Déterminer l'environnement depuis la variable passée
-            TARGET_ENV="${{ env.TARGET_ENV }}"
             echo "🎯 Deploying to: $TARGET_ENV"
-            
-            if [ "$TARGET_ENV" = "production" ]; then
-              DEPLOY_DIR="/srv/www/securevault"
-              ENV_FILE="/srv/www/securevault/.env"
-              BRANCH="master"
-            else
-              DEPLOY_DIR="/srv/www/securevault-staging"
-              ENV_FILE="/srv/www/securevault-staging/.env"
-              BRANCH="develop"
-            fi
-            
             echo "📂 Deploy directory: $DEPLOY_DIR"
             
             # Cloner/mettre à jour le repo
@@ -531,52 +547,45 @@ jobs:
                 echo "🧹 Cleaning existing directory..."
                 rm -rf "$DEPLOY_DIR"
               fi
-              git clone -b $BRANCH https://github.com/${{ github.repository }}.git "$DEPLOY_DIR"
-              cd "$DEPLOY_DIR"
+              git clone -b \$BRANCH https://github.com/${{ github.repository }}.git "\$DEPLOY_DIR"
+              cd "\$DEPLOY_DIR"
             fi
             
             # Naviguer vers securevault
-            cd saas/securevault
+            cd ${{ env.PROJECT_PATH }}
             
-            # Copier le fichier .env correspondant à l'environnement
-            if [ "$TARGET_ENV" = "production" ]; then
-              ENV_TEMPLATE=".env.production"
-            else
-              ENV_TEMPLATE=".env.staging"
-            fi
-            
-            echo "📝 Using environment template: $ENV_TEMPLATE"
+            echo "📝 Using environment template: \$ENV_TEMPLATE"
             
             # Vérifier que le template existe dans le repo
-            if [ ! -f "$ENV_TEMPLATE" ]; then
-              echo "❌ ERREUR: Template $ENV_TEMPLATE manquant dans le repo"
+            if [ ! -f "\$ENV_TEMPLATE" ]; then
+              echo "❌ ERREUR: Template \$ENV_TEMPLATE manquant dans le repo"
               exit 1
             fi
             
             # Copier le template comme base
-            cp "$ENV_TEMPLATE" .env
+            cp "\$ENV_TEMPLATE" .env
             
             # Vérifier et injecter les secrets depuis le fichier .env du VPS
-            if [ -f "$ENV_FILE" ]; then
+            if [ -f "\$ENV_FILE" ]; then
               echo "🔐 Injecting secrets from VPS .env file..."
               
               # Extraire les secrets critiques du fichier VPS
               for SECRET_VAR in POSTGRES_PASSWORD JWT_SECRET ENCRYPTION_KEY; do
-                SECRET_VALUE=$(grep -E "^${SECRET_VAR}=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- || echo "")
-                if [ -n "$SECRET_VALUE" ]; then
+                SECRET_VALUE=\$(grep -E "^\${SECRET_VAR}=" "\$ENV_FILE" 2>/dev/null | cut -d'=' -f2- || echo "")
+                if [ -n "\$SECRET_VALUE" ]; then
                   # Remplacer dans le fichier .env local
-                  if grep -q "^${SECRET_VAR}=" .env; then
-                    sed -i "s|^${SECRET_VAR}=.*|${SECRET_VAR}=${SECRET_VALUE}|" .env
+                  if grep -q "^\${SECRET_VAR}=" .env; then
+                    sed -i "s|^\${SECRET_VAR}=.*|\${SECRET_VAR}=\${SECRET_VALUE}|" .env
                   else
-                    echo "${SECRET_VAR}=${SECRET_VALUE}" >> .env
+                    echo "\${SECRET_VAR}=\${SECRET_VALUE}" >> .env
                   fi
-                  echo "  ✅ Injected ${SECRET_VAR}"
+                  echo "  ✅ Injected \${SECRET_VAR}"
                 else
-                  echo "  ⚠️ ${SECRET_VAR} not found in VPS .env, using template default"
+                  echo "  ⚠️ \${SECRET_VAR} not found in VPS .env, using template default"
                 fi
               done
             else
-              echo "⚠️ VPS .env file not found at $ENV_FILE"
+              echo "⚠️ VPS .env file not found at \$ENV_FILE"
               echo "   Using template defaults (INSECURE for production!)"
             fi
             
@@ -669,15 +678,18 @@ jobs:
           echo "::add-mask::${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
 
       - name: 🔍 Inspect Traefik for routers
+        env:
+          TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
         run: |
           echo "🔍 Checking Traefik routers in logs..."
-          ENVIRONMENT=${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
-          if [ "$ENVIRONMENT" = "production" ]; then
-            FRONTEND_DOM="vault.freijstack.com"
-            API_DOM="vault-api.freijstack.com"
+          
+          # Déterminer les domaines selon l'environnement
+          if [ "$TARGET_ENV" = "production" ]; then
+            FRONTEND_DOM="${{ env.FRONTEND_DOMAIN_PROD }}"
+            API_DOM="${{ env.BACKEND_DOMAIN_PROD }}"
           else
-            FRONTEND_DOM="vault-staging.freijstack.com"
-            API_DOM="vault-api-staging.freijstack.com"
+            FRONTEND_DOM="${{ env.FRONTEND_DOMAIN_STAGING }}"
+            API_DOM="${{ env.BACKEND_DOMAIN_STAGING }}"
           fi
 
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << VERIFY_LOGS
@@ -694,14 +706,16 @@ jobs:
           VERIFY_LOGS
 
       - name: 🌐 HTTP checks (TLS & routes)
+        env:
+          TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
         run: |
-          ENVIRONMENT=${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
-          if [ "$ENVIRONMENT" = "production" ]; then
-            FRONTEND_DOM="vault.freijstack.com"
-            API_DOM="vault-api.freijstack.com"
+          # Déterminer les domaines selon l'environnement
+          if [ "$TARGET_ENV" = "production" ]; then
+            FRONTEND_DOM="${{ env.FRONTEND_DOMAIN_PROD }}"
+            API_DOM="${{ env.BACKEND_DOMAIN_PROD }}"
           else
-            FRONTEND_DOM="vault-staging.freijstack.com"
-            API_DOM="vault-api-staging.freijstack.com"
+            FRONTEND_DOM="${{ env.FRONTEND_DOMAIN_STAGING }}"
+            API_DOM="${{ env.BACKEND_DOMAIN_STAGING }}"
           fi
 
           check_url() {
