@@ -172,9 +172,9 @@ nano /srv/www/securevault-staging/.env
 **Contenu minimal .env** (secrets critiques à ajouter):
 ```env
 # Générer avec: openssl rand -hex 32
-POSTGRES_PASSWORD=votre_mot_de_passe_db_securise
-JWT_SECRET=votre_secret_jwt_32_bytes_hex
-ENCRYPTION_KEY=votre_cle_chiffrement_32_bytes_hex
+POSTGRES_PASSWORD=<YOUR_SECURE_DB_PASSWORD_HERE>
+JWT_SECRET=<YOUR_JWT_SECRET_32_BYTES_HEX_HERE>
+ENCRYPTION_KEY=<YOUR_ENCRYPTION_KEY_32_BYTES_HEX_HERE>
 ```
 
 ⚠️ **IMPORTANT**: 
