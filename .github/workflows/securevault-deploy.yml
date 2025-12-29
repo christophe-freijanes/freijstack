@@ -626,21 +626,21 @@ jobs:
           TRAEFIK_RESTART
 
       - name: Verify Deployment
+        env:
+          TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
         run: |
-          ENVIRONMENT=${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
-          
-          echo "🔍 Vérification du déploiement sur $ENVIRONMENT..."
+          echo "🔍 Vérification du déploiement sur $TARGET_ENV..."
           sleep 5
           
+          # Déterminer le répertoire selon l'environnement
+          if [ "$TARGET_ENV" = "production" ]; then
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
+          else
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
+          fi
+          
           # Vérifier que les conteneurs tournent sur le VPS
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
-            'if [ "${{ github.ref }}" = "refs/heads/master" ]; then
-              cd /srv/www/securevault/saas/securevault
-              docker compose -f docker-compose.yml ps
-            else
-              cd /srv/www/securevault-staging/saas/securevault
-              docker compose -f docker-compose.staging.yml ps
-            fi'
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "cd $DEPLOY_DIR/${{ env.PROJECT_PATH }} && docker compose ps"
           
           echo "✅ Déploiement vérifié avec succès!"
 
