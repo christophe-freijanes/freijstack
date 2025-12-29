@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci && npm cache clean --force
+RUN npm install --prefer-offline --no-audit && npm cache clean --force
 
 # Copy source code
 COPY public/ ./public/
