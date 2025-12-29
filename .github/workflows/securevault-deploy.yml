@@ -43,6 +43,13 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
 
+      - name: 🔒 Mask sensitive values
+        run: |
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_HOST }}"
+          # Mask combined user@host too
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+
       - name: 🌐 Check DNS Configuration
         run: |
           echo "🔍 Checking DNS records..."
@@ -99,6 +106,17 @@ jobs:
             
             echo "Environment: $ENV"
             echo ""
+
+            # Mask sensitive values from existing .env if present
+            echo "🔒 Applying runtime masks for sensitive values..."
+            if [ -f "$ENV_FILE" ]; then
+              for VAR in DB_PASSWORD JWT_SECRET ENCRYPTION_KEY; do
+                VALUE=$(grep -E "^$VAR=" "$ENV_FILE" | cut -d'=' -f2-)
+                if [ -n "$VALUE" ]; then
+                  echo "::add-mask::$VALUE"
+                fi
+              done
+            fi
             
             # 1. Vérifier Docker
             echo "1️⃣ Checking Docker..."
@@ -389,6 +407,12 @@ jobs:
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 🔒 Mask sensitive values
+        run: |
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_HOST }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
 
       - name: 🚀 Deploy to VPS
         run: |
