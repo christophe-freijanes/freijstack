@@ -1,4 +1,4 @@
-name: CI/CD - Portfolio
+name: 📄 Portfolio
 
 on:
   push:
