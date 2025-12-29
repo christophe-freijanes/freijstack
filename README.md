@@ -1,6 +1,8 @@
 # FreijStack 🚀
 
 [![CI/CD Pipeline](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/main.yml?branch=master&label=CI%2FCD&style=flat-square)](https://github.com/christophe-freijanes/freijstack/actions)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/main.yml?branch=master&label=CodeQL&style=flat-square&logo=github)](https://github.com/christophe-freijanes/freijstack/security/code-scanning)
+[![Security Policy](https://img.shields.io/badge/security-policy-blue?style=flat-square&logo=shield)](https://github.com/christophe-freijanes/freijstack/security/policy)
 [![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square)](LICENSE)
 [![Top Language](https://img.shields.io/github/languages/top/christophe-freijanes/freijstack?style=flat-square&color=yellow)](https://github.com/christophe-freijanes/freijstack)
 [![Code Size](https://img.shields.io/github/languages/code-size/christophe-freijanes/freijstack?style=flat-square&color=green)](https://github.com/christophe-freijanes/freijstack)
