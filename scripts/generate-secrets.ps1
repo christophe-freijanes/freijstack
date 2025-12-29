@@ -106,8 +106,8 @@ REACT_APP_API_URL=https://vault-staging-api.freijstack.com
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
 Write-Host "1. Copy the secrets above"
-Write-Host "2. SSH to Hostinger:"
-Write-Host "   ssh user@your-hostinger-ip"
+Write-Host "2. SSH to VPS:"
+Write-Host "   ssh user@your-vps-ip"
 Write-Host "3. Create .env files:"
 Write-Host "   mkdir -p /srv/www/securevault/saas/securevault"
 Write-Host "   nano /srv/www/securevault/saas/securevault/.env"

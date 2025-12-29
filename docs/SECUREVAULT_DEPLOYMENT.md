@@ -22,9 +22,9 @@ Vérifiez que vous avez déjà configuré dans **Settings → Secrets and variab
 
 | Secret | Utilisé pour |
 |--------|-------------|
-| `HOSTINGER_SSH_HOST` | IP/domaine du VPS |
-| `HOSTINGER_SSH_USER` | Utilisateur SSH |
-| `HOSTINGER_SSH_KEY` | Clé SSH pour déploiement |
+| `VPS_SSH_HOST` | IP/domaine du VPS |
+| `VPS_SSH_USER` | Utilisateur SSH |
+| `VPS_SSH_KEY` | Clé SSH pour déploiement |
 
 ✅ **Aucun nouveau secret à créer** - la pipeline utilise les secrets existants!
 
@@ -87,7 +87,7 @@ openssl rand -base64 32
 
 ---
 
-## 🚀 Structure du Déploiement sur Hostinger
+## 🚀 Structure du Déploiement sur VPS
 
 La pipeline crée automatiquement (même que le portfolio):
 
@@ -101,7 +101,7 @@ La pipeline crée automatiquement (même que le portfolio):
     └── saas/securevault/.env    # ⚠️ À créer!
 ```
 
-**Même infrastructure Hostinger** que le portfolio ✅
+**Même infrastructure VPS** que le portfolio ✅
 
 ---
 
