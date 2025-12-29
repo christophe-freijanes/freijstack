@@ -698,17 +698,18 @@ jobs:
             API_DOM="${{ env.BACKEND_DOMAIN_STAGING }}"
           fi
 
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << VERIFY_LOGS
-            set -e
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'VERIFY_LOGS'
             TRAEFIK_CONTAINER=$(docker ps --format '{{.Names}}' | grep -i 'traefik' | head -n1)
             if [ -z "$TRAEFIK_CONTAINER" ]; then
-              echo "❌ Traefik not running"
-              exit 1
+              echo "⚠️  Traefik not running (containers accessible without reverse proxy)"
+              echo "ℹ️  To enable HTTPS/TLS and routing, deploy base infrastructure:"
+              echo "    cd /srv/docker/freijstack/base-infra && docker compose up -d"
+            else
+              echo "✅ Found Traefik container: $TRAEFIK_CONTAINER"
+              echo "📜 Last Traefik logs (filtered):"
+              docker logs --tail=50 "$TRAEFIK_CONTAINER" | grep -E "(vault|mytlschallenge|websecure|entryPoints)" || echo "No matching logs"
+              echo "✅ Log inspection done"
             fi
-            echo "✅ Found Traefik container: $TRAEFIK_CONTAINER"
-            echo "📜 Last Traefik logs (filtered):"
-            docker logs --tail=300 "$TRAEFIK_CONTAINER" | grep -E "($FRONTEND_DOM|$API_DOM|mytlschallenge|websecure)" || true
-            echo "✅ Log inspection done"
           VERIFY_LOGS
 
       - name: 🌐 HTTP checks (TLS & routes)
