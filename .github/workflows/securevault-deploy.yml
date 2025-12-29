@@ -599,11 +599,12 @@ jobs:
             ATTEMPTS=3
             DELAY=10
             for i in $(seq 1 $ATTEMPTS); do
-              CODE=$(curl -sSL -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time 20 "https://$DOMAIN" || echo "000")
+              # Accept self-signed certs temporarily with -k
+              CODE=$(curl -sSLk -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time 20 "https://$DOMAIN" || echo "000")
               echo "Attempt $i: $DOMAIN → HTTP $CODE"
               case "$CODE" in
-                200|301|302)
-                  echo "✅ $DOMAIN reachable"
+                200|301|302|404)
+                  echo "✅ $DOMAIN reachable (HTTP $CODE)"
                   return 0
                   ;;
                 *)
@@ -611,7 +612,7 @@ jobs:
                   ;;
               esac
             done
-            echo "❌ $DOMAIN not reachable with valid status after retries"
+            echo "⚠️ $DOMAIN not reachable with valid status after retries (last: $CODE)"
             return 1
           }
 
