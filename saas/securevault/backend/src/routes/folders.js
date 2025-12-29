@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/database');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 
 // ============================================================================
 // FOLDER MANAGEMENT (RoboForm-style organization)
 // ============================================================================
 
 // Get all folders for user (tree structure)
-router.get('/', authenticateToken, async (req, res) => {
+router.get('/', authenticate, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT * FROM folder_tree WHERE user_id = $1 ORDER BY path`,
@@ -22,7 +22,7 @@ router.get('/', authenticateToken, async (req, res) => {
 });
 
 // Get single folder with stats
-router.get('/:id', authenticateToken, async (req, res) => {
+router.get('/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -66,7 +66,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
 });
 
 // Create new folder
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', authenticate, async (req, res) => {
   try {
     const { name, parent_id, icon, color } = req.body;
     
@@ -92,7 +92,7 @@ router.post('/', authenticateToken, async (req, res) => {
 });
 
 // Update folder
-router.put('/:id', authenticateToken, async (req, res) => {
+router.put('/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
     const { name, icon, color, is_favorite, parent_id } = req.body;
@@ -122,7 +122,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
 });
 
 // Delete folder
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
     const { move_secrets_to } = req.query;
@@ -171,7 +171,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 });
 
 // Move folder to another parent
-router.post('/:id/move', authenticateToken, async (req, res) => {
+router.post('/:id/move', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
     const { parent_id } = req.body;
@@ -214,7 +214,7 @@ router.post('/:id/move', authenticateToken, async (req, res) => {
 });
 
 // Get all secrets in folder (with subfolders)
-router.get('/:id/secrets', authenticateToken, async (req, res) => {
+router.get('/:id/secrets', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
     const { include_subfolders } = req.query;
@@ -260,3 +260,4 @@ router.get('/:id/secrets', authenticateToken, async (req, res) => {
 });
 
 module.exports = router;
+

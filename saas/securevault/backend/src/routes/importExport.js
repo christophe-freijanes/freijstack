@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/database');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 const { encrypt, decrypt } = require('../utils/crypto');
 const multer = require('multer');
 const csv = require('csv-parser');
@@ -17,7 +17,7 @@ const upload = multer({
 // ============================================================================
 
 // Import from CSV
-router.post('/csv', authenticateToken, upload.single('file'), async (req, res) => {
+router.post('/csv', authenticate, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -121,7 +121,7 @@ router.post('/csv', authenticateToken, upload.single('file'), async (req, res) =
 });
 
 // Import from JSON (generic format)
-router.post('/json', authenticateToken, upload.single('file'), async (req, res) => {
+router.post('/json', authenticate, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -220,7 +220,7 @@ router.post('/json', authenticateToken, upload.single('file'), async (req, res) 
 });
 
 // Import from KeePass XML (simplified)
-router.post('/keepass', authenticateToken, upload.single('file'), async (req, res) => {
+router.post('/keepass', authenticate, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -337,7 +337,7 @@ router.post('/keepass', authenticateToken, upload.single('file'), async (req, re
 // ============================================================================
 
 // Export to CSV
-router.get('/csv', authenticateToken, async (req, res) => {
+router.get('/csv', authenticate, async (req, res) => {
   try {
     const { folder_id, include_subfolders } = req.query;
     
@@ -412,7 +412,7 @@ router.get('/csv', authenticateToken, async (req, res) => {
 });
 
 // Export to JSON
-router.get('/json', authenticateToken, async (req, res) => {
+router.get('/json', authenticate, async (req, res) => {
   try {
     const { folder_id, include_subfolders } = req.query;
     
@@ -494,7 +494,7 @@ router.get('/json', authenticateToken, async (req, res) => {
 });
 
 // Export to KeePass CSV format
-router.get('/keepass-csv', authenticateToken, async (req, res) => {
+router.get('/keepass-csv', authenticate, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT 
@@ -543,7 +543,7 @@ router.get('/keepass-csv', authenticateToken, async (req, res) => {
 });
 
 // Get import history
-router.get('/history', authenticateToken, async (req, res) => {
+router.get('/history', authenticate, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT * FROM imports 
@@ -561,3 +561,4 @@ router.get('/history', authenticateToken, async (req, res) => {
 });
 
 module.exports = router;
+
