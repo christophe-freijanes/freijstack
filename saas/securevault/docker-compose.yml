@@ -44,6 +44,7 @@ services:
       - web
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=web"
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-backend.rule=Host(`${API_DOMAIN:-vault-api.freijstack.com}`)"
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-backend.entrypoints=websecure"
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-backend.tls=true"
@@ -74,6 +75,7 @@ services:
       - web
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=web"
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-frontend.rule=Host(`${FRONTEND_DOMAIN:-vault.freijstack.com}`)"
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-frontend.entrypoints=websecure"
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-frontend.tls=true"
