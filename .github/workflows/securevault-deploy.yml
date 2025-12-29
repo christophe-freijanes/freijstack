@@ -196,11 +196,11 @@ jobs:
             # 5. Vérifier le fichier .env
             echo ""
             echo "5️⃣ Checking .env file..."
-            if [ -f "$ENV_FILE" ]; then
-              echo "✅ .env file exists at $ENV_FILE"
+            if [ -f "\$ENV_FILE" ]; then
+              echo "✅ .env file exists at \$ENV_FILE"
               
               # Déterminer les domaines selon l'environnement
-              if [ "$ENV" = "production" ]; then
+              if [ "$TARGET_ENV" = "production" ]; then
                 API_DOM="vault-api.freijstack.com"
                 FRONTEND_DOM="vault.freijstack.com"
                 FRONTEND_U="https://vault.freijstack.com"
@@ -243,13 +243,13 @@ jobs:
               # Vérifier les secrets critiques
               MISSING_SECRETS=""
               for VAR in DB_PASSWORD JWT_SECRET ENCRYPTION_KEY; do
-                if ! grep -q "^${VAR}=" "$ENV_FILE"; then
-                  MISSING_SECRETS="$MISSING_SECRETS $VAR"
+                if ! grep -q "^\${VAR}=" "\$ENV_FILE"; then
+                  MISSING_SECRETS="\$MISSING_SECRETS \$VAR"
                 fi
               done
               
-              if [ -n "$MISSING_SECRETS" ]; then
-                echo "❌ Missing critical secrets:$MISSING_SECRETS"
+              if [ -n "\$MISSING_SECRETS" ]; then
+                echo "❌ Missing critical secrets:\$MISSING_SECRETS"
                 echo "   These must be added manually for security reasons"
                 exit 1
               fi
@@ -263,15 +263,15 @@ jobs:
               echo "⚠️ .env file not found, creating it with generated secrets..."
               
               # Créer le répertoire si nécessaire
-              mkdir -p $(dirname "$ENV_FILE")
+              mkdir -p \$(dirname "\$ENV_FILE")
               
               # Générer les secrets
-              DB_PASS=$(openssl rand -hex 32)
-              JWT_SEC=$(openssl rand -hex 32)
-              ENC_KEY=$(openssl rand -hex 32)
+              DB_PASS=\$(openssl rand -hex 32)
+              JWT_SEC=\$(openssl rand -hex 32)
+              ENC_KEY=\$(openssl rand -hex 32)
               
               # Déterminer les domaines selon l'environnement
-              if [ "$ENV" = "production" ]; then
+              if [ "$TARGET_ENV" = "production" ]; then
                 API_DOM="vault-api.freijstack.com"
                 FRONTEND_DOM="vault.freijstack.com"
                 FRONTEND_U="https://vault.freijstack.com"
@@ -285,38 +285,38 @@ jobs:
               
               # Créer le fichier .env avec les secrets générés
               {
-                echo "# Auto-generated secrets for SecureVault $ENV"
-                echo "# Generated on $(date)"
+                echo "# Auto-generated secrets for SecureVault $TARGET_ENV"
+                echo "# Generated on \$(date)"
                 echo ""
-                echo "COMPOSE_PROJECT_NAME=$PROJECT_NAME"
+                echo "COMPOSE_PROJECT_NAME=\\$PROJECT_NAME"
                 echo ""
-                echo "DB_PASSWORD=$DB_PASS"
-                echo "JWT_SECRET=$JWT_SEC"
-                echo "ENCRYPTION_KEY=$ENC_KEY"
+                echo "DB_PASSWORD=\$DB_PASS"
+                echo "JWT_SECRET=\$JWT_SEC"
+                echo "ENCRYPTION_KEY=\$ENC_KEY"
                 echo ""
                 echo "# Domain configuration"
-                echo "API_DOMAIN=$API_DOM"
-                echo "FRONTEND_DOMAIN=$FRONTEND_DOM"
-                echo "FRONTEND_URL=$FRONTEND_U"
-              } > "$ENV_FILE"
+                echo "API_DOMAIN=\$API_DOM"
+                echo "FRONTEND_DOMAIN=\$FRONTEND_DOM"
+                echo "FRONTEND_URL=\$FRONTEND_U"
+              } > "\\$ENV_FILE"
               
-              chmod 600 "$ENV_FILE"
-              echo "✅ .env file created at $ENV_FILE with secure permissions"
+              chmod 600 "\$ENV_FILE"
+              echo "✅ .env file created at \$ENV_FILE with secure permissions"
             fi
             
             # 6. Vérifier les permissions
             echo ""
             echo "6️⃣ Checking .env permissions..."
-            PERMS=$(stat -c %a "$ENV_FILE" 2>/dev/null || stat -f %A "$ENV_FILE")
-            if [ "$PERMS" = "600" ]; then
+            PERMS=\$(stat -c %a "\$ENV_FILE" 2>/dev/null || stat -f %A "\$ENV_FILE")
+            if [ "\\$PERMS" = "600" ]; then
               echo "✅ .env permissions are secure (600)"
             else
-              echo "⚠️ .env permissions are $PERMS (should be 600)"
-              echo "   Fix with: chmod 600 $ENV_FILE"
+              echo "⚠️ .env permissions are \$PERMS (should be 600)"
+              echo "   Fix with: chmod 600 \$ENV_FILE"
             fi
             
             echo ""
-            echo "✅ All VPS prerequisites validated for $ENV!"
+            echo "✅ All VPS prerequisites validated for $TARGET_ENV!"
           VPS_CHECK
 
       - name: ✅ Validation Summary
