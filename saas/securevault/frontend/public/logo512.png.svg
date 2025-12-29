@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="grad512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow512">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  
+  <circle cx="256" cy="256" r="245" fill="url(#grad512)" filter="url(#shadow512)"/>
+  
+  <!-- Lock body -->
+  <rect x="179" y="230" width="154" height="128" rx="15" fill="#ffffff" opacity="0.95"/>
+  
+  <!-- Lock shackle -->
+  <path d="M 205 230 L 205 179 Q 205 128, 256 128 Q 307 128, 307 179 L 307 230" 
+        stroke="#ffffff" 
+        stroke-width="20" 
+        fill="none" 
+        stroke-linecap="round"
+        opacity="0.95"/>
+  
+  <!-- Keyhole -->
+  <circle cx="256" cy="280" r="16" fill="#1e3a8a"/>
+  <rect x="248" y="280" width="16" height="43" rx="5" fill="#1e3a8a"/>
+  
+  <!-- Shine effect -->
+  <ellipse cx="214" cy="192" rx="42" ry="64" fill="#ffffff" opacity="0.12" transform="rotate(-30 214 192)"/>
+  
+  <!-- Inner detail circles -->
+  <circle cx="256" cy="294" r="8" fill="#ffffff" opacity="0.2"/>
+  <circle cx="256" cy="294" r="5" fill="#ffffff" opacity="0.15"/>
+</svg>

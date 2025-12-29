@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+  <defs>
+    <linearGradient id="grad180" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow180">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Rounded square background (iOS style) -->
+  <rect x="10" y="10" width="160" height="160" rx="35" fill="url(#grad180)" filter="url(#shadow180)"/>
+  
+  <!-- Lock body -->
+  <rect x="63" y="81" width="54" height="45" rx="5" fill="#ffffff" opacity="0.95"/>
+  
+  <!-- Lock shackle -->
+  <path d="M 72 81 L 72 63 Q 72 45, 90 45 Q 108 45, 108 63 L 108 81" 
+        stroke="#ffffff" 
+        stroke-width="7" 
+        fill="none" 
+        stroke-linecap="round"
+        opacity="0.95"/>
+  
+  <!-- Keyhole -->
+  <circle cx="90" cy="99" r="5.5" fill="#1e3a8a"/>
+  <rect x="87.25" y="99" width="5.5" height="15" rx="2" fill="#1e3a8a"/>
+  
+  <!-- Shine effect -->
+  <ellipse cx="75" cy="68" rx="15" ry="22" fill="#ffffff" opacity="0.12" transform="rotate(-30 75 68)"/>
+</svg>
