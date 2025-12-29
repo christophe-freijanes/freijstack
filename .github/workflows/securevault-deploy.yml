@@ -121,12 +121,15 @@ jobs:
         run: |
           # Déterminer les chemins selon l'environnement
           if [ "$TARGET_ENV" = "production" ]; then
-            ENV_FILE="${{ env.VPS_ENV_FILE_PROD }}"
+            VPS_ENV_FILE="${{ env.VPS_ENV_FILE_PROD }}"
           else
-            ENV_FILE="${{ env.VPS_ENV_FILE_STAGING }}"
+            VPS_ENV_FILE="${{ env.VPS_ENV_FILE_STAGING }}"
           fi
           
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << VPS_CHECK
+          # Passer les variables au script SSH via export
+          export TARGET_ENV VPS_ENV_FILE
+          
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "TARGET_ENV='$TARGET_ENV' VPS_ENV_FILE='$VPS_ENV_FILE'" bash << 'VPS_CHECK'
             set -e
             echo "🔍 Checking VPS configuration..."
             echo "Environment: $TARGET_ENV"
@@ -134,11 +137,11 @@ jobs:
 
             # Mask sensitive values from existing .env if present
             echo "🔒 Applying runtime masks for sensitive values..."
-            if [ -f "$ENV_FILE" ]; then
+            if [ -f "$VPS_ENV_FILE" ]; then
               for VAR in DB_PASSWORD JWT_SECRET ENCRYPTION_KEY POSTGRES_PASSWORD; do
-                VALUE=\$(grep -E "^\$VAR=" "$ENV_FILE" | cut -d'=' -f2-)
-                if [ -n "\$VALUE" ]; then
-                  echo "::add-mask::\$VALUE"
+                VALUE=$(grep -E "^${VAR}=" "$VPS_ENV_FILE" | cut -d'=' -f2-)
+                if [ -n "$VALUE" ]; then
+                  echo "::add-mask::$VALUE"
                 fi
               done
             fi
@@ -196,8 +199,8 @@ jobs:
             # 5. Vérifier le fichier .env
             echo ""
             echo "5️⃣ Checking .env file..."
-            if [ -f "\$ENV_FILE" ]; then
-              echo "✅ .env file exists at \$ENV_FILE"
+            if [ -f "$VPS_ENV_FILE" ]; then
+              echo "✅ .env file exists at $VPS_ENV_FILE"
               
               # Déterminer les domaines selon l'environnement
               if [ "$TARGET_ENV" = "production" ]; then
@@ -215,27 +218,27 @@ jobs:
               # Vérifier et ajouter les variables manquantes
               UPDATED=0
               
-              if ! grep -q "^COMPOSE_PROJECT_NAME=" "$ENV_FILE"; then
-                echo "" >> "$ENV_FILE"
-                echo "COMPOSE_PROJECT_NAME=$PROJECT_NAME" >> "$ENV_FILE"
+              if ! grep -q "^COMPOSE_PROJECT_NAME=" "$VPS_ENV_FILE"; then
+                echo "" >> "$VPS_ENV_FILE"
+                echo "COMPOSE_PROJECT_NAME=$PROJECT_NAME" >> "$VPS_ENV_FILE"
                 echo "⚠️ Added missing COMPOSE_PROJECT_NAME=$PROJECT_NAME"
                 UPDATED=1
               fi
               
-              if ! grep -q "^API_DOMAIN=" "$ENV_FILE"; then
-                echo "API_DOMAIN=$API_DOM" >> "$ENV_FILE"
+              if ! grep -q "^API_DOMAIN=" "$VPS_ENV_FILE"; then
+                echo "API_DOMAIN=$API_DOM" >> "$VPS_ENV_FILE"
                 echo "⚠️ Added missing API_DOMAIN=$API_DOM"
                 UPDATED=1
               fi
               
-              if ! grep -q "^FRONTEND_DOMAIN=" "$ENV_FILE"; then
-                echo "FRONTEND_DOMAIN=$FRONTEND_DOM" >> "$ENV_FILE"
+              if ! grep -q "^FRONTEND_DOMAIN=" "$VPS_ENV_FILE"; then
+                echo "FRONTEND_DOMAIN=$FRONTEND_DOM" >> "$VPS_ENV_FILE"
                 echo "⚠️ Added missing FRONTEND_DOMAIN=$FRONTEND_DOM"
                 UPDATED=1
               fi
               
-              if ! grep -q "^FRONTEND_URL=" "$ENV_FILE"; then
-                echo "FRONTEND_URL=$FRONTEND_U" >> "$ENV_FILE"
+              if ! grep -q "^FRONTEND_URL=" "$VPS_ENV_FILE"; then
+                echo "FRONTEND_URL=$FRONTEND_U" >> "$VPS_ENV_FILE"
                 echo "⚠️ Added missing FRONTEND_URL=$FRONTEND_U"
                 UPDATED=1
               fi
@@ -243,7 +246,7 @@ jobs:
               # Vérifier les secrets critiques
               MISSING_SECRETS=""
               for VAR in DB_PASSWORD JWT_SECRET ENCRYPTION_KEY; do
-                if ! grep -q "^\${VAR}=" "\$ENV_FILE"; then
+                if ! grep -q "^\${VAR}=" "\$VPS_ENV_FILE"; then
                   MISSING_SECRETS="\$MISSING_SECRETS \$VAR"
                 fi
               done
@@ -263,7 +266,7 @@ jobs:
               echo "⚠️ .env file not found, creating it with generated secrets..."
               
               # Créer le répertoire si nécessaire
-              mkdir -p \$(dirname "\$ENV_FILE")
+              mkdir -p \$(dirname "\$VPS_ENV_FILE")
               
               # Générer les secrets
               DB_PASS=\$(openssl rand -hex 32)
@@ -298,21 +301,21 @@ jobs:
                 echo "API_DOMAIN=\$API_DOM"
                 echo "FRONTEND_DOMAIN=\$FRONTEND_DOM"
                 echo "FRONTEND_URL=\$FRONTEND_U"
-              } > "\\$ENV_FILE"
+              } > "\\$VPS_ENV_FILE"
               
-              chmod 600 "\$ENV_FILE"
-              echo "✅ .env file created at \$ENV_FILE with secure permissions"
+              chmod 600 "\$VPS_ENV_FILE"
+              echo "✅ .env file created at \$VPS_ENV_FILE with secure permissions"
             fi
             
             # 6. Vérifier les permissions
             echo ""
             echo "6️⃣ Checking .env permissions..."
-            PERMS=\$(stat -c %a "\$ENV_FILE" 2>/dev/null || stat -f %A "\$ENV_FILE")
+            PERMS=\$(stat -c %a "\$VPS_ENV_FILE" 2>/dev/null || stat -f %A "\$VPS_ENV_FILE")
             if [ "\\$PERMS" = "600" ]; then
               echo "✅ .env permissions are secure (600)"
             else
               echo "⚠️ .env permissions are \$PERMS (should be 600)"
-              echo "   Fix with: chmod 600 \$ENV_FILE"
+              echo "   Fix with: chmod 600 \$VPS_ENV_FILE"
             fi
             
             echo ""
@@ -566,12 +569,12 @@ jobs:
             cp "\$ENV_TEMPLATE" .env
             
             # Vérifier et injecter les secrets depuis le fichier .env du VPS
-            if [ -f "\$ENV_FILE" ]; then
+            if [ -f "\$VPS_ENV_FILE" ]; then
               echo "🔐 Injecting secrets from VPS .env file..."
               
               # Extraire les secrets critiques du fichier VPS
               for SECRET_VAR in POSTGRES_PASSWORD JWT_SECRET ENCRYPTION_KEY; do
-                SECRET_VALUE=\$(grep -E "^\${SECRET_VAR}=" "\$ENV_FILE" 2>/dev/null | cut -d'=' -f2- || echo "")
+                SECRET_VALUE=\$(grep -E "^\${SECRET_VAR}=" "\$VPS_ENV_FILE" 2>/dev/null | cut -d'=' -f2- || echo "")
                 if [ -n "\$SECRET_VALUE" ]; then
                   # Remplacer dans le fichier .env local
                   if grep -q "^\${SECRET_VAR}=" .env; then
@@ -585,7 +588,7 @@ jobs:
                 fi
               done
             else
-              echo "⚠️ VPS .env file not found at \$ENV_FILE"
+              echo "⚠️ VPS .env file not found at \$VPS_ENV_FILE"
               echo "   Using template defaults (INSECURE for production!)"
             fi
             
@@ -794,3 +797,4 @@ jobs:
           echo "Tests: ${{ needs.test.result }}"
           echo "Deploy: ${{ needs.deploy.result }}"
           echo "Post-verify: ${{ needs.post-verify.result }}"
+
