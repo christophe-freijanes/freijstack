@@ -15,15 +15,15 @@ Index de la documentation technique du projet.
 |----------|-------------|------|
 | 🏠 **README Principal** | Vue d'ensemble du projet | [../README.md](../README.md) |
 | 🔗 **Integration Guide** | Guide d'intégration infrastructure + apps | [../base-infra/BASE_INTEGRATION.md](../base-infra/BASE_INTEGRATION.md) |
-| 🏗️ **Infrastructure Base** | Docker Compose, Traefik | [../base-infra/README.md](../base-infra/README.md) |
+| 🏗️ **Infrastructure Base** | Docker Compose, Traefik, n8n, portfolio | [../base-infra/README.md](../base-infra/README.md) |
+| 🐳 **Structure Docker** | Organisation containers, volumes, réseaux | [DOCKER_STRUCTURE.md](DOCKER_STRUCTURE.md) |
 | 🏗️ **Architecture Technique** | Infrastructure, CI/CD, déploiement | [architecture.md](architecture.md) |
 | 📌 **Guide Déploiement** | VPS, Docker, Traefik, rollback | [DEPLOYMENT.md](DEPLOYMENT.md) |
 | 🔐 **SecureVault Deployment** | Pipeline CI/CD dédiée, configuration VPS | [SECUREVAULT_DEPLOYMENT.md](SECUREVAULT_DEPLOYMENT.md) |
 | 🔄 **Secret Rotation** | Automatisation rotation des secrets | [SECRET_ROTATION.md](SECRET_ROTATION.md) |
 | 🔍 **Guide Troubleshooting** | Diagnostic et résolution des problèmes | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) |
 | 📊 **Guide Monitoring** | Prometheus, Grafana, Loki, alertes | [MONITORING.md](MONITORING.md) |
-| 🌐 **Portfolio** | Documentation du portfolio web | [../saas/portfolio/README.md](../saas/portfolio/README.md) |
-| 🚀 **SaaS Apps** | Applications démonstratives (Portfolio, SecureVault, n8n) | [../saas/README.md](../saas/README.md) |
+| 🚀 **SecureVault** | Gestionnaire de secrets chiffrés | [../saas/securevault/README.md](../saas/securevault/README.md) |
 | ✅ **Pull Request Template** | Checklist de validation PR | [../.github/pull_request_template.md](../.github/pull_request_template.md) |
 
 ---
@@ -33,6 +33,7 @@ Index de la documentation technique du projet.
 ### Infrastructure & DevOps
 - [Integration Guide](../base-infra/BASE_INTEGRATION.md) - Guide complet d'intégration (Traefik + apps)
 - [Infrastructure Base](../base-infra/README.md) - Docker Compose, Traefik
+- [Structure Docker](DOCKER_STRUCTURE.md) - Organisation containers, volumes, réseaux
 - [Architecture Technique Complète](architecture.md) - Infrastructure, CI/CD, sécurité, monitoring
 - [Guide Déploiement VPS](DEPLOYMENT.md) - Installation complète (Ubuntu, Docker, Traefik, DNS)
 - [SecureVault CI/CD Pipeline](SECUREVAULT_DEPLOYMENT.md) - Déploiement automatisé SecureVault
@@ -42,15 +43,10 @@ Index de la documentation technique du projet.
 - [Pipeline CI/CD](architecture.md#4-pipeline-cicd)
 - [GitHub Actions Workflows](../.github/workflows/README.md) - Documentation complète des workflows
 
-### Frontend & Web
-- [Portfolio README](../saas/portfolio/README.md) - Features, i18n, responsive design
-- [Thèmes Saisonniers](../saas/portfolio/README.md) - Système de changement automatique
-- [Accessibilité WCAG](../saas/portfolio/README.md) - Conformité AA
-
 ### Backend & SaaS Applications
-- [SaaS Apps Overview](../saas/README.md) - Vue d'ensemble applications SaaS
 - [SecureVault Manager](../saas/securevault/README.md) - Gestionnaire de secrets chiffrés
-- [n8n Automation](../saas/n8n/README.md) - Plateforme d'automation et workflows
+- [SecureVault CI/CD Pipeline](SECUREVAULT_DEPLOYMENT.md) - Déploiement automatisé SecureVault
+- [Secret Rotation Automation](SECRET_ROTATION.md) - Rotation automatisée des secrets
 
 ### Sécurité
 - [Mesures de Sécurité](architecture.md#5-sécurité--conformité) - Politiques et conformité
@@ -69,62 +65,24 @@ Index de la documentation technique du projet.
 
 ### Déployer Localement
 
-#### Infrastructure Base (Traefik)
+#### Infrastructure Base (Traefik + n8n + Portfolio)
 
 ```bash
 # Cloner le repo
 git clone https://github.com/christophe-freijanes/freijstack.git
 cd freijstack
 
-# Déployer infrastructure (Traefik seulement)
+# Déployer infrastructure complète
 cd base-infra
 docker network create web
 docker volume create traefik_data
+docker volume create n8n_data
 cp .env.example .env
 nano .env  # Configurer DOMAIN_NAME
-docker-compose up -d
-```
-
-#### Applications (Portfolio, n8n, SecureVault)
-
-```bash
-# Portfolio
-cd saas/portfolio
-cp .env.example .env
-docker-compose up -d
-
-# n8n
-cd ../n8n
-cp .env.example .env
-docker-compose up -d
-
-# SecureVault
-cd ../securevault
-./init-db.sh
-docker-compose up -d
+docker compose up -d
 ```
 
 **Voir**: [BASE_INTEGRATION.md](../base-infra/BASE_INTEGRATION.md)
-docker-compose up -d
-```
-
-#### Portfolio
-
-```bash
-# Ouvrir le portfolio
-cd saas/portfolio
-
-# Option 1 : Fichier HTML direct
-# Double-cliquez sur index.html
-
-# Option 2 : Serveur local Python
-python -m http.server 8000
-# Accès: http://localhost:8000
-
-# Option 3 : Serveur local Node
-npx http-server .
-# Accès: http://localhost:8080
-```
 
 #### SecureVault
 

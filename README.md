@@ -1,6 +1,5 @@
 # FreijStack 🚀
 
-[![Portfolio](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/portfolio-deploy.yml?branch=master&label=Portfolio&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/portfolio-deploy.yml)
 [![SecureVault](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/securevault-deploy.yml?branch=master&label=SecureVault&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/securevault-deploy.yml)
 [![Infrastructure](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/infrastructure-deploy.yml?branch=master&label=Infrastructure&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/infrastructure-deploy.yml)
 [![Security Scans](https://img.shields.io/badge/security-scans-brightgreen?style=flat-square&logo=githubsecurity)](https://github.com/christophe-freijanes/freijstack/security/code-scanning)
@@ -41,28 +40,22 @@ Portfolio et projets cloud & sécurité de **Christophe FREIJANES** - Senior Clo
 freijstack/
 ├── .github/
 │   ├── workflows/           # CI/CD pipelines (GitHub Actions)
-│   │   ├── main.yml         # Deploy portfolio + n8n
-│   │   └── securevault-deploy.yml  # Deploy SecureVault
+│   │   ├── infrastructure-deploy.yml  # Traefik, n8n, portfolio
+│   │   ├── securevault-deploy.yml     # SecureVault (staging auto, prod manual)
+│   │   ├── rotate-secrets.yml         # Rotation secrets SecureVault
+│   │   └── pr-title-automation.yml    # Auto-format PR titles
 │   └── pull_request_template.md
-├── base-infra/              # 🏗️ Infrastructure partagée
-│   ├── docker-compose.yml   # Traefik (reverse proxy)
+├── base-infra/              # 🏗️ Infrastructure centralisée
+│   ├── docker-compose.yml   # Traefik + n8n + portfolio (prod + staging)
 │   ├── BASE_INTEGRATION.md  # Guide d'intégration
 │   └── README.md            # Documentation infrastructure
-├── saas/                    # 🚀 Applications SaaS démos
+├── saas/                    # 🚀 Applications SaaS
 │   ├── README.md            # Vue d'ensemble SaaS
-│   ├── portfolio/           # 🌐 Portfolio web professionnel
-│   │   ├── docker-compose.yml
-│   │   ├── index.html
-│   │   ├── style.css
-│   │   ├── script.js
-│   │   └── README.md
-│   ├── securevault/         # 🔐 Gestionnaire de secrets chiffrés
-│   │   ├── backend/
-│   │   ├── frontend/
-│   │   ├── docker-compose.yml
-│   │   └── README.md
-│   └── n8n/                 # 🤖 Plateforme d'automation
-│       ├── docker-compose.yml
+│   └── securevault/         # 🔐 Gestionnaire de secrets chiffrés
+│       ├── backend/
+│       ├── frontend/
+│       ├── docker-compose.yml          # Production
+│       ├── docker-compose.staging.yml  # Staging
 │       └── README.md
 ├── docs/
 │   ├── architecture.md      # Documentation technique
@@ -82,6 +75,11 @@ freijstack/
 ### Infrastructure (`/base-infra`)
 
 Infrastructure centralisée gérée par Docker Compose:
+- **Traefik v2.10**: Reverse proxy + TLS automatique (Let's Encrypt)
+- **n8n**: Plateforme d'automation no-code (automation.freijstack.com)
+- **Portfolio**: Site web statique nginx (production + staging)
+
+Tous les services partagent le réseau Docker `web` pour la communication avec Traefik.
 - **Traefik** - Reverse proxy avec TLS automatique (Let's Encrypt)
 - **nginx** - Serveur web statique pour Portfolio (volumes `/srv/www`)
 - **n8n** - Plateforme d'automation et workflows

@@ -1,14 +1,20 @@
 # 🔒 SECURITY - Fichiers Sensibles
 
 ## Environment Variables & Secrets
+# Ignore actual .env files with secrets
 .env
 .env.local
 .env.*.local
 .env.production.local
 .env.development.local
 .env.test.local
-*.env
+
+# Allow templates (no secrets, versioned)
 !.env.example
+!.env.production
+!.env.staging
+!**/.env.production
+!**/.env.staging
 
 ## SSH Keys & Certificates
 *.pem

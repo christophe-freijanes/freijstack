@@ -513,8 +513,7 @@ services:
 ### 6.3. Alerting (Configuration future)
 
 **Canaux d'alerte** (via Grafana/Prometheus Alertmanager):
-- 📧 Email: contact@freijstack.com
-- 💬 Discord/Slack webhook
+-  Discord/Slack webhook
 - 📱 SMS (critical only)
 
 **Alertes critiques**:
@@ -583,7 +582,6 @@ services:
 ## 8. Contacts & Support
 
 **Mainteneur**: Christophe FREIJANES  
-**Email**: contact@freijstack.com  
 **GitHub**: https://github.com/christophe-freijanes/freijstack  
 **LinkedIn**: https://www.linkedin.com/in/christophe-freijanes
 

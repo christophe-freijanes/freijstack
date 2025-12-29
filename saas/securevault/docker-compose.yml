@@ -1,93 +1,102 @@
-version: '3.8'
-
 services:
+  # ============================================
   # PostgreSQL Database
+  # ============================================
   postgres:
     image: postgres:15-alpine
-    container_name: ${COMPOSE_PROJECT_NAME:-securevault}-postgres
+    container_name: ${CONTAINER_PREFIX}-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: securevault
-      POSTGRES_USER: securevault
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme_in_production}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - securevault-network
+      - app-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U securevault"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  # ============================================
   # Backend API
+  # ============================================
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: ${COMPOSE_PROJECT_NAME:-securevault}-backend
+    container_name: ${CONTAINER_PREFIX}-backend
     restart: unless-stopped
     environment:
-      NODE_ENV: production
-      PORT: 3001
-      DATABASE_URL: postgresql://securevault:${DB_PASSWORD:-changeme_in_production}@postgres:5432/securevault
-      JWT_SECRET: ${JWT_SECRET:-generate_with_openssl_rand_hex_32}
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-generate_with_openssl_rand_hex_32}
-      BCRYPT_ROUNDS: 12
-      JWT_EXPIRES_IN: 24h
-      FRONTEND_URL: ${FRONTEND_URL:-https://vault.freijstack.com}
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${PORT}
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      BCRYPT_ROUNDS: ${BCRYPT_ROUNDS}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      FRONTEND_URL: ${FRONTEND_URL}
     depends_on:
       postgres:
         condition: service_healthy
     networks:
-      - securevault-network
-      - web
+      - app-network
+      - external-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-backend.rule=Host(`${API_DOMAIN:-vault-api.freijstack.com}`)"
-      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-backend.entrypoints=websecure"
-      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-backend.tls=true"
-      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-backend.tls.certresolver=mytlschallenge"
-      - "traefik.http.services.${COMPOSE_PROJECT_NAME:-securevault}-backend.loadbalancer.server.port=3001"
+      - "traefik.docker.network=${EXTERNAL_NETWORK}"
+      - "traefik.http.routers.${BACKEND_ROUTER}.rule=Host(`${BACKEND_HOST}`)"
+      - "traefik.http.routers.${BACKEND_ROUTER}.entrypoints=websecure"
+      - "traefik.http.routers.${BACKEND_ROUTER}.tls=true"
+      - "traefik.http.routers.${BACKEND_ROUTER}.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.${BACKEND_ROUTER}.loadbalancer.server.port=${PORT}"
       # CORS headers
-      - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-securevault}-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS"
-      - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-securevault}-cors.headers.accesscontrolalloworiginlist=${FRONTEND_URL:-https://vault.freijstack.com}"
-      - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-securevault}-cors.headers.accesscontrolallowcredentials=true"
-      - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-securevault}-cors.headers.accesscontrolallowheaders=Content-Type,Authorization"
-      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-backend.middlewares=${COMPOSE_PROJECT_NAME:-securevault}-cors"
+      - "traefik.http.middlewares.${CORS_MIDDLEWARE}.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS"
+      - "traefik.http.middlewares.${CORS_MIDDLEWARE}.headers.accesscontrolalloworiginlist=${FRONTEND_URL}"
+      - "traefik.http.middlewares.${CORS_MIDDLEWARE}.headers.accesscontrolallowcredentials=true"
+      - "traefik.http.middlewares.${CORS_MIDDLEWARE}.headers.accesscontrolallowheaders=Content-Type,Authorization"
+      - "traefik.http.routers.${BACKEND_ROUTER}.middlewares=${CORS_MIDDLEWARE}"
     command: sh -c "sleep 5 && node src/server.js"
 
+  # ============================================
   # Frontend
+  # ============================================
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - REACT_APP_API_URL=https://${API_DOMAIN:-vault-api.freijstack.com}/api
-    container_name: ${COMPOSE_PROJECT_NAME:-securevault}-frontend
+        - REACT_APP_API_URL=${API_URL}
+    container_name: ${CONTAINER_PREFIX}-frontend
     restart: unless-stopped
-    environment:
-      REACT_APP_API_URL: https://${API_DOMAIN:-vault-api.freijstack.com}/api
-    depends_on:
-      - backend
     networks:
-      - web
+      - external-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-frontend.rule=Host(`${FRONTEND_DOMAIN:-vault.freijstack.com}`)"
-      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-frontend.entrypoints=websecure"
-      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-frontend.tls=true"
-      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-frontend.tls.certresolver=mytlschallenge"
-      - "traefik.http.services.${COMPOSE_PROJECT_NAME:-securevault}-frontend.loadbalancer.server.port=80"
+      - "traefik.docker.network=${EXTERNAL_NETWORK}"
+      - "traefik.http.routers.${FRONTEND_ROUTER}.rule=Host(`${FRONTEND_HOST}`)"
+      - "traefik.http.routers.${FRONTEND_ROUTER}.entrypoints=websecure"
+      - "traefik.http.routers.${FRONTEND_ROUTER}.tls=true"
+      - "traefik.http.routers.${FRONTEND_ROUTER}.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.${FRONTEND_ROUTER}.loadbalancer.server.port=80"
 
+# ============================================
+# VOLUMES
+# ============================================
 volumes:
   postgres_data:
-    name: ${COMPOSE_PROJECT_NAME:-securevault}_postgres_data
+    name: ${POSTGRES_VOLUME}
     driver: local
 
+# ============================================
+# NETWORKS
+# ============================================
 networks:
-  securevault-network:
-    name: ${COMPOSE_PROJECT_NAME:-securevault}_network
+  app-network:
+    name: ${APP_NETWORK}
     driver: bridge
-  web:
+  external-network:
+    name: ${EXTERNAL_NETWORK}
     external: true

@@ -21,6 +21,35 @@ on:
         options:
           - staging
           - production
+      deploy_traefik:
+        description: 'Déployer Traefik'
+        required: false
+        default: true
+        type: boolean
+      deploy_portfolio:
+        description: 'Déployer Portfolio'
+        required: false
+        default: true
+        type: boolean
+      deploy_n8n:
+        description: 'Déployer n8n'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  # Paths
+  PROJECT_PATH: base-infra
+  COMPOSE_FILE: docker-compose.yml
+  # Branches
+  BRANCH_PROD: master
+  BRANCH_STAGING: develop
+  # Docker images
+  TRAEFIK_IMAGE: traefik:latest
+  # Services
+  SERVICE_TRAEFIK: traefik
+  SERVICE_PORTFOLIO: portfolio
+  SERVICE_N8N: n8n
 
 jobs:
   validate:
@@ -32,17 +61,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🐳 Validate Docker Compose syntax
-        working-directory: base-infra
+        working-directory: ${{ env.PROJECT_PATH }}
         run: |
-          docker-compose config > /dev/null
-          echo "✅ docker-compose.yml syntax valid"
+          docker compose config > /dev/null
+          echo "✅ ${{ env.COMPOSE_FILE }} syntax valid"
 
       - name: 🔐 Check environment variables (safe)
-        working-directory: base-infra
+        working-directory: ${{ env.PROJECT_PATH }}
         run: |
           echo "Checking Docker Compose env placeholders (without values)..."
           # Validate compose parses and contains no obvious unresolved variables
-          docker-compose config > /dev/null
+          docker compose config > /dev/null
           echo "✅ Docker Compose configuration validated without exposing env values"
 
   security:
@@ -58,7 +87,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
-          scan-ref: 'base-infra'
+          scan-ref: ${{ env.PROJECT_PATH }}
           format: 'sarif'
           output: 'trivy-base-infra.sarif'
         continue-on-error: true
@@ -83,18 +112,18 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🐳 Build Docker images (test)
-        working-directory: base-infra
+        working-directory: ${{ env.PROJECT_PATH }}
         run: |
-          echo "Testing Traefik image..."
-          docker pull traefik:latest
+          echo "Testing ${{ env.SERVICE_TRAEFIK }} image..."
+          docker pull ${{ env.TRAEFIK_IMAGE }}
           
-          echo "✅ Traefik image validated"
+          echo "✅ ${{ env.SERVICE_TRAEFIK }} image validated"
 
       - name: 🧪 Validate docker-compose services
-        working-directory: base-infra
+        working-directory: ${{ env.PROJECT_PATH }}
         run: |
-          docker-compose config --format json | jq .services | grep -E "traefik"
-          echo "✅ Traefik service configured"
+          docker compose config --format json | jq .services | grep -E "${{ env.SERVICE_TRAEFIK }}"
+          echo "✅ ${{ env.SERVICE_TRAEFIK }} service configured"
 
   notify:
     name: 📢 Notify
@@ -107,7 +136,7 @@ jobs:
         if: success()
         run: |
           echo "✅ Infrastructure validation passed!"
-          echo "Environment: ${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}"
+          echo "Environment: ${{ github.ref == format('refs/heads/{0}', env.BRANCH_PROD) && 'production' || 'staging' }}"
           echo "Branch: ${{ github.ref_name }}"
 
       - name: ❌ Validation Failed

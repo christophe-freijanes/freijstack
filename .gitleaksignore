@@ -3,3 +3,6 @@
 # False positives: Google Drive public file ID in portfolio (not a secret)
 portfolio/index.html:generic-api-key:28
 portfolio/index.html:generic-api-key:535
+
+# SecureVault README: JWT examples in documentation (not sensitive)
+saas/securevault/README.md:generic-api-key

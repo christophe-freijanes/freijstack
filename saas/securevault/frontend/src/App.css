@@ -5,19 +5,22 @@
 }
 
 :root {
-  --primary-color: #3b82f6;
+  /* Vault Dark Theme - Coffre-fort sécurisé */
+  --primary-color: #3b9eff;
   --primary-dark: #2563eb;
-  --secondary-color: #64748b;
+  --secondary-color: #8b92a0;
   --success-color: #10b981;
   --danger-color: #ef4444;
   --warning-color: #f59e0b;
-  --bg-color: #f8fafc;
-  --card-bg: #ffffff;
-  --text-color: #1e293b;
-  --text-muted: #64748b;
-  --border-color: #e2e8f0;
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --bg-color: #0f1419;
+  --card-bg: #1a1f2e;
+  --text-color: #e2e8f0;
+  --text-muted: #94a3b8;
+  --border-color: #2d3748;
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.5);
+  --input-bg: #151923;
+  --hover-bg: #252a38;
 }
 
 body {
@@ -37,7 +40,22 @@ body {
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #0f1419 0%, #1a2332 50%, #151923 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(59, 158, 255, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.03) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 .auth-box {
@@ -98,18 +116,21 @@ body {
   border-radius: 8px;
   font-size: 1rem;
   transition: all 0.2s;
+  background-color: var(--input-bg);
+  color: var(--text-color);
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(59, 158, 255, 0.15);
+  background-color: var(--card-bg);
 }
 
 .error-message {
-  background-color: #fee2e2;
-  color: var(--danger-color);
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
   padding: 0.75rem 1rem;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -180,7 +201,7 @@ body {
 }
 
 .dashboard-header {
-  background: white;
+  background: var(--card-bg);
   border-bottom: 1px solid var(--border-color);
   padding: 1.5rem 2rem;
   box-shadow: var(--shadow);
@@ -217,7 +238,7 @@ body {
 }
 
 .dashboard-tabs {
-  background: white;
+  background: var(--card-bg);
   border-bottom: 1px solid var(--border-color);
   padding: 0 2rem;
   display: flex;
@@ -282,6 +303,8 @@ body {
 .secret-card:hover {
   box-shadow: var(--shadow-lg);
   transform: translateY(-2px);
+  border-color: rgba(59, 158, 255, 0.3);
+  background: var(--hover-bg);
 }
 
 .secret-header {
@@ -371,7 +394,8 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -387,7 +411,8 @@ body {
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+  border: 1px solid var(--border-color);
 }
 
 .modal h2 {
@@ -450,18 +475,18 @@ body {
 }
 
 .audit-action.login-success {
-  background-color: #d1fae5;
-  color: var(--success-color);
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
 }
 
 .audit-action.secret-created {
-  background-color: #dbeafe;
-  color: var(--primary-color);
+  background-color: rgba(59, 158, 255, 0.15);
+  color: #93c5fd;
 }
 
 .audit-action.secret-deleted {
-  background-color: #fee2e2;
-  color: var(--danger-color);
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
 }
 
 /* Loading */
