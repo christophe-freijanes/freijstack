@@ -310,4 +310,4 @@ Tous droits réservés © 2025 Christophe FREIJANES
 
 ---
 
-**Dernière mise à jour**: Décembre 2025
+![Dernière mise à jour](https://img.shields.io/github/last-commit/christophe-freijanes/freijstack?label=Derni%C3%A8re%20mise%20%C3%A0%20jour&style=flat-square&color=blue)
