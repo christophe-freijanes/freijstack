@@ -1,0 +1,7 @@
+# Require PR review by code owners (with branch protection enabled)
+* @christophe-freijanes
+
+# Folder-specific ownership (customize as needed)
+docs/ @christophe-freijanes
+portfolio/ @christophe-freijanes
+saas/ @christophe-freijanes

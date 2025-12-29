@@ -1,0 +1,77 @@
+##############################
+# OS & Editor junk
+##############################
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+.idea/
+.vscode/
+*.code-workspace
+
+##############################
+# Node.js
+##############################
+node_modules/
+.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+##############################
+# Build & caches
+##############################
+dist/
+build/
+out/
+.cache/
+cache/
+tmp/
+temp/
+
+##############################
+# Coverage & reports
+##############################
+coverage/
+.nyc_output/
+
+##############################
+# Environment & secrets
+##############################
+.env
+.env.*
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+*.pfx
+*.ppk
+id_rsa
+id_ed25519
+
+##############################
+# Docker & Compose (local overrides)
+##############################
+docker-compose.override.yml
+
+##############################
+# Backups & temporary artifacts
+##############################
+*.backup/
+*.backup.*
+portfolio*.backup*/
+
+##############################
+# Logs
+##############################
+logs/
+*.log
+
+##############################
+# Minified assets
+# Note: keep *.min.css and *.min.js tracked when needed
+# (do NOT ignore) since production may reference them.
+##############################

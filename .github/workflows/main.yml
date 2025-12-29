@@ -72,8 +72,8 @@ jobs:
 
       - name: Minify CSS
         run: |
-          npm install -g csso-cli
-          csso portfolio/style.css -o portfolio/style.min.css
+          npm install -g csso-cli@3.0.0
+          csso portfolio/style.css -o portfolio/style.min.css --restructure-off
           echo "✅ CSS minified"
 
       - name: Minify JavaScript

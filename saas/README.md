@@ -198,6 +198,12 @@ docker-compose --version
 # Lancer tous les services
 docker-compose up -d
 
+## 🔄 Maintenance
+- Ne jamais committer de secrets (`.env`, clés, certificats). Utiliser des variables d'environnement ou un vault.
+- À chaque modification dans `saas/` ou ses sous-dossiers, mettre à jour les README correspondants.
+- La CI inclut un contrôle de cohérence README et échouera si un dossier change sans mise à jour de son README.
+- Respecter les bonnes pratiques Docker (multi-stage, utilisateur non-root, images slim).
+
 # Vérifier status
 docker-compose ps
 docker-compose logs -f

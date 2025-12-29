@@ -196,6 +196,17 @@ git push origin develop
 - Path-based routing (no root exposure)
 - SSH key-based auth
 
+## 🛡️ Gouvernance & Sécurité du Dépôt
+
+- Visibilité: recommandé en mode Private (GitHub Settings → Danger Zone).
+- Branch protection: exiger revues des PR et statuts CI (CodeQL, Gitleaks, Trivy, README consistency).
+- Propriété de code: voir [CODEOWNERS](.github/CODEOWNERS) — les dossiers clés nécessitent approbation.
+- Signalement sécurité: lire [SECURITY.md](.github/SECURITY.md) pour divulgation responsable.
+- README consistency: le workflow [readme-consistency.yml](.github/workflows/readme-consistency.yml) exige la mise à jour des README quand des dossiers changent.
+- Secrets: ne jamais committer `.env`, clés et certificats (cf. `.gitignore`).
+- Assets minifiés: production charge `style.min.css` et `script.min.js` générés par CI.
+ - PR checklist: utiliser le modèle [.github/pull_request_template.md](.github/pull_request_template.md) pour valider README, sécurité, CI et accessibilité.
+
 ## 🌍 Langues
 
 Portfolio entièrement traduit:

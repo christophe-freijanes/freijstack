@@ -236,6 +236,17 @@ body.season-winter {
 ### Ajouter des animations
 Utiliser les animations existantes ou créer dans `style.css` → `@keyframes`
 
+### Mise à jour des assets minifiés
+En production, la page charge `style.min.css` et `script.min.js` générés par la CI. Lors de modifications CSS/JS:
+- Vérifier que la CI minifie sans erreurs (csso avec `--restructure-off`).
+- Confirmer que `index.html` référence bien les fichiers minifiés.
+
+### Mise à jour du README
+Ce dossier est soumis à un contrôle de cohérence README en CI. À chaque modification de structure ou de fonctionnalités, mettre à jour ce README pour refléter:
+- Changements de sections, routes ou assets
+- Nouveaux breakpoints responsifs
+- Modifications de sécurité (CSP, headers)
+
 ## 🐛 Dépannage
 
 ### Problème: Images ne chargent pas

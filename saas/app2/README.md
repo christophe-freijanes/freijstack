@@ -398,6 +398,11 @@ metadata:
   name: app2-secrets
 type: Opaque
 stringData:
+
+  ## 🛠️ Maintenance
+  - Ne jamais committer de secrets (`.env`, clés). Utiliser des variables d'environnement et des stores de secrets.
+  - Mettre à jour ce README à chaque changement d'events, d'API REST, de configuration ou de structure.
+  - La CI échoue si un dossier change sans mise à jour du README.
   JWT_SECRET: your-secret
   MONGODB_URL: mongodb://mongodb:27017/notifications
   RABBITMQ_URL: amqp://rabbitmq:5672

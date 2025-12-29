@@ -378,6 +378,11 @@ jobs:
         run: docker push myregistry/app1:latest
       - name: Deploy to K8s
         run: kubectl apply -f kubernetes/deployment.yaml
+
+## 🛠️ Maintenance
+- Ne pas committer de secrets (`.env`, clés). Utiliser des variables d'environnement localement et des secrets en CI.
+- Mettre à jour ce README si vous changez l'API, la configuration ou la structure.
+- La CI vérifie que les dossiers modifiés ont leur README mis à jour.
 ```
 
 ## 📁 Structure des Répertoires

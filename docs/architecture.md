@@ -1,114 +1,110 @@
 # Architecture du Projet freijstack.com
 
-Ce document décrit l'architecture globale du dépôt GitHub `freijstack` et les stratégies de déploiement pour le site personnel de Christophe FREIJANES, `freijstack.com`.
+Ce document décrit l'architecture actuelle de `freijstack` et le déploiement de `freijstack.com` (production et staging), basée sur un VPS Docker avec Traefik et Nginx.
 
-## 1. Vue d'ensemble du Dépôt GitHub
-
-Le dépôt `freijstack` est structuré pour héberger plusieurs composants distincts, tous liés au domaine `freijstack.com`. L'objectif est de démontrer les compétences en DevSecOps de Christophe FREIJANES à travers un portfolio, un blog, une landing page et des applications SaaS démonstratives.
+## 1. Structure du dépôt
 
 ```
 freijstack/
-├── .github/                     # Workflows GitHub Actions pour CI/CD
-├── blog/                        # Blog personnel (contenu statique)
-├── docs/                        # Documentation du projet (ce fichier, etc.)
-├── landing/                     # Page d'accueil principale (freijstack.com)
-├── package.json                 # Dépendances et scripts globaux (optionnel)
-├── portfolio/                   # Portfolio interactif
-│   ├── public/                  # Fichiers statiques (HTML, CSS, JS)
-│   └── src/                     # Code source (si framework JS)
-├── saas/                        # Répertoire pour les applications SaaS démonstratives
-│   ├── app1/                    # Première application SaaS (backend, frontend, Dockerfile)
-│   ├── app2/                    # Deuxième application SaaS (backend, frontend, Dockerfile)
-│   └── README.md                # Description des applications SaaS
-└── README.md                    # README principal du dépôt
+├── portfolio/              # Site portfolio (HTML/CSS/JS)
+├── saas/
+│   ├── app1/               # Démo SaaS 1 (Dockerfile + README)
+│   └── app2/               # Démo SaaS 2 (Dockerfile + README)
+├── docs/                   # Documentation (ce fichier, README)
+├── .github/workflows/      # CI/CD GitHub Actions
+├── package.json            # Dépendances/outils
+└── README.md               # README racine
 ```
 
-## 2. Composants Principaux
+## 2. Composants déployés
 
-### 2.1. Landing Page (`/landing`)
+### 2.1 Portfolio
+- Frontend statique: HTML5/CSS3/JS (vanilla)
+- Sécurité: Content Security Policy (CSP) dans `portfolio/index.html`
+- Responsif: breakpoints `≤768px`, `≤480px`, `≤360px`
+- Production: `https://portfolio.freijstack.com`
+- Staging: `https://portfolio-staging.freijstack.com`
 
-*   **Description** : La page d'accueil principale du site, servant de point d'entrée pour les visiteurs.
-*   **Technologies** : HTML, CSS, JavaScript (potentiellement un framework léger ou un générateur de site statique comme Astro ou Next.js si le besoin évolue).
-*   **Déploiement** : Fichiers statiques servis à la racine de `freijstack.com`.
+### 2.2 SaaS (démos)
+- `saas/app1` et `saas/app2`: images Docker et documentation
+- Non déployés publiquement par défaut; prêts pour conteneurisation et orchestration
 
-### 2.2. Portfolio (`/portfolio`)
+### 2.3 Automation (optionnel)
+- `automation.freijstack.com`: n8n (workflow automation) via Traefik (si activé sur VPS)
 
-*   **Description** : Présentation des projets, compétences et expériences professionnelles de Christophe, inspirée d'un design moderne avec une disposition visuelle améliorée et des animations.
-*   **Technologies** : HTML, CSS, JavaScript (avec la bibliothèque ScrollReveal.js pour les animations).
-*   **Nouvelle Disposition Visuelle** :
-    *   **Section Hero** : Maintien de l'image de fond avec effet parallax au mouvement de la souris.
-    *   **Section "À Propos"** : Disposition en deux colonnes asymétriques avec un texte de présentation détaillé à gauche et une photo de profil/faits marquants à droite.
-    *   **Section "Compétences"** : Grille dynamique avec des compétences regroupées par catégories (Cloud & Infra, Sécurité, CI/CD & Automatisation, Développement) pour une meilleure organisation.
-    *   **Section "Projets"** : Grille de type "Portfolio Visuel" (Masonry/Mosaïque) avec des images de projets de tailles variées et des superpositions d'informations au survol.
-    *   **Section "Démos SaaS"** : Présentation sous forme de cartes d'aperçu avec image, titre, description et lien direct.
-    *   **Section "Contact"** : Formulaire de contact intégré dans une carte, avec des liens sociaux proéminents et stylisés.
-*   **Déploiement** : Fichiers statiques servis sous `freijstack.com/portfolio`.
+## 3. Hébergement (VPS Docker)
 
-### 2.3. Blog (`/blog`)
+- OS: Ubuntu 22.04 LTS
+- Orchestration: Docker Compose v2
+- Reverse proxy: Traefik (TLS via Let's Encrypt/ACME)
+- Serveur statique: Nginx (2 conteneurs)
 
-*   **Description** : Contient les articles de blog existants de Christophe. La nature statique du blog facilite son intégration.
-*   **Technologies** : Fichiers HTML/Markdown générés (par exemple, par Jekyll, Hugo, Astro).
-*   **Déploiement** : Fichiers statiques servis sous `freijstack.com/blog`.
+### 3.1 Routage Traefik
+Routers et services déclarés pour chaque sous-domaine:
+- `portfolio.freijstack.com` → service `portfolio` (nginx)
+- `portfolio-staging.freijstack.com` → service `portfolio-staging` (nginx)
+- `automation.freijstack.com` → service `n8n` (optionnel)
 
-### 2.4. Applications SaaS (`/saas`)
+TLS: certificats gérés automatiquement par Traefik.
 
-*   **Description** : Répertoire pour héberger des applications logicielles en tant que service (SaaS) démonstratives. Chaque `appX` a sa propre structure pour simuler un microservice complet.
-*   **Structure de chaque App SaaS** :
-    *   `backend/` : Code source du backend (ex: Python/Flask, Node.js/Express, Go).
-    *   `frontend/` : Code source du frontend (ex: React, Vue, Angular).
-    *   `Dockerfile` : Pour la conteneurisation de l'application.
-*   **Technologies** : Variables par application (Python, Go, Node.js, Docker, Kubernetes).
-*   **Déploiement** : Les applications SaaS sont conçues pour être conteneurisées et peuvent être déployées indépendamment, potentiellement sous des sous-domaines (ex: `app1.freijstack.com`) ou des chemins spécifiques sur le serveur Hostinger.
+### 3.2 Nginx (conteneurs distincts)
+Deux conteneurs Nginx serveurs de fichiers statiques:
+- Montages:
+    - `/srv/www/portfolio` → `/usr/share/nginx/html`
+    - `/srv/www/portfolio-staging` → `/usr/share/nginx/html`
+- Traefik pointe directement vers ces services (pas de middleware de réécriture complexe).
 
-## 3. Stratégie de Déploiement CI/CD
+## 4. DNS & Réseau
 
-Le déploiement est automatisé via GitHub Actions vers l'hébergement Hostinger, en utilisant SSH pour la connexion et le transfert de fichiers.
+- DNS A records: sous-domaines pointant vers l'IP du VPS
+- TLS: Let's Encrypt via Traefik (ACME challenge)
+- Accès public: HTTPS obligatoire
 
-### 3.1. Outils de Déploiement
+## 5. CI/CD (GitHub Actions)
 
-*   **GitHub Actions** : Orchestre les workflows de CI/CD.
-*   **`appleboy/ssh-action`** : Action GitHub pour exécuter des commandes SSH et transférer des fichiers.
-*   **SSH** : Protocole sécurisé pour la connexion au serveur Hostinger.
-*   **`scp`** : Utilisé pour copier des fichiers sur le serveur distant.
+Workflows clés dans `.github/workflows/main.yml`:
+- Validation & sécurité:
+    - CodeQL (SAST), Gitleaks (secrets), Trivy (vulnérabilités)
+- Build & optimisation:
+    - Minification CSS via `csso` (flag `--restructure-off`)
+    - Minification JS via `terser`
+- Déploiement:
+    - `rsync` sécurisé vers le VPS: mise à jour de `/srv/www/portfolio*`
+    - Nettoyage des backups: conservation des 3 derniers, purge anciens
+    - Redémarrage Traefik post-déploy pour recharger routes/certs
+- Artefacts:
+    - `style.min.css` et `script.min.js` générés et utilisés en production
 
-### 3.2. Secrets GitHub Requis
+Branches cibles:
+- `develop` → staging (`portfolio-staging.freijstack.com`)
+- `master` → production (`portfolio.freijstack.com`)
 
-Les informations sensibles sont stockées en toute sécurité dans les secrets du dépôt GitHub :
+## 6. Sécurité & Gouvernance
 
-*   `SSH_PRIVATE_KEY` : Clé SSH privée pour l'authentification sur Hostinger.
-*   `SSH_HOST` : Adresse IP ou nom d'hôte du serveur Hostinger.
-*   `SSH_USERNAME` : Nom d'utilisateur SSH pour la connexion Hostinger.
-*   `DEPLOY_PATH_ROOT` : Chemin absolu sur le serveur Hostinger où les fichiers du site seront déployés (ex: `/home/uXXXXX/domains/freijstack.com/public_html`).
-*   `DOCKER_USERNAME` (pour SaaS) : Nom d'utilisateur pour le registre Docker (ex: Docker Hub).
-*   `DOCKER_PASSWORD` (pour SaaS) : Mot de passe/jeton pour le registre Docker.
+- CSP stricte dans le portfolio; pas de trackers externes
+- `.gitignore`: secrets et artefacts sensibles ignorés
+- README consistency workflow: exige mise à jour des README lors de modifications de dossiers
+- CODEOWNERS: revue PR requise (avec branch protection)
+- SECURITY.md: divulgation responsable et pratiques de durcissement
 
-### 3.3. Workflows GitHub Actions
+## 7. Flux de requête (schéma)
 
-*   **`.github/workflows/main.yml`** :
-    *   **Déclencheur** : `push` sur la branche `main`.
-    *   **Responsabilités** : Déploiement de la `landing page`, du `portfolio` (fichiers statiques de `portfolio/public`), et du `blog` (fichiers statiques de `blog/`).
-    *   **Étapes** : Checkout du code, puis pour chaque composant, connexion SSH pour créer/nettoyer le répertoire de destination et copier les fichiers.
+```
+Utilisateur → DNS → Traefik (TLS) → Router (Host) → Service Nginx → Fichiers statiques
+                                                                                     └→ n8n (automation) [optionnel]
+```
 
-*   **Workflows SaaS dédiés (conceptual)** :
-    *   **`.github/workflows/saas-app1-deploy.yml`** (exemple)
-    *   **Déclencheur** : `push` sur la branche `main` avec des modifications dans `saas/app1/**`.
-    *   **Responsabilités** : Construire l'image Docker de l'application SaaS, la pousser vers un registre (ex: Docker Hub), puis se connecter au serveur Hostinger pour déployer/redémarrer le conteneur (via `docker compose` ou `kubectl` si Kubernetes est configuré sur un VPS).
+## 8. Arborescence serveur (VPS)
 
-## 4. Hébergement et Serveur Web (Hostinger)
+```
+/srv/www/
+├── portfolio/            # Production (branch master)
+└── portfolio-staging/    # Staging (branch develop)
+```
 
-*   **Configuration DNS** : Le nom de domaine `freijstack.com` pointe vers l'adresse IP du serveur Hostinger.
-*   **Configuration du serveur web (Nginx/Apache)** : Sur un VPS Hostinger, Nginx ou Apache sera configuré pour :
-    *   Servir la `landing page` à la racine (`/`).
-    *   Servir le `portfolio` sous `/portfolio`.
-    *   Servir le `blog` sous `/blog`.
-    *   Gérer les applications `saas` soit via des sous-domaines (nécessitant une configuration DNS et Nginx/Apache) soit via des chemins spécifiques avec reverse proxy vers les conteneurs Docker.
+## 9. Notes de maintenance
 
-## 5. Considérations DevSecOps
-
-*   **Sécurité des Secrets** : Utilisation des secrets GitHub pour stocker les informations sensibles.
-*   **Automatisation** : CI/CD complet avec GitHub Actions pour réduire les erreurs manuelles et garantir des déploiements cohérents.
-*   **Conteneurisation (SaaS)** : Utilisation de Docker pour isoler les applications SaaS et faciliter la portabilité.
-*   **Infrastructure as Code (potentiel futur)** : Possibilité d'intégrer Terraform ou Ansible pour la gestion de l'infrastructure sur un VPS Hostinger.
-*   **Qualité du code** : Intégration future de linters, tests unitaires et scans de sécurité (SAST/DAST/SCA) dans les workflows GitHub Actions.
-
-Cette architecture fournit une base solide pour un site personnel évolutif et professionnel, mettant en valeur des pratiques modernes de développement et d'opérations sécurisées.
+- Toujours vérifier les pages sur mobile (≤480px et ≤360px)
+- Éviter les réécritures Traefik complexes; préférer services dédiés
+- Ne jamais committer de secrets (`.env`, clés, certificats)
+- Utiliser le PR template pour valider README, sécurité, CI et accessibilité.
