@@ -3,10 +3,18 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
+const session = require('express-session');
+const passport = require('passport');
 
 const authRoutes = require('./routes/auth');
 const secretsRoutes = require('./routes/secrets');
+const secretsEnhancedRoutes = require('./routes/secretsEnhanced');
+const foldersRoutes = require('./routes/folders');
+const importExportRoutes = require('./routes/importExport');
 const auditRoutes = require('./routes/audit');
+const auditAdminRoutes = require('./routes/auditAdmin');
+const samlRoutes = require('./routes/saml');
+const { isSamlEnabled } = require('./config/saml');
 const { errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -44,6 +52,26 @@ app.use('/api/', limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Session Configuration (required for SAML)
+if (isSamlEnabled()) {
+  app.use(session({
+    secret: process.env.SESSION_SECRET || process.env.JWT_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+  }));
+
+  // Initialize Passport
+  app.use(passport.initialize());
+  app.use(passport.session());
+  
+  console.log('✅ SSO/SAML authentication enabled');
+}
+
 // Health Check
 app.get('/health', (req, res) => {
   res.status(200).json({ 
@@ -57,7 +85,16 @@ app.get('/health', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/secrets', secretsRoutes);
+app.use('/api/secrets-pro', secretsEnhancedRoutes);
+app.use('/api/folders', foldersRoutes);
+app.use('/api/import-export', importExportRoutes);
 app.use('/api/audit', auditRoutes);
+app.use('/api/audit/admin', auditAdminRoutes);
+
+// SSO/SAML Routes (if enabled)
+if (isSamlEnabled()) {
+  app.use('/api/auth/saml', samlRoutes);
+}
 
 // 404 Handler
 app.use((req, res) => {
@@ -70,6 +107,7 @@ app.use((req, res) => {
 // Error Handler (must be last)
 app.use(errorHandler);
 
+  console.log(`🔑 SSO/SAML: ${isSamlEnabled() ? 'Enabled' : 'Disabled'}`);
 // Start Server
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🔐 SecureVault Backend running on port ${PORT}`);
