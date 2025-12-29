@@ -127,9 +127,9 @@ jobs:
             if docker network ls | grep -q "web"; then
               echo "✅ Network 'web' exists"
             else
-              echo "❌ Network 'web' not found"
-              echo "   Create it with: docker network create web"
-              exit 1
+              echo "⚠️ Network 'web' not found, creating it..."
+              docker network create web
+              echo "✅ Network 'web' created successfully"
             fi
             
             # 4. Vérifier Traefik
@@ -165,14 +165,28 @@ jobs:
                 echo "✅ All required variables present"
               fi
             else
-              echo "❌ .env file not found at $ENV_FILE"
-              echo ""
-              echo "📝 Create it with:"
-              echo "   mkdir -p $(dirname $ENV_FILE)"
-              echo "   cat > $ENV_FILE << 'EOF'"
-              echo "   DB_PASSWORD=\$(openssl rand -hex 32)"
-              echo "   JWT_SECRET=\$(openssl rand -hex 32)"
-              echo "   ENCRYPTION_KEY=\$(openssl rand -hex 32)"
+              echo "⚠️ .env file not found, creating it with generated secrets..."
+              
+              # Créer le répertoire si nécessaire
+              mkdir -p $(dirname "$ENV_FILE")
+              
+              # Générer les secrets
+              DB_PASS=$(openssl rand -hex 32)
+              JWT_SEC=$(openssl rand -hex 32)
+              ENC_KEY=$(openssl rand -hex 32)
+              
+              # Créer le fichier .env
+              cat > "$ENV_FILE" << EOF
+# Auto-generated secrets for SecureVault $ENV
+# Generated on $(date)
+
+DB_PASSWORD=$DB_PASS
+JWT_SECRET=$JWT_SEC
+ENCRYPTION_KEY=$ENC_KEY
+EOF
+              
+              chmod 600 "$ENV_FILE"
+              echo "✅ .env file created at $ENV_FILE with secure permissions"
               echo "   EOF"
               echo "   chmod 600 $ENV_FILE"
               exit 1
