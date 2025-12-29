@@ -150,17 +150,55 @@ jobs:
             if [ -f "$ENV_FILE" ]; then
               echo "✅ .env file exists at $ENV_FILE"
               
-              # Vérifier les variables requises
-              MISSING=""
-              for VAR in DB_PASSWORD JWT_SECRET ENCRYPTION_KEY API_DOMAIN FRONTEND_DOMAIN FRONTEND_URL; do
+              # Déterminer les domaines selon l'environnement
+              if [ "$ENV" = "production" ]; then
+                API_DOM="vault-api.freijstack.com"
+                FRONTEND_DOM="vault.freijstack.com"
+                FRONTEND_U="https://vault.freijstack.com"
+              else
+                API_DOM="vault-api-staging.freijstack.com"
+                FRONTEND_DOM="vault-staging.freijstack.com"
+                FRONTEND_U="https://vault-staging.freijstack.com"
+              fi
+              
+              # Vérifier et ajouter les variables manquantes
+              UPDATED=0
+              
+              if ! grep -q "^API_DOMAIN=" "$ENV_FILE"; then
+                echo "" >> "$ENV_FILE"
+                echo "API_DOMAIN=$API_DOM" >> "$ENV_FILE"
+                echo "⚠️ Added missing API_DOMAIN=$API_DOM"
+                UPDATED=1
+              fi
+              
+              if ! grep -q "^FRONTEND_DOMAIN=" "$ENV_FILE"; then
+                echo "FRONTEND_DOMAIN=$FRONTEND_DOM" >> "$ENV_FILE"
+                echo "⚠️ Added missing FRONTEND_DOMAIN=$FRONTEND_DOM"
+                UPDATED=1
+              fi
+              
+              if ! grep -q "^FRONTEND_URL=" "$ENV_FILE"; then
+                echo "FRONTEND_URL=$FRONTEND_U" >> "$ENV_FILE"
+                echo "⚠️ Added missing FRONTEND_URL=$FRONTEND_U"
+                UPDATED=1
+              fi
+              
+              # Vérifier les secrets critiques
+              MISSING_SECRETS=""
+              for VAR in DB_PASSWORD JWT_SECRET ENCRYPTION_KEY; do
                 if ! grep -q "^${VAR}=" "$ENV_FILE"; then
-                  MISSING="$MISSING $VAR"
+                  MISSING_SECRETS="$MISSING_SECRETS $VAR"
                 fi
               done
               
-              if [ -n "$MISSING" ]; then
-                echo "⚠️ Missing variables in .env:$MISSING"
+              if [ -n "$MISSING_SECRETS" ]; then
+                echo "❌ Missing critical secrets:$MISSING_SECRETS"
+                echo "   These must be added manually for security reasons"
                 exit 1
+              fi
+              
+              if [ $UPDATED -eq 1 ]; then
+                echo "✅ .env file updated with missing domain variables"
               else
                 echo "✅ All required variables present"
               fi
