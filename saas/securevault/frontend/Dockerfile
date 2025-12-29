@@ -12,6 +12,10 @@ RUN npm install --prefer-offline --no-audit && npm cache clean --force
 COPY public/ ./public/
 COPY src/ ./src/
 
+# Inject API URL for React build (CRA reads REACT_APP_*)
+ARG REACT_APP_API_URL
+ENV REACT_APP_API_URL=${REACT_APP_API_URL}
+
 # Build application
 RUN npm run build
 

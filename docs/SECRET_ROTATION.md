@@ -119,7 +119,7 @@ gh workflow run rotate-secrets.yml \
 
 ```bash
 # SSH vers le VPS
-ssh user@hostinger
+ssh user@vps
 
 # Exécuter le script
 bash /srv/www/securevault/scripts/rotate-secrets.sh production
@@ -243,7 +243,7 @@ GitHub → Actions → Rotate Secrets → [Run ID]
 
 ```bash
 # SSH vers le VPS
-ssh user@hostinger
+ssh user@vps
 
 # Vérifier le backup
 ls -lh /srv/www/securevault/backups/

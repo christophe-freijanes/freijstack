@@ -21,15 +21,300 @@ on:
         options:
           - staging
           - production
+      restart_traefik:
+        description: 'Redémarrer Traefik après déploiement'
+        required: false
+        default: false
+        type: boolean
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/securevault
 
 jobs:
+  validate:
+    name: ✅ Validate VPS Configuration
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 🔒 Mask sensitive values
+        run: |
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_HOST }}"
+          # Mask combined user@host too
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+
+      - name: 🌐 Check DNS Configuration
+        run: |
+          echo "🔍 Checking DNS records..."
+          
+          # Fonction pour vérifier un DNS
+          check_dns() {
+            DOMAIN=$1
+            echo "Checking $DOMAIN..."
+            if dig +short $DOMAIN | grep -q '[0-9]'; then
+              IP=$(dig +short $DOMAIN | head -n1)
+              echo "✅ $DOMAIN → $IP"
+              return 0
+            else
+              echo "❌ $DOMAIN not configured"
+              return 1
+            fi
+          }
+          
+          ENV=${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
+          FAILED=0
+          
+          if [ "$ENV" = "production" ]; then
+            check_dns "vault.freijstack.com" || FAILED=1
+            check_dns "vault-api.freijstack.com" || FAILED=1
+          else
+            check_dns "vault-staging.freijstack.com" || FAILED=1
+            check_dns "vault-api-staging.freijstack.com" || FAILED=1
+          fi
+          
+          if [ $FAILED -eq 1 ]; then
+            echo ""
+            echo "⚠️ Some DNS records are missing. Please configure them:"
+            echo "   - Add A records pointing to your VPS IP"
+            echo "   - Wait 5-10 minutes for propagation"
+            exit 1
+          fi
+          
+          echo "✅ All DNS records configured correctly"
+
+      - name: 🔍 Check VPS Prerequisites
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'VPS_CHECK'
+            set -e
+            echo "🔍 Checking VPS configuration..."
+            
+            # Déterminer l'environnement
+            if [ "${{ github.ref }}" = "refs/heads/master" ]; then
+              ENV="production"
+              ENV_FILE="/srv/www/securevault/.env"
+            else
+              ENV="staging"
+              ENV_FILE="/srv/www/securevault-staging/.env"
+            fi
+            
+            echo "Environment: $ENV"
+            echo ""
+
+            # Mask sensitive values from existing .env if present
+            echo "🔒 Applying runtime masks for sensitive values..."
+            if [ -f "$ENV_FILE" ]; then
+              for VAR in DB_PASSWORD JWT_SECRET ENCRYPTION_KEY; do
+                VALUE=$(grep -E "^$VAR=" "$ENV_FILE" | cut -d'=' -f2-)
+                if [ -n "$VALUE" ]; then
+                  echo "::add-mask::$VALUE"
+                fi
+              done
+            fi
+            
+            # 1. Vérifier Docker
+            echo "1️⃣ Checking Docker..."
+            if command -v docker &> /dev/null; then
+              DOCKER_VERSION=$(docker --version)
+              echo "✅ Docker installed: $DOCKER_VERSION"
+            else
+              echo "❌ Docker not installed"
+              exit 1
+            fi
+            
+            # 2. Vérifier Docker Compose
+            echo ""
+            echo "2️⃣ Checking Docker Compose..."
+            if docker compose version &> /dev/null; then
+              COMPOSE_VERSION=$(docker compose version)
+              echo "✅ Docker Compose installed: $COMPOSE_VERSION"
+            else
+              echo "❌ Docker Compose not installed"
+              exit 1
+            fi
+            
+            # 3. Vérifier le réseau web
+            echo ""
+            echo "3️⃣ Checking Docker network 'web'..."
+            if docker network ls | grep -q "web"; then
+              echo "✅ Network 'web' exists"
+            else
+              echo "⚠️ Network 'web' not found, creating it..."
+              docker network create web
+              echo "✅ Network 'web' created successfully"
+            fi
+            
+            # 4. Vérifier Traefik
+            echo ""
+            echo "4️⃣ Checking Traefik..."
+            TRAEFIK_CONTAINER=$(docker ps --format '{{.Names}}' | grep -i 'traefik' | head -n1)
+            if [ -n "$TRAEFIK_CONTAINER" ]; then
+              TRAEFIK_STATUS=$(docker ps --filter "name=$TRAEFIK_CONTAINER" --format "{{.Status}}")
+              echo "✅ Traefik is running: $TRAEFIK_STATUS (container: $TRAEFIK_CONTAINER)"
+            else
+              echo "⚠️ Traefik not running"
+              echo "   Start it with: cd base-infra && docker-compose up -d"
+              exit 1
+            fi
+            
+            # 5. Vérifier le fichier .env
+            echo ""
+            echo "5️⃣ Checking .env file..."
+            if [ -f "$ENV_FILE" ]; then
+              echo "✅ .env file exists at $ENV_FILE"
+              
+              # Déterminer les domaines selon l'environnement
+              if [ "$ENV" = "production" ]; then
+                API_DOM="vault-api.freijstack.com"
+                FRONTEND_DOM="vault.freijstack.com"
+                FRONTEND_U="https://vault.freijstack.com"
+                PROJECT_NAME="securevault"
+              else
+                API_DOM="vault-api-staging.freijstack.com"
+                FRONTEND_DOM="vault-staging.freijstack.com"
+                FRONTEND_U="https://vault-staging.freijstack.com"
+                PROJECT_NAME="securevault-staging"
+              fi
+              
+              # Vérifier et ajouter les variables manquantes
+              UPDATED=0
+              
+              if ! grep -q "^COMPOSE_PROJECT_NAME=" "$ENV_FILE"; then
+                echo "" >> "$ENV_FILE"
+                echo "COMPOSE_PROJECT_NAME=$PROJECT_NAME" >> "$ENV_FILE"
+                echo "⚠️ Added missing COMPOSE_PROJECT_NAME=$PROJECT_NAME"
+                UPDATED=1
+              fi
+              
+              if ! grep -q "^API_DOMAIN=" "$ENV_FILE"; then
+                echo "API_DOMAIN=$API_DOM" >> "$ENV_FILE"
+                echo "⚠️ Added missing API_DOMAIN=$API_DOM"
+                UPDATED=1
+              fi
+              
+              if ! grep -q "^FRONTEND_DOMAIN=" "$ENV_FILE"; then
+                echo "FRONTEND_DOMAIN=$FRONTEND_DOM" >> "$ENV_FILE"
+                echo "⚠️ Added missing FRONTEND_DOMAIN=$FRONTEND_DOM"
+                UPDATED=1
+              fi
+              
+              if ! grep -q "^FRONTEND_URL=" "$ENV_FILE"; then
+                echo "FRONTEND_URL=$FRONTEND_U" >> "$ENV_FILE"
+                echo "⚠️ Added missing FRONTEND_URL=$FRONTEND_U"
+                UPDATED=1
+              fi
+              
+              # Vérifier les secrets critiques
+              MISSING_SECRETS=""
+              for VAR in DB_PASSWORD JWT_SECRET ENCRYPTION_KEY; do
+                if ! grep -q "^${VAR}=" "$ENV_FILE"; then
+                  MISSING_SECRETS="$MISSING_SECRETS $VAR"
+                fi
+              done
+              
+              if [ -n "$MISSING_SECRETS" ]; then
+                echo "❌ Missing critical secrets:$MISSING_SECRETS"
+                echo "   These must be added manually for security reasons"
+                exit 1
+              fi
+              
+              if [ $UPDATED -eq 1 ]; then
+                echo "✅ .env file updated with missing domain variables"
+              else
+                echo "✅ All required variables present"
+              fi
+            else
+              echo "⚠️ .env file not found, creating it with generated secrets..."
+              
+              # Créer le répertoire si nécessaire
+              mkdir -p $(dirname "$ENV_FILE")
+              
+              # Générer les secrets
+              DB_PASS=$(openssl rand -hex 32)
+              JWT_SEC=$(openssl rand -hex 32)
+              ENC_KEY=$(openssl rand -hex 32)
+              
+              # Déterminer les domaines selon l'environnement
+              if [ "$ENV" = "production" ]; then
+                API_DOM="vault-api.freijstack.com"
+                FRONTEND_DOM="vault.freijstack.com"
+                FRONTEND_U="https://vault.freijstack.com"
+                PROJECT_NAME="securevault"
+              else
+                API_DOM="vault-api-staging.freijstack.com"
+                FRONTEND_DOM="vault-staging.freijstack.com"
+                FRONTEND_U="https://vault-staging.freijstack.com"
+                PROJECT_NAME="securevault-staging"
+              fi
+              
+              # Créer le fichier .env avec les secrets générés
+              {
+                echo "# Auto-generated secrets for SecureVault $ENV"
+                echo "# Generated on $(date)"
+                echo ""
+                echo "COMPOSE_PROJECT_NAME=$PROJECT_NAME"
+                echo ""
+                echo "DB_PASSWORD=$DB_PASS"
+                echo "JWT_SECRET=$JWT_SEC"
+                echo "ENCRYPTION_KEY=$ENC_KEY"
+                echo ""
+                echo "# Domain configuration"
+                echo "API_DOMAIN=$API_DOM"
+                echo "FRONTEND_DOMAIN=$FRONTEND_DOM"
+                echo "FRONTEND_URL=$FRONTEND_U"
+              } > "$ENV_FILE"
+              
+              chmod 600 "$ENV_FILE"
+              echo "✅ .env file created at $ENV_FILE with secure permissions"
+            fi
+            
+            # 6. Vérifier les permissions
+            echo ""
+            echo "6️⃣ Checking .env permissions..."
+            PERMS=$(stat -c %a "$ENV_FILE" 2>/dev/null || stat -f %A "$ENV_FILE")
+            if [ "$PERMS" = "600" ]; then
+              echo "✅ .env permissions are secure (600)"
+            else
+              echo "⚠️ .env permissions are $PERMS (should be 600)"
+              echo "   Fix with: chmod 600 $ENV_FILE"
+            fi
+            
+            echo ""
+            echo "✅ All VPS prerequisites validated for $ENV!"
+          VPS_CHECK
+
+      - name: ✅ Validation Summary
+        if: success()
+        run: |
+          echo "✅ VPS Configuration Validated Successfully!"
+          echo ""
+          echo "Environment: ${{ github.ref == 'refs/heads/master' && 'Production' || 'Staging' }}"
+          echo "Ready for deployment 🚀"
+
+      - name: ❌ Validation Failed
+        if: failure()
+        run: |
+          echo "❌ VPS Configuration Validation Failed"
+          echo ""
+          echo "Please fix the issues above before deploying."
+          echo "Review the logs for specific error messages."
+          exit 1
+
   test:
     name: 🧪 Test & Build
     runs-on: ubuntu-latest
+    needs: validate
     permissions:
       contents: read
       security-events: write
@@ -93,17 +378,27 @@ jobs:
           output: 'trivy-frontend.sarif'
         continue-on-error: true
 
-      - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v2
+      - name: Upload Trivy results to GitHub Security (Backend)
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
         with:
-          sarif_file: 'trivy-*.sarif'
+          sarif_file: 'trivy-backend.sarif'
+          category: 'securevault-backend'
+        continue-on-error: true
+
+      - name: Upload Trivy results to GitHub Security (Frontend)
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: 'trivy-frontend.sarif'
+          category: 'securevault-frontend'
         continue-on-error: true
 
   deploy:
-    name: 🚀 Deploy to Hostinger VPS
+    name: 🚀 Deploy to VPS
     runs-on: ubuntu-latest
     needs: test
-    if: success()
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')
     environment:
       name: ${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
       url: ${{ github.ref == 'refs/heads/master' && 'https://vault.freijstack.com' || 'https://vault-staging.freijstack.com' }}
@@ -112,16 +407,22 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: 🔐 Prepare SSH key (from portfolio secrets)
+      - name: 🔐 Prepare SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/deploy_key
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.HOSTINGER_SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 🔒 Mask sensitive values
+        run: |
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_HOST }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
 
       - name: 🚀 Deploy to VPS
         run: |
-          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} << 'DEPLOY_SCRIPT'
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'DEPLOY_SCRIPT'
             set -e
             echo "🚀 Starting SecureVault deployment..."
             
@@ -158,7 +459,7 @@ jobs:
             # Naviguer vers securevault
             cd saas/securevault
             
-            # Vérifier que .env existe
+            # Vérifier que .env existe à la racine
             if [ ! -f "$ENV_FILE" ]; then
               echo "❌ ERREUR: Fichier .env manquant à $ENV_FILE"
               echo "📝 Créez-le sur le VPS avec les variables d'environnement"
@@ -166,21 +467,66 @@ jobs:
               exit 1
             fi
             
+            # Copier le .env depuis la racine vers le répertoire docker-compose
+            echo "📝 Copying .env file..."
+            cp "$ENV_FILE" .env
+
+            # Forcer les variables d'environnement selon l'environnement ciblé (priorité sur .env)
+            if [ "$BRANCH" = "refs/heads/master" ]; then
+              PROJECT_NAME="securevault"
+              API_DOM="vault-api.freijstack.com"
+              FRONTEND_DOM="vault.freijstack.com"
+              FRONTEND_U="https://vault.freijstack.com"
+            else
+              PROJECT_NAME="securevault-staging"
+              API_DOM="vault-api-staging.freijstack.com"
+              FRONTEND_DOM="vault-staging.freijstack.com"
+              FRONTEND_U="https://vault-staging.freijstack.com"
+            fi
+
+            export COMPOSE_PROJECT_NAME="$PROJECT_NAME"
+            export API_DOMAIN="$API_DOM"
+            export FRONTEND_DOMAIN="$FRONTEND_DOM"
+            export FRONTEND_URL="$FRONTEND_U"
+
+            echo "🔧 Effective environment variables for compose:"
+            echo "  COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME"
+            echo "  API_DOMAIN=$API_DOMAIN"
+            echo "  FRONTEND_DOMAIN=$FRONTEND_DOMAIN"
+            echo "  FRONTEND_URL=$FRONTEND_URL"
+            
             echo "🔧 Building and starting containers..."
-            docker-compose -f docker-compose.yml pull
-            docker-compose -f docker-compose.yml up -d --build
+            docker compose pull
+            docker compose up -d --build --remove-orphans
             
             # Attendre que les services soient prêts
             sleep 10
             
             # Vérifier la santé
             echo "🏥 Checking health..."
-            docker-compose -f docker-compose.yml ps
+            docker compose ps
             
             echo "✅ Deployment successful!"
             echo "📊 Logs:"
-            docker-compose -f docker-compose.yml logs --tail=20
-            DEPLOY_SCRIPT
+            docker compose logs --tail=20
+          DEPLOY_SCRIPT
+
+      - name: 🔄 Restart Traefik (optionnel)
+        if: github.event_name == 'workflow_dispatch' && inputs.restart_traefik == true
+        run: |
+          echo "🔄 Restarting Traefik as requested..."
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'TRAEFIK_RESTART'
+            set -e
+            TRAEFIK_CONTAINER=$(docker ps --format '{{.Names}}' | grep -i 'traefik' | head -n1)
+            if [ -z "$TRAEFIK_CONTAINER" ]; then
+              echo "❌ Traefik container not found"
+              exit 1
+            fi
+            echo "Restarting $TRAEFIK_CONTAINER..."
+            docker restart "$TRAEFIK_CONTAINER"
+            sleep 5
+            echo "✅ Traefik restarted"
+          TRAEFIK_RESTART
 
       - name: Verify Deployment
         run: |
@@ -190,13 +536,13 @@ jobs:
           sleep 5
           
           # Vérifier que les conteneurs tournent sur le VPS
-          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
             'if [ "${{ github.ref }}" = "refs/heads/master" ]; then
               cd /srv/www/securevault/saas/securevault
             else
               cd /srv/www/securevault-staging/saas/securevault
             fi
-            docker-compose ps'
+            docker compose ps'
           
           echo "✅ Déploiement vérifié avec succès!"
 
@@ -214,3 +560,137 @@ jobs:
           echo "❌ SecureVault deployment failed!"
           echo "Check logs above for details"
           exit 1
+
+  post-verify:
+    name: 🔎 Post-Deployment Verification
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Prepare SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 🔒 Mask sensitive values
+        run: |
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_HOST }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+
+      - name: 🔍 Inspect Traefik for routers
+        run: |
+          echo "🔍 Checking Traefik routers in logs..."
+          ENVIRONMENT=${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
+          if [ "$ENVIRONMENT" = "production" ]; then
+            FRONTEND_DOM="vault.freijstack.com"
+            API_DOM="vault-api.freijstack.com"
+          else
+            FRONTEND_DOM="vault-staging.freijstack.com"
+            API_DOM="vault-api-staging.freijstack.com"
+          fi
+
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << VERIFY_LOGS
+            set -e
+            TRAEFIK_CONTAINER=\$(docker ps --format '{{.Names}}' | grep -i 'traefik' | head -n1)
+            if [ -z "\$TRAEFIK_CONTAINER" ]; then
+              echo "❌ Traefik not running"
+              exit 1
+            fi
+            echo "✅ Found Traefik container: \$TRAEFIK_CONTAINER"
+            echo "📜 Last Traefik logs (filtered):"
+            docker logs --tail=300 "\$TRAEFIK_CONTAINER" | grep -E "($FRONTEND_DOM|$API_DOM|mytlschallenge|websecure)" || true
+            echo "✅ Log inspection done"
+          VERIFY_LOGS
+
+      - name: 🌐 HTTP checks (TLS & routes)
+        run: |
+          ENVIRONMENT=${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
+          if [ "$ENVIRONMENT" = "production" ]; then
+            FRONTEND_DOM="vault.freijstack.com"
+            API_DOM="vault-api.freijstack.com"
+          else
+            FRONTEND_DOM="vault-staging.freijstack.com"
+            API_DOM="vault-api-staging.freijstack.com"
+          fi
+
+          check_url() {
+            DOMAIN="$1"
+            ATTEMPTS=3
+            DELAY=10
+            for i in $(seq 1 $ATTEMPTS); do
+              # Accept self-signed certs temporarily with -k
+              CODE=$(curl -sSLk -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time 20 "https://$DOMAIN" || echo "000")
+              echo "Attempt $i: $DOMAIN → HTTP $CODE"
+              case "$CODE" in
+                200|301|302|404)
+                  echo "✅ $DOMAIN reachable (HTTP $CODE)"
+                  return 0
+                  ;;
+                *)
+                  sleep "$DELAY"
+                  ;;
+              esac
+            done
+            echo "⚠️ $DOMAIN not reachable with valid status after retries (last: $CODE)"
+            return 1
+          }
+
+          FAILED=0
+          check_url "$FRONTEND_DOM" || FAILED=1
+          check_url "$API_DOM" || FAILED=1
+
+          if [ $FAILED -eq 1 ]; then
+            echo "❌ Post-deployment verification failed"
+            exit 1
+          fi
+          echo "✅ Post-deployment verification successful"
+
+  notify:
+    name: 📢 Notify Status
+    runs-on: ubuntu-latest
+    needs: [validate, test, deploy, post-verify]
+    if: always()
+    
+    steps:
+      - name: Check overall status
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "🔍 Pull Request - Validation Only"
+            echo "✅ Code validation and security checks completed"
+            echo "📋 No deployment on pull requests"
+          elif [ "${{ github.ref }}" == "refs/heads/develop" ]; then
+            echo "🧪 STAGING Environment - Push Event"
+            echo "✅ SecureVault staging deployment completed"
+            echo "📍 https://vault-staging.freijstack.com"
+            echo "📍 API: https://vault-api-staging.freijstack.com"
+          elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            echo "🚀 PRODUCTION Environment - Push Event"
+            echo "✅ SecureVault production deployment completed"
+            echo "🎯 https://vault.freijstack.com"
+            echo "🎯 API: https://vault-api.freijstack.com"
+          else
+            echo "ℹ️ Event: ${{ github.event_name }} on ${{ github.ref }}"
+          fi
+
+      - name: ✅ Success Summary
+        if: ${{ needs.validate.result == 'success' && needs.test.result == 'success' && needs.deploy.result == 'success' && needs.post-verify.result == 'success' }}
+        run: |
+          echo "✅ All jobs completed successfully!"
+          echo "📊 Validation: ✅"
+          echo "🧪 Tests: ✅"
+          echo "🚀 Deployment: ✅"
+          echo "🔎 Post-verification: ✅"
+
+      - name: ⚠️ Partial Success
+        if: ${{ (needs.validate.result == 'failure' || needs.test.result == 'failure' || needs.deploy.result == 'failure' || needs.post-verify.result == 'failure') }}
+        run: |
+          echo "⚠️ Some jobs failed:"
+          echo "Validation: ${{ needs.validate.result }}"
+          echo "Tests: ${{ needs.test.result }}"
+          echo "Deploy: ${{ needs.deploy.result }}"
+          echo "Post-verify: ${{ needs.post-verify.result }}"

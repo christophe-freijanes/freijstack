@@ -176,11 +176,11 @@ jobs:
         continue-on-error: true
         uses: actions/deploy-pages@v4
 
-  # Job 5: Deploy to Hostinger (Staging - develop)
+  # Job 5: Deploy to VPS (Staging - develop)
   # Note: Ce workflow copie les fichiers statiques via rsync.
   # TODO: Migrer vers docker-compose up depuis portfolio/docker-compose.yml
-  deploy-hostinger-staging:
-    name: 🧪 Deploy to Hostinger (Staging)
+  deploy-vps-staging:
+    name: 🧪 Deploy to VPS (Staging)
     runs-on: ubuntu-latest
     needs: [validate, build, security]
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
@@ -192,18 +192,24 @@ jobs:
       - name: Prepare SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/deploy_key
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.HOSTINGER_SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 🔒 Mask sensitive values
+        run: |
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_HOST }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
 
       - name: Create staging directory on VPS
         run: |
-          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
             'mkdir -p /srv/www/portfolio-staging && echo "📁 Staging directory ready"'
 
       - name: Backup existing staging (if exists)
         run: |
-          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
             'if [ -d /srv/www/portfolio-staging ] && [ "$(ls -A /srv/www/portfolio-staging)" ]; then \
                cp -r /srv/www/portfolio-staging /srv/www/portfolio-staging.backup.$(date +%s); \
                echo "💾 Backup created"; \
@@ -212,30 +218,30 @@ jobs:
       - name: Deploy portfolio to staging (/portfolio-staging)
         run: |
           rsync -avz --delete -e "ssh -i ~/.ssh/deploy_key" \
-            saas/portfolio/ ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:/srv/www/portfolio-staging/
+            saas/portfolio/ ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}:/srv/www/portfolio-staging/
 
       - name: Verify staging deployment
         run: |
           echo "✅ Portfolio déployé vers STAGING!"
           echo "📍 Path: /srv/www/portfolio-staging"
-          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
             'ls -lh /srv/www/portfolio-staging/ | head -10'
 
       - name: Cleanup old staging backups (keep last 3)
         run: |
-          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
             'ls -dt /srv/www/portfolio-staging.backup.* 2>/dev/null | tail -n +4 | xargs -r rm -rf || true'
 
       - name: Restart Traefik on VPS
         run: |
-          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
             'C=$(docker ps --filter "name=traefik" --format "{{.Names}}" | head -n1); if [ -n "$C" ]; then docker restart "$C"; fi'
 
-  # Job 6: Deploy to Hostinger (Production - master)
+  # Job 6: Deploy to VPS (Production - master)
   # Note: Ce workflow copie les fichiers statiques via rsync.
   # TODO: Migrer vers docker-compose up depuis portfolio/docker-compose.yml
-  deploy-hostinger:
-    name: 🚀 Deploy to Hostinger (Production)
+  deploy-vps:
+    name: 🚀 Deploy to VPS (Production)
     runs-on: ubuntu-latest
     needs: [validate, build, security]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -247,18 +253,24 @@ jobs:
       - name: Prepare SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/deploy_key
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.HOSTINGER_SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 🔒 Mask sensitive values
+        run: |
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_HOST }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
 
       - name: Create production directory on VPS
         run: |
-          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
             'mkdir -p /srv/www/portfolio && echo "📁 Production directory ready"'
 
       - name: Backup existing production (if exists)
         run: |
-          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
             'if [ -d /srv/www/portfolio ] && [ "$(ls -A /srv/www/portfolio)" ]; then \
                cp -r /srv/www/portfolio /srv/www/portfolio.backup.$(date +%s); \
                echo "💾 Backup created"; \
@@ -267,24 +279,24 @@ jobs:
       - name: Deploy portfolio to production (/portfolio)
         run: |
           rsync -avz --delete -e "ssh -i ~/.ssh/deploy_key" \
-            saas/portfolio/ ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:/srv/www/portfolio/
+            saas/portfolio/ ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}:/srv/www/portfolio/
 
       - name: Verify production deployment
         run: |
           echo "✅ Portfolio déployé vers PRODUCTION!"
-          echo "📍 Production: https://${{ secrets.HOSTINGER_DOMAIN }}/portfolio/"
+          echo "📍 Production: https://${{ secrets.VPS_DOMAIN }}/portfolio/"
           echo "📍 GitHub Pages: https://${{ github.repository_owner }}.github.io/freijstack/portfolio"
-          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
             'ls -lh /srv/www/portfolio/ | head -10'
 
       - name: Cleanup old production backups (keep last 3)
         run: |
-          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
             'ls -dt /srv/www/portfolio.backup.* 2>/dev/null | tail -n +4 | xargs -r rm -rf || true'
 
       - name: Restart Traefik on VPS
         run: |
-          ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} \
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
             'C=$(docker ps --filter "name=traefik" --format "{{.Names}}" | head -n1); if [ -n "$C" ]; then docker restart "$C"; fi'
 
   # Job 7: Notifications
@@ -324,7 +336,7 @@ jobs:
           body: |
             ## FreijStack Release
             Portfolio deployment completed successfully!
-            - Portfolio: Live on GitHub Pages & Hostinger
+            - Portfolio: Live on GitHub Pages & VPS
             - Security: All checks passed
             - Performance: Assets optimized
           draft: false
