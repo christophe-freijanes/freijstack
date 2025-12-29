@@ -1,19 +1,64 @@
-# FreijStack
+# FreijStack 🚀
+
+[![CI/CD Pipeline](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/main.yml?branch=master&label=CI%2FCD&style=flat-square)](https://github.com/christophe-freijanes/freijstack/actions)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/main.yml?branch=master&label=CodeQL&style=flat-square&logo=github)](https://github.com/christophe-freijanes/freijstack/security/code-scanning)
+[![Security Policy](https://img.shields.io/badge/security-policy-blue?style=flat-square&logo=shield)](https://github.com/christophe-freijanes/freijstack/security/policy)
+[![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square)](LICENSE)
+[![Top Language](https://img.shields.io/github/languages/top/christophe-freijanes/freijstack?style=flat-square&color=yellow)](https://github.com/christophe-freijanes/freijstack)
+[![Code Size](https://img.shields.io/github/languages/code-size/christophe-freijanes/freijstack?style=flat-square&color=green)](https://github.com/christophe-freijanes/freijstack)
+[![Last Commit](https://img.shields.io/github/last-commit/christophe-freijanes/freijstack?label=Derni%C3%A8re%20MAJ&style=flat-square&color=blue)](https://github.com/christophe-freijanes/freijstack/commits)
+[![Stars](https://img.shields.io/github/stars/christophe-freijanes/freijstack?style=flat-square&color=orange)](https://github.com/christophe-freijanes/freijstack/stargazers)
 
 Portfolio et projets cloud & sécurité de **Christophe FREIJANES** - Senior Cloud & Security Specialist (DevSecOps).
 
-**Live**: https://portfolio.freijstack.com/
+**Live**: https://portfolio.freijstack.com/ | **Staging**: https://portfolio-staging.freijstack.com/
+
+---
+
+## 📚 Documentation
+
+| Document | Description |
+|----------|-------------|
+| 📘 [Architecture Technique](docs/architecture.md) | Vue d'ensemble de l'infrastructure, déploiement, et CI/CD |
+| � [Guide Déploiement](docs/DEPLOYMENT.md) | Installation VPS, Docker, Traefik, DNS, rollback |
+| 🔍 [Guide Troubleshooting](docs/TROUBLESHOOTING.md) | Diagnostic et résolution des problèmes courants |
+| 📊 [Guide Monitoring](docs/MONITORING.md) | Prometheus, Grafana, Loki, alertes et dashboards |
+| �📗 [Portfolio README](portfolio/README.md) | Documentation complète du portfolio (features, i18n, sécurité) |
+| 📙 [SaaS Apps README](saas/README.md) | Applications SaaS démonstratives (App1, App2) |
+| 📕 [App1 - Gestionnaire de Tâches](saas/app1/README.md) | Application CRUD sécurisée avec authentification |
+| 📓 [App2 - Service Notifications](saas/app2/README.md) | Microservice temps réel avec WebSockets |
+| 🔖 [Pull Request Template](.github/pull_request_template.md) | Checklist de validation pour les PR |
+
+---
 
 ## 📋 Structure du Projet
 
 ```
 freijstack/
-├── portfolio/          # Portfolio web professionnel (HTML/CSS/JS)
-├── saas/              # Applications SaaS démos (DevSecOps, Microservices)
-├── docs/              # Documentation et architecture
-├── .github/workflows/ # CI/CD pipelines (GitHub Actions)
-├── package.json       # Dépendances du projet
-└── README.md          # Ce fichier
+├── .github/
+│   ├── workflows/           # CI/CD pipelines (GitHub Actions)
+│   │   └── main.yml         # Deploy staging + production
+│   └── pull_request_template.md  # PR validation checklist
+├── portfolio/               # Portfolio web professionnel
+│   ├── index.html
+│   ├── style.css
+│   ├── script.js
+│   ├── data.json
+│   ├── public/              # Assets publics
+│   └── README.md            # Doc portfolio
+├── saas/                    # Applications SaaS démos
+│   ├── app1/                # Gestionnaire de tâches sécurisé
+│   │   ├── Dockerfile
+│   │   └── README.md
+│   ├── app2/                # Service de notifications temps réel
+│   │   ├── Dockerfile
+│   │   └── README.md
+│   └── README.md            # Vue d'ensemble SaaS
+├── docs/
+│   ├── architecture.md      # Documentation technique
+│   └── README.md
+├── package.json             # Scripts et dépendances
+└── README.md                # Ce fichier
 ```
 
 ## 🎯 Sections
@@ -62,41 +107,94 @@ Voir [saas/README.md](saas/README.md) pour plus de détails.
 
 ## 🚀 CI/CD Pipeline
 
-Le projet utilise **GitHub Actions** avec un pipeline complet:
+Le projet utilise **GitHub Actions** avec un pipeline de déploiement automatique complet.
 
-### Branches
-- `develop` - Staging (déploié vers `/portfolio-staging` + GitHub Pages)
-- `master` - Production (déploié vers `/portfolio` sur VPS)
+### Branches & Déploiement
 
-### Jobs
-1. **Validate & Lint** - HTML/CSS/JS linting
-2. **Build & Optimize** - Minification CSS/JS
-3. **Security Scan** - Trivy, Gitleaks, CodeQL
-4. **Deploy to GitHub Pages** (staging uniquement)
-5. **Deploy to Hostinger** (staging + production)
-6. **Notifications** - Status reports
+| Branche | Environnement | URL | Déclenché sur |
+|---------|--------------|-----|---------------|
+| `develop` | Staging | https://portfolio-staging.freijstack.com | Push sur develop |
+| `master` | Production | https://portfolio.freijstack.com | Push sur master |
 
-**Détails**: Voir `.github/workflows/main.yml`
+### Pipeline Jobs
 
-## 🏗️ Déploiement
+1. ✅ **Validate & Lint**
+   - HTML validation (W3C)
+   - CSS/JS syntax check
 
-### Infrastructure
-- **VPS**: Hostinger (Ubuntu 22.04)
-- **Web Server**: nginx + Traefik (reverse proxy)
-- **TLS**: Let's Encrypt via ACME
-- **DNS**: Traefik path-based routing
+2. 🔨 **Build & Optimize**
+   - CSS minification (csso-cli)
+   - JS minification (terser)
+   - Asset optimization
 
-### Paths
+3. 🔐 **Security Scan**
+   - **CodeQL** - Code analysis
+   - **Gitleaks** - Secret detection
+   - **Trivy** - Vulnerability scanning
+
+4. 🌐 **Deploy to GitHub Pages**
+   - Staging uniquement (develop branch)
+   - Backup automatique
+
+5. 🚀 **Deploy to VPS**
+   - Déploiement via rsync (SSH)
+   - Traefik restart pour routing
+   - Production + Staging paths
+
+6. 📊 **Post-Deploy**
+   - Backup cleanup (garde 7 derniers)
+   - Validation des URLs
+   - Status notifications
+
+**Voir**: [CI/CD Configuration](.github/workflows/main.yml)
+
+## 🏗️ Infrastructure & Déploiement
+
+### Stack Technique
+
+| Composant | Technologie | Usage |
+|-----------|------------|-------|
+| **Serveur** | Ubuntu 22.04 VPS | Hébergement principal |
+| **Reverse Proxy** | Traefik v2.10 | Routing + TLS automatique |
+| **Web Server** | nginx:alpine | Serveur de fichiers statiques |
+| **Containerisation** | Docker Compose v2 | Orchestration services |
+| **TLS** | Let's Encrypt (ACME) | Certificats SSL automatiques |
+| **DNS** | Subdomain routing | portfolio.freijstack.com |
+
+### Architecture Déploiement
+
 ```
+Internet
+   |
+   v
+Traefik (Port 80/443)
+   ├─> portfolio.freijstack.com -> nginx (Production)
+   └─> portfolio-staging.freijstack.com -> nginx (Staging)
+
+Paths sur VPS:
 /srv/www/
 ├── portfolio/           # Production (master branch)
+│   ├── index.html
+│   ├── style.css
+│   ├── script.js
+│   └── ...
 └── portfolio-staging/   # Staging (develop branch)
+    ├── index.html
+    ├── style.css
+    ├── script.js
+    └── ...
 ```
 
-### Déploiement Automatique
-- Chaque commit sur `develop` déploie vers `portfolio-staging.freijstack.com`
-- Chaque commit sur `master` déploie vers `portfolio.freijstack.com`
-- Utilise SSH + rsync pour transfert sécurisé
+### Processus de Déploiement
+
+1. **Commit & Push** → GitHub (develop ou master)
+2. **GitHub Actions** → Pipeline CI/CD déclenché
+3. **Build & Tests** → Validation + Security scans
+4. **Deploy** → rsync via SSH vers VPS
+5. **Routing** → Traefik restart + health check
+6. **Live** → Site accessible via HTTPS
+
+**Voir**: [Architecture Détaillée](docs/architecture.md)
 
 ## 🚀 Démarrage Rapide
 
@@ -224,4 +322,10 @@ Tous droits réservés © 2025 Christophe FREIJANES
 
 ---
 
-**Dernière mise à jour**: Décembre 2025
+<div align="center">
+
+[![Last Commit](https://img.shields.io/github/last-commit/christophe-freijanes/freijstack?label=Derni%C3%A8re%20mise%20%C3%A0%20jour&style=for-the-badge&color=blue)](https://github.com/christophe-freijanes/freijstack/commits)
+[![Issues](https://img.shields.io/github/issues/christophe-freijanes/freijstack?style=for-the-badge&color=yellow)](https://github.com/christophe-freijanes/freijstack/issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/christophe-freijanes/freijstack?style=for-the-badge&color=green)](https://github.com/christophe-freijanes/freijstack/pulls)
+
+</div>
