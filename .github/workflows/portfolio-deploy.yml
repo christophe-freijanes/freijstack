@@ -28,7 +28,7 @@ env:
 jobs:
   # Job 1: Validation et Linting
   validate:
-    name: Validate & Lint
+    name: ✅ Validate & Lint
     runs-on: ubuntu-latest
     
     steps:
@@ -63,7 +63,7 @@ jobs:
 
   # Job 2: Build & Optimize Assets
   build:
-    name: Build & Optimize
+    name: 🏗️ Build & Optimize
     runs-on: ubuntu-latest
     needs: validate
     
@@ -105,7 +105,7 @@ jobs:
 
   # Job 3: Security Scanning
   security:
-    name: Security Scan
+    name: 🔒 Security Scan
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -139,7 +139,7 @@ jobs:
 
   # Job 4: Deploy to GitHub Pages (Staging - develop)
   deploy-pages-staging:
-    name: Deploy to GitHub Pages (Staging)
+    name: 📄 Deploy to GitHub Pages (Staging)
     runs-on: ubuntu-latest
     needs: [validate, build, security]
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
@@ -181,7 +181,7 @@ jobs:
 
   # Job 5: Deploy to Hostinger (Staging - develop)
   deploy-hostinger-staging:
-    name: Deploy to Hostinger (Staging)
+    name: 🧪 Deploy to Hostinger (Staging)
     runs-on: ubuntu-latest
     needs: [validate, build, security, deploy-pages-staging]
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
@@ -234,7 +234,7 @@ jobs:
 
   # Job 6: Deploy to Hostinger (Production - master)
   deploy-hostinger:
-    name: Deploy to Hostinger (Production)
+    name: 🚀 Deploy to Hostinger (Production)
     runs-on: ubuntu-latest
     needs: [validate, build, security]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -288,7 +288,7 @@ jobs:
 
   # Job 7: Notifications
   notify:
-    name: Notify Status
+    name: 📢 Notify Status
     runs-on: ubuntu-latest
     needs: [validate, build, security, deploy-pages-staging, deploy-hostinger-staging, deploy-hostinger]
     if: always()
