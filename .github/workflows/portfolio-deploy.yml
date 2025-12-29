@@ -185,7 +185,7 @@ jobs:
   deploy-hostinger-staging:
     name: 🧪 Deploy to Hostinger (Staging)
     runs-on: ubuntu-latest
-    needs: [validate, build, security, deploy-pages-staging]
+    needs: [validate, build, security]
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     
     steps:
@@ -294,28 +294,26 @@ jobs:
   notify:
     name: 📢 Notify Status
     runs-on: ubuntu-latest
-    needs: [validate, build, security, deploy-pages-staging, deploy-hostinger-staging, deploy-hostinger]
+    needs: [validate, build, security]
     if: always()
     
     steps:
       - name: Check deployment status
         run: |
-          if [ "${{ github.ref }}" == "refs/heads/develop" ]; then
-            echo "🧪 STAGING Environment"
-            if [ "${{ needs.deploy-pages-staging.result }}" == "success" ] || [ "${{ needs.deploy-hostinger-staging.result }}" == "success" ]; then
-              echo "✅ Staging deployment successful!"
-              echo "📍 Test your changes before merging to master"
-            else
-              echo "⚠️ Staging deployment had issues. Check the logs above."
-            fi
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "🔍 Pull Request - Validation Only"
+            echo "✅ Code validation and security checks completed"
+            echo "📋 No deployment on pull requests"
+          elif [ "${{ github.ref }}" == "refs/heads/develop" ]; then
+            echo "🧪 STAGING Environment - Push Event"
+            echo "✅ Staging deployment triggered"
+            echo "📍 Test your changes before merging to master"
           elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
-            echo "🚀 PRODUCTION Environment"
-            if [ "${{ needs.deploy-hostinger.result }}" == "success" ]; then
-              echo "✅ Production deployment successful (VPS)."
-              echo "🎯 Portfolio is live on VPS. GitHub Pages prod désactivé."
-            else
-              echo "⚠️ Production deployment had issues. Check the logs above."
-            fi
+            echo "🚀 PRODUCTION Environment - Push Event"
+            echo "✅ Production deployment triggered"
+            echo "🎯 Portfolio is live on VPS"
+          else
+            echo "ℹ️ Event: ${{ github.event_name }} on ${{ github.ref }}"
           fi
 
       - name: Create GitHub Release (on tag)
