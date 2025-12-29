@@ -5,10 +5,19 @@ on:
     branches:
       - master
       - develop
+    paths:
+      - 'portfolio/**'
+      - '.github/workflows/portfolio-deploy.yml'
+      - 'package.json'
+      - 'README.md'
   pull_request:
     branches:
       - master
       - develop
+    paths:
+      - 'portfolio/**'
+      - '.github/workflows/portfolio-deploy.yml'
+      - 'package.json'
 
 env:
   REGISTRY: ghcr.io
