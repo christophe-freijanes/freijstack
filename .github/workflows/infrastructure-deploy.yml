@@ -21,6 +21,21 @@ on:
         options:
           - staging
           - production
+      deploy_traefik:
+        description: 'Déployer Traefik'
+        required: false
+        default: true
+        type: boolean
+      deploy_portfolio:
+        description: 'Déployer Portfolio'
+        required: false
+        default: true
+        type: boolean
+      deploy_n8n:
+        description: 'Déployer n8n'
+        required: false
+        default: true
+        type: boolean
 
 jobs:
   validate:

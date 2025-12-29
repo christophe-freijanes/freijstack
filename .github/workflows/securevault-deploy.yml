@@ -2,7 +2,7 @@ name: 🔐 Deploy SecureVault
 
 on:
   push:
-    branches: [develop, master]
+    branches: [develop]  # Auto-deploy staging only
     paths:
       - 'saas/securevault/**'
       - '.github/workflows/securevault-deploy.yml'
@@ -35,7 +35,7 @@ jobs:
   validate:
     name: ✅ Validate VPS Configuration
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/develop') || github.event_name == 'workflow_dispatch'
 
     steps:
       - name: 📥 Checkout code
@@ -403,7 +403,7 @@ jobs:
     name: 🧹 Cleanup Old Containers
     runs-on: ubuntu-latest
     needs: test
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/develop') || github.event_name == 'workflow_dispatch'
 
     steps:
       - name: 🔐 Prepare SSH key
@@ -420,14 +420,18 @@ jobs:
           echo "::add-mask::${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
 
       - name: 🧹 Force remove old containers
+        env:
+          TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
         run: |
+          echo "🎯 Cleanup for environment: $TARGET_ENV"
+          
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'CLEANUP_SCRIPT'
             set -e
             echo "🧹 Cleaning up old containers and networks..."
             
             # Déterminer l'environnement
-            BRANCH="${{ github.ref }}"
-            if [ "$BRANCH" = "refs/heads/master" ]; then
+            TARGET_ENV="${{ env.TARGET_ENV }}"
+            if [ "$TARGET_ENV" = "production" ]; then
               CONTAINERS="securevault-backend securevault-frontend securevault-postgres"
               NETWORKS="securevault_network"
               echo "Environment: production"
@@ -464,7 +468,7 @@ jobs:
     name: 🚀 Deploy to VPS
     runs-on: ubuntu-latest
     needs: cleanup
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/develop') || github.event_name == 'workflow_dispatch'
     environment:
       name: ${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
       url: ${{ github.ref == 'refs/heads/master' && 'https://vault.freijstack.com' || 'https://vault-staging.freijstack.com' }}
@@ -487,19 +491,28 @@ jobs:
           echo "::add-mask::${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
 
       - name: 🚀 Deploy to VPS
+        env:
+          # Pour workflow_dispatch: utiliser inputs.environment, sinon détecter depuis la branche
+          TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
         run: |
+          echo "🎯 Target environment: $TARGET_ENV"
+          
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'DEPLOY_SCRIPT'
             set -e
             echo "🚀 Starting SecureVault deployment..."
             
-            # Déterminer l'environnement (même structure que portfolio)
-            BRANCH="${{ github.ref }}"
-            if [ "$BRANCH" = "refs/heads/master" ]; then
+            # Déterminer l'environnement depuis la variable passée
+            TARGET_ENV="${{ env.TARGET_ENV }}"
+            echo "🎯 Deploying to: $TARGET_ENV"
+            
+            if [ "$TARGET_ENV" = "production" ]; then
               DEPLOY_DIR="/srv/www/securevault"
               ENV_FILE="/srv/www/securevault/.env"
+              BRANCH="master"
             else
               DEPLOY_DIR="/srv/www/securevault-staging"
               ENV_FILE="/srv/www/securevault-staging/.env"
+              BRANCH="develop"
             fi
             
             echo "📂 Deploy directory: $DEPLOY_DIR"
@@ -509,7 +522,7 @@ jobs:
               echo "✅ Repository already exists, pulling latest changes..."
               cd "$DEPLOY_DIR"
               git fetch origin
-              git reset --hard origin/${{ github.ref_name }}
+              git reset --hard origin/$BRANCH
               git clean -fd
             else
               echo "📥 Cloning repository for the first time..."
@@ -518,7 +531,7 @@ jobs:
                 echo "🧹 Cleaning existing directory..."
                 rm -rf "$DEPLOY_DIR"
               fi
-              git clone -b ${{ github.ref_name }} https://github.com/${{ github.repository }}.git "$DEPLOY_DIR"
+              git clone -b $BRANCH https://github.com/${{ github.repository }}.git "$DEPLOY_DIR"
               cd "$DEPLOY_DIR"
             fi
             
@@ -538,7 +551,7 @@ jobs:
             cp "$ENV_FILE" .env
 
             # Forcer les variables d'environnement selon l'environnement ciblé (priorité sur .env)
-            if [ "$BRANCH" = "refs/heads/master" ]; then
+            if [ "$TARGET_ENV" = "production" ]; then
               PROJECT_NAME="securevault"
               API_DOM="vault-api.freijstack.com"
               FRONTEND_DOM="vault.freijstack.com"
