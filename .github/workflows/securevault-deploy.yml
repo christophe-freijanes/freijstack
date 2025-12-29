@@ -21,6 +21,11 @@ on:
         options:
           - staging
           - production
+      restart_traefik:
+        description: 'Redémarrer Traefik après déploiement'
+        required: false
+        default: false
+        type: boolean
 
 env:
   REGISTRY: ghcr.io
@@ -481,6 +486,23 @@ jobs:
             docker compose logs --tail=20
           DEPLOY_SCRIPT
 
+      - name: 🔄 Restart Traefik (optionnel)
+        if: github.event_name == 'workflow_dispatch' && inputs.restart_traefik == true
+        run: |
+          echo "🔄 Restarting Traefik as requested..."
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'TRAEFIK_RESTART'
+            set -e
+            if docker ps --format '{{.Names}}' | grep -q '^traefik$'; then
+              echo "Restarting traefik container..."
+              docker restart traefik
+              sleep 5
+              echo "✅ Traefik restarted"
+            else
+              echo "❌ Traefik container not found"
+              exit 1
+            fi
+          TRAEFIK_RESTART
+
       - name: Verify Deployment
         run: |
           ENVIRONMENT=${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
@@ -513,3 +535,89 @@ jobs:
           echo "❌ SecureVault deployment failed!"
           echo "Check logs above for details"
           exit 1
+
+  post-verify:
+    name: 🔎 Post-Deployment Verification
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Prepare SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 🔒 Mask sensitive values
+        run: |
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_HOST }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+
+      - name: 🔍 Inspect Traefik for routers
+        run: |
+          echo "🔍 Checking Traefik routers in logs..."
+          ENVIRONMENT=${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
+          if [ "$ENVIRONMENT" = "production" ]; then
+            FRONTEND_DOM="vault.freijstack.com"
+            API_DOM="vault-api.freijstack.com"
+          else
+            FRONTEND_DOM="vault-staging.freijstack.com"
+            API_DOM="vault-api-staging.freijstack.com"
+          fi
+
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << VERIFY_LOGS
+            set -e
+            if ! docker ps --format '{{.Names}}' | grep -q '^traefik$'; then
+              echo "❌ Traefik not running"
+              exit 1
+            fi
+            echo "📜 Last Traefik logs (filtered):"
+            docker logs --tail=300 traefik | grep -E "($FRONTEND_DOM|$API_DOM|mytlschallenge|websecure)" || true
+            echo "✅ Log inspection done"
+          VERIFY_LOGS
+
+      - name: 🌐 HTTP checks (TLS & routes)
+        run: |
+          ENVIRONMENT=${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
+          if [ "$ENVIRONMENT" = "production" ]; then
+            FRONTEND_DOM="vault.freijstack.com"
+            API_DOM="vault-api.freijstack.com"
+          else
+            FRONTEND_DOM="vault-staging.freijstack.com"
+            API_DOM="vault-api-staging.freijstack.com"
+          fi
+
+          check_url() {
+            DOMAIN="$1"
+            ATTEMPTS=3
+            DELAY=10
+            for i in $(seq 1 $ATTEMPTS); do
+              CODE=$(curl -sSL -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time 20 "https://$DOMAIN" || echo "000")
+              echo "Attempt $i: $DOMAIN → HTTP $CODE"
+              case "$CODE" in
+                200|301|302)
+                  echo "✅ $DOMAIN reachable"
+                  return 0
+                  ;;
+                *)
+                  sleep "$DELAY"
+                  ;;
+              esac
+            done
+            echo "❌ $DOMAIN not reachable with valid status after retries"
+            return 1
+          }
+
+          FAILED=0
+          check_url "$FRONTEND_DOM" || FAILED=1
+          check_url "$API_DOM" || FAILED=1
+
+          if [ $FAILED -eq 1 ]; then
+            echo "❌ Post-deployment verification failed"
+            exit 1
+          fi
+          echo "✅ Post-deployment verification successful"
