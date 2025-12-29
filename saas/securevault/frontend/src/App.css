@@ -154,6 +154,28 @@ body {
   text-decoration: underline;
 }
 
+/* Auth Divider */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.5rem 0;
+  color: var(--text-muted);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.auth-divider span {
+  padding: 0 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
 /* Buttons */
 .btn {
   padding: 0.75rem 1.5rem;
@@ -187,6 +209,18 @@ body {
 
 .btn-secondary:hover {
   background-color: #475569;
+}
+
+.btn-sso {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  width: 100%;
+}
+
+.btn-sso:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5568d3 0%, #63408a 100%);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
 }
 
 .btn:disabled {
