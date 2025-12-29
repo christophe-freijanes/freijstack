@@ -66,35 +66,109 @@ PostgreSQL 15+
 Docker & Docker Compose v2+
 ```
 
-### 2. Exécuter les Migrations
+### 2. ⚡ Exécuter les Migrations (AUTOMATIQUE)
+
+#### ✨ Nouveauté : Migrations Automatiques via GitHub Actions
+
+Les migrations sont maintenant **exécutées automatiquement** lors de chaque déploiement ! 🎉
+
+**Comment ça marche ?**
+
+Le workflow `.github/workflows/securevault-deploy.yml` inclut l'étape **"🗄️ Run Database Migrations"** qui :
+
+1. ⏳ Attend que PostgreSQL soit prêt (30s max)
+2. 🔍 Détecte les migrations déjà appliquées :
+   - Migration 001 → vérifie si la table `roles` existe
+   - Migration 002 → vérifie si la table `folders` existe
+3. ▶️ Applique uniquement les nouvelles migrations
+4. 📊 Affiche un résumé du schéma
+5. ✅ Confirme le succès
+
+**Avantages** :
+- ✅ **Zéro intervention manuelle** : Les migrations se font automatiquement
+- ✅ **Idempotence** : Peut être exécuté plusieurs fois sans erreur
+- ✅ **Traçabilité** : Logs complets dans GitHub Actions
+- ✅ **Sécurité** : Détection automatique des migrations déjà appliquées
+
+**Exemple de logs du workflow** :
+```
+🗄️ Running database migrations for staging...
+⏳ Waiting for PostgreSQL to be ready...
+✅ PostgreSQL is ready!
+
+1️⃣ Checking migration 001_add_features.sql...
+  ℹ️  Migration 001 already applied (roles table exists)
+
+2️⃣ Checking migration 002_pro_features.sql...
+  ▶️  Applying migration 002_pro_features.sql...
+  ✅ Migration 002 applied successfully
+
+📊 Database schema summary:
+  List of relations
+ Schema |        Name         | Type  |  Owner   
+--------+---------------------+-------+----------
+ public | folders             | table | postgres
+ public | secret_types        | table | postgres
+ ...
+```
+
+---
+
+### 2.1. 🛠️ Exécution Manuelle (Si Besoin)
+
+**Méthode 1 : Via le script dédié** (recommandé)
+
+```bash
+# Copier le script sur le VPS
+scp scripts/run-migrations.sh user@vps:/tmp/
+
+# Se connecter et exécuter
+ssh user@vps
+chmod +x /tmp/run-migrations.sh
+
+# Pour staging
+/tmp/run-migrations.sh staging
+
+# Pour production
+/tmp/run-migrations.sh production
+```
+
+Le script :
+- ✅ Vérifie les migrations déjà appliquées
+- ✅ Applique uniquement les nouvelles
+- ✅ Affiche un résumé coloré
+- ✅ Redémarre le backend automatiquement
+
+**Méthode 2 : Direct avec Docker Compose**
 
 ```bash
 # Se connecter au VPS
 ssh user@secrets.example.com
 
 # Aller dans le dossier
-cd /opt/securevault
+cd /srv/www/securevault/saas/securevault
 
 # Exécuter les migrations dans l'ordre
-docker compose exec postgres psql -U postgres -d securevault < backend/migrations/001_add_features.sql
-docker compose exec postgres psql -U postgres -d securevault < backend/migrations/002_pro_features.sql
+docker compose exec -T postgres psql -U postgres -d securevault < backend/migrations/001_add_features.sql
+docker compose exec -T postgres psql -U postgres -d securevault < backend/migrations/002_pro_features.sql
+
+# Redémarrer le backend
+docker compose restart backend
 ```
 
 **Vérification** :
-```sql
--- Connectez-vous à PostgreSQL
-docker compose exec postgres psql -U postgres -d securevault
+```bash
+# Vérifier les tables
+docker compose exec postgres psql -U postgres -d securevault -c "\dt"
 
--- Vérifiez les tables
-\dt
+# Devrait afficher :
+# folders, secret_types, secret_history, password_health, collections, etc.
 
--- Devrait afficher :
--- folders, secret_types, secret_history, password_health, collections, etc.
+# Vérifier les types de secrets (doit retourner 9)
+docker compose exec postgres psql -U postgres -d securevault -c "SELECT name, label FROM secret_types;"
 
--- Vérifiez les types de secrets
-SELECT name, label FROM secret_types;
-
--- Devrait afficher 9 types : login, secure_note, credit_card, etc.
+# Devrait afficher 9 types : login, secure_note, credit_card, identity, 
+# server, database, api_key, ssh_key, document
 ```
 
 ### 3. Installer les Dépendances
@@ -109,7 +183,300 @@ npm install  # Réinstalle toutes les dépendances
 npm list multer csv-parser
 ```
 
-### 4. Redémarrer les Services
+---
+
+## 📊 Monitoring des Migrations
+
+### 1. Via GitHub Actions (automatique)
+
+Consultez les logs de déploiement :
+
+1. Allez sur GitHub → **Actions**
+2. Sélectionnez **🔐 Deploy SecureVault**
+3. Cliquez sur le dernier run
+4. Ouvrez l'étape **"🗄️ Run Database Migrations"**
+
+Vous verrez exactement quelles migrations ont été appliquées.
+
+### 2. Via Logs Docker
+
+```bash
+# Logs PostgreSQL pendant migration
+docker compose logs -f postgres
+
+# Chercher les erreurs
+docker compose logs postgres | grep -i error
+
+# Logs backend après migration
+docker compose logs -f backend
+```
+
+### 3. Vérification Manuelle du Schéma
+
+```bash
+# Se connecter à la base
+docker compose exec postgres psql -U postgres -d securevault
+
+# Lister toutes les tables
+\dt
+
+# Voir la structure d'une table
+\d folders
+\d secret_types
+\d secret_history
+
+# Voir les vues
+\dv
+
+# Voir les triggers
+\dy
+
+# Quitter
+\q
+```
+
+### 4. Vérifier les Données
+
+```bash
+# Nombre de types de secrets (doit être 9)
+docker compose exec postgres psql -U postgres -d securevault \
+  -c "SELECT COUNT(*) FROM secret_types;"
+
+# Lister tous les types
+docker compose exec postgres psql -U postgres -d securevault \
+  -c "SELECT name, label, icon FROM secret_types ORDER BY name;"
+
+# Vérifier qu'il n'y a pas d'erreurs de contraintes
+docker compose exec postgres psql -U postgres -d securevault \
+  -c "SELECT tablename, indexname FROM pg_indexes WHERE schemaname='public';"
+```
+
+---
+
+## 🔄 Ajouter une Nouvelle Migration
+
+### 1. Créer le fichier
+
+```bash
+# Dans backend/migrations/
+touch 003_my_new_feature.sql
+```
+
+### 2. Écrire la migration
+
+```sql
+-- backend/migrations/003_my_new_feature.sql
+
+-- Vérifier que la migration n'a pas déjà été appliquée
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'my_new_table') THEN
+    
+    -- Créer nouvelle table
+    CREATE TABLE my_new_table (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+    
+    -- Ajouter index
+    CREATE INDEX idx_my_new_table_name ON my_new_table(name);
+    
+    RAISE NOTICE '✅ Table my_new_table created';
+  ELSE
+    RAISE NOTICE 'ℹ️  Table my_new_table already exists';
+  END IF;
+END $$;
+```
+
+### 3. Mettre à jour le workflow
+
+Éditer `.github/workflows/securevault-deploy.yml`, dans la section **"🗄️ Run Database Migrations"** :
+
+```bash
+# Migration 003: My new feature
+echo ""
+echo "3️⃣ Checking migration 003_my_new_feature.sql..."
+if [ -f "backend/migrations/003_my_new_feature.sql" ]; then
+  if docker compose exec -T postgres psql -U postgres -d securevault -tAc \
+    "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'my_new_table');" | grep -q "t"; then
+    echo "  ℹ️  Migration 003 already applied (my_new_table exists)"
+  else
+    echo "  ▶️  Applying migration 003_my_new_feature.sql..."
+    docker compose exec -T postgres psql -U postgres -d securevault < backend/migrations/003_my_new_feature.sql
+    echo "  ✅ Migration 003 applied successfully"
+  fi
+fi
+```
+
+### 4. Mettre à jour le script manuel
+
+Éditer `scripts/run-migrations.sh`, ajouter :
+
+```bash
+# Migration 003
+run_migration "backend/migrations/003_my_new_feature.sql" "my_new_table"
+```
+
+### 5. Tester localement
+
+```bash
+# Appliquer la migration
+docker compose exec -T postgres psql -U postgres -d securevault < backend/migrations/003_my_new_feature.sql
+
+# Vérifier
+docker compose exec postgres psql -U postgres -d securevault -c "\d my_new_table"
+```
+
+### 6. Déployer
+
+```bash
+git add .
+git commit -m "feat: add migration 003 for new feature"
+git push origin develop
+```
+
+Le workflow appliquera automatiquement la nouvelle migration ! 🚀
+
+---
+
+## ⚠️ Troubleshooting des Migrations
+
+### Problème : Migration échoue avec "relation already exists"
+
+**Cause** : La table existe déjà (migration déjà appliquée).
+
+**Solution** :
+```sql
+-- Utiliser toujours IF NOT EXISTS
+CREATE TABLE IF NOT EXISTS my_table (...);
+ALTER TABLE my_table ADD COLUMN IF NOT EXISTS my_column VARCHAR(255);
+```
+
+### Problème : "Database does not exist"
+
+**Cause** : La base n'a pas été créée.
+
+**Solution** :
+```bash
+# Créer la base
+docker compose exec postgres psql -U postgres -c "CREATE DATABASE securevault;"
+
+# Puis relancer les migrations
+docker compose exec -T postgres psql -U postgres -d securevault < backend/migrations/001_add_features.sql
+```
+
+### Problème : Workflow indique "Migration already applied" mais la table n'existe pas
+
+**Cause** : Table indicatrice incorrecte dans le workflow.
+
+**Solution** : Vérifier que la table indicatrice correspond bien à celle créée :
+
+```bash
+# Lister toutes les tables
+docker compose exec postgres psql -U postgres -d securevault -c "\dt"
+
+# Si "folders" n'existe pas mais le workflow dit qu'elle existe, 
+# exécuter manuellement la migration
+docker compose exec -T postgres psql -U postgres -d securevault < backend/migrations/002_pro_features.sql
+```
+
+### Problème : Permission denied sur postgres
+
+**Cause** : Utilisateur postgres n'a pas les droits.
+
+**Solution** :
+```bash
+# Se connecter en tant que superuser
+docker compose exec postgres psql -U postgres
+
+# Donner les droits
+GRANT ALL PRIVILEGES ON DATABASE securevault TO postgres;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO postgres;
+```
+
+### Problème : Workflow timeout sur "Waiting for PostgreSQL"
+
+**Cause** : PostgreSQL trop lent à démarrer.
+
+**Solution** : Augmenter le timeout dans le workflow :
+
+```bash
+# Dans .github/workflows/securevault-deploy.yml
+for i in {1..60}; do  # Passer de 30 à 60 secondes
+  if docker compose exec -T postgres pg_isready -U postgres; then
+    echo "✅ PostgreSQL is ready!"
+    break
+  fi
+  sleep 1
+done
+```
+
+### Problème : Migration appliquée mais backend ne voit pas les nouvelles tables
+
+**Cause** : Backend pas redémarré.
+
+**Solution** :
+```bash
+# Redémarrer le backend
+docker compose restart backend
+
+# Vérifier les logs
+docker compose logs -f backend
+```
+
+### Problème : Données manquantes après migration (secret_types vide)
+
+**Cause** : Migration 002 n'a pas inséré les données.
+
+**Solution** :
+```bash
+# Vérifier si les types existent
+docker compose exec postgres psql -U postgres -d securevault \
+  -c "SELECT COUNT(*) FROM secret_types;"
+
+# Si 0, relancer juste la partie INSERT de la migration
+docker compose exec postgres psql -U postgres -d securevault << 'EOF'
+INSERT INTO secret_types (name, label, icon, fields, description) VALUES
+('login', 'Login', '🔐', 
+ '[{"name":"username","type":"text","label":"Username","required":true},{"name":"password","type":"password","label":"Password","required":true}]',
+ 'Website or app login credentials'),
+-- ... (reste des INSERT)
+ON CONFLICT (name) DO NOTHING;
+EOF
+```
+
+### Rollback d'une Migration (⚠️ Dangereux)
+
+Si une migration a causé des problèmes :
+
+```bash
+# 1. Faire un backup
+docker compose exec postgres pg_dump -U postgres securevault > backup_before_rollback.sql
+
+# 2. Supprimer les tables créées
+docker compose exec postgres psql -U postgres -d securevault << 'EOF'
+DROP TABLE IF EXISTS folders CASCADE;
+DROP TABLE IF EXISTS secret_types CASCADE;
+DROP TABLE IF EXISTS secret_history CASCADE;
+DROP TABLE IF EXISTS password_health CASCADE;
+DROP TABLE IF EXISTS collections CASCADE;
+-- etc.
+EOF
+
+# 3. Restaurer le backup précédent (si disponible)
+docker compose exec -T postgres psql -U postgres -d securevault < backup_before_migration.sql
+
+# 4. Redémarrer
+docker compose restart backend
+```
+
+**⚠️ Important** : Toujours faire un backup avant de rollback !
+
+---
+
+## 4. Redémarrer les Services
 
 ```bash
 # Depuis /opt/securevault
