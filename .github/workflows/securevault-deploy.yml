@@ -458,22 +458,26 @@ jobs:
             CONTAINERS="${{ env.CONTAINER_PREFIX_PROD }}-backend ${{ env.CONTAINER_PREFIX_PROD }}-frontend ${{ env.CONTAINER_PREFIX_PROD }}-postgres"
             NETWORKS="${{ env.NETWORK_PROD }}"
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
+            PROJECT_PATH="${{ env.PROJECT_PATH }}"
           else
             CONTAINERS="${{ env.CONTAINER_PREFIX_STAGING }}-backend ${{ env.CONTAINER_PREFIX_STAGING }}-frontend ${{ env.CONTAINER_PREFIX_STAGING }}-postgres"
             NETWORKS="${{ env.NETWORK_STAGING }}"
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
+            PROJECT_PATH="${{ env.PROJECT_PATH }}"
           fi
           
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << CLEANUP_SCRIPT
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "TARGET_ENV='$TARGET_ENV' CONTAINERS='$CONTAINERS' NETWORKS='$NETWORKS' DEPLOY_DIR='$DEPLOY_DIR' PROJECT_PATH='$PROJECT_PATH'" bash << 'CLEANUP_SCRIPT'
             set -e
             echo "🧹 Cleaning up old containers and networks..."
             echo "Environment: $TARGET_ENV"
             echo "Deploy directory: $DEPLOY_DIR"
+            echo "Containers to remove: $CONTAINERS"
+            echo "Networks to remove: $NETWORKS"
             
             # Arrêter les conteneurs via docker compose si le dossier existe
-            if [ -d "$DEPLOY_DIR/${{ env.PROJECT_PATH }}" ]; then
+            if [ -d "$DEPLOY_DIR/$PROJECT_PATH" ]; then
               echo "📂 Found existing deployment, stopping services..."
-              cd "$DEPLOY_DIR/${{ env.PROJECT_PATH }}"
+              cd "$DEPLOY_DIR/$PROJECT_PATH"
               docker compose down 2>/dev/null || echo "  ℹ️  No compose services running"
             fi
             
