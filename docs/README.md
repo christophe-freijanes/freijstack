@@ -20,6 +20,7 @@ Index de la documentation technique du projet.
 | 🏗️ **Architecture Technique** | Infrastructure, CI/CD, déploiement | [architecture.md](architecture.md) |
 | 📌 **Guide Déploiement** | VPS, Docker, Traefik, rollback | [DEPLOYMENT.md](DEPLOYMENT.md) |
 | 🔐 **SecureVault Deployment** | Pipeline CI/CD dédiée, configuration VPS | [SECUREVAULT_DEPLOYMENT.md](SECUREVAULT_DEPLOYMENT.md) |
+| 🤖 **Automatisation Complète** | Zéro-intervention, staging éphémère, prod 24/7 | [AUTOMATION.md](AUTOMATION.md) |
 | 🔄 **Secret Rotation** | Automatisation rotation des secrets | [SECRET_ROTATION.md](SECRET_ROTATION.md) |
 | 🔍 **Guide Troubleshooting** | Diagnostic et résolution des problèmes | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) |
 | 📊 **Guide Monitoring** | Prometheus, Grafana, Loki, alertes | [MONITORING.md](MONITORING.md) |
@@ -37,6 +38,7 @@ Index de la documentation technique du projet.
 - [Architecture Technique Complète](architecture.md) - Infrastructure, CI/CD, sécurité, monitoring
 - [Guide Déploiement VPS](DEPLOYMENT.md) - Installation complète (Ubuntu, Docker, Traefik, DNS)
 - [SecureVault CI/CD Pipeline](SECUREVAULT_DEPLOYMENT.md) - Déploiement automatisé SecureVault
+- [Automatisation Complète](AUTOMATION.md) - Zéro-intervention, staging éphémère, production 24/7
 - [Secret Rotation Automation](SECRET_ROTATION.md) - Rotation automatisée des secrets
 - [Guide Monitoring](MONITORING.md) - Prometheus, Grafana, Loki, alertes
 - [Configuration Docker Compose](architecture.md#34-docker-compose-configuration)
