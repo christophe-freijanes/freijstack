@@ -246,13 +246,13 @@ jobs:
               # Vérifier les secrets critiques
               MISSING_SECRETS=""
               for VAR in DB_PASSWORD JWT_SECRET ENCRYPTION_KEY; do
-                if ! grep -q "^\${VAR}=" "\$VPS_ENV_FILE"; then
-                  MISSING_SECRETS="\$MISSING_SECRETS \$VAR"
+                if ! grep -q "^${VAR}=" "$VPS_ENV_FILE"; then
+                  MISSING_SECRETS="$MISSING_SECRETS $VAR"
                 fi
               done
               
-              if [ -n "\$MISSING_SECRETS" ]; then
-                echo "❌ Missing critical secrets:\$MISSING_SECRETS"
+              if [ -n "$MISSING_SECRETS" ]; then
+                echo "❌ Missing critical secrets:$MISSING_SECRETS"
                 echo "   These must be added manually for security reasons"
                 exit 1
               fi
@@ -266,12 +266,12 @@ jobs:
               echo "⚠️ .env file not found, creating it with generated secrets..."
               
               # Créer le répertoire si nécessaire
-              mkdir -p \$(dirname "\$VPS_ENV_FILE")
+              mkdir -p $(dirname "$VPS_ENV_FILE")
               
               # Générer les secrets
-              DB_PASS=\$(openssl rand -hex 32)
-              JWT_SEC=\$(openssl rand -hex 32)
-              ENC_KEY=\$(openssl rand -hex 32)
+              DB_PASS=$(openssl rand -hex 32)
+              JWT_SEC=$(openssl rand -hex 32)
+              ENC_KEY=$(openssl rand -hex 32)
               
               # Déterminer les domaines selon l'environnement
               if [ "$TARGET_ENV" = "production" ]; then
@@ -289,33 +289,33 @@ jobs:
               # Créer le fichier .env avec les secrets générés
               {
                 echo "# Auto-generated secrets for SecureVault $TARGET_ENV"
-                echo "# Generated on \$(date)"
+                echo "# Generated on $(date)"
                 echo ""
-                echo "COMPOSE_PROJECT_NAME=\\$PROJECT_NAME"
+                echo "COMPOSE_PROJECT_NAME=$PROJECT_NAME"
                 echo ""
-                echo "DB_PASSWORD=\$DB_PASS"
-                echo "JWT_SECRET=\$JWT_SEC"
-                echo "ENCRYPTION_KEY=\$ENC_KEY"
+                echo "DB_PASSWORD=$DB_PASS"
+                echo "JWT_SECRET=$JWT_SEC"
+                echo "ENCRYPTION_KEY=$ENC_KEY"
                 echo ""
                 echo "# Domain configuration"
-                echo "API_DOMAIN=\$API_DOM"
-                echo "FRONTEND_DOMAIN=\$FRONTEND_DOM"
-                echo "FRONTEND_URL=\$FRONTEND_U"
-              } > "\\$VPS_ENV_FILE"
+                echo "API_DOMAIN=$API_DOM"
+                echo "FRONTEND_DOMAIN=$FRONTEND_DOM"
+                echo "FRONTEND_URL=$FRONTEND_U"
+              } > "$VPS_ENV_FILE"
               
-              chmod 600 "\$VPS_ENV_FILE"
-              echo "✅ .env file created at \$VPS_ENV_FILE with secure permissions"
+              chmod 600 "$VPS_ENV_FILE"
+              echo "✅ .env file created at $VPS_ENV_FILE with secure permissions"
             fi
             
             # 6. Vérifier les permissions
             echo ""
             echo "6️⃣ Checking .env permissions..."
-            PERMS=\$(stat -c %a "\$VPS_ENV_FILE" 2>/dev/null || stat -f %A "\$VPS_ENV_FILE")
-            if [ "\\$PERMS" = "600" ]; then
+            PERMS=$(stat -c %a "$VPS_ENV_FILE" 2>/dev/null || stat -f %A "$VPS_ENV_FILE")
+            if [ "$PERMS" = "600" ]; then
               echo "✅ .env permissions are secure (600)"
             else
-              echo "⚠️ .env permissions are \$PERMS (should be 600)"
-              echo "   Fix with: chmod 600 \$VPS_ENV_FILE"
+              echo "⚠️ .env permissions are $PERMS (should be 600)"
+              echo "   Fix with: chmod 600 $VPS_ENV_FILE"
             fi
             
             echo ""
@@ -464,11 +464,11 @@ jobs:
             
             # Arrêter et supprimer les conteneurs s'ils existent
             for CONTAINER in $CONTAINERS; do
-              if docker ps -a --format '{{.Names}}' | grep -q "^\${CONTAINER}\$"; then
-                echo "Removing container: \$CONTAINER"
-                docker rm -f "\$CONTAINER" || true
+              if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER}$"; then
+                echo "Removing container: $CONTAINER"
+                docker rm -f "$CONTAINER" || true
               else
-                echo "Container \$CONTAINER does not exist, skipping"
+                echo "Container $CONTAINER does not exist, skipping"
               fi
             done
             
@@ -550,45 +550,45 @@ jobs:
                 echo "🧹 Cleaning existing directory..."
                 rm -rf "$DEPLOY_DIR"
               fi
-              git clone -b \$BRANCH https://github.com/${{ github.repository }}.git "\$DEPLOY_DIR"
-              cd "\$DEPLOY_DIR"
+              git clone -b $BRANCH https://github.com/${{ github.repository }}.git "$DEPLOY_DIR"
+              cd "$DEPLOY_DIR"
             fi
             
             # Naviguer vers securevault
             cd ${{ env.PROJECT_PATH }}
             
-            echo "📝 Using environment template: \$ENV_TEMPLATE"
+            echo "📝 Using environment template: $ENV_TEMPLATE"
             
             # Vérifier que le template existe dans le repo
-            if [ ! -f "\$ENV_TEMPLATE" ]; then
-              echo "❌ ERREUR: Template \$ENV_TEMPLATE manquant dans le repo"
+            if [ ! -f "$ENV_TEMPLATE" ]; then
+              echo "❌ ERREUR: Template $ENV_TEMPLATE manquant dans le repo"
               exit 1
             fi
             
             # Copier le template comme base
-            cp "\$ENV_TEMPLATE" .env
+            cp "$ENV_TEMPLATE" .env
             
             # Vérifier et injecter les secrets depuis le fichier .env du VPS
-            if [ -f "\$VPS_ENV_FILE" ]; then
+            if [ -f "$VPS_ENV_FILE" ]; then
               echo "🔐 Injecting secrets from VPS .env file..."
               
               # Extraire les secrets critiques du fichier VPS
               for SECRET_VAR in POSTGRES_PASSWORD JWT_SECRET ENCRYPTION_KEY; do
-                SECRET_VALUE=\$(grep -E "^\${SECRET_VAR}=" "\$VPS_ENV_FILE" 2>/dev/null | cut -d'=' -f2- || echo "")
-                if [ -n "\$SECRET_VALUE" ]; then
+                SECRET_VALUE=$(grep -E "^${SECRET_VAR}=" "$VPS_ENV_FILE" 2>/dev/null | cut -d'=' -f2- || echo "")
+                if [ -n "$SECRET_VALUE" ]; then
                   # Remplacer dans le fichier .env local
-                  if grep -q "^\${SECRET_VAR}=" .env; then
-                    sed -i "s|^\${SECRET_VAR}=.*|\${SECRET_VAR}=\${SECRET_VALUE}|" .env
+                  if grep -q "^${SECRET_VAR}=" .env; then
+                    sed -i "s|^${SECRET_VAR}=.*|${SECRET_VAR}=${SECRET_VALUE}|" .env
                   else
-                    echo "\${SECRET_VAR}=\${SECRET_VALUE}" >> .env
+                    echo "${SECRET_VAR}=${SECRET_VALUE}" >> .env
                   fi
-                  echo "  ✅ Injected \${SECRET_VAR}"
+                  echo "  ✅ Injected ${SECRET_VAR}"
                 else
-                  echo "  ⚠️ \${SECRET_VAR} not found in VPS .env, using template default"
+                  echo "  ⚠️ ${SECRET_VAR} not found in VPS .env, using template default"
                 fi
               done
             else
-              echo "⚠️ VPS .env file not found at \$VPS_ENV_FILE"
+              echo "⚠️ VPS .env file not found at $VPS_ENV_FILE"
               echo "   Using template defaults (INSECURE for production!)"
             fi
             
@@ -697,14 +697,14 @@ jobs:
 
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << VERIFY_LOGS
             set -e
-            TRAEFIK_CONTAINER=\$(docker ps --format '{{.Names}}' | grep -i 'traefik' | head -n1)
-            if [ -z "\$TRAEFIK_CONTAINER" ]; then
+            TRAEFIK_CONTAINER=$(docker ps --format '{{.Names}}' | grep -i 'traefik' | head -n1)
+            if [ -z "$TRAEFIK_CONTAINER" ]; then
               echo "❌ Traefik not running"
               exit 1
             fi
-            echo "✅ Found Traefik container: \$TRAEFIK_CONTAINER"
+            echo "✅ Found Traefik container: $TRAEFIK_CONTAINER"
             echo "📜 Last Traefik logs (filtered):"
-            docker logs --tail=300 "\$TRAEFIK_CONTAINER" | grep -E "($FRONTEND_DOM|$API_DOM|mytlschallenge|websecure)" || true
+            docker logs --tail=300 "$TRAEFIK_CONTAINER" | grep -E "($FRONTEND_DOM|$API_DOM|mytlschallenge|websecure)" || true
             echo "✅ Log inspection done"
           VERIFY_LOGS
 
@@ -797,4 +797,5 @@ jobs:
           echo "Tests: ${{ needs.test.result }}"
           echo "Deploy: ${{ needs.deploy.result }}"
           echo "Post-verify: ${{ needs.post-verify.result }}"
+
 
