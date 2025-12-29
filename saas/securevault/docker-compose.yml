@@ -47,7 +47,7 @@ services:
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-backend.rule=Host(`${API_DOMAIN:-vault-api.freijstack.com}`)"
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-backend.entrypoints=websecure"
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-backend.tls=true"
-      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-backend.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-backend.tls.certresolver=mytlschallenge"
       - "traefik.http.services.${COMPOSE_PROJECT_NAME:-securevault}-backend.loadbalancer.server.port=3001"
       # CORS headers
       - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-securevault}-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS"
@@ -75,7 +75,7 @@ services:
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-frontend.rule=Host(`${FRONTEND_DOMAIN:-vault.freijstack.com}`)"
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-frontend.entrypoints=websecure"
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-frontend.tls=true"
-      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-frontend.tls.certresolver=mytlschallenge"
       - "traefik.http.services.${COMPOSE_PROJECT_NAME:-securevault}-frontend.loadbalancer.server.port=80"
 
 volumes:
