@@ -568,3 +568,126 @@ docker stats
 **Version**: 1.0  
 **Auteur**: Christophe FREIJANES  
 **Date**: Décembre 2025
+ 
+---
+
+## 🔧 Prochaines Étapes - Déploiement VPS (SecureVault)
+
+Procédure pas-à-pas pour déployer l'application SaaS de démo SecureVault sur le VPS hébergeant déjà le portfolio.
+
+### 1. Préparer DNS et Traefik
+
+- Ajouter ces enregistrements DNS vers l'IP du VPS:
+
+```
+Type    Nom                   Valeur
+A       vault                 IP_VPS
+A       vault-api             IP_VPS
+```
+
+- Vérifier que le réseau Docker Traefik existe (créé plus haut):
+
+```bash
+docker network ls | grep web || docker network create web
+```
+
+### 2. Récupérer le code sur le VPS
+
+```bash
+ssh deploy@IP_VPS
+cd /srv/docker
+git clone https://github.com/christophe-freijanes/freijstack.git || true
+cd freijstack
+git pull origin develop
+cd saas/securevault
+```
+
+### 3. Générer les secrets nécessaires
+
+```bash
+# JWT Secret (32 bytes = 64 hex chars)
+openssl rand -hex 32
+
+# Encryption Key (32 bytes = 64 hex chars)
+openssl rand -hex 32
+
+# Database Password
+openssl rand -base64 24
+```
+
+### 4. Configurer l'environnement
+
+```bash
+cp .env.example .env
+nano .env
+
+# Renseigner:
+# DB_PASSWORD=...
+# JWT_SECRET=...
+# ENCRYPTION_KEY=...
+```
+
+### 5. Builder et démarrer les services
+
+```bash
+docker-compose up -d --build
+
+# Vérifier conteneurs
+docker-compose ps
+
+# Suivre les logs
+docker-compose logs -f backend
+docker-compose logs -f frontend
+```
+
+### 6. Initialiser la base de données
+
+```bash
+chmod +x init-db.sh
+./init-db.sh
+```
+
+### 7. Vérifications post-déploiement
+
+```bash
+# Backend API (Doit renvoyer status healthy)
+curl https://vault-api.freijstack.com/health
+
+# Frontend (Réponse 200)
+curl -I https://vault.freijstack.com
+
+# Certificats TLS actifs via Traefik
+docker logs traefik | grep -i acme
+```
+
+### 8. Premier utilisateur et premier secret
+
+1. Ouvrir https://vault.freijstack.com
+2. Créer un compte (page Register)
+3. Se connecter (Login)
+4. Créer un secret (ex: `aws-api-key`) via le Dashboard
+
+### 9. Notes importantes de sécurité
+
+- Ne pas changer `ENCRYPTION_KEY` en production sans rotation planifiée (perte d'accès aux secrets existants)
+- Sauvegarder `ENCRYPTION_KEY` et `JWT_SECRET` dans un coffre (Vault/1Password)
+- Sauvegarder la base PostgreSQL régulièrement:
+
+```bash
+docker-compose exec postgres pg_dump -U securevault securevault | gzip > backup_$(date +%Y%m%d_%H%M%S).sql.gz
+```
+
+### 10. Rollback rapide (SecureVault)
+
+```bash
+# Arrêter services
+docker-compose down
+
+# Restaurer DB depuis backup
+gunzip -c backup_YYYYMMDD_HHMMSS.sql.gz | docker-compose exec -T postgres psql -U securevault securevault
+
+# Relancer
+docker-compose up -d
+```
+
+Pour plus de détails, voir la documentation dédiée: saas/securevault/README.md.

@@ -1,0 +1,348 @@
+# 🔒 SECURITY - Fichiers Sensibles
+
+## Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+.env.production.local
+.env.development.local
+.env.test.local
+*.env
+!.env.example
+
+## SSH Keys & Certificates
+*.pem
+*.key
+*.crt
+*.cer
+*.p8
+*.p12
+*.pfx
+*.jks
+*.pub
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+known_hosts
+
+## API Keys & Credentials
+.credentials
+credentials.json
+~/.aws/
+~/.gcloud/
+~/.kube/config
+
+## Private Files
+*.private
+*.secret
+secrets/
+private/
+
+---
+
+# 📦 Dependencies
+
+## Node.js / npm
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+npm-debug.log
+npm-error.log
+yarn-error.log
+pnpm-debug.log
+.pnpm-store/
+
+## Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+---
+
+# 🛠️ Build & Compilation
+
+## General
+build/
+dist/
+*.local
+*.min.js
+*.min.css
+
+## React/Frontend
+.parcel-cache
+.next
+out/
+.nuxt
+dist/
+.cache/
+.vuepress/dist
+.serverless/
+.fusebox/
+.dynamodb/
+.tern-port
+.vscode-test
+.yarn/cache
+.yarn/unplugged
+
+## Backend/Server
+dist/
+build/
+coverage/
+.nyc_output/
+
+---
+
+# 💾 Logs & Temp Files
+
+## Logs
+*.log
+logs/
+log/
+logs/**/*
+
+## Temporary Files
+tmp/
+temp/
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+---
+
+# 🔧 IDE & Editor Files
+
+## VS Code
+.vscode/
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
+
+## JetBrains IDEs
+.idea/
+.idea_modules/
+*.iml
+*.iws
+*.ipr
+out/
+.gradle/
+.gradletasknamecache
+
+## Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+## Vim
+.vim/
+*.swp
+*.swo
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+.netrwhist
+*~
+
+## Emacs
+*~
+\#*\#
+.\#*
+
+## macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+---
+
+# 🐳 Docker & Containers
+
+## Docker
+Dockerfile.build
+docker-compose.override.yml
+.dockerignore
+
+## Container Artifacts
+.container_cache/
+
+---
+
+# 🗄️ Database
+
+## Database Files
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+data/
+pgdata/
+mongodata/
+redis_data/
+
+## Database Backups
+*.sql
+*.sql.gz
+*.bak
+backups/
+
+---
+
+# ☁️ Cloud & VCS
+
+## AWS
+.aws/
+.aws-credentials
+aws-credentials
+
+## Google Cloud
+.gcloud/
+.gcp/
+
+## Azure
+.azure/
+
+## Backups
+.backups/
+backups/
+*.backup
+
+---
+
+# 📊 Coverage & Testing
+
+coverage/
+.coverage
+.nyc_output/
+junit.xml
+coverage.xml
+*.lcov
+.eslintcache
+
+---
+
+# 🚀 CI/CD & Deploy
+
+## GitHub Actions
+.github/workflows/logs/
+
+## Deploy Artifacts
+releases/
+artifacts/
+.deploy/
+
+---
+
+# 📄 OS & System Files
+
+## Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+## Linux
+.fuse_hidden*
+.directory
+
+## macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+---
+
+# 🔐 Security-Specific
+
+## OWASP Security
+secrets/
+.secrets/
+.private/
+.secure/
+sensitive_data/
+
+## Password Managers
+.1password/
+.lastpass/
+.keepass/
+
+## VPN & Network
+.vpn/
+.ssh/config
+.netrc
+
+---
+
+# 🎯 Project-Specific
+
+## Portfolio Build
+portfolio/dist/
+portfolio/build/
+
+## SaaS Build
+saas/*/dist/
+saas/*/build/
+saas/securevault/backend/dist/
+saas/securevault/frontend/build/
+
+## Docs Build
+docs/.vuepress/dist
+docs/.vitepress/dist
+docs/site/
+
+---
+
+# ✅ IMPORTANT: Do NOT ignore these!
+
+# Keep tracked (negation patterns)
+!.gitkeep
+!.gitleaksignore
+!.env.example
+!.github/workflows/
+!.github/pull_request_template.md
+!.vscode/settings.json
+!.vscode/extensions.json
+!.idea/runConfigurations/
+!.idea/codeStyles/
+!docs/
+!portfolio/
+!saas/

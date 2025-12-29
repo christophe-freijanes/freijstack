@@ -42,11 +42,11 @@ freijstack/
 │   ├── public/                    # Assets publics
 │   └── README.md                  # Documentation portfolio
 ├── saas/
-│   ├── app1/                      # Gestionnaire de tâches sécurisé
-│   │   ├── Dockerfile
-│   │   └── README.md
-│   ├── app2/                      # Service notifications temps réel
-│   │   ├── Dockerfile
+│   ├── securevault/               # SecureVault Manager (secrets chiffrés)
+│   │   ├── backend/
+│   │   ├── frontend/
+│   │   ├── docker-compose.yml
+│   │   ├── init-db.sh
 │   │   └── README.md
 │   └── README.md                  # Vue d'ensemble SaaS
 ├── package.json                   # Scripts et dépendances
@@ -60,7 +60,7 @@ freijstack/
 - ✅ **Sécurisé** - CSP, WCAG AA, scans automatiques (CodeQL, Gitleaks, Trivy)
 - ✅ **Déploiement Automatisé** - CI/CD complet via GitHub Actions
 - ✅ **High Availability** - Traefik + nginx avec TLS automatique
-- 🚧 **SaaS Démos** - Applications conteneurisées (en développement)
+- ✅ **SaaS Demo** - SecureVault Manager (secrets chiffrés, audit logs, PostgreSQL)
 
 ---
 
@@ -99,24 +99,21 @@ freijstack/
 
 ### 2.2. Applications SaaS (`/saas`)
 
-**Description**: Exemples d'applications conteneurisées démontrant architecture microservices et DevSecOps.
+**Description**: Exemple d'application conteneurisée démontrant architecture sécurisée et DevSecOps.
 
-#### App1: Gestionnaire de Tâches Sécurisé
-- **Stack**: Node.js/Python + Express/FastAPI + PostgreSQL/MongoDB
-- **Features**: JWT auth, RBAC, RESTful API, Docker multi-stage
-- **Architecture**: Backend + Frontend (React/Vue) + Database
-- **Status**: 🚧 En développement
-
-#### App2: Service de Notifications Temps Réel
-- **Stack**: Node.js + Socket.io + RabbitMQ/Redis + MongoDB
-- **Features**: WebSockets, event-driven, message queue, real-time
-- **Architecture**: Microservices, circuit breaker, retry patterns
-- **Status**: 🚧 En développement
+#### SecureVault Manager: Gestionnaire de Secrets Chiffrés
+- **Stack**: Node.js 18 + Express + React 18 + PostgreSQL 15 + Traefik
+- **Features**: 
+  - Chiffrement AES-256-GCM des secrets
+  - Authentification JWT + RBAC (admin, user)
+  - Audit logs détaillés
+  - Intégration Traefik avec TLS/ACME
+- **Architecture**: Backend API + Frontend SPA + Database + Docker Compose
+- **Status**: ✅ Production-ready
 
 **Documentation**:
 - [Vue d'ensemble SaaS](../saas/README.md)
-- [App1 README](../saas/app1/README.md)
-- [App2 README](../saas/app2/README.md)
+- [SecureVault Manager](../saas/securevault/README.md)
 
 ---
 
@@ -563,8 +560,9 @@ services:
 ### Roadmap Technique
 
 **Court terme** (Q1 2025):
-- [ ] Finaliser App1 (gestionnaire tâches)
-- [ ] Finaliser App2 (service notifications)
+- [x] SecureVault Manager (gestionnaire secrets chiffrés)
+- [x] Intégration Traefik + TLS/ACME
+- [x] Audit logs et RBAC
 - [ ] Ajouter monitoring (Prometheus + Grafana)
 - [ ] Implémenter analytics (privacy-first, e.g., Plausible)
 

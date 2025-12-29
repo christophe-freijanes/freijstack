@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: securevault-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: securevault
+      POSTGRES_USER: securevault
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme_in_production}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - securevault-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U securevault"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: securevault-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://securevault:${DB_PASSWORD:-changeme_in_production}@postgres:5432/securevault
+      JWT_SECRET: ${JWT_SECRET:-generate_with_openssl_rand_hex_32}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-generate_with_openssl_rand_hex_32}
+      BCRYPT_ROUNDS: 12
+      JWT_EXPIRES_IN: 24h
+      FRONTEND_URL: https://vault.freijstack.com
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - securevault-network
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.securevault-backend.rule=Host(`vault-api.freijstack.com`)"
+      - "traefik.http.routers.securevault-backend.entrypoints=websecure"
+      - "traefik.http.routers.securevault-backend.tls=true"
+      - "traefik.http.routers.securevault-backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.securevault-backend.loadbalancer.server.port=3001"
+      # CORS headers
+      - "traefik.http.middlewares.securevault-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS"
+      - "traefik.http.middlewares.securevault-cors.headers.accesscontrolalloworiginlist=https://vault.freijstack.com"
+      - "traefik.http.middlewares.securevault-cors.headers.accesscontrolallowcredentials=true"
+      - "traefik.http.middlewares.securevault-cors.headers.accesscontrolallowheaders=Content-Type,Authorization"
+      - "traefik.http.routers.securevault-backend.middlewares=securevault-cors"
+    command: sh -c "sleep 5 && node src/server.js"
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: securevault-frontend
+    restart: unless-stopped
+    environment:
+      REACT_APP_API_URL: https://vault-api.freijstack.com/api
+    depends_on:
+      - backend
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.securevault-frontend.rule=Host(`vault.freijstack.com`)"
+      - "traefik.http.routers.securevault-frontend.entrypoints=websecure"
+      - "traefik.http.routers.securevault-frontend.tls=true"
+      - "traefik.http.routers.securevault-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.securevault-frontend.loadbalancer.server.port=80"
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  securevault-network:
+    driver: bridge
+  web:
+    external: true
