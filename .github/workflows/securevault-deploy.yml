@@ -130,18 +130,19 @@ jobs:
           export TARGET_ENV VPS_ENV_FILE
           
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "TARGET_ENV='$TARGET_ENV' VPS_ENV_FILE='$VPS_ENV_FILE'" bash << 'VPS_CHECK'
-            set -e
             echo "🔍 Checking VPS configuration..."
             echo "Environment: $TARGET_ENV"
+            echo "ENV File: $VPS_ENV_FILE"
             echo ""
 
             # Mask sensitive values from existing .env if present
             echo "🔒 Applying runtime masks for sensitive values..."
             if [ -f "$VPS_ENV_FILE" ]; then
               for VAR in DB_PASSWORD JWT_SECRET ENCRYPTION_KEY POSTGRES_PASSWORD; do
-                VALUE=$(grep -E "^${VAR}=" "$VPS_ENV_FILE" | cut -d'=' -f2-)
+                VALUE=$(grep -E "^${VAR}=" "$VPS_ENV_FILE" 2>/dev/null | cut -d'=' -f2- || echo "")
                 if [ -n "$VALUE" ]; then
                   echo "::add-mask::$VALUE"
+                  echo "  ✅ Masked $VAR"
                 fi
               done
             fi
@@ -243,14 +244,21 @@ jobs:
               # Vérifier les secrets critiques
               MISSING_SECRETS=""
               for VAR in DB_PASSWORD JWT_SECRET ENCRYPTION_KEY; do
-                if ! grep -q "^${VAR}=" "$VPS_ENV_FILE"; then
+                if ! grep -q "^${VAR}=" "$VPS_ENV_FILE" 2>/dev/null; then
                   MISSING_SECRETS="$MISSING_SECRETS $VAR"
+                  echo "  ⚠️  Missing: $VAR"
+                else
+                  echo "  ✅ Found: $VAR"
                 fi
               done
               
               if [ -n "$MISSING_SECRETS" ]; then
+                echo ""
                 echo "❌ Missing critical secrets:$MISSING_SECRETS"
-                echo "   These must be added manually for security reasons"
+                echo "   Add them to $VPS_ENV_FILE:"
+                echo "   DB_PASSWORD=\$(openssl rand -hex 32)"
+                echo "   JWT_SECRET=\$(openssl rand -hex 32)"
+                echo "   ENCRYPTION_KEY=\$(openssl rand -hex 32)"
                 exit 1
               fi
               
