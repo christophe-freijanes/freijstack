@@ -538,59 +538,62 @@ jobs:
             # Naviguer vers securevault
             cd saas/securevault
             
-            # Vérifier que .env existe à la racine
-            if [ ! -f "$ENV_FILE" ]; then
-              echo "❌ ERREUR: Fichier .env manquant à $ENV_FILE"
-              echo "📝 Créez-le sur le VPS avec les variables d'environnement"
-              echo "   Exemple: JWT_SECRET, ENCRYPTION_KEY, DB_PASSWORD, etc."
+            # Copier le fichier .env correspondant à l'environnement
+            if [ "$TARGET_ENV" = "production" ]; then
+              ENV_TEMPLATE=".env.production"
+            else
+              ENV_TEMPLATE=".env.staging"
+            fi
+            
+            echo "📝 Using environment template: $ENV_TEMPLATE"
+            
+            # Vérifier que le template existe dans le repo
+            if [ ! -f "$ENV_TEMPLATE" ]; then
+              echo "❌ ERREUR: Template $ENV_TEMPLATE manquant dans le repo"
               exit 1
             fi
             
-            # Copier le .env depuis la racine vers le répertoire docker-compose
-            echo "📝 Copying .env file..."
-            cp "$ENV_FILE" .env
-
-            # Forcer les variables d'environnement selon l'environnement ciblé (priorité sur .env)
-            if [ "$TARGET_ENV" = "production" ]; then
-              PROJECT_NAME="securevault"
-              API_DOM="vault-api.freijstack.com"
-              FRONTEND_DOM="vault.freijstack.com"
-              FRONTEND_U="https://vault.freijstack.com"
-              COMPOSE_FILE="docker-compose.yml"
+            # Copier le template comme base
+            cp "$ENV_TEMPLATE" .env
+            
+            # Vérifier et injecter les secrets depuis le fichier .env du VPS
+            if [ -f "$ENV_FILE" ]; then
+              echo "🔐 Injecting secrets from VPS .env file..."
+              
+              # Extraire les secrets critiques du fichier VPS
+              for SECRET_VAR in POSTGRES_PASSWORD JWT_SECRET ENCRYPTION_KEY; do
+                SECRET_VALUE=$(grep -E "^${SECRET_VAR}=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- || echo "")
+                if [ -n "$SECRET_VALUE" ]; then
+                  # Remplacer dans le fichier .env local
+                  if grep -q "^${SECRET_VAR}=" .env; then
+                    sed -i "s|^${SECRET_VAR}=.*|${SECRET_VAR}=${SECRET_VALUE}|" .env
+                  else
+                    echo "${SECRET_VAR}=${SECRET_VALUE}" >> .env
+                  fi
+                  echo "  ✅ Injected ${SECRET_VAR}"
+                else
+                  echo "  ⚠️ ${SECRET_VAR} not found in VPS .env, using template default"
+                fi
+              done
             else
-              PROJECT_NAME="securevault-staging"
-              API_DOM="vault-api-staging.freijstack.com"
-              FRONTEND_DOM="vault-staging.freijstack.com"
-              FRONTEND_U="https://vault-staging.freijstack.com"
-              COMPOSE_FILE="docker-compose.staging.yml"
+              echo "⚠️ VPS .env file not found at $ENV_FILE"
+              echo "   Using template defaults (INSECURE for production!)"
             fi
-
-            export COMPOSE_PROJECT_NAME="$PROJECT_NAME"
-            export API_DOMAIN="$API_DOM"
-            export FRONTEND_DOMAIN="$FRONTEND_DOM"
-            export FRONTEND_URL="$FRONTEND_U"
-
-            echo "🔧 Effective environment variables for compose:"
-            echo "  COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME"
-            echo "  COMPOSE_FILE=$COMPOSE_FILE"
-            echo "  API_DOMAIN=$API_DOMAIN"
-            echo "  FRONTEND_DOMAIN=$FRONTEND_DOMAIN"
-            echo "  FRONTEND_URL=$FRONTEND_URL"
             
             echo "🔧 Building and starting containers..."
-            docker compose -f "$COMPOSE_FILE" pull
-            docker compose -f "$COMPOSE_FILE" up -d --build --remove-orphans
+            docker compose pull
+            docker compose up -d --build --remove-orphans
             
             # Attendre que les services soient prêts
             sleep 10
             
             # Vérifier la santé
             echo "🏥 Checking health..."
-            docker compose -f "$COMPOSE_FILE" ps
+            docker compose ps
             
             echo "✅ Deployment successful!"
             echo "📊 Logs:"
-            docker compose -f "$COMPOSE_FILE" logs --tail=20
+            docker compose logs --tail=20
           DEPLOY_SCRIPT
 
       - name: 🔄 Restart Traefik (optionnel)

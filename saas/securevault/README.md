@@ -147,32 +147,48 @@ openssl rand -base64 24
 
 ### 3. Créer .env
 
+Le projet utilise un **système d'environnement variabilisé** avec des fichiers `.env` spécifiques:
+
+**Fichiers disponibles**:
+- `.env.example` - Template avec documentation complète
+- `.env.production` - Configuration production (vault.freijstack.com)
+- `.env.staging` - Configuration staging (vault-staging.freijstack.com)
+
+**Pour développement local**:
 ```bash
 cp .env.example .env
 nano .env
 ```
 
-**Contenu .env**:
-```env
-# Secrets (requis - générer avec: openssl rand -hex 32)
-DB_PASSWORD=your_secure_db_password_here
-JWT_SECRET=your_jwt_secret_32_bytes_hex_here
-ENCRYPTION_KEY=your_encryption_key_32_bytes_hex_here
+**Pour déploiement sur VPS** (requis):
+```bash
+# Pour production
+nano /srv/www/securevault/.env
 
-# Configuration des domaines (requis pour Traefik)
-API_DOMAIN=vault-api.freijstack.com
-FRONTEND_DOMAIN=vault.freijstack.com
-FRONTEND_URL=https://vault.freijstack.com
+# Pour staging
+nano /srv/www/securevault-staging/.env
 ```
 
-💡 **Pour staging**, utilisez:
+**Contenu minimal .env** (secrets critiques à ajouter):
 ```env
-API_DOMAIN=vault-api-staging.freijstack.com
-FRONTEND_DOMAIN=vault-staging.freijstack.com
-FRONTEND_URL=https://vault-staging.freijstack.com
+# Générer avec: openssl rand -hex 32
+POSTGRES_PASSWORD=votre_mot_de_passe_db_securise
+JWT_SECRET=votre_secret_jwt_32_bytes_hex
+ENCRYPTION_KEY=votre_cle_chiffrement_32_bytes_hex
 ```
 
-⚠️ **IMPORTANT**: Ces clés sont critiques ! Ne jamais les commiter dans Git.
+⚠️ **IMPORTANT**: 
+- Les templates `.env.production` et `.env.staging` sont **versionnés** (sans secrets)
+- Les secrets réels sont dans `/srv/www/securevault/.env` sur le VPS (non versionnés)
+- CI/CD injecte automatiquement les secrets du VPS dans les containers
+
+**Architecture de déploiement**:
+```
+1. GitHub Actions copie .env.production ou .env.staging (depuis le repo)
+2. Script injecte les secrets depuis /srv/www/securevault/.env (VPS)
+3. docker compose up utilise le .env fusionné
+4. Un seul docker-compose.yml pour les deux environnements ✨
+```
 
 ### 4. Lancer l'Application
 
