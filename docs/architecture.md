@@ -93,7 +93,7 @@ freijstack/
 - **Production**: https://portfolio.freijstack.com (branch master)
 - **Staging**: https://portfolio-staging.freijstack.com (branch develop)
 
-**Documentation**: [portfolio/README.md](../portfolio/README.md)
+**Documentation**: [portfolio/README.md](../saas/portfolio/README.md)
 
 ---
 
@@ -589,7 +589,7 @@ services:
 
 **Documentation**:
 - [README Principal](../README.md)
-- [Portfolio README](../portfolio/README.md)
+- [Portfolio README](../saas/portfolio/README.md)
 - [SaaS Apps README](../saas/README.md)
 
 ---

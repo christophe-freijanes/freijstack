@@ -5,7 +5,7 @@
 [![Multilingue](https://img.shields.io/badge/languages-FR%2FEN-orange?style=flat-square&logo=language)](./index.html)
 [![Responsive](https://img.shields.io/badge/responsive-mobile--first-green?style=flat-square&logo=device)](./style.css)
 [![WCAG AA](https://img.shields.io/badge/accessibility-WCAG%20AA-blue?style=flat-square&logo=ada)](./index.html)
-[![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square)](../LICENSE)
+[![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square)](../../LICENSE)
 
 Portfolio web professionnel multilingue (FR/EN) mettant en avant les compétences Cloud & Security / DevSecOps.
 
@@ -54,6 +54,34 @@ Portfolio web professionnel multilingue (FR/EN) mettant en avant les compétence
 - **Footer** - Navigation et informations de contact
 
 ## 🚀 Utilisation
+
+### Avec Docker (Production/Staging)
+
+Le portfolio est maintenant géré par **son propre docker-compose.yml** :
+
+```bash
+# Prérequis: Traefik doit être démarré
+cd base-infra
+docker network create web
+docker volume create traefik_data
+docker-compose up -d
+
+# Démarrer le portfolio
+cd ../portfolio
+cp .env.example .env
+nano .env  # Configurer DOMAIN_NAME
+docker-compose up -d
+
+# Vérifier
+docker-compose ps
+docker logs -f portfolio
+```
+
+**URLs**:
+- Production: https://portfolio.freijstack.com
+- Staging: https://portfolio-staging.freijstack.com
+
+**Voir**: [../../base-infra/BASE_INTEGRATION.md](../../base-infra/BASE_INTEGRATION.md)
 
 ### Ouvrir localement
 ```bash

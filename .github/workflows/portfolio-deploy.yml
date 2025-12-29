@@ -6,7 +6,7 @@ on:
       - master
       - develop
     paths:
-      - 'portfolio/**'
+      - 'saas/portfolio/**'
       - '.github/workflows/portfolio-deploy.yml'
       - 'package.json'
       - 'README.md'
@@ -15,7 +15,7 @@ on:
       - master
       - develop
     paths:
-      - 'portfolio/**'
+      - 'saas/portfolio/**'
       - '.github/workflows/portfolio-deploy.yml'
       - 'package.json'
 
@@ -46,17 +46,17 @@ jobs:
       - name: Lint HTML
         run: |
           npm install -g html-validate
-          html-validate portfolio/index.html || true
+          html-validate saas/portfolio/index.html || true
 
       - name: Validate CSS
         run: |
           npm install -g stylelint stylelint-config-standard
-          stylelint "portfolio/style.css" || true
+          stylelint "saas/portfolio/style.css" || true
 
       - name: Check JavaScript
         run: |
           npm install -g eslint
-          eslint portfolio/script.js || true
+          eslint saas/portfolio/script.js || true
 
       - name: Security audit
         run: npm audit --audit-level=moderate || true
@@ -82,25 +82,25 @@ jobs:
       - name: Minify CSS
         run: |
           npm install -g csso-cli
-          csso portfolio/style.css -o portfolio/style.min.css
+          csso saas/portfolio/style.css -o saas/portfolio/style.min.css
           echo "✅ CSS minified"
 
       - name: Minify JavaScript
         run: |
           npm install -g terser
-          terser portfolio/script.js -o portfolio/script.min.js -c -m
+          terser saas/portfolio/script.js -o saas/portfolio/script.min.js -c -m
           echo "✅ JavaScript minified"
 
       - name: Optimize assets
         run: |
           echo "Asset sizes before optimization:"
-          ls -lh portfolio/*.{css,js} | awk '{print $9, $5}'
+          ls -lh saas/portfolio/*.{css,js} | awk '{print $9, $5}'
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: portfolio/
+          path: saas/portfolio/
           retention-days: 5
 
   # Job 3: Security Scanning
@@ -164,7 +164,7 @@ jobs:
       - name: Build static site
         run: |
           mkdir -p _site/portfolio
-          cp -r portfolio/* _site/portfolio/
+          cp -r saas/portfolio/* _site/portfolio/
           echo "<!-- STAGING ENVIRONMENT -->" >> _site/portfolio/index.html
           echo "✅ Staging site built"
 
@@ -180,6 +180,8 @@ jobs:
         uses: actions/deploy-pages@v4
 
   # Job 5: Deploy to Hostinger (Staging - develop)
+  # Note: Ce workflow copie les fichiers statiques via rsync.
+  # TODO: Migrer vers docker-compose up depuis portfolio/docker-compose.yml
   deploy-hostinger-staging:
     name: 🧪 Deploy to Hostinger (Staging)
     runs-on: ubuntu-latest
@@ -213,7 +215,7 @@ jobs:
       - name: Deploy portfolio to staging (/portfolio-staging)
         run: |
           rsync -avz --delete -e "ssh -i ~/.ssh/deploy_key" \
-            portfolio/ ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:/srv/www/portfolio-staging/
+            saas/portfolio/ ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:/srv/www/portfolio-staging/
 
       - name: Verify staging deployment
         run: |
@@ -233,6 +235,8 @@ jobs:
             'C=$(docker ps --filter "name=traefik" --format "{{.Names}}" | head -n1); if [ -n "$C" ]; then docker restart "$C"; fi'
 
   # Job 6: Deploy to Hostinger (Production - master)
+  # Note: Ce workflow copie les fichiers statiques via rsync.
+  # TODO: Migrer vers docker-compose up depuis portfolio/docker-compose.yml
   deploy-hostinger:
     name: 🚀 Deploy to Hostinger (Production)
     runs-on: ubuntu-latest
@@ -266,7 +270,7 @@ jobs:
       - name: Deploy portfolio to production (/portfolio)
         run: |
           rsync -avz --delete -e "ssh -i ~/.ssh/deploy_key" \
-            portfolio/ ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:/srv/www/portfolio/
+            saas/portfolio/ ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }}:/srv/www/portfolio/
 
       - name: Verify production deployment
         run: |

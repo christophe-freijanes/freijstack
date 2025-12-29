@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+    
+    environment:
+      - N8N_HOST=${SUBDOMAIN_N8N}.${DOMAIN_NAME}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - NODE_ENV=production
+      - WEBHOOK_URL=https://${SUBDOMAIN_N8N}.${DOMAIN_NAME}/
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-Europe/Paris}
+      - N8N_DISABLE_PRODUCTION_MAIN_PROCESS=false
+      - N8N_SKIP_WEBHOOK_VALIDATION=false
+    
+    ports:
+      - "127.0.0.1:5678:5678"
+    
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - /local-files:/files:z
+    
+    networks:
+      - web
+    
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.n8n.loadbalancer.server.port=5678
+      
+      # Router pour n8n
+      - traefik.http.routers.n8n.rule=Host(`${SUBDOMAIN_N8N}.${DOMAIN_NAME}`)
+      - traefik.http.routers.n8n.entrypoints=websecure
+      - traefik.http.routers.n8n.tls.certresolver=mytlschallenge
+      - traefik.http.routers.n8n.service=n8n
+      
+      # Security headers
+      - traefik.http.middlewares.n8n-headers.headers.SSLRedirect=true
+      - traefik.http.middlewares.n8n-headers.headers.STSSeconds=315360000
+      - traefik.http.middlewares.n8n-headers.headers.browserXSSFilter=true
+      - traefik.http.middlewares.n8n-headers.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.n8n-headers.headers.forceSTSHeader=true
+      - traefik.http.middlewares.n8n-headers.headers.SSLHost=${DOMAIN_NAME}
+      - traefik.http.middlewares.n8n-headers.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.n8n-headers.headers.STSPreload=true
+      - traefik.http.routers.n8n.middlewares=n8n-headers@docker
+
+volumes:
+  n8n_data:
+    driver: local
+
+networks:
+  web:
+    external: true
