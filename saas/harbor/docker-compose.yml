@@ -99,7 +99,6 @@ services:
       CHART_CACHE_DRIVER: redis
       _REDIS_URL_CORE: redis://harbor-redis:6379/0
       _REDIS_URL_REG: redis://harbor-redis:6379/1
-      PORTAL_URL: http://harbor-portal:8080
       TRIVY_ADAPTER_URL: http://harbor-trivy:8080
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/api/v2.0/ping || exit 1"]

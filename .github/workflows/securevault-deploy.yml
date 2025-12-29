@@ -457,15 +457,25 @@ jobs:
           if [ "$TARGET_ENV" = "production" ]; then
             CONTAINERS="${{ env.CONTAINER_PREFIX_PROD }}-backend ${{ env.CONTAINER_PREFIX_PROD }}-frontend ${{ env.CONTAINER_PREFIX_PROD }}-postgres"
             NETWORKS="${{ env.NETWORK_PROD }}"
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
           else
             CONTAINERS="${{ env.CONTAINER_PREFIX_STAGING }}-backend ${{ env.CONTAINER_PREFIX_STAGING }}-frontend ${{ env.CONTAINER_PREFIX_STAGING }}-postgres"
             NETWORKS="${{ env.NETWORK_STAGING }}"
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
           fi
           
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << CLEANUP_SCRIPT
             set -e
             echo "🧹 Cleaning up old containers and networks..."
             echo "Environment: $TARGET_ENV"
+            echo "Deploy directory: $DEPLOY_DIR"
+            
+            # Arrêter les conteneurs via docker compose si le dossier existe
+            if [ -d "$DEPLOY_DIR/${{ env.PROJECT_PATH }}" ]; then
+              echo "📂 Found existing deployment, stopping services..."
+              cd "$DEPLOY_DIR/${{ env.PROJECT_PATH }}"
+              docker compose down 2>/dev/null || echo "  ℹ️  No compose services running"
+            fi
             
             # Arrêter et supprimer les conteneurs s'ils existent
             for CONTAINER in $CONTAINERS; do
@@ -477,17 +487,18 @@ jobs:
               fi
             done
             
-            # Supprimer les réseaux orphelins s'ils existent
+            # Supprimer les réseaux avec leurs labels incorrects
             for NETWORK in $NETWORKS; do
               if docker network ls --format '{{.Name}}' | grep -q "^${NETWORK}$"; then
-                echo "Removing network: $NETWORK"
-                docker network rm "$NETWORK" || true
+                echo "🔧 Removing network with incorrect labels: $NETWORK"
+                docker network rm "$NETWORK" 2>/dev/null || echo "  ⚠️  Could not remove $NETWORK (may have active endpoints)"
               else
                 echo "Network $NETWORK does not exist, skipping"
               fi
             done
             
             echo "✅ Cleanup complete (volumes preserved for data safety)"
+            echo "   Networks will be recreated with correct labels during deployment"
           CLEANUP_SCRIPT
 
   deploy:
