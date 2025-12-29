@@ -423,15 +423,17 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'CLEANUP_SCRIPT'
             set -e
-            echo "🧹 Cleaning up old containers..."
+            echo "🧹 Cleaning up old containers and networks..."
             
             # Déterminer l'environnement
             BRANCH="${{ github.ref }}"
             if [ "$BRANCH" = "refs/heads/master" ]; then
               CONTAINERS="securevault-backend securevault-frontend securevault-postgres"
+              NETWORKS="securevault_network"
               echo "Environment: production"
             else
               CONTAINERS="securevault-staging-backend securevault-staging-frontend securevault-staging-postgres"
+              NETWORKS="securevault_staging_network"
               echo "Environment: staging"
             fi
             
@@ -445,7 +447,17 @@ jobs:
               fi
             done
             
-            echo "✅ Cleanup complete"
+            # Supprimer les réseaux orphelins s'ils existent
+            for NETWORK in $NETWORKS; do
+              if docker network ls --format '{{.Name}}' | grep -q "^${NETWORK}$"; then
+                echo "Removing network: $NETWORK"
+                docker network rm "$NETWORK" || true
+              else
+                echo "Network $NETWORK does not exist, skipping"
+              fi
+            done
+            
+            echo "✅ Cleanup complete (volumes preserved for data safety)"
           CLEANUP_SCRIPT
 
   deploy:
