@@ -37,12 +37,13 @@ jobs:
           docker-compose config > /dev/null
           echo "✅ docker-compose.yml syntax valid"
 
-      - name: 🔐 Check environment variables
+      - name: 🔐 Check environment variables (safe)
         working-directory: base-infra
         run: |
-          echo "Checking required environment variables..."
-          grep -E "^[A-Z_]+=" docker-compose.yml | head -20 || true
-          echo "✅ Docker Compose configuration validated"
+          echo "Checking Docker Compose env placeholders (without values)..."
+          # Validate compose parses and contains no obvious unresolved variables
+          docker-compose config > /dev/null
+          echo "✅ Docker Compose configuration validated without exposing env values"
 
   security:
     name: 🔐 Security Checks
