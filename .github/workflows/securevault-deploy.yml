@@ -429,7 +429,7 @@ jobs:
             # Naviguer vers securevault
             cd saas/securevault
             
-            # Vérifier que .env existe
+            # Vérifier que .env existe à la racine
             if [ ! -f "$ENV_FILE" ]; then
               echo "❌ ERREUR: Fichier .env manquant à $ENV_FILE"
               echo "📝 Créez-le sur le VPS avec les variables d'environnement"
@@ -437,20 +437,24 @@ jobs:
               exit 1
             fi
             
+            # Copier le .env depuis la racine vers le répertoire docker-compose
+            echo "📝 Copying .env file..."
+            cp "$ENV_FILE" .env
+            
             echo "🔧 Building and starting containers..."
-            docker compose -f docker-compose.yml pull
-            docker compose -f docker-compose.yml up -d --build
+            docker compose pull
+            docker compose up -d --build
             
             # Attendre que les services soient prêts
             sleep 10
             
             # Vérifier la santé
             echo "🏥 Checking health..."
-            docker compose -f docker-compose.yml ps
+            docker compose ps
             
             echo "✅ Deployment successful!"
             echo "📊 Logs:"
-            docker compose -f docker-compose.yml logs --tail=20
+            docker compose logs --tail=20
           DEPLOY_SCRIPT
 
       - name: Verify Deployment
