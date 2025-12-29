@@ -66,7 +66,7 @@ Workflows clés dans `.github/workflows/main.yml`:
 - Validation & sécurité:
     - CodeQL (SAST), Gitleaks (secrets), Trivy (vulnérabilités)
 - Build & optimisation:
-    - Minification CSS via `csso` (flag `--restructure-off`)
+    - Minification CSS via `csso` (flag `--no-restructure`)
     - Minification JS via `terser`
 - Déploiement:
     - `rsync` sécurisé vers le VPS: mise à jour de `/srv/www/portfolio*`

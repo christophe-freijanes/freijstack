@@ -238,7 +238,7 @@ Utiliser les animations existantes ou créer dans `style.css` → `@keyframes`
 
 ### Mise à jour des assets minifiés
 En production, la page charge `style.min.css` et `script.min.js` générés par la CI. Lors de modifications CSS/JS:
-- Vérifier que la CI minifie sans erreurs (csso avec `--restructure-off`).
+- Vérifier que la CI minifie sans erreurs (csso avec `--no-restructure`).
 - Confirmer que `index.html` référence bien les fichiers minifiés.
 
 ### Mise à jour du README
