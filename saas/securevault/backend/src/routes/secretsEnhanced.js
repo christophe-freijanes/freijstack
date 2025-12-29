@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/database');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 const { encrypt, decrypt } = require('../utils/crypto');
 
 // ============================================================================
@@ -9,7 +9,7 @@ const { encrypt, decrypt } = require('../utils/crypto');
 // ============================================================================
 
 // Get all secret types
-router.get('/types', authenticateToken, async (req, res) => {
+router.get('/types', authenticate, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT * FROM secret_types ORDER BY name`
@@ -22,7 +22,7 @@ router.get('/types', authenticateToken, async (req, res) => {
 });
 
 // Get template for a secret type
-router.get('/types/:name/template', authenticateToken, async (req, res) => {
+router.get('/types/:name/template', authenticate, async (req, res) => {
   try {
     const { name } = req.params;
     const result = await pool.query(
@@ -46,7 +46,7 @@ router.get('/types/:name/template', authenticateToken, async (req, res) => {
 // ============================================================================
 
 // Get all secrets (with filters)
-router.get('/', authenticateToken, async (req, res) => {
+router.get('/', authenticate, async (req, res) => {
   try {
     const { 
       folder_id, 
@@ -151,7 +151,7 @@ router.get('/', authenticateToken, async (req, res) => {
 });
 
 // Get single secret (with history)
-router.get('/:id', authenticateToken, async (req, res) => {
+router.get('/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
     const { include_history } = req.query;
@@ -216,7 +216,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
 });
 
 // Create new secret (enhanced)
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', authenticate, async (req, res) => {
   try {
     const {
       name,
@@ -306,7 +306,7 @@ router.post('/', authenticateToken, async (req, res) => {
 });
 
 // Update secret (enhanced with history tracking)
-router.put('/:id', authenticateToken, async (req, res) => {
+router.put('/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
     const {
@@ -441,7 +441,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
 });
 
 // Get secret history version
-router.get('/:id/history/:version', authenticateToken, async (req, res) => {
+router.get('/:id/history/:version', authenticate, async (req, res) => {
   try {
     const { id, version } = req.params;
     
@@ -481,7 +481,7 @@ router.get('/:id/history/:version', authenticateToken, async (req, res) => {
 });
 
 // Restore secret from history
-router.post('/:id/history/:version/restore', authenticateToken, async (req, res) => {
+router.post('/:id/history/:version/restore', authenticate, async (req, res) => {
   try {
     const { id, version } = req.params;
     
@@ -555,7 +555,7 @@ router.post('/:id/history/:version/restore', authenticateToken, async (req, res)
 });
 
 // Delete secret
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -583,3 +583,4 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 });
 
 module.exports = router;
+
