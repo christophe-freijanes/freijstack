@@ -364,19 +364,19 @@ jobs:
             fi
             
             echo "🔧 Building and starting containers..."
-            docker-compose -f docker-compose.yml pull
-            docker-compose -f docker-compose.yml up -d --build
+            docker compose -f docker-compose.yml pull
+            docker compose -f docker-compose.yml up -d --build
             
             # Attendre que les services soient prêts
             sleep 10
             
             # Vérifier la santé
             echo "🏥 Checking health..."
-            docker-compose -f docker-compose.yml ps
+            docker compose -f docker-compose.yml ps
             
             echo "✅ Deployment successful!"
             echo "📊 Logs:"
-            docker-compose -f docker-compose.yml logs --tail=20
+            docker compose -f docker-compose.yml logs --tail=20
             DEPLOY_SCRIPT
 
       - name: Verify Deployment
@@ -393,7 +393,7 @@ jobs:
             else
               cd /srv/www/securevault-staging/saas/securevault
             fi
-            docker-compose ps'
+            docker compose ps'
           
           echo "✅ Déploiement vérifié avec succès!"
 
