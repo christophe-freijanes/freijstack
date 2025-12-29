@@ -158,9 +158,10 @@ jobs:
             # 4. Vérifier Traefik
             echo ""
             echo "4️⃣ Checking Traefik..."
-            if docker ps --format '{{.Names}}' | grep -q "traefik"; then
-              TRAEFIK_STATUS=$(docker ps --filter "name=traefik" --format "{{.Status}}")
-              echo "✅ Traefik is running: $TRAEFIK_STATUS"
+            TRAEFIK_CONTAINER=$(docker ps --format '{{.Names}}' | grep -i 'traefik' | head -n1)
+            if [ -n "$TRAEFIK_CONTAINER" ]; then
+              TRAEFIK_STATUS=$(docker ps --filter "name=$TRAEFIK_CONTAINER" --format "{{.Status}}")
+              echo "✅ Traefik is running: $TRAEFIK_STATUS (container: $TRAEFIK_CONTAINER)"
             else
               echo "⚠️ Traefik not running"
               echo "   Start it with: cd base-infra && docker-compose up -d"
@@ -492,15 +493,15 @@ jobs:
           echo "🔄 Restarting Traefik as requested..."
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'TRAEFIK_RESTART'
             set -e
-            if docker ps --format '{{.Names}}' | grep -q '^traefik$'; then
-              echo "Restarting traefik container..."
-              docker restart traefik
-              sleep 5
-              echo "✅ Traefik restarted"
-            else
+            TRAEFIK_CONTAINER=$(docker ps --format '{{.Names}}' | grep -i 'traefik' | head -n1)
+            if [ -z "$TRAEFIK_CONTAINER" ]; then
               echo "❌ Traefik container not found"
               exit 1
             fi
+            echo "Restarting $TRAEFIK_CONTAINER..."
+            docker restart "$TRAEFIK_CONTAINER"
+            sleep 5
+            echo "✅ Traefik restarted"
           TRAEFIK_RESTART
 
       - name: Verify Deployment
@@ -571,12 +572,14 @@ jobs:
 
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << VERIFY_LOGS
             set -e
-            if ! docker ps --format '{{.Names}}' | grep -q '^traefik$'; then
+            TRAEFIK_CONTAINER=\$(docker ps --format '{{.Names}}' | grep -i 'traefik' | head -n1)
+            if [ -z "\$TRAEFIK_CONTAINER" ]; then
               echo "❌ Traefik not running"
               exit 1
             fi
+            echo "✅ Found Traefik container: \$TRAEFIK_CONTAINER"
             echo "📜 Last Traefik logs (filtered):"
-            docker logs --tail=300 traefik | grep -E "($FRONTEND_DOM|$API_DOM|mytlschallenge|websecure)" || true
+            docker logs --tail=300 "\$TRAEFIK_CONTAINER" | grep -E "($FRONTEND_DOM|$API_DOM|mytlschallenge|websecure)" || true
             echo "✅ Log inspection done"
           VERIFY_LOGS
 
