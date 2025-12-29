@@ -1,4 +1,4 @@
-name: PR Title Automation
+name: 🤖 PR Title Automation
 
 on:
   pull_request:
@@ -12,12 +12,12 @@ jobs:
   auto-title:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Auto-generate PR title
+      - name: 🔧 Auto-generate PR title
         uses: actions/github-script@v7
         with:
           script: |
