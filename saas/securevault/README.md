@@ -263,10 +263,12 @@ curl -X POST https://vault-api.freijstack.com/api/auth/login \
 
 # Réponse:
 # {
-#   "token": "eyJhbGciOiJIUzI1NiIs...",
+#   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...[base64_encoded_jwt]",
 #   "user": {"id": 1, "username": "johndoe", ...}
 # }
 ```
+
+> ⚠️ **Note**: Le token JWT ci-dessus est un exemple. Les vrais tokens sont générés dynamiquement.
 
 ### Secrets Management
 
