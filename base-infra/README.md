@@ -16,7 +16,7 @@ Infrastructure centralisée partagée par toutes les applications (Portfolio, Se
 
 ```
 base-infra/
-├── docker-compose.yml       # Configuration Traefik uniquement
+├── docker-compose.yml      # Configuration Traefik uniquement
 ├── README.md               # Ce fichier
 └── BASE_INTEGRATION.md     # Guide d'intégration globale
 ```
