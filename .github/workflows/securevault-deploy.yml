@@ -305,7 +305,7 @@ jobs:
         continue-on-error: true
 
   deploy:
-    name: 🚀 Deploy to Hostinger VPS
+    name: 🚀 Deploy to VPS
     runs-on: ubuntu-latest
     needs: test
     if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')

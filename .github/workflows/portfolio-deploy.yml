@@ -176,11 +176,11 @@ jobs:
         continue-on-error: true
         uses: actions/deploy-pages@v4
 
-  # Job 5: Deploy to Hostinger (Staging - develop)
+  # Job 5: Deploy to VPS (Staging - develop)
   # Note: Ce workflow copie les fichiers statiques via rsync.
   # TODO: Migrer vers docker-compose up depuis portfolio/docker-compose.yml
-  deploy-hostinger-staging:
-    name: 🧪 Deploy to Hostinger (Staging)
+  deploy-vps-staging:
+    name: 🧪 Deploy to VPS (Staging)
     runs-on: ubuntu-latest
     needs: [validate, build, security]
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
@@ -231,11 +231,11 @@ jobs:
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
             'C=$(docker ps --filter "name=traefik" --format "{{.Names}}" | head -n1); if [ -n "$C" ]; then docker restart "$C"; fi'
 
-  # Job 6: Deploy to Hostinger (Production - master)
+  # Job 6: Deploy to VPS (Production - master)
   # Note: Ce workflow copie les fichiers statiques via rsync.
   # TODO: Migrer vers docker-compose up depuis portfolio/docker-compose.yml
-  deploy-hostinger:
-    name: 🚀 Deploy to Hostinger (Production)
+  deploy-vps:
+    name: 🚀 Deploy to VPS (Production)
     runs-on: ubuntu-latest
     needs: [validate, build, security]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -324,7 +324,7 @@ jobs:
           body: |
             ## FreijStack Release
             Portfolio deployment completed successfully!
-            - Portfolio: Live on GitHub Pages & Hostinger
+            - Portfolio: Live on GitHub Pages & VPS
             - Security: All checks passed
             - Performance: Assets optimized
           draft: false
