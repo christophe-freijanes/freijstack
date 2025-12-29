@@ -20,7 +20,10 @@ Portfolio et projets cloud & sécurité de **Christophe FREIJANES** - Senior Clo
 | Document | Description |
 |----------|-------------|
 | 📘 [Architecture Technique](docs/architecture.md) | Vue d'ensemble de l'infrastructure, déploiement, et CI/CD |
-| 📗 [Portfolio README](portfolio/README.md) | Documentation complète du portfolio (features, i18n, sécurité) |
+| � [Guide Déploiement](docs/DEPLOYMENT.md) | Installation VPS, Docker, Traefik, DNS, rollback |
+| 🔍 [Guide Troubleshooting](docs/TROUBLESHOOTING.md) | Diagnostic et résolution des problèmes courants |
+| 📊 [Guide Monitoring](docs/MONITORING.md) | Prometheus, Grafana, Loki, alertes et dashboards |
+| �📗 [Portfolio README](portfolio/README.md) | Documentation complète du portfolio (features, i18n, sécurité) |
 | 📙 [SaaS Apps README](saas/README.md) | Applications SaaS démonstratives (App1, App2) |
 | 📕 [App1 - Gestionnaire de Tâches](saas/app1/README.md) | Application CRUD sécurisée avec authentification |
 | 📓 [App2 - Service Notifications](saas/app2/README.md) | Microservice temps réel avec WebSockets |
