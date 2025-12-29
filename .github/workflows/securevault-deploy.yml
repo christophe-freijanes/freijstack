@@ -43,7 +43,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: 'saas/securevault/backend/package-lock.json'
+          cache-dependency-path: 'saas/securevault/backend/package.json'
 
       - name: 🧪 Test Backend
         working-directory: saas/securevault/backend
@@ -61,7 +61,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: 'saas/securevault/frontend/package-lock.json'
+          cache-dependency-path: 'saas/securevault/frontend/package.json'
 
       - name: 🧪 Test Frontend
         working-directory: saas/securevault/frontend
