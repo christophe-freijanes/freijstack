@@ -482,11 +482,13 @@ jobs:
               API_DOM="vault-api.freijstack.com"
               FRONTEND_DOM="vault.freijstack.com"
               FRONTEND_U="https://vault.freijstack.com"
+              COMPOSE_FILE="docker-compose.yml"
             else
               PROJECT_NAME="securevault-staging"
               API_DOM="vault-api-staging.freijstack.com"
               FRONTEND_DOM="vault-staging.freijstack.com"
               FRONTEND_U="https://vault-staging.freijstack.com"
+              COMPOSE_FILE="docker-compose.staging.yml"
             fi
 
             export COMPOSE_PROJECT_NAME="$PROJECT_NAME"
@@ -496,24 +498,25 @@ jobs:
 
             echo "🔧 Effective environment variables for compose:"
             echo "  COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME"
+            echo "  COMPOSE_FILE=$COMPOSE_FILE"
             echo "  API_DOMAIN=$API_DOMAIN"
             echo "  FRONTEND_DOMAIN=$FRONTEND_DOMAIN"
             echo "  FRONTEND_URL=$FRONTEND_URL"
             
             echo "🔧 Building and starting containers..."
-            docker compose pull
-            docker compose up -d --build --remove-orphans
+            docker compose -f "$COMPOSE_FILE" pull
+            docker compose -f "$COMPOSE_FILE" up -d --build --remove-orphans
             
             # Attendre que les services soient prêts
             sleep 10
             
             # Vérifier la santé
             echo "🏥 Checking health..."
-            docker compose ps
+            docker compose -f "$COMPOSE_FILE" ps
             
             echo "✅ Deployment successful!"
             echo "📊 Logs:"
-            docker compose logs --tail=20
+            docker compose -f "$COMPOSE_FILE" logs --tail=20
           DEPLOY_SCRIPT
 
       - name: 🔄 Restart Traefik (optionnel)
@@ -544,10 +547,11 @@ jobs:
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
             'if [ "${{ github.ref }}" = "refs/heads/master" ]; then
               cd /srv/www/securevault/saas/securevault
+              docker compose -f docker-compose.yml ps
             else
               cd /srv/www/securevault-staging/saas/securevault
-            fi
-            docker compose ps'
+              docker compose -f docker-compose.staging.yml ps
+            fi'
           
           echo "✅ Déploiement vérifié avec succès!"
 
