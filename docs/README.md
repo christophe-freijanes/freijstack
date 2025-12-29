@@ -16,6 +16,7 @@ Index de la documentation technique du projet.
 | 🏠 **README Principal** | Vue d'ensemble du projet | [../README.md](../README.md) |
 | 🔗 **Integration Guide** | Guide d'intégration infrastructure + apps | [../base-infra/BASE_INTEGRATION.md](../base-infra/BASE_INTEGRATION.md) |
 | 🏗️ **Infrastructure Base** | Docker Compose, Traefik, n8n, portfolio | [../base-infra/README.md](../base-infra/README.md) |
+| 🐳 **Structure Docker** | Organisation containers, volumes, réseaux | [DOCKER_STRUCTURE.md](DOCKER_STRUCTURE.md) |
 | 🏗️ **Architecture Technique** | Infrastructure, CI/CD, déploiement | [architecture.md](architecture.md) |
 | 📌 **Guide Déploiement** | VPS, Docker, Traefik, rollback | [DEPLOYMENT.md](DEPLOYMENT.md) |
 | 🔐 **SecureVault Deployment** | Pipeline CI/CD dédiée, configuration VPS | [SECUREVAULT_DEPLOYMENT.md](SECUREVAULT_DEPLOYMENT.md) |
@@ -32,6 +33,7 @@ Index de la documentation technique du projet.
 ### Infrastructure & DevOps
 - [Integration Guide](../base-infra/BASE_INTEGRATION.md) - Guide complet d'intégration (Traefik + apps)
 - [Infrastructure Base](../base-infra/README.md) - Docker Compose, Traefik
+- [Structure Docker](DOCKER_STRUCTURE.md) - Organisation containers, volumes, réseaux
 - [Architecture Technique Complète](architecture.md) - Infrastructure, CI/CD, sécurité, monitoring
 - [Guide Déploiement VPS](DEPLOYMENT.md) - Installation complète (Ubuntu, Docker, Traefik, DNS)
 - [SecureVault CI/CD Pipeline](SECUREVAULT_DEPLOYMENT.md) - Déploiement automatisé SecureVault
