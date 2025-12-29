@@ -115,10 +115,10 @@ services:
 volumes:
   traefik_data:
     name: traefik_data
-    driver: local
+    external: true
   n8n_data:
     name: n8n_data
-    driver: local
+    external: true
 
 # ============================================
 # NETWORKS - Shared Infrastructure
