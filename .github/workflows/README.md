@@ -8,8 +8,9 @@ Documentation complète des workflows CI/CD et automatisations du projet.
 
 | Workflow | Fichier | Déclencheur | Durée | Description |
 |----------|---------|-------------|-------|-------------|
-| **CI/CD Pipeline** | [main.yml](main.yml) | Push master/develop, PR | ~5-8 min | Build, test, security scan, deploy VPS + GitHub Pages |
+| **Portfolio Deploy** | [portfolio-deploy.yml](portfolio-deploy.yml) | Push master/develop, PR | ~5-8 min | Build, test, security scan, deploy VPS + GitHub Pages |
 | **SecureVault Deploy** | [securevault-deploy.yml](securevault-deploy.yml) | Push master/develop (saas/securevault/*), manual | ~3-5 min | Test, build, scan, deploy SecureVault sur VPS |
+| **Secret Rotation** | [rotate-secrets.yml](rotate-secrets.yml) | Schedule (1er du mois), manual | ~3-5 min | Rotation automatique des secrets (DB_PASSWORD, JWT_SECRET, etc.) |
 | **PR Title Automation** | [pr-title-automation.yml](pr-title-automation.yml) | Ouverture PR | ~10s | Auto-format titre PR avec Conventional Commits |
 
 ---
@@ -67,7 +68,7 @@ on:
 
 ---
 
-## 🚀 Workflow 2: CI/CD Pipeline
+## 🚀 Workflow 2: Portfolio Deploy
 
 ### Déclencheurs
 
@@ -221,6 +222,51 @@ rm -rf ~/.ssh/id_rsa
 
 ---
 
+## 🔐 Workflow 3: Secret Rotation
+
+### Déclencheurs
+
+```yaml
+on:
+  schedule:
+    - cron: '0 2 1 * *'  # 1er du mois à 2h UTC
+  workflow_dispatch:      # Déclenchement manuel
+    inputs:
+      environment:
+        required: true
+        type: choice
+        options: ['staging', 'production']
+      secret_type:
+        required: true
+        type: choice
+        options: ['db_password', 'all']
+```
+
+**Calendrier**:
+- **Automatique**: 1er du mois à 2h UTC (DB_PASSWORD seulement)
+- **Manuel**: GitHub Actions → Rotate Secrets
+
+### Processus Rotation
+
+1. **Sauvegarde** : Backup du `.env` existant
+2. **Génération** : Nouveaux secrets cryptographiquement sécurisés
+3. **Mise à jour DB** : Change password PostgreSQL (si DB_PASSWORD)
+4. **Redémarrage** : `docker-compose restart`
+5. **Vérification** : Health check (API répond ✅)
+6. **Rollback** : En cas d'erreur, restaure le backup
+
+### Secrets Affectés
+
+| Secret | Fréquence | Impact | Manuel |
+|--------|-----------|--------|--------|
+| **DB_PASSWORD** | 6 mois | Aucun (services internes) | ✅ |
+| **JWT_SECRET** | Annuel | Tous les users re-login | ✅ |
+| **ENCRYPTION_KEY** | Annuel | ⚠️ Perte d'accès aux données | ✅ |
+
+Voir [SECRET_ROTATION.md](../docs/SECRET_ROTATION.md) pour le guide détaillé.
+
+---
+
 ## 🔐 Configuration SecureVault Deployment
 
 ### Secrets GitHub Requis
@@ -371,9 +417,11 @@ Vous pouvez modifier le titre manuellement si nécessaire.
 ### Badges dans README
 
 ```markdown
-[![CI/CD Pipeline](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/main.yml?branch=master&label=CI%2FCD&style=flat-square)](https://github.com/christophe-freijanes/freijstack/actions)
+[![Portfolio Deploy](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/portfolio-deploy.yml?branch=master&label=Portfolio&style=flat-square)](https://github.com/christophe-freijanes/freijstack/actions)
 
-[![CodeQL](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/main.yml?branch=master&label=CodeQL&style=flat-square&logo=github)](https://github.com/christophe-freijanes/freijstack/security/code-scanning)
+[![SecureVault Deploy](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/securevault-deploy.yml?branch=develop&label=SecureVault&style=flat-square)](https://github.com/christophe-freijanes/freijstack/actions)
+
+[![Secret Rotation](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/rotate-secrets.yml?label=Secret%20Rotation&style=flat-square)](https://github.com/christophe-freijanes/freijstack/actions)
 ```
 
 ---
