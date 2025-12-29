@@ -1,5 +1,12 @@
 # FreijStack 🚀
 
+[![CI/CD Pipeline](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/main.yml?branch=master&label=CI%2FCD&style=flat-square)](https://github.com/christophe-freijanes/freijstack/actions)
+[![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square)](LICENSE)
+[![Top Language](https://img.shields.io/github/languages/top/christophe-freijanes/freijstack?style=flat-square&color=yellow)](https://github.com/christophe-freijanes/freijstack)
+[![Code Size](https://img.shields.io/github/languages/code-size/christophe-freijanes/freijstack?style=flat-square&color=green)](https://github.com/christophe-freijanes/freijstack)
+[![Last Commit](https://img.shields.io/github/last-commit/christophe-freijanes/freijstack?label=Derni%C3%A8re%20MAJ&style=flat-square&color=blue)](https://github.com/christophe-freijanes/freijstack/commits)
+[![Stars](https://img.shields.io/github/stars/christophe-freijanes/freijstack?style=flat-square&color=orange)](https://github.com/christophe-freijanes/freijstack/stargazers)
+
 Portfolio et projets cloud & sécurité de **Christophe FREIJANES** - Senior Cloud & Security Specialist (DevSecOps).
 
 **Live**: https://portfolio.freijstack.com/ | **Staging**: https://portfolio-staging.freijstack.com/
@@ -310,4 +317,10 @@ Tous droits réservés © 2025 Christophe FREIJANES
 
 ---
 
-![Dernière mise à jour](https://img.shields.io/github/last-commit/christophe-freijanes/freijstack?label=Derni%C3%A8re%20mise%20%C3%A0%20jour&style=flat-square&color=blue)
+<div align="center">
+
+[![Last Commit](https://img.shields.io/github/last-commit/christophe-freijanes/freijstack?label=Derni%C3%A8re%20mise%20%C3%A0%20jour&style=for-the-badge&color=blue)](https://github.com/christophe-freijanes/freijstack/commits)
+[![Issues](https://img.shields.io/github/issues/christophe-freijanes/freijstack?style=for-the-badge&color=yellow)](https://github.com/christophe-freijanes/freijstack/issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/christophe-freijanes/freijstack?style=for-the-badge&color=green)](https://github.com/christophe-freijanes/freijstack/pulls)
+
+</div>
