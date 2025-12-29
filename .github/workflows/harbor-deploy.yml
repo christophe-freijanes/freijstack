@@ -1,0 +1,601 @@
+name: 🐳 Deploy Harbor Registry
+
+on:
+  push:
+    branches: [develop]  # Auto-deploy staging only
+    paths:
+      - 'saas/harbor/**'
+      - '.github/workflows/harbor-deploy.yml'
+  pull_request:
+    branches: [develop, master]
+    paths:
+      - 'saas/harbor/**'
+      - '.github/workflows/harbor-deploy.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      restart_traefik:
+        description: 'Redémarrer Traefik après déploiement'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  # Paths
+  PROJECT_PATH: saas/harbor
+  VPS_DEPLOY_DIR_PROD: /srv/www/harbor
+  VPS_DEPLOY_DIR_STAGING: /srv/www/harbor-staging
+  VPS_ENV_FILE_PROD: /srv/www/harbor/.env
+  VPS_ENV_FILE_STAGING: /srv/www/harbor-staging/.env
+  # Branches
+  BRANCH_PROD: master
+  BRANCH_STAGING: develop
+  # Container names
+  CONTAINER_PREFIX_PROD: harbor
+  CONTAINER_PREFIX_STAGING: harbor-staging
+  # Networks
+  NETWORK_PROD: harbor_network
+  NETWORK_STAGING: harbor_staging_network
+  # Domains
+  REGISTRY_DOMAIN_PROD: registry.freijstack.com
+  REGISTRY_DOMAIN_STAGING: registry-staging.freijstack.com
+
+jobs:
+  validate:
+    name: ✅ Validate VPS Configuration
+    runs-on: ubuntu-latest
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/develop') || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 🔒 Mask sensitive values
+        run: |
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_HOST }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+
+      - name: 🌐 Check DNS Configuration
+        env:
+          TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
+        run: |
+          echo "🔍 Checking DNS records for $TARGET_ENV..."
+          
+          check_dns() {
+            DOMAIN=$1
+            echo "Checking $DOMAIN..."
+            if dig +short $DOMAIN | grep -q '[0-9]'; then
+              IP=$(dig +short $DOMAIN | head -n1)
+              echo "✅ $DOMAIN → $IP"
+              return 0
+            else
+              echo "❌ $DOMAIN not configured"
+              return 1
+            fi
+          }
+          
+          FAILED=0
+          
+          if [ "$TARGET_ENV" = "production" ]; then
+            check_dns "${{ env.REGISTRY_DOMAIN_PROD }}" || FAILED=1
+          else
+            check_dns "${{ env.REGISTRY_DOMAIN_STAGING }}" || FAILED=1
+          fi
+          
+          if [ $FAILED -eq 1 ]; then
+            echo ""
+            echo "⚠️ DNS record missing. Please configure:"
+            echo "   - Add A record pointing to your VPS IP"
+            echo "   - Wait 5-10 minutes for propagation"
+            exit 1
+          fi
+          
+          echo "✅ DNS configured correctly"
+
+      - name: 🔍 Check VPS Prerequisites
+        env:
+          TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
+        run: |
+          if [ "$TARGET_ENV" = "production" ]; then
+            VPS_ENV_FILE="${{ env.VPS_ENV_FILE_PROD }}"
+          else
+            VPS_ENV_FILE="${{ env.VPS_ENV_FILE_STAGING }}"
+          fi
+          
+          export TARGET_ENV VPS_ENV_FILE
+          
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "TARGET_ENV='$TARGET_ENV' VPS_ENV_FILE='$VPS_ENV_FILE'" bash << 'VPS_CHECK'
+            echo "🔍 Checking VPS configuration..."
+            echo "Environment: $TARGET_ENV"
+            echo "ENV File: $VPS_ENV_FILE"
+            echo ""
+
+            # Mask sensitive values
+            echo "🔒 Applying runtime masks for sensitive values..."
+            if [ -f "$VPS_ENV_FILE" ]; then
+              for VAR in DB_PASSWORD HARBOR_ADMIN_PASSWORD CORE_SECRET JOBSERVICE_SECRET REGISTRY_HTTP_SECRET; do
+                VALUE=$(grep -E "^${VAR}=" "$VPS_ENV_FILE" 2>/dev/null | cut -d'=' -f2- || echo "")
+                if [ -n "$VALUE" ]; then
+                  echo "::add-mask::$VALUE"
+                  echo "  ✅ Masked $VAR"
+                fi
+              done
+            fi
+            
+            # 1. Check Docker
+            echo ""
+            echo "1️⃣ Checking Docker..."
+            if command -v docker &> /dev/null; then
+              DOCKER_VERSION=$(docker --version)
+              echo "✅ Docker installed: $DOCKER_VERSION"
+            else
+              echo "❌ Docker not installed"
+              exit 1
+            fi
+            
+            # 2. Check Docker Compose
+            echo ""
+            echo "2️⃣ Checking Docker Compose..."
+            if docker compose version &> /dev/null; then
+              COMPOSE_VERSION=$(docker compose version)
+              echo "✅ Docker Compose installed: $COMPOSE_VERSION"
+            else
+              echo "❌ Docker Compose not installed"
+              exit 1
+            fi
+            
+            # 3. Check network 'web'
+            echo ""
+            echo "3️⃣ Checking Docker network 'web'..."
+            if docker network ls | grep -q "web"; then
+              echo "✅ Network 'web' exists"
+            else
+              echo "⚠️ Network 'web' not found, creating it..."
+              docker network create web
+              echo "✅ Network 'web' created successfully"
+            fi
+            
+            # 4. Check Traefik
+            echo ""
+            echo "4️⃣ Checking Traefik..."
+            TRAEFIK_CONTAINER=$(docker ps --format '{{.Names}}' | grep -i 'traefik' | head -n1)
+            if [ -n "$TRAEFIK_CONTAINER" ]; then
+              TRAEFIK_STATUS=$(docker ps --filter "name=$TRAEFIK_CONTAINER" --format "{{.Status}}")
+              echo "✅ Traefik is running: $TRAEFIK_STATUS (container: $TRAEFIK_CONTAINER)"
+            else
+              echo "⚠️ Traefik not running"
+              echo "   Deploy base infrastructure first:"
+              echo "   cd /srv/docker/freijstack/base-infra && docker compose up -d"
+            fi
+            
+            # 5. Ensure deployment directory exists
+            echo ""
+            echo "5️⃣ Ensuring deployment directories exist..."
+            if [ "$TARGET_ENV" = "production" ]; then
+              DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
+            else
+              DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
+            fi
+            
+            if [ ! -d "$DEPLOY_DIR" ]; then
+              echo "Creating deployment directory: $DEPLOY_DIR"
+              mkdir -p "$DEPLOY_DIR"
+              echo "✅ Directory created"
+            else
+              echo "✅ Directory already exists: $DEPLOY_DIR"
+            fi
+            
+            # 6. Check .env file
+            echo ""
+            echo "6️⃣ Checking .env file..."
+            if [ -f "$VPS_ENV_FILE" ]; then
+              echo "✅ .env file exists at $VPS_ENV_FILE"
+              
+              # Determine domain based on environment
+              if [ "$TARGET_ENV" = "production" ]; then
+                REGISTRY_DOM="registry.freijstack.com"
+              else
+                REGISTRY_DOM="registry-staging.freijstack.com"
+              fi
+              
+              # Check and add missing variables
+              UPDATED=0
+              
+              if ! grep -q "^REGISTRY_DOMAIN=" "$VPS_ENV_FILE"; then
+                echo "" >> "$VPS_ENV_FILE"
+                echo "REGISTRY_DOMAIN=$REGISTRY_DOM" >> "$VPS_ENV_FILE"
+                echo "⚠️ Added missing REGISTRY_DOMAIN=$REGISTRY_DOM"
+                UPDATED=1
+              fi
+              
+              # Check critical secrets
+              MISSING_SECRETS=""
+              for VAR in DB_PASSWORD HARBOR_ADMIN_PASSWORD CORE_SECRET JOBSERVICE_SECRET REGISTRY_HTTP_SECRET; do
+                if ! grep -q "^${VAR}=" "$VPS_ENV_FILE" 2>/dev/null; then
+                  MISSING_SECRETS="$MISSING_SECRETS $VAR"
+                  echo "  ⚠️  Missing: $VAR"
+                else
+                  echo "  ✅ Found: $VAR"
+                fi
+              done
+              
+              if [ -n "$MISSING_SECRETS" ]; then
+                echo ""
+                echo "❌ Missing critical secrets:$MISSING_SECRETS"
+                echo "   Add them to $VPS_ENV_FILE:"
+                echo "   DB_PASSWORD=\$(openssl rand -hex 32)"
+                echo "   HARBOR_ADMIN_PASSWORD=\$(openssl rand -hex 32)"
+                echo "   CORE_SECRET=\$(openssl rand -hex 32)"
+                echo "   JOBSERVICE_SECRET=\$(openssl rand -hex 32)"
+                echo "   REGISTRY_HTTP_SECRET=\$(openssl rand -hex 32)"
+                exit 1
+              fi
+              
+              if [ $UPDATED -eq 1 ]; then
+                echo "✅ .env file updated with missing variables"
+              else
+                echo "✅ All required variables present"
+              fi
+            else
+              echo "⚠️ .env file not found, creating it with generated secrets..."
+              
+              mkdir -p $(dirname "$VPS_ENV_FILE")
+              
+              # Generate secrets
+              DB_PASS=$(openssl rand -hex 32)
+              HARBOR_PASS=$(openssl rand -hex 32)
+              CORE_SEC=$(openssl rand -hex 32)
+              JOB_SEC=$(openssl rand -hex 32)
+              REG_SEC=$(openssl rand -hex 32)
+              
+              # Determine domain based on environment
+              if [ "$TARGET_ENV" = "production" ]; then
+                REGISTRY_DOM="registry.freijstack.com"
+              else
+                REGISTRY_DOM="registry-staging.freijstack.com"
+              fi
+              
+              # Create .env file
+              {
+                echo "# Auto-generated secrets for Harbor $TARGET_ENV"
+                echo "# Generated on $(date)"
+                echo ""
+                echo "DB_PASSWORD=$DB_PASS"
+                echo "HARBOR_ADMIN_PASSWORD=$HARBOR_PASS"
+                echo "CORE_SECRET=$CORE_SEC"
+                echo "JOBSERVICE_SECRET=$JOB_SEC"
+                echo "REGISTRY_HTTP_SECRET=$REG_SEC"
+                echo ""
+                echo "# Domain configuration"
+                echo "REGISTRY_DOMAIN=$REGISTRY_DOM"
+              } > "$VPS_ENV_FILE"
+              
+              chmod 600 "$VPS_ENV_FILE"
+              echo "✅ .env file created at $VPS_ENV_FILE"
+              echo ""
+              echo "🔑 IMPORTANT: Save Harbor admin password:"
+              echo "   Username: admin"
+              echo "   Password: $HARBOR_PASS"
+            fi
+            
+            # 7. Check permissions
+            echo ""
+            echo "7️⃣ Checking .env permissions..."
+            PERMS=$(stat -c %a "$VPS_ENV_FILE" 2>/dev/null || stat -f %A "$VPS_ENV_FILE")
+            if [ "$PERMS" = "600" ]; then
+              echo "✅ .env permissions are secure (600)"
+            else
+              echo "⚠️ .env permissions are $PERMS (should be 600)"
+              chmod 600 "$VPS_ENV_FILE"
+              echo "✅ Permissions fixed"
+            fi
+            
+            # 8. Check disk space
+            echo ""
+            echo "8️⃣ Checking disk space..."
+            AVAILABLE=$(df -BG / | tail -1 | awk '{print $4}' | sed 's/G//')
+            if [ "$AVAILABLE" -gt 20 ]; then
+              echo "✅ Sufficient disk space: ${AVAILABLE}GB available"
+            else
+              echo "⚠️ Low disk space: ${AVAILABLE}GB available (20GB+ recommended)"
+            fi
+            
+            # 9. Check memory
+            echo ""
+            echo "9️⃣ Checking memory..."
+            TOTAL_MEM=$(free -g | grep Mem | awk '{print $2}')
+            if [ "$TOTAL_MEM" -ge 4 ]; then
+              echo "✅ Sufficient memory: ${TOTAL_MEM}GB total"
+            else
+              echo "⚠️ Low memory: ${TOTAL_MEM}GB total (4GB+ recommended)"
+            fi
+            
+            echo ""
+            echo "✅ All VPS prerequisites validated for $TARGET_ENV!"
+          VPS_CHECK
+
+      - name: ✅ Validation Summary
+        if: success()
+        run: |
+          echo "✅ VPS Configuration Validated Successfully!"
+          echo ""
+          echo "Environment: ${{ github.ref == 'refs/heads/master' && 'Production' || 'Staging' }}"
+          echo "Ready for deployment 🚀"
+
+      - name: ❌ Validation Failed
+        if: failure()
+        run: |
+          echo "❌ VPS Configuration Validation Failed"
+          echo ""
+          echo "Please fix the issues above before deploying."
+          exit 1
+
+  cleanup:
+    name: 🧹 Cleanup Old Containers
+    runs-on: ubuntu-latest
+    needs: validate
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/develop') || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: 🔐 Prepare SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 🔒 Mask sensitive values
+        run: |
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_HOST }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+
+      - name: 🧹 Force remove old containers
+        env:
+          TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
+        run: |
+          echo "🎯 Cleanup for environment: $TARGET_ENV"
+          
+          if [ "$TARGET_ENV" = "production" ]; then
+            CONTAINER_PREFIX="${{ env.CONTAINER_PREFIX_PROD }}"
+            NETWORKS="${{ env.NETWORK_PROD }}"
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
+          else
+            CONTAINER_PREFIX="${{ env.CONTAINER_PREFIX_STAGING }}"
+            NETWORKS="${{ env.NETWORK_STAGING }}"
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
+          fi
+          
+          # List of Harbor containers
+          CONTAINERS="$CONTAINER_PREFIX-db $CONTAINER_PREFIX-redis $CONTAINER_PREFIX-core $CONTAINER_PREFIX-portal $CONTAINER_PREFIX-registry $CONTAINER_PREFIX-registryctl $CONTAINER_PREFIX-jobservice $CONTAINER_PREFIX-trivy $CONTAINER_PREFIX-nginx"
+          
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << CLEANUP_SCRIPT
+            set -e
+            echo "🧹 Cleaning up old containers and networks..."
+            echo "Environment: $TARGET_ENV"
+            echo "Deploy directory: $DEPLOY_DIR"
+            
+            # Stop services via docker compose if directory exists
+            if [ -d "$DEPLOY_DIR/${{ env.PROJECT_PATH }}" ]; then
+              echo "📂 Found existing deployment, stopping services..."
+              cd "$DEPLOY_DIR/${{ env.PROJECT_PATH }}"
+              docker compose down 2>/dev/null || echo "  ℹ️  No compose services running"
+            fi
+            
+            # Force remove containers if they exist
+            for CONTAINER in $CONTAINERS; do
+              if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER}$"; then
+                echo "Removing container: $CONTAINER"
+                docker rm -f "$CONTAINER" || true
+              fi
+            done
+            
+            # Remove networks with incorrect labels
+            for NETWORK in $NETWORKS; do
+              if docker network ls --format '{{.Name}}' | grep -q "^${NETWORK}$"; then
+                echo "🔧 Removing network with incorrect labels: $NETWORK"
+                docker network rm "$NETWORK" 2>/dev/null || echo "  ⚠️  Could not remove $NETWORK"
+              fi
+            done
+            
+            echo "✅ Cleanup complete (volumes preserved for data safety)"
+            echo "   Networks will be recreated with correct labels during deployment"
+          CLEANUP_SCRIPT
+
+  deploy:
+    name: 🚀 Deploy to VPS
+    runs-on: ubuntu-latest
+    needs: cleanup
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/develop') || github.event_name == 'workflow_dispatch'
+    environment:
+      name: ${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
+      url: ${{ github.ref == 'refs/heads/master' && 'https://registry.freijstack.com' || 'https://registry-staging.freijstack.com' }}
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Prepare SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 🔒 Mask sensitive values
+        run: |
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_HOST }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+
+      - name: 🚀 Deploy to VPS
+        env:
+          TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
+        run: |
+          echo "🎯 Target environment: $TARGET_ENV"
+          
+          if [ "$TARGET_ENV" = "production" ]; then
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
+            ENV_FILE="${{ env.VPS_ENV_FILE_PROD }}"
+            BRANCH="${{ env.BRANCH_PROD }}"
+            ENV_TEMPLATE=".env.production"
+          else
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
+            ENV_FILE="${{ env.VPS_ENV_FILE_STAGING }}"
+            BRANCH="${{ env.BRANCH_STAGING }}"
+            ENV_TEMPLATE=".env.staging"
+          fi
+          
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << DEPLOY_SCRIPT
+            set -e
+            echo "🚀 Starting Harbor deployment..."
+            echo "🎯 Deploying to: $TARGET_ENV"
+            echo "📂 Deploy directory: $DEPLOY_DIR"
+            
+            # Clone/update repo
+            if [ -d "$DEPLOY_DIR/.git" ]; then
+              echo "✅ Repository already exists, pulling latest changes..."
+              cd "$DEPLOY_DIR"
+              git fetch origin
+              git reset --hard origin/$BRANCH
+              git clean -fd
+            else
+              echo "📥 Cloning repository for the first time..."
+              if [ -d "$DEPLOY_DIR" ]; then
+                echo "🧹 Cleaning existing directory..."
+                rm -rf "$DEPLOY_DIR"
+              fi
+              git clone -b $BRANCH https://github.com/${{ github.repository }}.git "$DEPLOY_DIR"
+              cd "$DEPLOY_DIR"
+            fi
+            
+            # Navigate to harbor
+            cd ${{ env.PROJECT_PATH }}
+            
+            echo "📝 Using environment template: $ENV_TEMPLATE"
+            
+            # Verify template exists
+            if [ ! -f "$ENV_TEMPLATE" ]; then
+              echo "❌ ERROR: Template $ENV_TEMPLATE missing in repo"
+              exit 1
+            fi
+            
+            # Copy template as base
+            cp "$ENV_TEMPLATE" .env
+            
+            # Inject secrets from VPS .env file
+            if [ -f "$ENV_FILE" ]; then
+              echo "🔐 Injecting secrets from VPS .env file..."
+              
+              for SECRET_VAR in DB_PASSWORD HARBOR_ADMIN_PASSWORD CORE_SECRET JOBSERVICE_SECRET REGISTRY_HTTP_SECRET; do
+                SECRET_VALUE=\$(grep -E "^${SECRET_VAR}=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- || echo "")
+                if [ -n "\$SECRET_VALUE" ]; then
+                  if grep -q "^${SECRET_VAR}=" .env; then
+                    sed -i "s|^${SECRET_VAR}=.*|${SECRET_VAR}=\${SECRET_VALUE}|" .env
+                  else
+                    echo "${SECRET_VAR}=\${SECRET_VALUE}" >> .env
+                  fi
+                  echo "  ✅ Injected ${SECRET_VAR}"
+                else
+                  echo "  ⚠️ ${SECRET_VAR} not found in VPS .env"
+                fi
+              done
+            else
+              echo "⚠️ VPS .env file not found at $ENV_FILE"
+              echo "   Using template defaults (INSECURE for production!)"
+            fi
+            
+            echo "🔧 Pulling and starting containers..."
+            docker compose pull
+            docker compose up -d --remove-orphans
+            
+            # Wait for services
+            echo "⏳ Waiting for services to start..."
+            sleep 15
+            
+            # Check health
+            echo "🏥 Checking health..."
+            docker compose ps
+            
+            echo "✅ Deployment successful!"
+            echo "📊 Recent logs:"
+            docker compose logs --tail=30
+          DEPLOY_SCRIPT
+
+      - name: 🔄 Restart Traefik (optional)
+        if: github.event_name == 'workflow_dispatch' && inputs.restart_traefik == true
+        run: |
+          echo "🔄 Restarting Traefik as requested..."
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'TRAEFIK_RESTART'
+            set -e
+            TRAEFIK_CONTAINER=$(docker ps --format '{{.Names}}' | grep -i 'traefik' | head -n1)
+            if [ -z "$TRAEFIK_CONTAINER" ]; then
+              echo "❌ Traefik container not found"
+              exit 1
+            fi
+            echo "Restarting $TRAEFIK_CONTAINER..."
+            docker restart "$TRAEFIK_CONTAINER"
+            sleep 5
+            echo "✅ Traefik restarted"
+          TRAEFIK_RESTART
+
+      - name: ✅ Verify Deployment
+        env:
+          TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
+        run: |
+          echo "🔍 Verifying deployment on $TARGET_ENV..."
+          sleep 5
+          
+          if [ "$TARGET_ENV" = "production" ]; then
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
+            REGISTRY_URL="${{ env.REGISTRY_DOMAIN_PROD }}"
+          else
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
+            REGISTRY_URL="${{ env.REGISTRY_DOMAIN_STAGING }}"
+          fi
+          
+          # Check containers
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "cd $DEPLOY_DIR/${{ env.PROJECT_PATH }} && docker compose ps"
+          
+          echo ""
+          echo "✅ Deployment verified successfully!"
+          echo ""
+          echo "🌐 Harbor Registry URL: https://$REGISTRY_URL"
+          echo "👤 Default credentials: admin / [check VPS .env file]"
+          echo ""
+          echo "📚 Next steps:"
+          echo "  1. Access Harbor at https://$REGISTRY_URL"
+          echo "  2. Change admin password"
+          echo "  3. Create projects and configure RBAC"
+          echo "  4. Configure Docker clients: docker login $REGISTRY_URL"
+
+  notify:
+    name: 📬 Notification
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: always()
+
+    steps:
+      - name: 📬 Deployment Status
+        run: |
+          if [ "${{ needs.deploy.result }}" = "success" ]; then
+            echo "✅ Harbor deployment completed successfully!"
+          else
+            echo "❌ Harbor deployment failed"
+            exit 1
+          fi

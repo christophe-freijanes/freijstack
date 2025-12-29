@@ -458,22 +458,26 @@ jobs:
             CONTAINERS="${{ env.CONTAINER_PREFIX_PROD }}-backend ${{ env.CONTAINER_PREFIX_PROD }}-frontend ${{ env.CONTAINER_PREFIX_PROD }}-postgres"
             NETWORKS="${{ env.NETWORK_PROD }}"
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
+            PROJECT_PATH="${{ env.PROJECT_PATH }}"
           else
             CONTAINERS="${{ env.CONTAINER_PREFIX_STAGING }}-backend ${{ env.CONTAINER_PREFIX_STAGING }}-frontend ${{ env.CONTAINER_PREFIX_STAGING }}-postgres"
             NETWORKS="${{ env.NETWORK_STAGING }}"
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
+            PROJECT_PATH="${{ env.PROJECT_PATH }}"
           fi
           
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << CLEANUP_SCRIPT
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "TARGET_ENV='$TARGET_ENV' CONTAINERS='$CONTAINERS' NETWORKS='$NETWORKS' DEPLOY_DIR='$DEPLOY_DIR' PROJECT_PATH='$PROJECT_PATH'" bash << 'CLEANUP_SCRIPT'
             set -e
             echo "🧹 Cleaning up old containers and networks..."
             echo "Environment: $TARGET_ENV"
             echo "Deploy directory: $DEPLOY_DIR"
+            echo "Containers to remove: $CONTAINERS"
+            echo "Networks to remove: $NETWORKS"
             
             # Arrêter les conteneurs via docker compose si le dossier existe
-            if [ -d "$DEPLOY_DIR/${{ env.PROJECT_PATH }}" ]; then
+            if [ -d "$DEPLOY_DIR/$PROJECT_PATH" ]; then
               echo "📂 Found existing deployment, stopping services..."
-              cd "$DEPLOY_DIR/${{ env.PROJECT_PATH }}"
+              cd "$DEPLOY_DIR/$PROJECT_PATH"
               docker compose down 2>/dev/null || echo "  ℹ️  No compose services running"
             fi
             
@@ -536,21 +540,22 @@ jobs:
           # Déterminer les chemins selon l'environnement
           if [ "$TARGET_ENV" = "production" ]; then
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
-            ENV_FILE="${{ env.VPS_ENV_FILE_PROD }}"
+            VPS_ENV_FILE="${{ env.VPS_ENV_FILE_PROD }}"
             BRANCH="${{ env.BRANCH_PROD }}"
             ENV_TEMPLATE=".env.production"
           else
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
-            ENV_FILE="${{ env.VPS_ENV_FILE_STAGING }}"
+            VPS_ENV_FILE="${{ env.VPS_ENV_FILE_STAGING }}"
             BRANCH="${{ env.BRANCH_STAGING }}"
             ENV_TEMPLATE=".env.staging"
           fi
           
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << DEPLOY_SCRIPT
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "TARGET_ENV='$TARGET_ENV' DEPLOY_DIR='$DEPLOY_DIR' VPS_ENV_FILE='$VPS_ENV_FILE' BRANCH='$BRANCH' ENV_TEMPLATE='$ENV_TEMPLATE' PROJECT_PATH='${{ env.PROJECT_PATH }}' GITHUB_REPO='${{ github.repository }}'" bash << 'DEPLOY_SCRIPT'
             set -e
             echo "🚀 Starting SecureVault deployment..."
             echo "🎯 Deploying to: $TARGET_ENV"
             echo "📂 Deploy directory: $DEPLOY_DIR"
+            echo "📝 VPS ENV file: $VPS_ENV_FILE"
             
             # Cloner/mettre à jour le repo
             if [ -d "$DEPLOY_DIR/.git" ]; then
@@ -566,12 +571,12 @@ jobs:
                 echo "🧹 Cleaning existing directory..."
                 rm -rf "$DEPLOY_DIR"
               fi
-              git clone -b $BRANCH https://github.com/${{ github.repository }}.git "$DEPLOY_DIR"
+              git clone -b $BRANCH https://github.com/$GITHUB_REPO.git "$DEPLOY_DIR"
               cd "$DEPLOY_DIR"
             fi
             
             # Naviguer vers securevault
-            cd ${{ env.PROJECT_PATH }}
+            cd $PROJECT_PATH
             
             echo "📝 Using environment template: $ENV_TEMPLATE"
             
