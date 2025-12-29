@@ -87,7 +87,7 @@ Une fois Traefik actif, démarrer les applications :
 #### Portfolio
 
 ```bash
-cd portfolio
+cd saas/portfolio
 cp .env.example .env
 nano .env
 docker-compose up -d
@@ -241,7 +241,7 @@ docker ps --format "table {{.Names}}\t{{.Status}}"
 docker logs -f traefik
 
 # Logs d'une app spécifique
-cd portfolio && docker-compose logs -f
+cd saas/portfolio && docker-compose logs -f
 cd saas/securevault && docker-compose logs -f
 cd saas/n8n && docker-compose logs -f
 ```
@@ -272,7 +272,7 @@ docker-compose pull
 docker-compose up -d
 
 # Mettre à jour une application
-cd portfolio
+cd saas/portfolio
 docker-compose pull
 docker-compose up -d
 ```

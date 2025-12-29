@@ -89,7 +89,7 @@ docker logs -f portfolio
 # Double-cliquez sur index.html
 
 # Option 2: Serveur local (Python)
-cd portfolio
+cd saas/portfolio
 python3 -m http.server 8000
 # Accès: http://localhost:8000
 
@@ -107,7 +107,7 @@ git checkout -b feat/ma-modification
 # Tester localement
 
 # Commit et push vers develop
-git add portfolio/
+git add saas/portfolio/
 git commit -m "feat: description de la modification"
 git push origin feat/ma-modification
 

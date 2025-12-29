@@ -102,7 +102,7 @@ Portfolio web multilingue (FR/EN) avec:
 **Accès**: 
 - 📍 **Production**: https://portfolio.freijstack.com/
 - 📍 **Staging**: https://portfolio-staging.freijstack.com/
-- 📍 **Local**: Ouvrir `portfolio/index.html` dans un navigateur
+- 📍 **Local**: Ouvrir `saas/portfolio/index.html` dans un navigateur
 
 ### SaaS Démos (`/saas`)
 
@@ -244,7 +244,7 @@ docker-compose ps
 #### Portfolio (Local)
 
 ```bash
-cd portfolio
+cd saas/portfolio
 
 # Option 1: Ouvrir directement le fichier
 # Double-cliquez sur index.html
