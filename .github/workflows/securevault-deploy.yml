@@ -289,9 +289,11 @@ jobs:
         continue-on-error: true
 
       - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
         with:
-          sarif_file: 'trivy-*.sarif'
+          sarif_file: '.'
+          category: 'securevault-trivy'
         continue-on-error: true
 
   deploy:
