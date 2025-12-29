@@ -8,6 +8,9 @@ const passport = require('passport');
 
 const authRoutes = require('./routes/auth');
 const secretsRoutes = require('./routes/secrets');
+const secretsEnhancedRoutes = require('./routes/secretsEnhanced');
+const foldersRoutes = require('./routes/folders');
+const importExportRoutes = require('./routes/importExport');
 const auditRoutes = require('./routes/audit');
 const auditAdminRoutes = require('./routes/auditAdmin');
 const samlRoutes = require('./routes/saml');
@@ -82,6 +85,9 @@ app.get('/health', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/secrets', secretsRoutes);
+app.use('/api/secrets-pro', secretsEnhancedRoutes);
+app.use('/api/folders', foldersRoutes);
+app.use('/api/import-export', importExportRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/audit/admin', auditAdminRoutes);
 

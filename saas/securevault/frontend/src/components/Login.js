@@ -115,6 +115,10 @@ function Login({ onLogin }) {
             type="submit" 
             className="btn btn-primary" 
             disabled={loading}
+          >
+            {loading ? 'Connexion...' : 'Se connecter'}
+          </button>
+
         {samlEnabled && (
           <>
             <div className="auth-divider">
@@ -132,10 +136,6 @@ function Login({ onLogin }) {
             </button>
           </>
         )}
-
-          >
-            {loading ? 'Connexion...' : 'Se connecter'}
-          </button>
         </form>
 
         <div className="auth-footer">
