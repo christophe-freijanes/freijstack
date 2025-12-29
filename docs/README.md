@@ -1,5 +1,10 @@
 # 📚 Documentation FreijStack
 
+[![GitHub](https://img.shields.io/badge/repo-github-blue?style=flat-square&logo=github)](https://github.com/christophe-freijanes/freijstack)
+[![Status](https://img.shields.io/badge/status-active-success?style=flat-square&logo=checklist)](../README.md)
+[![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square)](../LICENSE)
+[![Last Updated](https://img.shields.io/badge/updated-December%202025-blue?style=flat-square&logo=calendar)](../README.md)
+
 Index de la documentation technique du projet.
 
 ## 📖 Documents Disponibles

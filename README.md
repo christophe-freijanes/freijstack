@@ -1,13 +1,14 @@
 # FreijStack 🚀
 
-[![CI/CD Pipeline](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/main.yml?branch=master&label=CI%2FCD&style=flat-square)](https://github.com/christophe-freijanes/freijstack/actions)
-[![CodeQL](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/main.yml?branch=master&label=CodeQL&style=flat-square&logo=github)](https://github.com/christophe-freijanes/freijstack/security/code-scanning)
-[![Security Policy](https://img.shields.io/badge/security-policy-blue?style=flat-square&logo=shield)](https://github.com/christophe-freijanes/freijstack/security/policy)
-[![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square)](LICENSE)
+[![CI/CD Pipeline](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/main.yml?branch=master&label=CI%2FCD&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions)
+[![Security Scans](https://img.shields.io/badge/security-scans-brightgreen?style=flat-square&logo=githubsecurity)](https://github.com/christophe-freijanes/freijstack/security/code-scanning)
+[![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square&logo=readme)](LICENSE)
 [![Top Language](https://img.shields.io/github/languages/top/christophe-freijanes/freijstack?style=flat-square&color=yellow)](https://github.com/christophe-freijanes/freijstack)
 [![Code Size](https://img.shields.io/github/languages/code-size/christophe-freijanes/freijstack?style=flat-square&color=green)](https://github.com/christophe-freijanes/freijstack)
-[![Last Commit](https://img.shields.io/github/last-commit/christophe-freijanes/freijstack?label=Derni%C3%A8re%20MAJ&style=flat-square&color=blue)](https://github.com/christophe-freijanes/freijstack/commits)
-[![Stars](https://img.shields.io/github/stars/christophe-freijanes/freijstack?style=flat-square&color=orange)](https://github.com/christophe-freijanes/freijstack/stargazers)
+[![Last Commit](https://img.shields.io/github/last-commit/christophe-freijanes/freijstack?label=Mise%20%C3%A0%20jour&style=flat-square&color=blue)](https://github.com/christophe-freijanes/freijstack/commits)
+[![Stars](https://img.shields.io/github/stars/christophe-freijanes/freijstack?style=flat-square&color=orange&logo=star)](https://github.com/christophe-freijanes/freijstack/stargazers)
+[![Issues](https://img.shields.io/github/issues/christophe-freijanes/freijstack?style=flat-square&color=critical)](https://github.com/christophe-freijanes/freijstack/issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/christophe-freijanes/freijstack?style=flat-square&color=success)](https://github.com/christophe-freijanes/freijstack/pulls)
 
 Portfolio et projets cloud & sécurité de **Christophe FREIJANES** - Senior Cloud & Security Specialist (DevSecOps).
 

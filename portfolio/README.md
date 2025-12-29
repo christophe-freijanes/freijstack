@@ -1,9 +1,13 @@
 # Portfolio - Christophe FREIJANES
 
-Portfolio web professionnel multilingue (FR/EN) mettant en avant les compétences Cloud & Security / DevSecOps.
+[![Live](https://img.shields.io/badge/live-portfolio.freijstack.com-success?style=flat-square&logo=globe)](https://portfolio.freijstack.com/)
+[![Staging](https://img.shields.io/badge/staging-portfolio--staging.freijstack.com-blue?style=flat-square&logo=globe)](https://portfolio-staging.freijstack.com/)
+[![Multilingue](https://img.shields.io/badge/languages-FR%2FEN-orange?style=flat-square&logo=language)](./index.html)
+[![Responsive](https://img.shields.io/badge/responsive-mobile--first-green?style=flat-square&logo=device)](./style.css)
+[![WCAG AA](https://img.shields.io/badge/accessibility-WCAG%20AA-blue?style=flat-square&logo=ada)](./index.html)
+[![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square)](../LICENSE)
 
-**Live**: https://portfolio.freijstack.com/  
-**Staging**: https://portfolio-staging.freijstack.com/
+Portfolio web professionnel multilingue (FR/EN) mettant en avant les compétences Cloud & Security / DevSecOps.
 
 ## 📌 Caractéristiques
 

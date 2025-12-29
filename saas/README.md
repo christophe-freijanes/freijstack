@@ -1,8 +1,13 @@
 # Applications SaaS Démos
 
-Exemples d'applications SaaS conteneurisées démontrant les compétences **DevSecOps**, développement backend/frontend, et déploiement automatisé.
+[![Status](https://img.shields.io/badge/status-en%20développement-yellow?style=flat-square&logo=construction)](./securevault)
+[![Docker Compose](https://img.shields.io/badge/docker-compose-2496ED?style=flat-square&logo=docker)](./securevault/docker-compose.yml)
+[![Node.js](https://img.shields.io/badge/backend-Node.js%2018-339933?style=flat-square&logo=node.js)](./securevault/backend)
+[![React](https://img.shields.io/badge/frontend-React%2018-61DAFB?style=flat-square&logo=react)](./securevault/frontend)
+[![PostgreSQL](https://img.shields.io/badge/database-PostgreSQL%2015-336791?style=flat-square&logo=postgresql)](./securevault)
+[![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square)](../LICENSE)
 
-**Status**: 🚧 En cours de développement
+Exemples d'applications SaaS conteneurisées démontrant les compétences **DevSecOps**, développement backend/frontend, et déploiement automatisé.
 
 ## 📋 Structure
 
