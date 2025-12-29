@@ -614,7 +614,6 @@ EOF
 - **Architecture**: [architecture.md](architecture.md)
 - **Déploiement**: [DEPLOYMENT.md](DEPLOYMENT.md)
 - **GitHub Issues**: https://github.com/christophe-freijanes/freijstack/issues
-- **Email**: contact@freijstack.com
 
 ---
 

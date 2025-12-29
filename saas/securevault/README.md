@@ -605,7 +605,6 @@ Application de démonstration pour portfolio DevSecOps.
 ## 📞 Contact
 
 - **Auteur**: Christophe FREIJANES
-- **Email**: contact@freijstack.com
 - **Portfolio**: https://portfolio.freijstack.com
 - **GitHub**: https://github.com/christophe-freijanes/freijstack
 
