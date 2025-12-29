@@ -14,48 +14,23 @@ Guide de configuration de la pipeline CI/CD dédiée pour SecureVault Manager.
 
 ## 🔧 Configuration GitHub Actions
 
-### Étape 1: Créer les secrets GitHub
+### ✅ Réutilisation des Secrets Portfolio
 
-Dans votre repo GitHub, allez à **Settings → Secrets and variables → Actions** et créez:
+**Bonne nouvelle**: SecureVault utilise les mêmes secrets que le portfolio!
 
-| Secret | Valeur | Description |
-|--------|--------|-------------|
-| `VPS_HOST` | `votre-ip-vps.com` | Adresse IP ou domaine du VPS |
-| `VPS_USER` | `ubuntu` (ou autre) | Utilisateur SSH |
-| `VPS_SSH_KEY` | Contenu clé privée | Clé SSH **privée** (générer si besoin) |
-| `VPS_PORT` | `22` | Port SSH (optionnel, défaut 22) |
+Vérifiez que vous avez déjà configuré dans **Settings → Secrets and variables → Actions**:
 
-### Génération d'une clé SSH (si besoin):
+| Secret | Utilisé pour |
+|--------|-------------|
+| `HOSTINGER_SSH_HOST` | IP/domaine du VPS |
+| `HOSTINGER_SSH_USER` | Utilisateur SSH |
+| `HOSTINGER_SSH_KEY` | Clé SSH pour déploiement |
 
-```bash
-# Sur votre machine locale
-ssh-keygen -t ed25519 -f ~/.ssh/github_actions -N ""
-
-# Copier la clé publique sur le VPS
-cat ~/.ssh/github_actions.pub | ssh user@vps "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
-
-# Copier le contenu de la clé privée dans le secret VPS_SSH_KEY
-cat ~/.ssh/github_actions
-```
+✅ **Aucun nouveau secret à créer** - la pipeline utilise les secrets existants!
 
 ---
 
-## 🚀 Structure du Déploiement sur VPS
-
-La pipeline crée automatiquement:
-
-```
-/app/
-├── securevault-prod/         # Production (branche master)
-│   ├── saas/securevault/
-│   │   ├── backend/
-│   │   ├── frontend/
-│   │   ├── docker-compose.yml
-│   │   └── .env              # ⚠️ À créer manuellement
-│   └── .git/
-├── securevault-staging/      # Staging (branche develop)
-│   └── [même structure]
-```
+## 📂 Structure de Déploiement
 
 ---
 
@@ -63,7 +38,7 @@ La pipeline crée automatiquement:
 
 ### Sur le VPS, créer les fichiers .env:
 
-**Pour PRODUCTION** (`/app/securevault-prod/saas/securevault/.env`):
+**Pour PRODUCTION** (`/srv/www/securevault/saas/securevault/.env`):
 
 ```bash
 # Backend
@@ -83,7 +58,7 @@ LOG_LEVEL=info
 REACT_APP_API_URL=https://vault-api.freijstack.com
 ```
 
-**Pour STAGING** (`/app/securevault-staging/saas/securevault/.env`):
+**Pour STAGING** (`/srv/www/securevault-staging/saas/securevault/.env`):
 
 ```bash
 # Backend
@@ -112,13 +87,31 @@ openssl rand -base64 32
 
 ---
 
+## 🚀 Structure du Déploiement sur Hostinger
+
+La pipeline crée automatiquement (même que le portfolio):
+
+```
+/srv/www/
+├── portfolio/                    # Portfolio prod
+├── portfolio-staging/            # Portfolio staging  
+├── securevault/                  # SecureVault prod (master)
+│   └── saas/securevault/.env    # ⚠️ À créer!
+└── securevault-staging/          # SecureVault staging (develop)
+    └── saas/securevault/.env    # ⚠️ À créer!
+```
+
+**Même infrastructure Hostinger** que le portfolio ✅
+
+---
+
 ## 🔄 Pipeline Workflow
 
 ### Déclenchement Automatique
 
 La pipeline s'exécute automatiquement quand:
-- ✅ Push sur la branche `develop` → Déploie sur **STAGING**
-- ✅ Push sur la branche `master` → Déploie sur **PRODUCTION**
+- ✅ Push sur la branche `develop` → Déploie sur **STAGING** (`/srv/www/securevault-staging/`)
+- ✅ Push sur la branche `master` → Déploie sur **PRODUCTION** (`/srv/www/securevault/`)
 - ✅ Changements dans `saas/securevault/**`
 
 ### Étapes de la Pipeline
