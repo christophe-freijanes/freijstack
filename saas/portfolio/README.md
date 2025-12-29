@@ -1,9 +1,13 @@
 # Portfolio - Christophe FREIJANES
 
-Portfolio web professionnel multilingue (FR/EN) mettant en avant les compétences Cloud & Security / DevSecOps.
+[![Live](https://img.shields.io/badge/live-portfolio.freijstack.com-success?style=flat-square&logo=globe)](https://portfolio.freijstack.com/)
+[![Staging](https://img.shields.io/badge/staging-portfolio--staging.freijstack.com-blue?style=flat-square&logo=globe)](https://portfolio-staging.freijstack.com/)
+[![Multilingue](https://img.shields.io/badge/languages-FR%2FEN-orange?style=flat-square&logo=language)](./index.html)
+[![Responsive](https://img.shields.io/badge/responsive-mobile--first-green?style=flat-square&logo=device)](./style.css)
+[![WCAG AA](https://img.shields.io/badge/accessibility-WCAG%20AA-blue?style=flat-square&logo=ada)](./index.html)
+[![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square)](../../LICENSE)
 
-**Live**: https://portfolio.freijstack.com/  
-**Staging**: https://portfolio-staging.freijstack.com/
+Portfolio web professionnel multilingue (FR/EN) mettant en avant les compétences Cloud & Security / DevSecOps.
 
 ## 📌 Caractéristiques
 
@@ -51,13 +55,41 @@ Portfolio web professionnel multilingue (FR/EN) mettant en avant les compétence
 
 ## 🚀 Utilisation
 
+### Avec Docker (Production/Staging)
+
+Le portfolio est maintenant géré par **son propre docker-compose.yml** :
+
+```bash
+# Prérequis: Traefik doit être démarré
+cd base-infra
+docker network create web
+docker volume create traefik_data
+docker-compose up -d
+
+# Démarrer le portfolio
+cd ../portfolio
+cp .env.example .env
+nano .env  # Configurer DOMAIN_NAME
+docker-compose up -d
+
+# Vérifier
+docker-compose ps
+docker logs -f portfolio
+```
+
+**URLs**:
+- Production: https://portfolio.freijstack.com
+- Staging: https://portfolio-staging.freijstack.com
+
+**Voir**: [../../base-infra/BASE_INTEGRATION.md](../../base-infra/BASE_INTEGRATION.md)
+
 ### Ouvrir localement
 ```bash
 # Option 1: Ouvrir directement
 # Double-cliquez sur index.html
 
 # Option 2: Serveur local (Python)
-cd portfolio
+cd saas/portfolio
 python3 -m http.server 8000
 # Accès: http://localhost:8000
 
@@ -75,7 +107,7 @@ git checkout -b feat/ma-modification
 # Tester localement
 
 # Commit et push vers develop
-git add portfolio/
+git add saas/portfolio/
 git commit -m "feat: description de la modification"
 git push origin feat/ma-modification
 

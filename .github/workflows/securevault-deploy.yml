@@ -137,15 +137,20 @@ jobs:
             
             echo "📂 Deploy directory: $DEPLOY_DIR"
             
-            # Créer répertoire si n'existe pas
-            mkdir -p "$DEPLOY_DIR"
-            
             # Cloner/mettre à jour le repo
             if [ -d "$DEPLOY_DIR/.git" ]; then
+              echo "✅ Repository already exists, pulling latest changes..."
               cd "$DEPLOY_DIR"
               git fetch origin
               git reset --hard origin/${{ github.ref_name }}
+              git clean -fd
             else
+              echo "📥 Cloning repository for the first time..."
+              # Supprimer le répertoire s'il existe mais n'est pas un repo Git
+              if [ -d "$DEPLOY_DIR" ]; then
+                echo "🧹 Cleaning existing directory..."
+                rm -rf "$DEPLOY_DIR"
+              fi
               git clone -b ${{ github.ref_name }} https://github.com/${{ github.repository }}.git "$DEPLOY_DIR"
               cd "$DEPLOY_DIR"
             fi

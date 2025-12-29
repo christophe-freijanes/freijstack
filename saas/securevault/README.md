@@ -1,5 +1,13 @@
 # 🔐 SecureVault Manager
 
+[![Docker](https://img.shields.io/badge/docker-compose-2496ED?style=flat-square&logo=docker)](./docker-compose.yml)
+[![Backend](https://img.shields.io/badge/backend-Node.js%2018-339933?style=flat-square&logo=node.js)](./backend)
+[![Frontend](https://img.shields.io/badge/frontend-React%2018-61DAFB?style=flat-square&logo=react)](./frontend)
+[![Database](https://img.shields.io/badge/database-PostgreSQL%2015-336791?style=flat-square&logo=postgresql)](./docker-compose.yml)
+[![Encryption](https://img.shields.io/badge/encryption-AES--256--GCM-blue?style=flat-square&logo=security)](./backend/src/utils/crypto.js)
+[![Authentication](https://img.shields.io/badge/auth-JWT%2BRBAC-green?style=flat-square&logo=jwt)](./backend/src/middleware/auth.js)
+[![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square)](../../LICENSE)
+
 **Gestionnaire de secrets sécurisé** avec chiffrement AES-256-GCM, authentification JWT, et audit complet.
 
 Application SaaS de démonstration pour le portfolio DevSecOps de **Christophe FREIJANES**.

@@ -1,6 +1,6 @@
 # 🚀 Guide de Déploiement - FreijStack
 
-Guide complet pour déployer le portfolio et les applications SaaS sur VPS.
+Guide complet pour déployer les applications SaaS (Portfolio, SecureVault, n8n) sur VPS.
 
 **Dernière mise à jour**: Décembre 2025
 
@@ -338,10 +338,10 @@ git clone https://github.com/christophe-freijanes/freijstack.git
 cd freijstack
 
 # Copier vers production
-sudo cp -r portfolio/* /srv/www/portfolio/
+sudo cp -r saas/portfolio/* /srv/www/portfolio/
 
 # Copier vers staging
-sudo cp -r portfolio/* /srv/www/portfolio-staging/
+sudo cp -r saas/portfolio/* /srv/www/portfolio-staging/
 
 # Permissions
 sudo chown -R deploy:deploy /srv/www/portfolio

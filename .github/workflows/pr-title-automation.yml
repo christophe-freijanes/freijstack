@@ -56,7 +56,7 @@ jobs:
             } else if (filePaths.some(f => f.includes('Dockerfile') || f.includes('docker-compose'))) {
               type = 'build';
               scope = 'docker';
-            } else if (filePaths.some(f => f.startsWith('portfolio/'))) {
+            } else if (filePaths.some(f => f.startsWith('saas/portfolio/'))) {
               type = 'feat';
               scope = 'portfolio';
             } else if (filePaths.some(f => f.startsWith('saas/'))) {
