@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # TRAEFIK - Reverse Proxy Central
+  # ============================================
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    restart: always
+    command:
+      - --api=true
+      - --api.insecure=true
+      - --api.dashboard=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.mytlschallenge.acme.tlschallenge=true
+      - --certificatesresolvers.mytlschallenge.acme.email=${SSL_EMAIL:-admin@freijstack.com}
+      - --certificatesresolvers.mytlschallenge.acme.storage=/letsencrypt/acme.json
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - traefik_data:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - web
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.dashboard.rule=Host(`traefik.${DOMAIN_NAME:-freijstack.com}`)
+      - traefik.http.routers.dashboard.service=api@internal
+      - traefik.http.services.dashboard.loadbalancer.server.port=8080
+
+# ============================================
+# VOLUMES - Persistent Data
+# ============================================
+volumes:
+  traefik_data:
+    name: traefik_data
+    driver: local
+  n8n_data:
+    name: n8n_data
+    driver: local
+
+# ============================================
+# NETWORKS - Shared Infrastructure
+# ============================================
+networks:
+  web:
+    name: web
+    driver: bridge

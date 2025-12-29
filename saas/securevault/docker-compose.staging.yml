@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # PostgreSQL Database (Staging)
+  # ============================================
+  postgres-staging:
+    image: postgres:15-alpine
+    container_name: securevault-staging-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: securevault_staging
+      POSTGRES_USER: securevault_staging
+      POSTGRES_PASSWORD: ${DB_PASSWORD_STAGING:-changeme_in_staging}
+    volumes:
+      - securevault_staging_postgres_data:/var/lib/postgresql/data
+    networks:
+      - securevault-staging-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U securevault_staging"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # Backend API (Staging)
+  # ============================================
+  backend-staging:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: securevault-staging-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://securevault_staging:${DB_PASSWORD_STAGING:-changeme_in_staging}@postgres-staging:5432/securevault_staging
+      JWT_SECRET: ${JWT_SECRET_STAGING:-generate_with_openssl_rand_hex_32}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY_STAGING:-generate_with_openssl_rand_hex_32}
+      BCRYPT_ROUNDS: 12
+      JWT_EXPIRES_IN: 24h
+      FRONTEND_URL: https://vault-staging.freijstack.com
+    depends_on:
+      postgres-staging:
+        condition: service_healthy
+    networks:
+      - securevault-staging-network
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.securevault-staging-backend.rule=Host(`vault-api-staging.freijstack.com`)"
+      - "traefik.http.routers.securevault-staging-backend.entrypoints=websecure"
+      - "traefik.http.routers.securevault-staging-backend.tls=true"
+      - "traefik.http.routers.securevault-staging-backend.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.securevault-staging-backend.loadbalancer.server.port=3001"
+      # CORS headers
+      - "traefik.http.middlewares.securevault-staging-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS"
+      - "traefik.http.middlewares.securevault-staging-cors.headers.accesscontrolalloworiginlist=https://vault-staging.freijstack.com"
+      - "traefik.http.middlewares.securevault-staging-cors.headers.accesscontrolallowcredentials=true"
+      - "traefik.http.middlewares.securevault-staging-cors.headers.accesscontrolallowheaders=Content-Type,Authorization"
+      - "traefik.http.routers.securevault-staging-backend.middlewares=securevault-staging-cors"
+    command: sh -c "sleep 5 && node src/server.js"
+
+  # ============================================
+  # Frontend (Staging)
+  # ============================================
+  frontend-staging:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_URL=https://vault-api-staging.freijstack.com/api
+    container_name: securevault-staging-frontend
+    restart: unless-stopped
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.securevault-staging-frontend.rule=Host(`vault-staging.freijstack.com`)"
+      - "traefik.http.routers.securevault-staging-frontend.entrypoints=websecure"
+      - "traefik.http.routers.securevault-staging-frontend.tls=true"
+      - "traefik.http.routers.securevault-staging-frontend.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.securevault-staging-frontend.loadbalancer.server.port=80"
+
+# ============================================
+# VOLUMES
+# ============================================
+volumes:
+  securevault_staging_postgres_data:
+    name: securevault_staging_postgres_data
+    driver: local
+
+# ============================================
+# NETWORKS
+# ============================================
+networks:
+  securevault-staging-network:
+    name: securevault_staging_network
+    driver: bridge
+  web:
+    external: true
