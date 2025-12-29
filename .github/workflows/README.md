@@ -8,8 +8,8 @@ Documentation complète des workflows CI/CD et automatisations du projet.
 
 | Workflow | Fichier | Déclencheur | Durée | Description |
 |----------|---------|-------------|-------|-------------|
-| **Portfolio Deploy** | [portfolio-deploy.yml](portfolio-deploy.yml) | Push master/develop, PR | ~5-8 min | Build, test, security scan, deploy VPS + GitHub Pages |
-| **SecureVault Deploy** | [securevault-deploy.yml](securevault-deploy.yml) | Push master/develop (saas/securevault/*), manual | ~3-5 min | Test, build, scan, deploy SecureVault sur VPS |
+| **Infrastructure Deploy** | [infrastructure-deploy.yml](infrastructure-deploy.yml) | Push master/develop (base-infra/*), manual | ~3-5 min | Validate, test, deploy Traefik + n8n + portfolio |
+| **SecureVault Deploy** | [securevault-deploy.yml](securevault-deploy.yml) | Push develop (auto), manual (prod) | ~5-7 min | Cleanup, test, build, deploy SecureVault sur VPS |
 | **Secret Rotation** | [rotate-secrets.yml](rotate-secrets.yml) | Schedule (1er du mois), manual | ~3-5 min | Rotation automatique des secrets (DB_PASSWORD, JWT_SECRET, etc.) |
 | **PR Title Automation** | [pr-title-automation.yml](pr-title-automation.yml) | Ouverture PR | ~10s | Auto-format titre PR avec Conventional Commits |
 
@@ -29,8 +29,9 @@ on:
 ```
 
 **Branches**:
-- `develop` → Déploiement **STAGING** (vault-staging-api.freijstack.com)
-- `master` → Déploiement **PRODUCTION** (vault-api.freijstack.com)
+- `develop` → Déploiement automatique **STAGING** (vault-staging.freijstack.com)
+- `master` → **AUCUN** déploiement automatique (protection production)
+- **workflow_dispatch** → Déploiement manuel avec choix environnement
 
 ### Jobs Pipeline (2 étapes)
 

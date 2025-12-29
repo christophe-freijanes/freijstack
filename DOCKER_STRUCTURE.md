@@ -6,46 +6,48 @@ Voici la nouvelle structure claire et gérable pour ton VPS.
 
 ```
 freijstack/                              # Racine du projet
-├── docker-compose.yml                   # ⭐ ROOT TRAEFIK (Reverse Proxy Central)
-│   └── Services: Traefik v2.10
-│   └── Volumes: traefik_data
-│   └── Networks: web (partagé)
+├── base-infra/
+│   └── docker-compose.yml           # ⭐ INFRASTRUCTURE CENTRALISÉE
+│       ├── Services: Traefik v2.10, n8n, portfolio (prod+staging)
+│       ├── Volumes: traefik_data, n8n_data (external)
+│       └── Networks: web (external, partagé)
 │
-├── saas/
-│   └── securevault/
-│       ├── docker-compose.yml           # 🔐 PRODUCTION SecureVault
-│       │   └── Services: postgres, backend, frontend
-│       │   └── Names: securevault-*
-│       │   └── Domains: vault.freijstack.com, vault-api.freijstack.com
-│       │
-│       └── docker-compose.staging.yml   # 🔐 STAGING SecureVault
-│           └── Services: postgres-staging, backend-staging, frontend-staging
-│           └── Names: securevault-staging-*
-│           └── Domains: vault-staging.freijstack.com, vault-api-staging.freijstack.com
-│
-└── (portfolio, n8n, etc. avec leurs propres docker-compose.yml)
+└── saas/
+    └── securevault/
+        ├── docker-compose.yml           # 🔐 PRODUCTION SecureVault
+        │   ├── Services: postgres, backend, frontend
+        │   ├── Names: securevault-*
+        │   └── Domains: vault.freijstack.com, vault-api.freijstack.com
+        │
+        └── docker-compose.staging.yml   # 🔐 STAGING SecureVault
+            ├── Services: postgres-staging, backend-staging, frontend-staging
+            ├── Names: securevault-staging-*
+            └── Domains: vault-staging.freijstack.com, vault-api-staging.freijstack.com
 ```
 
 ## 🚀 Utilisation
 
-### 1. Démarrer Traefik (une seule fois)
+### 1. Démarrer l'Infrastructure (une seule fois)
 
 ```bash
-cd /root  # ou freijstack/
+cd base-infra/
 
 # Créer le réseau partagé
 docker network create web
 
 # Créer les volumes
 docker volume create traefik_data
+docker volume create n8n_data
 
-# Démarrer Traefik
+# Démarrer Traefik + n8n + portfolio
 docker compose up -d
 ```
 
 **Résultat:**
-- Conteneur: `traefik`
-- Port: 80, 443, 8080 (dashboard)
+- Conteneur: `traefik` (ports 80, 443, 8080)
+- Conteneur: `n8n` (automation.freijstack.com)
+- Conteneur: `portfolio` (portfolio.freijstack.com)
+- Conteneur: `portfolio-staging` (portfolio-staging.freijstack.com)
 - Réseau: `web` (external)
 
 ### 2. Déployer SecureVault PRODUCTION

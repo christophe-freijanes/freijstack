@@ -16,7 +16,7 @@ Infrastructure centralisée partagée par toutes les applications (Portfolio, Se
 
 ```
 base-infra/
-├── docker-compose.yml      # Configuration Traefik uniquement
+├── docker-compose.yml      # Configuration centralisée
 ├── README.md               # Ce fichier
 └── BASE_INTEGRATION.md     # Guide d'intégration globale
 ```
@@ -30,15 +30,23 @@ base-infra/
    - API dashboard disponible
    - Network `web` pour communication avec toutes les apps
 
-### 🌐 Applications Séparées
+2. **n8n (latest)**
+   - Plateforme d'automation no-code
+   - Domain: automation.freijstack.com
+   - Volume: n8n_data (persistant)
 
-Chaque application a maintenant **sa propre configuration** :
+3. **Portfolio (nginx alpine)**
+   - Production: portfolio.freijstack.com
+   - Staging: portfolio-staging.freijstack.com
+   - Fichiers statiques depuis /srv/www/
+
+### 🏛️ Applications Séparées
+
+Seul **SecureVault** a sa propre configuration :
 
 | Application | Emplacement | Docker Compose |
 |-------------|-------------|----------------|
-| **Portfolio** | `saas/portfolio/` | `saas/portfolio/docker-compose.yml` |
-| **SecureVault** | `saas/securevault/` | `saas/securevault/docker-compose.yml` |
-| **n8n** | `saas/n8n/` | `saas/n8n/docker-compose.yml` |
+| **SecureVault** | `saas/securevault/` | `docker-compose.yml` (prod) + `docker-compose.staging.yml` |
 
 **Toutes communiquent** avec Traefik via le network Docker `web`.
 
