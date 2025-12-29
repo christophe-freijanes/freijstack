@@ -8,11 +8,11 @@ Exemples d'applications SaaS conteneurisées démontrant les compétences **DevS
 
 ```
 saas/
-├── app1/
-│   ├── Dockerfile
-│   └── README.md
-├── app2/
-│   ├── Dockerfile
+├── securevault/
+│   ├── backend/
+│   ├── frontend/
+│   ├── docker-compose.yml
+│   ├── init-db.sh
 │   └── README.md
 └── README.md (ce fichier)
 ```
@@ -28,160 +28,38 @@ Chaque application démontre des compétences clés:
 - ✅ **Monitoring** - Prometheus, Grafana, Logging
 - ✅ **High Availability** - Resilience, failover
 
-## 🎯 App1: Gestionnaire de Tâches Sécurisé
+## 🔐 SecureVault Manager
 
-Application complète de gestion de tâches avec focus sécurité.
-
-### Caractéristiques
-- **Authentification & Autorisation** - JWT, RBAC, OAuth2 ready
-- **API RESTful sécurisée** - Input validation, rate limiting, CORS
-- **Base de données persistante** - PostgreSQL / MongoDB
-- **Interface utilisateur interactive** - Frontend moderne (React/Vue)
-- **Conteneurisation Docker** - Multi-stage builds, security best practices, non-root user
-- **Déploiement** - Kubernetes / Docker Compose ready
-- **Monitoring** - Prometheus metrics, structured logging, health checks
-- **CI/CD** - Automated testing, code quality, security scans
-- **Database Migrations** - Version control, rollback capability
-
-### Stack Technologique
-- **Backend**: Node.js/Python + Express/FastAPI
-- **Frontend**: React / Vue.js
-- **Database**: PostgreSQL (prod) / SQLite (dev)
-- **Container**: Docker (multi-stage)
-- **Orchestration**: Kubernetes (optional) / Docker Compose
-- **Testing**: Jest / pytest, coverage > 80%
-- **Linting**: ESLint, prettier, mypy
-
-### Lancer l'application
-
-```bash
-cd app1
-
-# Avec Docker
-docker build -t app1:latest .
-docker run -p 8080:8080 \
-  -e DB_HOST=postgres \
-  -e JWT_SECRET=your-secret \
-  -e LOG_LEVEL=info \
-  app1:latest
-
-# Avec Docker Compose
-docker-compose up -d app1 postgres
-
-# Tester
-curl http://localhost:8080/api/health
-```
-
-### Endpoints API
-```
-POST   /api/auth/register        - Créer compte (hash password + validation)
-POST   /api/auth/login           - Connexion (JWT token)
-GET    /api/auth/verify          - Vérifier token
-GET    /api/tasks                - Lister tâches (paginated, filtered)
-POST   /api/tasks                - Créer tâche (validation, audit log)
-GET    /api/tasks/{id}           - Détail tâche
-PUT    /api/tasks/{id}           - Mettre à jour (idempotent)
-DELETE /api/tasks/{id}           - Supprimer (soft delete)
-GET    /api/health               - Health check (readiness/liveness)
-GET    /metrics                  - Prometheus metrics
-```
-
-### Sécurité
-- ✅ Input validation (zod, pydantic)
-- ✅ SQL injection prevention (prepared statements)
-- ✅ Rate limiting (express-rate-limit)
-- ✅ CORS configuration
-- ✅ HTTPS only (in prod)
-- ✅ JWT with expiration
-- ✅ Password hashing (bcrypt)
-- ✅ Audit logging
-
----
-
-## 🎯 App2: Service de Notification en Temps Réel
-
-Microservice spécialisé en notifications avec architecture résiliente.
+Application de démo centrée sur la gestion de secrets chiffrés.
 
 ### Caractéristiques
-- **WebSockets** - Communication bidirectionnelle en direct avec fallback HTTP
-- **Queue messaging** - RabbitMQ / Redis Streams pour fiabilité et déduplication
-- **Base de données NoSQL** - MongoDB pour stockage des notifications (schémaless)
-- **Architecture Microservices** - Découplage, scalabilité horizontale
-- **Sécurité par conception** - TLS, authentification bearer token, rate limiting
-- **Déploiement automatisé** - CI/CD avec GitHub Actions / GitLab CI
-- **Monitoring & Alerting** - Prometheus, Grafana, logs centralisés (ELK)
-- **High Availability** - Replicas, load balancing, graceful shutdown
+- **Chiffrement fort**: AES-256-GCM, clés dérivées avec PBKDF2
+- **Authentification**: JWT + RBAC (rôles: admin, user)
+- **Journalisation**: Audit logs pour toutes les opérations sensibles
+- **Traefik + TLS**: Exposition sécurisée via reverse-proxy et ACME
+- **PostgreSQL**: Stockage structuré des secrets et métadonnées
+- **Docker Compose**: Orchestration locale et prod simplifiée
+- **Sécurité**: Rate limiting, headers CSP, validation d'entrées
 
 ### Stack Technologique
-- **Backend**: Node.js + Socket.io / Python + FastAPI
-- **Message Queue**: RabbitMQ / Redis Streams
-- **Database**: MongoDB (replica set)
-- **Monitoring**: Prometheus + Grafana
-- **Logging**: ELK Stack (Elasticsearch, Logstash, Kibana)
-- **Container**: Docker (multi-stage)
-- **Orchestration**: Kubernetes / Docker Compose
-- **CI/CD**: GitHub Actions
+- Backend: Node.js 18 + Express
+- Frontend: React 18 (build servi par Nginx)
+- Base de données: PostgreSQL 15
+- Orchestration: Docker Compose
+- Proxy: Traefik v2.10 (réseau externe `web`)
 
-### Lancer l'application
+### Démarrer SecureVault
 
 ```bash
-cd app2
+cd saas/securevault
+cp .env.example .env && nano .env
+docker-compose up -d --build
+./init-db.sh
 
-# Avec Docker Compose (complet)
-docker-compose up -d
-
-# Manuellement
-docker build -t app2:latest .
-docker run -p 8081:8081 \
-  -e RABBITMQ_URL=amqp://rabbitmq:5672 \
-  -e MONGODB_URL=mongodb://mongo:27017 \
-  -e LOG_LEVEL=info \
-  app2:latest
-
-# Tester WebSocket
-curl http://localhost:8081/api/health
+# Vérifications
+curl https://vault-api.freijstack.com/health
+curl -I https://vault.freijstack.com
 ```
-
-### WebSocket Events
-```javascript
-// Client connect
-socket.emit('subscribe', { userId: '123', channels: ['updates'] });
-
-// Server sends notification
-socket.on('notification', (data) => {
-  console.log('New notification:', data);
-  console.log('  - id:', data.id);
-  console.log('  - message:', data.message);
-  console.log('  - timestamp:', data.timestamp);
-});
-
-// Acknowledge reception
-socket.emit('notification:ack', { notificationId: '456' });
-
-// Disconnect
-socket.disconnect();
-```
-
-### REST Endpoints
-```
-POST   /api/auth/token          - Obtenir token Bearer
-POST   /api/notifications       - Créer notification
-GET    /api/notifications       - Lister notifications (user)
-GET    /api/health              - Health check
-GET    /metrics                 - Prometheus metrics
-```
-
-### Sécurité
-- ✅ Bearer token authentication
-- ✅ CORS restrictif
-- ✅ Rate limiting par IP/user
-- ✅ Message validation (JSON schema)
-- ✅ Deduplication (event ID)
-- ✅ Graceful shutdown (drain connections)
-- ✅ Error handling sans leak d'info sensible
-- ✅ TLS en production
-
----
 
 ## 🚀 Déploiement DevSecOps
 
@@ -189,14 +67,14 @@ GET    /metrics                 - Prometheus metrics
 ```bash
 # Cloner et setup
 git clone https://github.com/christophe-freijanes/freijstack.git
-cd freijstack/saas
+cd freijstack/saas/securevault
 
 # Vérifier Docker
 docker --version
 docker-compose --version
 
 # Lancer tous les services
-docker-compose up -d
+docker-compose up -d --build
 
 # Vérifier status
 docker-compose ps
@@ -206,50 +84,34 @@ docker-compose logs -f
 docker-compose down
 ```
 
-### Développement d'une application
+### Développement SecureVault
 ```bash
-cd app1
-
-# Installer dépendances
+# Backend
+cd backend
 npm install
-# ou: pip install -r requirements.txt
-
-# Développement local
 npm run dev
-# ou: python -m uvicorn main:app --reload
+
+# Frontend
+cd ../frontend
+npm install
+npm start
 
 # Tests
-npm test
-# ou: pytest -v
-
-# Linting & format
-npm run lint
-npm run format
-# ou: pylint ., black .
+cd ../backend && npm test
 ```
 
 ### Production Deployment
 ```bash
 # Build images
-docker build -t myregistry/app1:v1.0.0 ./app1
-docker build -t myregistry/app2:v1.0.0 ./app2
+docker build -t myregistry/securevault-backend:v1 ./backend
+docker build -t myregistry/securevault-frontend:v1 ./frontend
 
 # Push to registry
-docker push myregistry/app1:v1.0.0
-docker push myregistry/app2:v1.0.0
+docker push myregistry/securevault-backend:v1
+docker push myregistry/securevault-frontend:v1
 
-# Deploy to Kubernetes
-kubectl apply -f kubernetes/namespaces.yaml
-kubectl apply -f kubernetes/app1/
-kubectl apply -f kubernetes/app2/
-
-# Verify deployment
-kubectl get deployments -n saas
-kubectl get pods -n saas
-kubectl get services -n saas
-
-# Port forward for testing
-kubectl port-forward -n saas svc/app1 8080:8080
+# Déploiement avec Traefik (compose)
+docker-compose up -d --build
 ```
 
 ### Security Best Practices
@@ -264,19 +126,13 @@ kubectl port-forward -n saas svc/app1 8080:8080
 
 ### Monitoring & Observability
 ```bash
-# Prometheus scrape endpoints
-curl http://app1:8080/metrics
-curl http://app2:8081/metrics
+# Health checks (local)
+curl http://localhost:8080/health
+curl -I http://localhost:8080
 
-# Grafana dashboards (localhost:3000)
-# Username: admin / Password: admin
-
-# Logs (ELK Stack)
-# Kibana: http://localhost:5601
-
-# Health checks
-curl http://app1:8080/api/health
-curl http://app2:8081/api/health
+# Health checks (prod via Traefik)
+curl https://vault-api.freijstack.com/health
+curl -I https://vault.freijstack.com
 ```
 
 ### CI/CD Pipeline
@@ -287,13 +143,12 @@ Le projet utilise GitHub Actions:
 - **Deploy**: Kubernetes rollout
 
 ```yaml
-# .github/workflows/saas-deploy.yml
-name: Deploy SaaS Apps
+# .github/workflows/securevault-deploy.yml
+name: Deploy SecureVault
 on:
-  push:
-    paths:
-      - 'saas/app1/**'
-      - 'saas/app2/**'
+     push:
+          paths:
+               - 'saas/securevault/**'
 ```
 
 ---
@@ -306,22 +161,17 @@ on:
 └────────────┬────────────────────────┘
              │ HTTPS
 ┌────────────▼────────────────────────┐
-│        Load Balancer (Nginx)        │
-└────────┬─────────────────┬──────────┘
-         │                 │
-    ┌────▼────┐      ┌────▼────┐
-    │  App1   │      │  App2   │
-    │ Replica │      │ Replica │
-    └────┬────┘      └────┬────┘
-         │                 │
-    ┌────▼─────────────────▼────┐
-    │  Message Queue (RabbitMQ) │
-    └────┬──────────────────────┘
-         │
-    ┌────▼──────────┬──────────────┐
-    │  PostgreSQL   │   MongoDB    │
-    │   (App1 DB)   │  (App2 Logs) │
-    └───────────────┴──────────────┘
+│          Traefik (TLS)              │
+└────────────┬───────────────┬────────┘
+             │               │
+       ┌─────▼─────┐   ┌─────▼─────┐
+       │ Frontend   │   │  Backend  │
+       │ (Nginx)    │   │ (Express) │
+       └─────┬──────┘   └─────┬─────┘
+             │                │
+             └────────┬───────┘
+                      ▼
+                 PostgreSQL
 ```
 
 ## 📝 Contribution
@@ -380,8 +230,7 @@ git push origin feat/awesome-feature
 
 ## 🔗 Ressources
 
-- [Détails App1](./app1/README.md)
-- [Détails App2](./app2/README.md)
+- [SecureVault Manager](./securevault/README.md)
 - [Architecture globale](/docs/architecture.md)
 
 ---

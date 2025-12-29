@@ -31,8 +31,7 @@ Index de la documentation technique du projet.
 
 ### Backend & Microservices
 - [SaaS Apps Overview](../saas/README.md)
-- [App1 - Gestionnaire de Tâches](../saas/app1/README.md)
-- [App2 - Service Notifications](../saas/app2/README.md)
+- [SecureVault Manager](../saas/securevault/README.md)
 
 ### Sécurité
 - [Mesures de Sécurité](architecture.md#5-sécurité--conformité)

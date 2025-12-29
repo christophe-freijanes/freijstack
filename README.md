@@ -23,10 +23,9 @@ Portfolio et projets cloud & sécurité de **Christophe FREIJANES** - Senior Clo
 | � [Guide Déploiement](docs/DEPLOYMENT.md) | Installation VPS, Docker, Traefik, DNS, rollback |
 | 🔍 [Guide Troubleshooting](docs/TROUBLESHOOTING.md) | Diagnostic et résolution des problèmes courants |
 | 📊 [Guide Monitoring](docs/MONITORING.md) | Prometheus, Grafana, Loki, alertes et dashboards |
-| �📗 [Portfolio README](portfolio/README.md) | Documentation complète du portfolio (features, i18n, sécurité) |
-| 📙 [SaaS Apps README](saas/README.md) | Applications SaaS démonstratives (App1, App2) |
-| 📕 [App1 - Gestionnaire de Tâches](saas/app1/README.md) | Application CRUD sécurisée avec authentification |
-| 📓 [App2 - Service Notifications](saas/app2/README.md) | Microservice temps réel avec WebSockets |
+| 📗 [Portfolio README](portfolio/README.md) | Documentation complète du portfolio (features, i18n, sécurité) |
+| 📙 [SaaS Apps README](saas/README.md) | Applications SaaS (SecureVault Manager) |
+| 🔐 [SecureVault Manager](saas/securevault/README.md) | Gestionnaire de secrets chiffrés (AES-256-GCM) |
 | 🔖 [Pull Request Template](.github/pull_request_template.md) | Checklist de validation pour les PR |
 
 ---
@@ -47,11 +46,10 @@ freijstack/
 │   ├── public/              # Assets publics
 │   └── README.md            # Doc portfolio
 ├── saas/                    # Applications SaaS démos
-│   ├── app1/                # Gestionnaire de tâches sécurisé
-│   │   ├── Dockerfile
-│   │   └── README.md
-│   ├── app2/                # Service de notifications temps réel
-│   │   ├── Dockerfile
+│   ├── securevault/         # SecureVault Manager (secrets chiffrés)
+│   │   ├── backend/
+│   │   ├── frontend/
+│   │   ├── docker-compose.yml
 │   │   └── README.md
 │   └── README.md            # Vue d'ensemble SaaS
 ├── docs/
@@ -83,23 +81,14 @@ Portfolio web multilingue (FR/EN) avec:
 
 ### SaaS Démos (`/saas`)
 
-Exemples d'applications SaaS conteneurisées démontrant les compétences DevSecOps:
+SecureVault Manager — application de démo DevSecOps:
+- 🔐 Secrets chiffrés (AES-256-GCM)
+- ✅ Authentification JWT + RBAC
+- 📝 Audit logs détaillés
+- 🐳 Docker + Traefik + TLS
+- 🗃️ PostgreSQL
 
-#### App1: Gestionnaire de Tâches Sécurisé
-- API RESTful sécurisée avec authentification
-- Base de données persistante
-- Interface utilisateur interactive
-- Conteneurisation Docker
-- CI/CD ready
-
-#### App2: Service de Notification en Temps Réel
-- WebSockets pour communication en direct
-- Architecture microservices
-- Intégration NoSQL
-- Sécurité par conception
-- Déploiement automatisé
-
-Voir [saas/README.md](saas/README.md) pour plus de détails.
+Voir [saas/securevault/README.md](saas/securevault/README.md) pour les détails et commandes.
 
 ### Documentation (`/docs`)
 
@@ -218,15 +207,15 @@ npx http-server .
 ### Applications SaaS
 
 ```bash
-# App1
-cd saas/app1
-docker build -t app1 .
-docker run -p 8080:8080 app1
+# SecureVault (compose)
+cd saas/securevault
+cp .env.example .env && nano .env
+docker-compose up -d --build
+./init-db.sh
 
-# App2
-cd saas/app2
-docker build -t app2 .
-docker run -p 8081:8081 app2
+# Vérification
+curl https://vault-api.freijstack.com/health
+curl -I https://vault.freijstack.com
 ```
 
 ### En Développement
