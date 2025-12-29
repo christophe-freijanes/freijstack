@@ -98,7 +98,7 @@ if (isSamlEnabled()) {
 }
 
 // Health Check
-app.get('/health', (req, res) => {
+app.get(['/health', '/api/health'], (req, res) => {
   res.status(200).json({ 
     status: 'healthy', 
     timestamp: new Date().toISOString(),
