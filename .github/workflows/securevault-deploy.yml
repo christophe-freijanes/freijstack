@@ -186,14 +186,11 @@ jobs:
               TRAEFIK_STATUS=$(docker ps --filter "name=$TRAEFIK_CONTAINER" --format "{{.Status}}")
               echo "✅ Traefik is running: $TRAEFIK_STATUS (container: $TRAEFIK_CONTAINER)"
             else
-              echo "⚠️ Traefik not running"
-              echo "   Setup steps:"
-              echo "   1. cd /root"
-              echo "   2. docker network create web 2>/dev/null || true"
-              echo "   3. docker volume create traefik_data 2>/dev/null || true"
-              echo "   4. cp freijstack/base-infra/docker-compose.yml ."
-              echo "   5. docker compose up -d"
-              exit 1
+              echo "⚠️ Traefik not running (containers will be accessible without reverse proxy)"
+              echo "   For HTTPS/TLS and proper routing, deploy base infrastructure:"
+              echo "   cd /srv/docker/freijstack/base-infra && docker compose up -d"
+              echo ""
+              echo "ℹ️  Continuing deployment without Traefik..."
             fi
             
             # 5. Vérifier le fichier .env
