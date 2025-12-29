@@ -28,24 +28,24 @@ env:
 
 jobs:
   test:
-    name: Test & Build
+    name: 🧪 Test & Build
     runs-on: ubuntu-latest
     permissions:
       contents: read
       security-events: write
 
     steps:
-      - name: Checkout code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js (Backend)
+      - name: 🔧 Set up Node.js (Backend)
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
           cache-dependency-path: 'saas/securevault/backend/package-lock.json'
 
-      - name: Test Backend
+      - name: 🧪 Test Backend
         working-directory: saas/securevault/backend
         run: |
           npm install
@@ -56,27 +56,27 @@ jobs:
         run: npm run lint --if-present
         continue-on-error: true
 
-      - name: Set up Node.js (Frontend)
+      - name: 🔧 Set up Node.js (Frontend)
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
           cache-dependency-path: 'saas/securevault/frontend/package-lock.json'
 
-      - name: Test Frontend
+      - name: 🧪 Test Frontend
         working-directory: saas/securevault/frontend
         run: |
           npm install
           npm test --if-present
         continue-on-error: true
 
-      - name: Build Docker images
+      - name: 🐳 Build Docker images
         working-directory: saas/securevault
         run: |
           docker build -t securevault-backend:test ./backend
           docker build -t securevault-frontend:test ./frontend
 
-      - name: Run Trivy vulnerability scan (Backend)
+      - name: 🔍 Run Trivy vulnerability scan (Backend)
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'securevault-backend:test'
@@ -84,7 +84,7 @@ jobs:
           output: 'trivy-backend.sarif'
         continue-on-error: true
 
-      - name: Run Trivy vulnerability scan (Frontend)
+      - name: 🔍 Run Trivy vulnerability scan (Frontend)
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'securevault-frontend:test'
@@ -99,7 +99,7 @@ jobs:
         continue-on-error: true
 
   deploy:
-    name: Deploy to Hostinger VPS
+    name: 🚀 Deploy to Hostinger VPS
     runs-on: ubuntu-latest
     needs: test
     if: success()
@@ -108,17 +108,17 @@ jobs:
       url: ${{ github.ref == 'refs/heads/master' && 'https://vault.freijstack.com' || 'https://vault-staging.freijstack.com' }}
 
     steps:
-      - name: Checkout code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: Prepare SSH key (from portfolio secrets)
+      - name: 🔐 Prepare SSH key (from portfolio secrets)
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.HOSTINGER_SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to VPS
+      - name: 🚀 Deploy to VPS
         run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.HOSTINGER_SSH_USER }}@${{ secrets.HOSTINGER_SSH_HOST }} << 'DEPLOY_SCRIPT'
             set -e
@@ -194,7 +194,7 @@ jobs:
           
           echo "✅ Déploiement vérifié avec succès!"
 
-      - name: Notify Deployment Success
+      - name: ✅ Notify Deployment Success
         if: success()
         run: |
           echo "✅ SecureVault deployment successful!"
@@ -202,7 +202,7 @@ jobs:
           echo "Branch: ${{ github.ref_name }}"
           echo "Commit: ${{ github.sha }}"
 
-      - name: Notify Deployment Failure
+      - name: ❌ Notify Deployment Failure
         if: failure()
         run: |
           echo "❌ SecureVault deployment failed!"
