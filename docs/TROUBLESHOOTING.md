@@ -110,7 +110,9 @@ docker logs portfolio-prod 2>&1 | tail -20
    # Redéployer depuis Git
    cd /tmp
    git clone https://github.com/christophe-freijanes/freijstack.git
-   sudo cp -r freijstack/saas/portfolio/* /srv/www/portfolio/
+   # Portfolio déployé via base-infra/
+   # Vérifier que les fichiers existent
+   ls -la /srv/www/portfolio/
    sudo chown -R deploy:deploy /srv/www/portfolio
    ```
 

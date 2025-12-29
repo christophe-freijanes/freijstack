@@ -41,11 +41,6 @@ Index de la documentation technique du projet.
 - [Pipeline CI/CD](architecture.md#4-pipeline-cicd)
 - [GitHub Actions Workflows](../.github/workflows/README.md) - Documentation complète des workflows
 
-### Frontend & Web
-- [Portfolio README](../saas/portfolio/README.md) - Features, i18n, responsive design
-- [Thèmes Saisonniers](../saas/portfolio/README.md) - Système de changement automatique
-- [Accessibilité WCAG](../saas/portfolio/README.md) - Conformité AA
-
 ### Backend & SaaS Applications
 - [SecureVault Manager](../saas/securevault/README.md) - Gestionnaire de secrets chiffrés
 - [SecureVault CI/CD Pipeline](SECUREVAULT_DEPLOYMENT.md) - Déploiement automatisé SecureVault
