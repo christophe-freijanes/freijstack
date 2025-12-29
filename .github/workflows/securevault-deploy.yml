@@ -164,7 +164,12 @@ jobs:
               echo "✅ Traefik is running: $TRAEFIK_STATUS (container: $TRAEFIK_CONTAINER)"
             else
               echo "⚠️ Traefik not running"
-              echo "   Start it with: cd base-infra && docker-compose up -d"
+              echo "   Setup steps:"
+              echo "   1. cd /root"
+              echo "   2. docker network create web 2>/dev/null || true"
+              echo "   3. docker volume create traefik_data 2>/dev/null || true"
+              echo "   4. cp freijstack/base-infra/docker-compose.yml ."
+              echo "   5. docker compose up -d"
               exit 1
             fi
             
