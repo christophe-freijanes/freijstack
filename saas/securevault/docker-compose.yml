@@ -4,7 +4,7 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: securevault-postgres
+    container_name: ${COMPOSE_PROJECT_NAME:-securevault}-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: securevault
@@ -25,7 +25,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: securevault-backend
+    container_name: ${COMPOSE_PROJECT_NAME:-securevault}-backend
     restart: unless-stopped
     environment:
       NODE_ENV: production
@@ -44,17 +44,17 @@ services:
       - web
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.securevault-backend.rule=Host(`${API_DOMAIN:-vault-api.freijstack.com}`)"
-      - "traefik.http.routers.securevault-backend.entrypoints=websecure"
-      - "traefik.http.routers.securevault-backend.tls=true"
-      - "traefik.http.routers.securevault-backend.tls.certresolver=letsencrypt"
-      - "traefik.http.services.securevault-backend.loadbalancer.server.port=3001"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-backend.rule=Host(`${API_DOMAIN:-vault-api.freijstack.com}`)"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-backend.entrypoints=websecure"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-backend.tls=true"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.${COMPOSE_PROJECT_NAME:-securevault}-backend.loadbalancer.server.port=3001"
       # CORS headers
-      - "traefik.http.middlewares.securevault-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS"
-      - "traefik.http.middlewares.securevault-cors.headers.accesscontrolalloworiginlist=${FRONTEND_URL:-https://vault.freijstack.com}"
-      - "traefik.http.middlewares.securevault-cors.headers.accesscontrolallowcredentials=true"
-      - "traefik.http.middlewares.securevault-cors.headers.accesscontrolallowheaders=Content-Type,Authorization"
-      - "traefik.http.routers.securevault-backend.middlewares=securevault-cors"
+      - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-securevault}-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS"
+      - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-securevault}-cors.headers.accesscontrolalloworiginlist=${FRONTEND_URL:-https://vault.freijstack.com}"
+      - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-securevault}-cors.headers.accesscontrolallowcredentials=true"
+      - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME:-securevault}-cors.headers.accesscontrolallowheaders=Content-Type,Authorization"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-backend.middlewares=${COMPOSE_PROJECT_NAME:-securevault}-cors"
     command: sh -c "sleep 5 && node src/server.js"
 
   # Frontend
@@ -62,7 +62,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: securevault-frontend
+    container_name: ${COMPOSE_PROJECT_NAME:-securevault}-frontend
     restart: unless-stopped
     environment:
       REACT_APP_API_URL: https://${API_DOMAIN:-vault-api.freijstack.com}/api
@@ -72,11 +72,11 @@ services:
       - web
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.securevault-frontend.rule=Host(`${FRONTEND_DOMAIN:-vault.freijstack.com}`)"
-      - "traefik.http.routers.securevault-frontend.entrypoints=websecure"
-      - "traefik.http.routers.securevault-frontend.tls=true"
-      - "traefik.http.routers.securevault-frontend.tls.certresolver=letsencrypt"
-      - "traefik.http.services.securevault-frontend.loadbalancer.server.port=80"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-frontend.rule=Host(`${FRONTEND_DOMAIN:-vault.freijstack.com}`)"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-frontend.entrypoints=websecure"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-frontend.tls=true"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-securevault}-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.${COMPOSE_PROJECT_NAME:-securevault}-frontend.loadbalancer.server.port=80"
 
 volumes:
   postgres_data:

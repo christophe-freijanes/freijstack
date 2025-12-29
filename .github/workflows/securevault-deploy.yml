@@ -155,17 +155,25 @@ jobs:
                 API_DOM="vault-api.freijstack.com"
                 FRONTEND_DOM="vault.freijstack.com"
                 FRONTEND_U="https://vault.freijstack.com"
+                PROJECT_NAME="securevault"
               else
                 API_DOM="vault-api-staging.freijstack.com"
                 FRONTEND_DOM="vault-staging.freijstack.com"
                 FRONTEND_U="https://vault-staging.freijstack.com"
+                PROJECT_NAME="securevault-staging"
               fi
               
               # Vérifier et ajouter les variables manquantes
               UPDATED=0
               
-              if ! grep -q "^API_DOMAIN=" "$ENV_FILE"; then
+              if ! grep -q "^COMPOSE_PROJECT_NAME=" "$ENV_FILE"; then
                 echo "" >> "$ENV_FILE"
+                echo "COMPOSE_PROJECT_NAME=$PROJECT_NAME" >> "$ENV_FILE"
+                echo "⚠️ Added missing COMPOSE_PROJECT_NAME=$PROJECT_NAME"
+                UPDATED=1
+              fi
+              
+              if ! grep -q "^API_DOMAIN=" "$ENV_FILE"; then
                 echo "API_DOMAIN=$API_DOM" >> "$ENV_FILE"
                 echo "⚠️ Added missing API_DOMAIN=$API_DOM"
                 UPDATED=1
@@ -218,16 +226,20 @@ jobs:
                 API_DOM="vault-api.freijstack.com"
                 FRONTEND_DOM="vault.freijstack.com"
                 FRONTEND_U="https://vault.freijstack.com"
+                PROJECT_NAME="securevault"
               else
                 API_DOM="vault-api-staging.freijstack.com"
                 FRONTEND_DOM="vault-staging.freijstack.com"
                 FRONTEND_U="https://vault-staging.freijstack.com"
+                PROJECT_NAME="securevault-staging"
               fi
               
               # Créer le fichier .env avec les secrets générés
               {
                 echo "# Auto-generated secrets for SecureVault $ENV"
                 echo "# Generated on $(date)"
+                echo ""
+                echo "COMPOSE_PROJECT_NAME=$PROJECT_NAME"
                 echo ""
                 echo "DB_PASSWORD=$DB_PASS"
                 echo "JWT_SECRET=$JWT_SEC"
