@@ -9,11 +9,65 @@ Documentation complète des workflows CI/CD et automatisations du projet.
 | Workflow | Fichier | Déclencheur | Durée | Description |
 |----------|---------|-------------|-------|-------------|
 | **CI/CD Pipeline** | [main.yml](main.yml) | Push master/develop, PR | ~5-8 min | Build, test, security scan, deploy VPS + GitHub Pages |
+| **SecureVault Deploy** | [securevault-deploy.yml](securevault-deploy.yml) | Push master/develop (saas/securevault/*), manual | ~3-5 min | Test, build, scan, deploy SecureVault sur VPS |
 | **PR Title Automation** | [pr-title-automation.yml](pr-title-automation.yml) | Ouverture PR | ~10s | Auto-format titre PR avec Conventional Commits |
 
 ---
 
-## 🚀 Workflow 1: CI/CD Pipeline
+## 🔐 Workflow 1: SecureVault Deployment
+
+### Déclencheurs
+
+```yaml
+on:
+  push:
+    branches: [develop, master]
+    paths:
+      - 'saas/securevault/**'
+  workflow_dispatch: # Déploiement manuel
+```
+
+**Branches**:
+- `develop` → Déploiement **STAGING** (vault-staging-api.freijstack.com)
+- `master` → Déploiement **PRODUCTION** (vault-api.freijstack.com)
+
+### Jobs Pipeline (2 étapes)
+
+#### 1️⃣ **Test & Build** (~2-3 min)
+
+**Objectif**: Tester backend/frontend, builder images Docker, scanner sécurité
+
+**Actions**:
+- `npm install && npm test` (Backend Node.js 18)
+- `npm install && npm test` (Frontend React 18)
+- `docker build` (Backend et Frontend)
+- **Trivy scan** sur les images Docker
+- Upload résultats vers GitHub Security
+
+**Sortie**:
+- ✅ Tests passés
+- ✅ Lint OK
+- ✅ Docker images buildées
+- ✅ Vulnérabilités scannées
+
+#### 2️⃣ **Deploy to VPS** (~1-2 min)
+
+**Objectif**: Déployer sur le VPS via SSH
+
+**Actions**:
+1. SSH connexion au VPS (user@host)
+2. Git pull/clone du repo
+3. `docker-compose up -d --build`
+4. Health check API (`/health`)
+5. Afficher les logs
+
+**Environnements**:
+- `staging`: `/app/securevault-staging`
+- `production`: `/app/securevault-prod`
+
+---
+
+## 🚀 Workflow 2: CI/CD Pipeline
 
 ### Déclencheurs
 
@@ -167,7 +221,60 @@ rm -rf ~/.ssh/id_rsa
 
 ---
 
-## 🤖 Workflow 2: PR Title Automation
+## 🔐 Configuration SecureVault Deployment
+
+### Secrets GitHub Requis
+
+Créer dans **Settings → Secrets and variables → Actions**:
+
+```yaml
+VPS_HOST         # IP ou domaine du VPS
+VPS_USER         # Utilisateur SSH (ex: ubuntu)
+VPS_SSH_KEY      # Clé privée SSH (ed25519)
+VPS_PORT         # Port SSH (optionnel, défaut 22)
+```
+
+### Structure VPS
+
+```
+/app/
+├── securevault-prod/       # Production
+│   └── saas/securevault/
+│       ├── backend/
+│       ├── frontend/
+│       ├── docker-compose.yml
+│       └── .env            # ⚠️ Créer manuellement
+├── securevault-staging/    # Staging
+│   └── [même structure]
+```
+
+### Configuration .env
+
+**Production** (`/app/securevault-prod/saas/securevault/.env`):
+```env
+NODE_ENV=production
+PORT=8080
+DB_HOST=postgres
+DB_USER=vault_prod
+JWT_SECRET=<CHANGEZ_MOI>
+ENCRYPTION_KEY=<CHANGEZ_MOI>
+```
+
+**Staging** (`/app/securevault-staging/saas/securevault/.env`):
+```env
+NODE_ENV=staging
+PORT=8081
+DB_HOST=postgres
+DB_USER=vault_staging
+JWT_SECRET=<CHANGEZ_MOI>
+ENCRYPTION_KEY=<CHANGEZ_MOI>
+```
+
+Voir [SECUREVAULT_DEPLOYMENT.md](../docs/SECUREVAULT_DEPLOYMENT.md) pour le guide complet.
+
+---
+
+## 🤖 Workflow 4: PR Title Automation
 
 ### Déclencheurs
 

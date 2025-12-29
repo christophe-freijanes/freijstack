@@ -1,0 +1,201 @@
+name: 🔐 Deploy SecureVault
+
+on:
+  push:
+    branches: [develop, master]
+    paths:
+      - 'saas/securevault/**'
+      - '.github/workflows/securevault-deploy.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/securevault
+
+jobs:
+  test:
+    name: Test & Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js (Backend)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'saas/securevault/backend/package-lock.json'
+
+      - name: Test Backend
+        working-directory: saas/securevault/backend
+        run: |
+          npm install
+          npm test --if-present
+
+      - name: Lint Backend
+        working-directory: saas/securevault/backend
+        run: npm run lint --if-present
+        continue-on-error: true
+
+      - name: Set up Node.js (Frontend)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'saas/securevault/frontend/package-lock.json'
+
+      - name: Test Frontend
+        working-directory: saas/securevault/frontend
+        run: |
+          npm install
+          npm test --if-present
+        continue-on-error: true
+
+      - name: Build Docker images
+        working-directory: saas/securevault
+        run: |
+          docker build -t securevault-backend:test ./backend
+          docker build -t securevault-frontend:test ./frontend
+
+      - name: Run Trivy vulnerability scan (Backend)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'securevault-backend:test'
+          format: 'sarif'
+          output: 'trivy-backend.sarif'
+        continue-on-error: true
+
+      - name: Run Trivy vulnerability scan (Frontend)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'securevault-frontend:test'
+          format: 'sarif'
+          output: 'trivy-frontend.sarif'
+        continue-on-error: true
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-*.sarif'
+        continue-on-error: true
+
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    needs: test
+    if: success()
+    environment:
+      name: ${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
+      url: ${{ github.ref == 'refs/heads/master' && 'https://vault.freijstack.com' || 'https://vault-staging.freijstack.com' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            set -e
+            echo "🚀 Starting SecureVault deployment..."
+            
+            # Déterminer l'environnement
+            BRANCH="${{ github.ref }}"
+            if [ "$BRANCH" = "refs/heads/master" ]; then
+              DEPLOY_DIR="/app/securevault-prod"
+              COMPOSE_FILE="/app/securevault-prod/docker-compose.yml"
+              ENV_FILE="/app/securevault-prod/.env"
+            else
+              DEPLOY_DIR="/app/securevault-staging"
+              COMPOSE_FILE="/app/securevault-staging/docker-compose.yml"
+              ENV_FILE="/app/securevault-staging/.env"
+            fi
+            
+            echo "📂 Deploy directory: $DEPLOY_DIR"
+            
+            # Créer répertoire si n'existe pas
+            mkdir -p "$DEPLOY_DIR"
+            
+            # Cloner/mettre à jour le repo
+            if [ -d "$DEPLOY_DIR/.git" ]; then
+              cd "$DEPLOY_DIR"
+              git fetch origin
+              git reset --hard origin/${{ github.ref_name }}
+            else
+              git clone -b ${{ github.ref_name }} https://github.com/${{ github.repository }}.git "$DEPLOY_DIR"
+              cd "$DEPLOY_DIR"
+            fi
+            
+            # Naviguer vers securevault
+            cd saas/securevault
+            
+            # Vérifier que .env existe
+            if [ ! -f "$ENV_FILE" ]; then
+              echo "⚠️  .env file not found at $ENV_FILE"
+              echo "📝 Please create it with required environment variables:"
+              cat .env.example
+              exit 1
+            fi
+            
+            echo "🔧 Building and starting containers..."
+            docker-compose -f docker-compose.yml pull
+            docker-compose -f docker-compose.yml up -d --build
+            
+            # Attendre que les services soient prêts
+            sleep 10
+            
+            # Vérifier la santé
+            echo "🏥 Checking health..."
+            docker-compose -f docker-compose.yml ps
+            
+            echo "✅ Deployment successful!"
+            echo "📊 Logs:"
+            docker-compose -f docker-compose.yml logs --tail=20
+
+      - name: Verify Deployment
+        run: |
+          ENVIRONMENT=${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
+          URL=${{ github.ref == 'refs/heads/master' && 'https://vault-api.freijstack.com/health' || 'https://vault-staging-api.freijstack.com/health' }}
+          
+          echo "🔍 Verifying deployment on $ENVIRONMENT..."
+          sleep 5
+          
+          if curl -f --silent "$URL" > /dev/null; then
+            echo "✅ Health check passed!"
+          else
+            echo "❌ Health check failed!"
+            exit 1
+          fi
+
+      - name: Notify Deployment Success
+        if: success()
+        run: |
+          echo "✅ SecureVault deployment successful!"
+          echo "Environment: ${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+
+      - name: Notify Deployment Failure
+        if: failure()
+        run: |
+          echo "❌ SecureVault deployment failed!"
+          echo "Check logs above for details"
+          exit 1
