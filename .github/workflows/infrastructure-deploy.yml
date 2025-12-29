@@ -34,7 +34,7 @@ jobs:
       - name: 🐳 Validate Docker Compose syntax
         working-directory: base-infra
         run: |
-          docker-compose config > /dev/null
+          docker compose config > /dev/null
           echo "✅ docker-compose.yml syntax valid"
 
       - name: 🔐 Check environment variables (safe)
@@ -42,7 +42,7 @@ jobs:
         run: |
           echo "Checking Docker Compose env placeholders (without values)..."
           # Validate compose parses and contains no obvious unresolved variables
-          docker-compose config > /dev/null
+          docker compose config > /dev/null
           echo "✅ Docker Compose configuration validated without exposing env values"
 
   security:
@@ -93,7 +93,7 @@ jobs:
       - name: 🧪 Validate docker-compose services
         working-directory: base-infra
         run: |
-          docker-compose config --format json | jq .services | grep -E "traefik"
+          docker compose config --format json | jq .services | grep -E "traefik"
           echo "✅ Traefik service configured"
 
   notify:
