@@ -80,10 +80,12 @@ services:
 
 volumes:
   postgres_data:
+    name: ${COMPOSE_PROJECT_NAME:-securevault}_postgres_data
     driver: local
 
 networks:
   securevault-network:
+    name: ${COMPOSE_PROJECT_NAME:-securevault}_network
     driver: bridge
   web:
     external: true
