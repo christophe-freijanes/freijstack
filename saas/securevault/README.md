@@ -154,9 +154,22 @@ nano .env
 
 **Contenu .env**:
 ```env
+# Secrets (requis - générer avec: openssl rand -hex 32)
 DB_PASSWORD=your_secure_db_password_here
 JWT_SECRET=your_jwt_secret_32_bytes_hex_here
 ENCRYPTION_KEY=your_encryption_key_32_bytes_hex_here
+
+# Configuration des domaines (requis pour Traefik)
+API_DOMAIN=vault-api.freijstack.com
+FRONTEND_DOMAIN=vault.freijstack.com
+FRONTEND_URL=https://vault.freijstack.com
+```
+
+💡 **Pour staging**, utilisez:
+```env
+API_DOMAIN=vault-api-staging.freijstack.com
+FRONTEND_DOMAIN=vault-staging.freijstack.com
+FRONTEND_URL=https://vault-staging.freijstack.com
 ```
 
 ⚠️ **IMPORTANT**: Ces clés sont critiques ! Ne jamais les commiter dans Git.

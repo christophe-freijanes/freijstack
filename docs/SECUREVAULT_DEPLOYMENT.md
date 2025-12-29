@@ -30,53 +30,40 @@ Vérifiez que vous avez déjà configuré dans **Settings → Secrets and variab
 
 ---
 
-## 📂 Structure de Déploiement
+## 📂 Configuration DNS Requise
+
+Avant le premier déploiement, configurez les enregistrements DNS A :
+
+**Production** (branche `master`):
+- `vault.freijstack.com` → IP de votre VPS
+- `vault-api.freijstack.com` → IP de votre VPS
+
+**Staging** (branche `develop`):
+- `vault-staging.freijstack.com` → IP de votre VPS
+- `vault-api-staging.freijstack.com` → IP de votre VPS
+
+💡 **Le workflow CI/CD vérifie automatiquement** que les DNS sont configurés avant de déployer.
 
 ---
 
-## 📝 Configuration d'Environment (.env)
+## 🔐 Gestion des Secrets
 
-### Sur le VPS, créer les fichiers .env:
+### ✅ Génération Automatique
 
-**Pour PRODUCTION** (`/srv/www/securevault/saas/securevault/.env`):
+Le workflow **génère automatiquement** tous les secrets lors du premier déploiement :
+- `DB_PASSWORD` : 64 caractères hexadécimaux
+- `JWT_SECRET` : 64 caractères hexadécimaux  
+- `ENCRYPTION_KEY` : 64 caractères hexadécimaux
 
-```bash
-# Backend
-NODE_ENV=production
-PORT=8080
-DB_HOST=postgres
-DB_PORT=5432
-DB_NAME=securevault_prod
-DB_USER=vault_prod
-DB_PASSWORD=<CHANGEZ_MOI>
-JWT_SECRET=<CHANGEZ_MOI>
-JWT_EXPIRY=7d
-ENCRYPTION_KEY=<CHANGEZ_MOI>
-LOG_LEVEL=info
+### 📝 Variables d'Environnement (.env)
 
-# Frontend
-REACT_APP_API_URL=https://vault-api.freijstack.com
-```
+Les fichiers `.env` sont **créés automatiquement** sur le VPS avec la configuration complète.
 
-**Pour STAGING** (`/srv/www/securevault-staging/saas/securevault/.env`):
+**Emplacement**:
+- Production : `/srv/www/securevault/.env`
+- Staging : `/srv/www/securevault-staging/.env`
 
-```bash
-# Backend
-NODE_ENV=staging
-PORT=8081
-DB_HOST=postgres
-DB_PORT=5432
-DB_NAME=securevault_staging
-DB_USER=vault_staging
-DB_PASSWORD=<CHANGEZ_MOI>
-JWT_SECRET=<CHANGEZ_MOI>
-JWT_EXPIRY=7d
-ENCRYPTION_KEY=<CHANGEZ_MOI>
-LOG_LEVEL=debug
-
-# Frontend
-REACT_APP_API_URL=https://vault-staging-api.freijstack.com
-```
+**Contenu généré automatiquement** (voir section "Structure du Déploiement" ci-dessous pour détails).
 
 ⚠️ **Générer des clés fortes:**
 
@@ -96,12 +83,40 @@ La pipeline crée automatiquement (même que le portfolio):
 ├── portfolio/                    # Portfolio prod
 ├── portfolio-staging/            # Portfolio staging  
 ├── securevault/                  # SecureVault prod (master)
-│   └── saas/securevault/.env    # ⚠️ À créer!
+│   └── saas/securevault/.env    # Auto-créé par CI/CD
 └── securevault-staging/          # SecureVault staging (develop)
-    └── saas/securevault/.env    # ⚠️ À créer!
+    └── saas/securevault/.env    # Auto-créé par CI/CD
 ```
 
 **Même infrastructure VPS** que le portfolio ✅
+
+### 📝 Variables d'Environnement Auto-configurées
+
+Le workflow CI/CD **génère automatiquement** le fichier `.env` avec:
+
+**Production** (branche `master`):
+```env
+DB_PASSWORD=<généré automatiquement>
+JWT_SECRET=<généré automatiquement>
+ENCRYPTION_KEY=<généré automatiquement>
+API_DOMAIN=vault-api.freijstack.com
+FRONTEND_DOMAIN=vault.freijstack.com
+FRONTEND_URL=https://vault.freijstack.com
+```
+
+**Staging** (branche `develop`):
+```env
+DB_PASSWORD=<généré automatiquement>
+JWT_SECRET=<généré automatiquement>
+ENCRYPTION_KEY=<généré automatiquement>
+API_DOMAIN=vault-api-staging.freijstack.com
+FRONTEND_DOMAIN=vault-staging.freijstack.com
+FRONTEND_URL=https://vault-staging.freijstack.com
+```
+
+💡 **Les secrets sont générés avec `openssl rand -hex 32`** lors du premier déploiement.
+
+⚠️ **Si le `.env` existe déjà**, seules les variables de domaine manquantes seront ajoutées (sans toucher aux secrets).
 
 ---
 
