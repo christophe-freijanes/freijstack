@@ -35,7 +35,7 @@ services:
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:-generate_with_openssl_rand_hex_32}
       BCRYPT_ROUNDS: 12
       JWT_EXPIRES_IN: 24h
-      FRONTEND_URL: https://vault.freijstack.com
+      FRONTEND_URL: ${FRONTEND_URL:-https://vault.freijstack.com}
     depends_on:
       postgres:
         condition: service_healthy
@@ -44,14 +44,14 @@ services:
       - web
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.securevault-backend.rule=Host(`vault-api.freijstack.com`)"
+      - "traefik.http.routers.securevault-backend.rule=Host(`${API_DOMAIN:-vault-api.freijstack.com}`)"
       - "traefik.http.routers.securevault-backend.entrypoints=websecure"
       - "traefik.http.routers.securevault-backend.tls=true"
       - "traefik.http.routers.securevault-backend.tls.certresolver=letsencrypt"
       - "traefik.http.services.securevault-backend.loadbalancer.server.port=3001"
       # CORS headers
       - "traefik.http.middlewares.securevault-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS"
-      - "traefik.http.middlewares.securevault-cors.headers.accesscontrolalloworiginlist=https://vault.freijstack.com"
+      - "traefik.http.middlewares.securevault-cors.headers.accesscontrolalloworiginlist=${FRONTEND_URL:-https://vault.freijstack.com}"
       - "traefik.http.middlewares.securevault-cors.headers.accesscontrolallowcredentials=true"
       - "traefik.http.middlewares.securevault-cors.headers.accesscontrolallowheaders=Content-Type,Authorization"
       - "traefik.http.routers.securevault-backend.middlewares=securevault-cors"
@@ -65,14 +65,14 @@ services:
     container_name: securevault-frontend
     restart: unless-stopped
     environment:
-      REACT_APP_API_URL: https://vault-api.freijstack.com/api
+      REACT_APP_API_URL: https://${API_DOMAIN:-vault-api.freijstack.com}/api
     depends_on:
       - backend
     networks:
       - web
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.securevault-frontend.rule=Host(`vault.freijstack.com`)"
+      - "traefik.http.routers.securevault-frontend.rule=Host(`${FRONTEND_DOMAIN:-vault.freijstack.com}`)"
       - "traefik.http.routers.securevault-frontend.entrypoints=websecure"
       - "traefik.http.routers.securevault-frontend.tls=true"
       - "traefik.http.routers.securevault-frontend.tls.certresolver=letsencrypt"

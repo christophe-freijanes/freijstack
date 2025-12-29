@@ -152,7 +152,7 @@ jobs:
               
               # Vérifier les variables requises
               MISSING=""
-              for VAR in DB_PASSWORD JWT_SECRET ENCRYPTION_KEY; do
+              for VAR in DB_PASSWORD JWT_SECRET ENCRYPTION_KEY API_DOMAIN FRONTEND_DOMAIN FRONTEND_URL; do
                 if ! grep -q "^${VAR}=" "$ENV_FILE"; then
                   MISSING="$MISSING $VAR"
                 fi
@@ -175,14 +175,30 @@ jobs:
               JWT_SEC=$(openssl rand -hex 32)
               ENC_KEY=$(openssl rand -hex 32)
               
+              # Déterminer les domaines selon l'environnement
+              if [ "$ENV" = "production" ]; then
+                API_DOM="vault-api.freijstack.com"
+                FRONTEND_DOM="vault.freijstack.com"
+                FRONTEND_U="https://vault.freijstack.com"
+              else
+                API_DOM="vault-api-staging.freijstack.com"
+                FRONTEND_DOM="vault-staging.freijstack.com"
+                FRONTEND_U="https://vault-staging.freijstack.com"
+              fi
+              
               # Créer le fichier .env avec les secrets générés
               {
-                echo "# Auto-generated secrets for SecureVault"
+                echo "# Auto-generated secrets for SecureVault $ENV"
                 echo "# Generated on $(date)"
                 echo ""
                 echo "DB_PASSWORD=$DB_PASS"
                 echo "JWT_SECRET=$JWT_SEC"
                 echo "ENCRYPTION_KEY=$ENC_KEY"
+                echo ""
+                echo "# Domain configuration"
+                echo "API_DOMAIN=$API_DOM"
+                echo "FRONTEND_DOMAIN=$FRONTEND_DOM"
+                echo "FRONTEND_URL=$FRONTEND_U"
               } > "$ENV_FILE"
               
               chmod 600 "$ENV_FILE"
