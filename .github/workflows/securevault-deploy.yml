@@ -470,6 +470,30 @@ jobs:
             # Copier le .env depuis la racine vers le répertoire docker-compose
             echo "📝 Copying .env file..."
             cp "$ENV_FILE" .env
+
+            # Forcer les variables d'environnement selon l'environnement ciblé (priorité sur .env)
+            if [ "$BRANCH" = "refs/heads/master" ]; then
+              PROJECT_NAME="securevault"
+              API_DOM="vault-api.freijstack.com"
+              FRONTEND_DOM="vault.freijstack.com"
+              FRONTEND_U="https://vault.freijstack.com"
+            else
+              PROJECT_NAME="securevault-staging"
+              API_DOM="vault-api-staging.freijstack.com"
+              FRONTEND_DOM="vault-staging.freijstack.com"
+              FRONTEND_U="https://vault-staging.freijstack.com"
+            fi
+
+            export COMPOSE_PROJECT_NAME="$PROJECT_NAME"
+            export API_DOMAIN="$API_DOM"
+            export FRONTEND_DOMAIN="$FRONTEND_DOM"
+            export FRONTEND_URL="$FRONTEND_U"
+
+            echo "🔧 Effective environment variables for compose:"
+            echo "  COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME"
+            echo "  API_DOMAIN=$API_DOMAIN"
+            echo "  FRONTEND_DOMAIN=$FRONTEND_DOMAIN"
+            echo "  FRONTEND_URL=$FRONTEND_URL"
             
             echo "🔧 Building and starting containers..."
             docker compose pull
