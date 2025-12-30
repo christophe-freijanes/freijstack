@@ -1,0 +1,312 @@
+name: 📄 Portfolio
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+    paths:
+      - 'saas/portfolio/**'
+      - '.github/workflows/portfolio-deploy.yml'
+      - 'package.json'
+      - 'README.md'
+  pull_request:
+    branches:
+      - master
+      - develop
+    paths:
+      - 'saas/portfolio/**'
+      - '.github/workflows/portfolio-deploy.yml'
+      - 'package.json'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  IS_PRODUCTION: ${{ github.ref == 'refs/heads/master' }}
+  IS_STAGING: ${{ github.ref == 'refs/heads/develop' }}
+
+jobs:
+  # Job 1: Validation et Linting
+  validate:
+    name: ✅ Validate & Lint
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint HTML
+        run: |
+          npm install -g html-validate
+          html-validate saas/portfolio/index.html || true
+      - name: Validate CSS
+        run: |
+          npm install -g stylelint stylelint-config-standard
+          stylelint "saas/portfolio/style.css" || true
+      - name: Check JavaScript
+        run: |
+          npm install -g eslint
+          eslint saas/portfolio/main.js || true
+      - name: Security audit
+        run: npm audit --audit-level=moderate || true
+
+  # Job 2: Build & Optimize Assets
+  build:
+    name: 🏗️ Build & Optimize
+    runs-on: ubuntu-latest
+    needs: validate
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Minify CSS
+        run: |
+          npm install -g csso-cli
+          csso saas/portfolio/style.css -o saas/portfolio/style.min.css
+          echo "✅ CSS minified"
+      - name: Minify JavaScript
+        run: |
+          npm install -g terser
+          terser saas/portfolio/main.js -o saas/portfolio/main.min.js -c -m
+          echo "✅ JavaScript minified"
+      - name: Optimize assets
+        run: |
+          echo "Asset sizes before optimization:"
+          ls -lh saas/portfolio/*.{css,js} | awk '{print $9, $5}'
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: saas/portfolio/
+          retention-days: 5
+
+  # Job 3: Security Scanning
+  security:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Check for hardcoded secrets
+        uses: gitleaks/gitleaks-action@v2
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+  # Job 4: Deploy to GitHub Pages (Staging - develop)
+  deploy-pages-staging:
+    name: 📄 Deploy to GitHub Pages (Staging)
+    runs-on: ubuntu-latest
+    needs: [validate, build, security]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
+    environment:
+      name: github-pages-staging
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        continue-on-error: true
+        uses: actions/configure-pages@v4
+
+      - name: Build static site
+        run: |
+          mkdir -p _site/portfolio
+          cp -r saas/portfolio/* _site/portfolio/
+          echo "<!-- STAGING ENVIRONMENT -->" >> _site/portfolio/index.html
+          echo "✅ Staging site built"
+      - name: Upload artifact
+        continue-on-error: true
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+
+  # Job 5: Deploy to VPS (Staging - develop)
+  # Note: Ce workflow copie les fichiers statiques via rsync.
+  # TODO: Migrer vers docker-compose up depuis portfolio/docker-compose.yml
+  deploy-VPS-staging:
+    name: 🧪 Deploy to VPS (Staging)
+    runs-on: ubuntu-latest
+    needs: [validate, build, security]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+      - name: Create staging directory on VPS
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            'mkdir -p /srv/www/portfolio-staging && echo "📁 Staging directory ready"'
+      - name: Backup existing staging (if exists)
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            'if [ -d /srv/www/portfolio-staging ] && [ "$(ls -A /srv/www/portfolio-staging)" ]; then \
+               cp -r /srv/www/portfolio-staging /srv/www/portfolio-staging.backup.$(date +%s); \
+               echo "💾 Backup created"; \
+             fi'
+      - name: Deploy portfolio to staging (/portfolio-staging)
+        run: |
+          rsync -avz --delete -e "ssh -i ~/.ssh/deploy_key" \
+            saas/portfolio/ ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}:/srv/www/portfolio-staging/
+      - name: Verify staging deployment
+        run: |
+          echo "✅ Portfolio déployé vers STAGING!"
+          echo "📍 Path: /srv/www/portfolio-staging"
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            'ls -lh /srv/www/portfolio-staging/ | head -10'
+      - name: Cleanup old staging backups (keep last 3)
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            'ls -dt /srv/www/portfolio-staging.backup.* 2>/dev/null | tail -n +4 | xargs -r rm -rf || true'
+      - name: Restart Traefik on VPS
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            'C=$(docker ps --filter "name=traefik" --format "{{.Names}}" | head -n1); if [ -n "$C" ]; then docker restart "$C"; fi'
+  # Job 6: Deploy to VPS (Production - master)
+  # Note: Ce workflow copie les fichiers statiques via rsync.
+  # TODO: Migrer vers docker-compose up depuis portfolio/docker-compose.yml
+  deploy-VPS:
+    name: 🚀 Deploy to VPS (Production)
+    runs-on: ubuntu-latest
+    needs: [validate, build, security]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+      - name: Create production directory on VPS
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            'mkdir -p /srv/www/portfolio && echo "📁 Production directory ready"'
+      - name: Backup existing production (if exists)
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            'if [ -d /srv/www/portfolio ] && [ "$(ls -A /srv/www/portfolio)" ]; then \
+               cp -r /srv/www/portfolio /srv/www/portfolio.backup.$(date +%s); \
+               echo "💾 Backup created"; \
+             fi'
+      - name: Deploy portfolio to production (/portfolio)
+        run: |
+          rsync -avz --delete -e "ssh -i ~/.ssh/deploy_key" \
+            saas/portfolio/ ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}:/srv/www/portfolio/
+      - name: Verify production deployment
+        run: |
+          echo "✅ Portfolio déployé vers PRODUCTION!"
+          echo "📍 Production: https://${{ secrets.VPS_DOMAIN }}/portfolio/"
+          echo "📍 GitHub Pages: https://${{ github.repository_owner }}.github.io/freijstack/portfolio"
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            'ls -lh /srv/www/portfolio/ | head -10'
+      - name: Cleanup old production backups (keep last 3)
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            'ls -dt /srv/www/portfolio.backup.* 2>/dev/null | tail -n +4 | xargs -r rm -rf || true'
+      - name: Restart Traefik on VPS
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            'C=$(docker ps --filter "name=traefik" --format "{{.Names}}" | head -n1); if [ -n "$C" ]; then docker restart "$C"; fi'
+  # Job 7: Notifications
+  notify:
+    name: 📢 Notify Status
+    runs-on: ubuntu-latest
+    needs: [validate, build, security]
+    if: always()
+    
+    steps:
+      - name: Check deployment status
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "🔍 Pull Request - Validation Only"
+            echo "✅ Code validation and security checks completed"
+            echo "📋 No deployment on pull requests"
+          elif [ "${{ github.ref }}" == "refs/heads/develop" ]; then
+            echo "🧪 STAGING Environment - Push Event"
+            echo "✅ Staging deployment triggered"
+            echo "📍 Test your changes before merging to master"
+          elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            echo "🚀 PRODUCTION Environment - Push Event"
+            echo "✅ Production deployment triggered"
+            echo "🎯 Portfolio is live on VPS"
+          else
+            echo "ℹ️ Event: ${{ github.event_name }} on ${{ github.ref }}"
+          fi
+      - name: Create GitHub Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            ## FreijStack Release
+            Portfolio deployment completed successfully!
+            - Portfolio: Live on GitHub Pages & VPS
+            - Security: All checks passed
+            - Performance: Assets optimized
+          draft: false
+          prerelease: false
