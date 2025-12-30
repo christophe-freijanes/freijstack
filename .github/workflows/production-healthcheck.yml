@@ -71,7 +71,6 @@ jobs:
           echo "🔢 leaks_count=${leaks_count}"
 
       - name: 📎 Upload gitleaks report (only if leaks found)
-        if: ${{ steps.gitleaks.outputs.leaks_count != '0' }}
         uses: actions/upload-artifact@v4
         with:
           name: gitleaks-report

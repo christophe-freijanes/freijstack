@@ -26,10 +26,11 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
         continue-on-error: true
 
-      - name: 💤 No leaks found — nothing to triage
+      - name: ✅ No leaks found — nothing to triage
         if: ${{ steps.download.outcome != 'success' }}
         run: |
-          echo "✅ No gitleaks artifact found. Nothing to triage."
+          echo "✅ No gitleaks artifact found for this run (no findings)."
+          exit 0
 
       - name: 🧾 Summarize findings (metadata only)
         if: ${{ steps.download.outcome == 'success' }}
