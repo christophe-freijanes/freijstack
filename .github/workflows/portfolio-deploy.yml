@@ -54,7 +54,7 @@ jobs:
       - name: Check JavaScript
         run: |
           npm install -g eslint
-          eslint saas/portfolio/main.js || true
+          eslint saas/portfolio/script.js || true
       - name: Security audit
         run: npm audit --audit-level=moderate || true
 
@@ -84,7 +84,7 @@ jobs:
       - name: Minify JavaScript
         run: |
           npm install -g terser
-          terser saas/portfolio/main.js -o saas/portfolio/main.min.js -c -m
+          terser saas/portfolio/script.js -o saas/portfolio/script.min.js -c -m
           echo "✅ JavaScript minified"
       - name: Optimize assets
         run: |
