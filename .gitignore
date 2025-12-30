@@ -1,4 +1,5 @@
-# 🔒 SECURITY - Fichiers Sensibles
+# Dossier de documentation privée
+docs-private/
 
 ## Environment Variables & Secrets
 # Ignore actual .env files with secrets
