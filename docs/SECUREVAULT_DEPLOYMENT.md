@@ -1,14 +1,26 @@
+
 # 🔐 SecureVault CI/CD Deployment Guide
 
-Guide de configuration de la pipeline CI/CD dédiée pour SecureVault Manager.
+---
+
+## 📝 Résumé
+
+Ce guide détaille la configuration de la pipeline CI/CD pour SecureVault : secrets, DNS, automatisation et sécurité du déploiement.
+
+- **Public visé** : DevOps, administrateurs
+- **Objectif** : Mettre en place un déploiement automatisé et sécurisé pour SecureVault
+- **Points clés** : Secrets partagés, DNS, génération automatique, GitHub Actions
+
+---
 
 ## 📋 Prérequis
 
-- **VPS Ubuntu 22.04+** avec Docker et Docker Compose installés
-- **Accès SSH** au VPS
-- **Clé SSH privée** pour l'authentification
-- **Domaines DNS** configurés (vault.freijstack.com, vault-api.freijstack.com)
-- **Traefik** déjà déployé sur le VPS
+### Prérequis simplifiés
+- VPS Ubuntu 22.04+ avec Docker & Docker Compose
+- Accès SSH au VPS
+- Clé SSH privée
+- Domaines DNS configurés (vault.freijstack.com, vault-api.freijstack.com)
+- Traefik déployé
 
 ---
 

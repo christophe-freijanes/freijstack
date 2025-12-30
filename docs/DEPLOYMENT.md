@@ -1,6 +1,17 @@
+
 # 🚀 Guide de Déploiement - FreijStack
 
-Guide complet pour déployer les applications SaaS (Portfolio, SecureVault, n8n) sur VPS.
+---
+
+## 📝 Résumé
+
+Ce guide détaille toutes les étapes pour déployer les applications SaaS FreijStack (Portfolio, SecureVault, n8n) sur un VPS sécurisé et performant.
+
+- **Public visé** : DevOps, administrateurs, contributeurs
+- **Objectif** : Déployer rapidement et en toute sécurité l’infrastructure FreijStack
+- **Points clés** : Prérequis, installation, configuration, rollback, troubleshooting
+
+---
 
 **Dernière mise à jour**: Décembre 2025
 
@@ -23,22 +34,19 @@ Guide complet pour déployer les applications SaaS (Portfolio, SecureVault, n8n)
 
 ## Prérequis
 
-### Matériel
-- **VPS Ubuntu 22.04 LTS** (minimum)
-  - 2 vCPU
-  - 2 GB RAM
-  - 20 GB SSD
-  - Bande passante: 1 TB/mois
-  
+
+### Matériel requis
+- VPS Ubuntu 22.04 LTS (min. 2 vCPU, 2 GB RAM, 20 GB SSD, 1 TB/mois)
+
 ### Logiciels
 - SSH client (OpenSSH, PuTTY)
-- Git client local
-- Accès root ou sudo au VPS
+- Git client
+- Accès root ou sudo
 
 ### Accès
 - Nom de domaine configuré (freijstack.com)
-- Accès DNS (pour configurer sous-domaines)
-- Clé SSH pour authentification
+- Accès DNS pour sous-domaines
+- Clé SSH
 
 ---
 
