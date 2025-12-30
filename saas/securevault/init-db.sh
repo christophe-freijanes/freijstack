@@ -25,7 +25,16 @@ echo "🔐 SecureVault - Database Initialization ($ENVIRONMENT)"
 echo "========================================"
 
 echo "⏳ Waiting for PostgreSQL service: $POSTGRES_SERVICE ..."
+WAIT_LIMIT=60
+WAIT_COUNT=0
 until docker-compose exec -T "$POSTGRES_SERVICE" pg_isready -U $DB_USER > /dev/null 2>&1; do
+  WAIT_COUNT=$((WAIT_COUNT+1))
+  echo "  Still waiting... ($WAIT_COUNT s)"
+  if [ $WAIT_COUNT -ge $WAIT_LIMIT ]; then
+    echo "❌ Timeout: PostgreSQL service did not become ready after $WAIT_LIMIT seconds."
+    docker-compose logs "$POSTGRES_SERVICE" --tail=40
+    exit 1
+  fi
   sleep 1
 done
 
