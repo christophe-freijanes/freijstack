@@ -19,6 +19,7 @@ concurrency:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   health-check:
@@ -31,6 +32,28 @@ jobs:
       db_status: ${{ steps.database.outputs.status }}
 
     steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔐 Secret scanning (Gitleaks CLI)
+        run: |
+          set -euo pipefail
+          echo "⬇️ Installing gitleaks (pinned version)..."
+          GITLEAKS_VERSION="8.21.2"
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            | tar -xz gitleaks
+          sudo mv gitleaks /usr/local/bin/gitleaks
+
+          echo "🔎 Running gitleaks with ignore file..."
+          test -f .gitleaksignore || (echo "❌ .gitleaksignore not found at repo root" && exit 1)
+
+          gitleaks detect \
+            --source . \
+            --gitleaks-ignore-path .gitleaksignore \
+            --redact
+
       - name: 🧰 Prepare tools
         run: |
           set -euo pipefail
@@ -53,14 +76,14 @@ jobs:
           for url in "${URLS[@]}"; do
             echo "🔎 Checking $url ..."
 
+            # -L pour suivre redirects (plus réaliste en prod)
             code=$(
-              curl -s -o /dev/null -w "%{http_code}" \
+              curl -s -L -o /dev/null -w "%{http_code}" \
                 --max-time 15 \
                 --retry 2 --retry-delay 2 --retry-all-errors \
                 "$url" || echo "000"
             )
 
-            # ✅ OK codes: 200/301/302
             if [ "$code" = "200" ] || [ "$code" = "301" ] || [ "$code" = "302" ]; then
               echo "✅ $url OK (HTTP $code)"
               echo "- ✅ $url (HTTP $code)" >> "$GITHUB_STEP_SUMMARY"
@@ -75,7 +98,6 @@ jobs:
         id: backend
         run: |
           set -euo pipefail
-
           echo "## 🧠 Backend API" >> "$GITHUB_STEP_SUMMARY"
 
           url="https://vault-api.freijstack.com/api/health"
@@ -107,10 +129,18 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
+
+          # host key -> known_hosts dédié
           ssh-keyscan -H "${{ secrets.VPS_SSH_HOST }}" >> ~/.ssh/known_hosts
 
-          # Quick SSH sanity check
-          ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o ConnectTimeout=10 \
+          # Quick SSH sanity check (timeout dur)
+          ssh -i ~/.ssh/deploy_key \
+            -o BatchMode=yes \
+            -o ConnectTimeout=10 \
+            -o ServerAliveInterval=5 \
+            -o ServerAliveCountMax=2 \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile=~/.ssh/known_hosts \
             "${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}" "echo '✅ SSH OK'"
 
       - name: 🗄️ Check Database Connectivity (pg_isready)
@@ -119,12 +149,11 @@ jobs:
           set -euo pipefail
           echo "## 🗄️ Database" >> "$GITHUB_STEP_SUMMARY"
 
-          SSH="ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o ConnectTimeout=10 ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+          SSH="ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=5 -o ServerAliveCountMax=2 -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
           PROD_DIR="/srv/www/securevault/saas/securevault"
 
           echo "🗄️ Checking PostgreSQL (pg_isready)..."
 
-          # Debug context: show compose ps first (helps when failing)
           $SSH "cd '$PROD_DIR' && docker compose ps" || true
 
           db_status=$(
@@ -154,9 +183,6 @@ jobs:
     timeout-minutes: 10
     needs: health-check
 
-    # ✅ auto-heal uniquement si:
-    # - health-check a échoué
-    # - event = schedule, OU workflow_dispatch avec auto_heal=true
     if: >
       always() &&
       needs.health-check.result == 'failure' &&
@@ -173,113 +199,3 @@ jobs:
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "${{ secrets.VPS_SSH_HOST }}" >> ~/.ssh/known_hosts
-
-      - name: ⏱️ Auto-Heal cooldown check (anti restart-loop)
-        id: cooldown
-        run: |
-          set -euo pipefail
-
-          SSH="ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o ConnectTimeout=10 ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
-          PROD_DIR="/srv/www/securevault/saas/securevault"
-          COOLDOWN_SECONDS=1800  # 30 minutes
-          STAMP_FILE="/tmp/securevault_last_heal"
-
-          echo "⏱️ Checking cooldown..."
-
-          now=$($SSH "date +%s")
-          last=$($SSH "test -f '$STAMP_FILE' && cat '$STAMP_FILE' || echo 0")
-
-          diff=$((now - last))
-
-          if [ "$diff" -lt "$COOLDOWN_SECONDS" ]; then
-            echo "🛑 Cooldown active: last heal was $diff seconds ago (< $COOLDOWN_SECONDS)."
-            echo "can_heal=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          else
-            echo "✅ Cooldown passed. Auto-heal allowed."
-            echo "can_heal=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: 🔧 Restart Production Services
-        if: ${{ steps.cooldown.outputs.can_heal == 'true' }}
-        run: |
-          set -euo pipefail
-
-          SSH="ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o ConnectTimeout=10 ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
-          PROD_DIR="/srv/www/securevault/saas/securevault"
-          STAMP_FILE="/tmp/securevault_last_heal"
-
-          echo "🚨 Health check failed — attempting auto-heal..."
-
-          $SSH << 'HEAL_SCRIPT'
-            set -euo pipefail
-
-            PROD_DIR="/srv/www/securevault/saas/securevault"
-            STAMP_FILE="/tmp/securevault_last_heal"
-
-            cd "$PROD_DIR"
-
-            echo "📊 Current container status:"
-            docker compose ps || true
-            echo ""
-
-            echo "🔄 Restarting all production services..."
-            docker compose restart
-
-            echo "⏳ Waiting for services to stabilize..."
-            sleep 25
-
-            echo "📊 New container status:"
-            docker compose ps || true
-            echo ""
-
-            echo "🔎 Checking backend health (internal)..."
-            backend_health=$(docker compose exec -T backend curl -s http://localhost:3001/api/health || echo "FAILED")
-
-            if echo "$backend_health" | grep -qi "ok"; then
-              echo "✅ Auto-heal successful!"
-              date +%s > "$STAMP_FILE"
-            else
-              echo "⚠️  Restart done but health still failing"
-              echo "backend_health=$backend_health"
-              exit 1
-            fi
-          HEAL_SCRIPT
-
-      - name: 🧹 Cleanup SSH key
-        if: always()
-        run: |
-          rm -f ~/.ssh/deploy_key || true
-
-  notify:
-    name: 📢 Health Status Notification
-    runs-on: ubuntu-latest
-    needs: [health-check, auto-heal]
-    if: always()
-    timeout-minutes: 3
-
-    steps:
-      - name: 📊 Summary
-        run: |
-          set -euo pipefail
-
-          echo "## 📢 Production Health Summary" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- 🏥 Health Check: **${{ needs.health-check.result }}**" >> "$GITHUB_STEP_SUMMARY"
-          echo "- 🔧 Auto-Heal: **${{ needs.auto-heal.result }}**" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-
-          if [ "${{ needs.health-check.result }}" = "success" ]; then
-            echo "✅ Production is **HEALTHY**" >> "$GITHUB_STEP_SUMMARY"
-            echo "- 🎯 https://vault.freijstack.com" >> "$GITHUB_STEP_SUMMARY"
-            echo "- 🎯 https://vault-api.freijstack.com" >> "$GITHUB_STEP_SUMMARY"
-          elif [ "${{ needs.auto-heal.result }}" = "success" ]; then
-            echo "⚠️ Production had issues but **auto-heal succeeded**" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "🚨 **CRITICAL**: Health check failed and auto-heal did not recover" >> "$GITHUB_STEP_SUMMARY"
-          fi
-
-      - name: 📣 Console output
-        run: |
-          echo "🏥 Health Check: ${{ needs.health-check.result }}"
-          echo "🔧 Auto-Heal: ${{ needs.auto-heal.result }}"

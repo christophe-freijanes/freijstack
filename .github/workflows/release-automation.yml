@@ -41,13 +41,6 @@ jobs:
             echo "has_lock=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: 🧾 Debug root files (optional)
-        run: |
-          set -euo pipefail
-          echo "📁 PWD: $(pwd)"
-          ls -la
-          ls -la package.json package-lock.json || true
-
       - name: 🟢 Setup Node.js (LTS) — with cache
         if: ${{ steps.lock.outputs.has_lock == 'true' }}
         uses: actions/setup-node@v4
@@ -64,16 +57,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-
-      # ---------------------------
-      # 🔐 SECURITY — Secret Scan
-      # ---------------------------
-      - name: 🔐 Secret scanning (Gitleaks)
-        uses: gitleaks/gitleaks-action@v2
-        with:
-          fail: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # ---------------------------
       # 🔐 SECURITY — Dependency Scan
