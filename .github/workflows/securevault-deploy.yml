@@ -640,23 +640,6 @@ jobs:
             docker compose logs --tail=20
           DEPLOY_SCRIPT
 
-      - name: 🔄 Restart Traefik (optionnel)
-        if: github.event_name == 'workflow_dispatch' && inputs.restart_traefik == true
-        run: |
-          echo "🔄 Restarting Traefik as requested..."
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'TRAEFIK_RESTART'
-            set -e
-            TRAEFIK_CONTAINER=$(docker ps --format '{{.Names}}' | grep -i 'traefik' | head -n1)
-            if [ -z "$TRAEFIK_CONTAINER" ]; then
-              echo "❌ Traefik container not found"
-              exit 1
-            fi
-            echo "Restarting $TRAEFIK_CONTAINER..."
-            docker restart "$TRAEFIK_CONTAINER"
-            sleep 5
-            echo "✅ Traefik restarted"
-          TRAEFIK_RESTART
-
       - name: 🗄️ Run Database Migrations
         env:
           TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
@@ -781,7 +764,7 @@ jobs:
             echo "✅ Database migrations completed!"
           MIGRATION_SCRIPT
 
-      - name: 🏗️ Initialize Database Schema (init-db.sh)
+      - name: 🏗️ Initialize Database Schema
         env:
           TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
         run: |
@@ -794,6 +777,24 @@ jobs:
             PROJECT_PATH="${{ env.PROJECT_PATH }}"
           fi
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "cd $DEPLOY_DIR/$PROJECT_PATH && chmod +x ./init-db.sh && ./init-db.sh $TARGET_ENV"
+
+      - name: 🔄 Restart Traefik
+        env:
+          TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
+        run: |
+          echo "🔄 Restarting Traefik as requested..."
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'TRAEFIK_RESTART'
+            set -e
+            TRAEFIK_CONTAINER=$(docker ps --format '{{.Names}}' | grep -i 'traefik' | head -n1)
+            if [ -z "$TRAEFIK_CONTAINER" ]; then
+              echo "❌ Traefik container not found"
+              exit 1
+            fi
+            echo "Restarting $TRAEFIK_CONTAINER..."
+            docker restart "$TRAEFIK_CONTAINER"
+            sleep 5
+            echo "✅ Traefik restarted"
+          TRAEFIK_RESTART
 
       - name: Verify Deployment
         env:
