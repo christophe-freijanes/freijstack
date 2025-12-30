@@ -50,8 +50,8 @@ Projet maintenu par **Christophe FREIJANES** – Senior Cloud & Security Special
 cd base-infra
 docker volume create traefik_data
 docker volume create n8n_data
-docker-compose up -d
-docker-compose ps
+docker compose up -d
+docker compose ps
 ```
 
 ### Portfolio (Local)
@@ -68,7 +68,7 @@ python3 -m http.server 8000
 ```bash
 cd saas/securevault
 cp .env.example .env && nano .env
-docker-compose up -d --build
+docker compose up -d --build
 ./init-db.sh
 ```
 
@@ -109,7 +109,7 @@ freijstack/
 │   │   └── pr-title-automation.yml    # Auto-format PR titles
 │   └── pull_request_template.md
 ├── base-infra/              # 🏗️ Infrastructure centralisée
-│   ├── docker-compose.yml   # Traefik + n8n + portfolio (prod + staging)
+│   ├── docker compose.yml   # Traefik + n8n + portfolio (prod + staging)
 │   ├── BASE_INTEGRATION.md  # Guide d'intégration
 │   └── README.md            # Documentation infrastructure
 ├── saas/                    # 🚀 Applications SaaS
@@ -117,8 +117,8 @@ freijstack/
 │   └── securevault/         # 🔐 Gestionnaire de secrets chiffrés
 │       ├── backend/
 │       ├── frontend/
-│       ├── docker-compose.yml          # Production
-│       ├── docker-compose.staging.yml  # Staging
+│       ├── docker compose.yml          # Production
+│       ├── docker compose.staging.yml  # Staging
 │       └── README.md
 ├── docs/
 │   ├── architecture.md      # Documentation technique
@@ -298,10 +298,10 @@ docker volume create traefik_data
 docker volume create n8n_data
 
 # Démarrer services
-docker-compose up -d
+docker compose up -d
 
 # Vérifier status
-docker-compose ps
+docker compose ps
 ```
 
 #### Portfolio (Local)
@@ -328,7 +328,7 @@ npx http-server .
 ```bash
 cd saas/securevault
 cp .env.example .env && nano .env
-docker-compose up -d --build
+docker compose up -d --build
 ./init-db.sh
 
 # Vérification
@@ -338,7 +338,7 @@ curl https://vault-api.freijstack.com/health
 #### n8n
 
 ```bash
-# Géré par base-infra/docker-compose.yml
+# Géré par base-infra/docker compose.yml
 # Accessible sur https://n8n.freijstack.com ou http://localhost:5678
 ```
 
