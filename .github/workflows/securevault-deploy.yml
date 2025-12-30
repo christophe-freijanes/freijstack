@@ -26,11 +26,6 @@ on:
         required: false
         default: false
         type: boolean
-      destroy_staging:
-        description: '🔥 Détruire Staging (ATTENTION!)'
-        required: false
-        default: false
-        type: boolean
 
 env:
   REGISTRY: ghcr.io
@@ -933,104 +928,11 @@ jobs:
             echo "❌ Post-deployment verification failed"
             exit 1
           fi
-  destroy-staging:
-    name: 🔥 Destroy Staging After Merge
-    runs-on: ubuntu-latest
-    needs: [deploy, post-verify]
-    # Détruire staging uniquement si :
-    # 1. Push vers master (merge depuis develop) OU
-    # 2. Manuel avec flag destroy_staging=true
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
-      (github.event_name == 'workflow_dispatch' && inputs.destroy_staging == true)
-    
-    steps:
-      - name: 🔐 Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
       
-      - name: 🔒 Mask sensitive values
-        run: |
-          echo "::add-mask::${{ secrets.VPS_SSH_USER }}"
-          echo "::add-mask::${{ secrets.VPS_SSH_HOST }}"
-          echo "::add-mask::${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
-      
-      - name: 🔥 Destroy Staging Environment
-        run: |
-          echo "🔥 Destroying staging environment..."
-          echo "⚠️  This will stop and remove all staging containers"
-          echo ""
-          
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'DESTROY_SCRIPT'
-            set -e
-            
-            STAGING_DIR="/srv/www/securevault-staging"
-            
-            echo "🎯 Target: Staging environment"
-            echo "📂 Directory: $STAGING_DIR"
-            echo ""
-            
-            if [ -d "$STAGING_DIR/saas/securevault" ]; then
-              cd "$STAGING_DIR/saas/securevault"
-              
-              echo "🛑 Stopping all staging containers..."
-              docker compose down 2>/dev/null || echo "  ℹ️  No containers running"
-              
-              echo "🗑️  Removing staging containers..."
-              for container in securevault-staging-backend securevault-staging-frontend securevault-staging-postgres; do
-                if docker ps -a --format '{{.Names}}' | grep -q "^${container}$"; then
-                  echo "  • Removing $container"
-                  docker rm -f "$container" 2>/dev/null || true
-                fi
-              done
-              
-              echo "🔌 Removing staging network..."
-              docker network rm securevault_staging_network 2>/dev/null || echo "  ℹ️  Network already removed"
-              
-              echo "💾 Preserving volumes (data safety)..."
-              echo "  ℹ️  Volumes kept for potential recovery"
-              echo "  ℹ️  To remove volumes manually: docker volume rm securevault-staging_postgres_data"
-              
-              echo ""
-              echo "✅ Staging environment destroyed successfully!"
-              echo ""
-              echo "📊 Remaining staging resources:"
-              echo ""
-              echo "Volumes (preserved):"
-              docker volume ls | grep staging || echo "  None"
-              echo ""
-              echo "To completely remove staging including data:"
-              echo "  docker volume rm \$(docker volume ls -q | grep staging)"
-            else
-              echo "⚠️  Staging directory not found, nothing to destroy"
-            fi
-          DESTROY_SCRIPT
-      
-      - name: ✅ Staging Destroyed
-        if: success()
-        run: |
-          echo "✅ Staging environment destroyed"
-          echo ""
-          echo "🎯 Production is now the only active environment"
-          echo "📍 https://vault.freijstack.com"
-          echo ""
-          echo "ℹ️  To recreate staging:"
-          echo "   1. Push to develop branch"
-          echo "   2. Workflow will automatically deploy staging"
-      
-      - name: ❌ Destruction Failed
-        if: failure()
-        run: |
-          echo "❌ Failed to destroy staging environment"
-          echo "Manual cleanup may be required"
-
   notify:
     name: 📢 Notify Status
     runs-on: ubuntu-latest
-    needs: [validate, test, deploy, post-verify, destroy-staging]
+    needs: [validate, test, deploy, post-verify]
     if: always()
     
     steps:
@@ -1053,10 +955,6 @@ jobs:
             echo "🎯 https://vault.freijstack.com"
             echo "🎯 API: https://vault-api.freijstack.com"
             echo ""
-            if [ "${{ needs.destroy-staging.result }}" == "success" ]; then
-              echo "🔥 Staging environment destroyed automatically"
-              echo "✅ Production is now the only active environment"
-            fi
           else
             echo "ℹ️ Event: ${{ github.event_name }} on ${{ github.ref }}"
           fi
@@ -1069,10 +967,6 @@ jobs:
           echo "🧪 Tests: ✅"
           echo "🚀 Deployment: ✅"
           echo "🔎 Post-verification: ✅"
-          
-          if [ "${{ needs.destroy-staging.result }}" == "success" ]; then
-            echo "🔥 Staging cleanup: ✅"
-          fi
 
       - name: ⚠️ Partial Success
         if: ${{ (needs.validate.result == 'failure' || needs.test.result == 'failure' || needs.deploy.result == 'failure' || needs.post-verify.result == 'failure') }}
@@ -1082,4 +976,3 @@ jobs:
           echo "Tests: ${{ needs.test.result }}"
           echo "Deploy: ${{ needs.deploy.result }}"
           echo "Post-verify: ${{ needs.post-verify.result }}"
-          echo "Destroy-staging: ${{ needs.destroy-staging.result }}"
