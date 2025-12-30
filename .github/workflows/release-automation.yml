@@ -71,6 +71,14 @@ jobs:
           echo "total=${total}" >> "$GITHUB_OUTPUT"
           echo "🔢 total_findings=${total}"
 
+      - name: 🧭 Debug gate context
+        run: |
+          echo "HealthCheck run: ${{ github.event.workflow_run.html_url }}"
+          echo "event:          ${{ github.event.workflow_run.event }}"
+          echo "head_branch:    ${{ github.event.workflow_run.head_branch }}"
+          echo "head_sha:       ${{ github.event.workflow_run.head_sha }}"
+          echo "gitleaks_total: ${{ steps.gate.outputs.total }}"
+
       - name: ✅ Security gate passed
         if: ${{ steps.gate.outputs.report_present == 'true' && steps.gate.outputs.total == '0' }}
         run: |
