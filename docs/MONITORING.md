@@ -1,6 +1,17 @@
+
 # 📊 Guide Monitoring & Observabilité - FreijStack
 
-Guide complet pour mettre en place et utiliser le monitoring de l'infrastructure et du portfolio.
+---
+
+## 📝 Résumé
+
+Ce guide explique comment surveiller et analyser l’infrastructure FreijStack : installation, dashboards, alertes et bonnes pratiques.
+
+- **Public visé** : DevOps, administrateurs, contributeurs
+- **Objectif** : Mettre en place un monitoring complet et proactif
+- **Points clés** : Stack Prometheus/Grafana/Loki, alertes, logs, SLA
+
+---
 
 **Dernière mise à jour**: Décembre 2025
 
@@ -23,13 +34,13 @@ Guide complet pour mettre en place et utiliser le monitoring de l'infrastructure
 
 ## Vue d'ensemble
 
-### Objectifs
 
-- ✅ Surveiller uptime et disponibilité (SLA 99.9%)
-- ✅ Monitorer performance (response time <500ms)
-- ✅ Détecter anomalies et incidents
-- ✅ Analyser logs centralisés
-- ✅ Alertes proactives (avant downtime)
+### Objectifs principaux
+- Surveiller uptime et disponibilité (SLA 99.9%)
+- Monitorer la performance (temps de réponse <500ms)
+- Détecter les anomalies et incidents
+- Analyser les logs centralisés
+- Recevoir des alertes proactives
 
 ### Architecture Monitoring
 

@@ -1,41 +1,102 @@
+
 # FreijStack 🚀
 
 [![SecureVault](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/securevault-deploy.yml?branch=master&label=SecureVault&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/securevault-deploy.yml)
 [![Infrastructure](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/infrastructure-deploy.yml?branch=master&label=Infrastructure&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/infrastructure-deploy.yml)
+[![Prod HealthCheck](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/production-healthcheck.yml?branch=master&label=Prod%20HealthCheck&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/production-healthcheck.yml)
 [![Security Scans](https://img.shields.io/badge/security-scans-brightgreen?style=flat-square&logo=githubsecurity)](https://github.com/christophe-freijanes/freijstack/security/code-scanning)
 [![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square&logo=readme)](LICENSE)
-[![Top Language](https://img.shields.io/github/languages/top/christophe-freijanes/freijstack?style=flat-square&color=yellow)](https://github.com/christophe-freijanes/freijstack)
-[![Code Size](https://img.shields.io/github/languages/code-size/christophe-freijanes/freijstack?style=flat-square&color=green)](https://github.com/christophe-freijanes/freijstack)
 [![Last Commit](https://img.shields.io/github/last-commit/christophe-freijanes/freijstack?label=Mise%20%C3%A0%20jour&style=flat-square&color=blue)](https://github.com/christophe-freijanes/freijstack/commits)
-[![Stars](https://img.shields.io/github/stars/christophe-freijanes/freijstack?style=flat-square&color=orange&logo=star)](https://github.com/christophe-freijanes/freijstack/stargazers)
-[![Issues](https://img.shields.io/github/issues/christophe-freijanes/freijstack?style=flat-square&color=critical)](https://github.com/christophe-freijanes/freijstack/issues)
-[![Pull Requests](https://img.shields.io/github/issues-pr/christophe-freijanes/freijstack?style=flat-square&color=success)](https://github.com/christophe-freijanes/freijstack/pulls)
-[![Prod HealthCheck](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/production-healthcheck.yml?branch=master&label=Prod%20HealthCheck&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/production-healthcheck.yml)
-
-Portfolio et projets cloud & sécurité de **Christophe FREIJANES** - Senior Cloud & Security Specialist (DevSecOps).
-
-**Live**: https://portfolio.freijstack.com/ | **Staging**: https://portfolio-staging.freijstack.com/
 
 ---
+
+## 📝 Résumé
+
+**FreijStack** est une stack DevSecOps complète pour déployer, monitorer et sécuriser des applications SaaS (Portfolio, SecureVault, n8n...) sur VPS, avec CI/CD automatisé, infrastructure Docker, monitoring avancé et sécurité intégrée.
+
+Projet maintenu par **Christophe FREIJANES** – Senior Cloud & Security Specialist (DevSecOps).
+
+---
+
+## 📑 Table des matières
+
+- [Accès rapides](#accès-rapides)
+- [Démarrage rapide](#démarrage-rapide)
+- [Documentation](#documentation)
+- [Structure du projet](#structure-du-projet)
+- [CI/CD Pipeline](#cicd-pipeline)
+- [Technologies](#technologies)
+- [Sécurité](#sécurité)
+- [Compétences clés](#compétences-clés)
+- [Contact](#contact)
+
+---
+
+## 🚦 Accès rapides
+
+- **Portfolio Production** : https://portfolio.freijstack.com/
+- **Portfolio Staging** : https://portfolio-staging.freijstack.com/
+- **SecureVault** : https://vault.freijstack.com/
+- **API SecureVault** : https://vault-api.freijstack.com/
+
+---
+
+## ⚡ Démarrage rapide
+
+### Infrastructure de Base (Traefik, nginx, n8n)
+
+```bash
+cd base-infra
+docker volume create traefik_data
+docker volume create n8n_data
+docker-compose up -d
+docker-compose ps
+```
+
+### Portfolio (Local)
+
+```bash
+cd saas/portfolio
+# Ouvrir index.html ou lancer :
+python3 -m http.server 8000
+# http://localhost:8000
+```
+
+### SecureVault
+
+```bash
+cd saas/securevault
+cp .env.example .env && nano .env
+docker-compose up -d --build
+./init-db.sh
+```
+
+---
+
+---
+
 
 ## 📚 Documentation
 
 | Document | Description |
 |----------|-------------|
-| 📘 [Architecture Technique](docs/architecture.md) | Vue d'ensemble de l'infrastructure, déploiement, et CI/CD |
-| 🏗️ [Infrastructure Base](base-infra/README.md) | Docker Compose, Traefik, nginx, n8n |
-| 📌 [Guide Déploiement](docs/DEPLOYMENT.md) | Installation VPS, Docker, Traefik, DNS, rollback |
-| 🔍 [Guide Troubleshooting](docs/TROUBLESHOOTING.md) | Diagnostic et résolution des problèmes courants |
-| 📊 [Guide Monitoring](docs/MONITORING.md) | Prometheus, Grafana, Loki, alertes et dashboards |
-| � [SaaS Apps README](saas/README.md) | Applications SaaS (Portfolio, SecureVault, n8n) |
-| 🌐 [Portfolio README](saas/portfolio/README.md) | Documentation complète du portfolio (features, i18n, sécurité) |
-| 🔐 [SecureVault Manager](saas/securevault/README.md) | Gestionnaire de secrets chiffrés (AES-256-GCM) |
-| 🤖 [n8n Automation](saas/n8n/README.md) | Plateforme d'automation & workflows |
+| 📘 [Architecture Technique](docs/architecture.md) | Vue d'ensemble de l'infrastructure, CI/CD, sécurité |
+| 🏗️ [Infrastructure Base](base-infra/README.md) | Docker Compose, Traefik, n8n, intégration |
+| 📌 [Guide Déploiement](docs/DEPLOYMENT.md) | Déploiement complet sur VPS |
+| 🚀 [SecureVault Pro](docs/PRO_DEPLOYMENT.md) | Déploiement avancé SecureVault |
+| 🔐 [SecureVault Manager](saas/securevault/README.md) | Gestionnaire de secrets chiffrés |
+| 🤖 [Automatisation](docs/AUTOMATION.md) | CI/CD, staging éphémère, production 24/7 |
+| 🔄 [Rotation des secrets](docs/SECRET_ROTATION.md) | Automatisation de la rotation des secrets |
+| 📊 [Monitoring](docs/MONITORING.md) | Prometheus, Grafana, alertes, dashboards |
+| 🔍 [Troubleshooting](docs/TROUBLESHOOTING.md) | Diagnostic et résolution des problèmes |
 | 🔖 [Pull Request Template](.github/pull_request_template.md) | Checklist de validation pour les PR |
 
 ---
 
-## 📋 Structure du Projet
+
+---
+
+## 🗂️ Structure du Projet
 
 ```
 freijstack/
@@ -125,7 +186,7 @@ Voir [saas/securevault/README.md](saas/securevault/README.md).
 - 📊 ETL & data sync
 - 🔐 Credential management
 
-Voir [saas/n8n/README.md](saas/n8n/README.md).
+ℹ️ n8n est géré et documenté dans [base-infra/README.md](base-infra/README.md) (voir la section dédiée à l'automation).
 
 **Vue d'ensemble SaaS**: [saas/README.md](saas/README.md)
 
@@ -174,7 +235,7 @@ Le projet utilise **GitHub Actions** avec un pipeline de déploiement automatiqu
    - Validation des URLs
    - Status notifications
 
-**Voir**: [CI/CD Configuration](.github/workflows/main.yml)
+**Voir**: Voir les fichiers dans [.github/workflows/](.github/workflows/) pour la configuration CI/CD détaillée.
 
 ## 🏗️ Infrastructure & Déploiement
 
@@ -361,11 +422,11 @@ Sélection de langue automatique avec persistance localStorage.
 - Monitoring: Prometheus, ELK, Grafana, Splunk
 - Méthodologies: Agile, ITIL, CI/CD, GitOps
 
+
 ## 📬 Contact
 
-- 🎓 Credly: [Certifications](https://www.credly.com/users/christophe-freijanes)
-- 💼 LinkedIn: Disponible dans le portfolio
-- 📧 E-mail: Disponible dans le portfolio
+- 🎓 [Certifications Credly](https://www.credly.com/users/christophe-freijanes)
+- 💼 [LinkedIn & Email](https://portfolio.freijstack.com/) (voir section contact du portfolio)
 
 ## 📝 Licence
 

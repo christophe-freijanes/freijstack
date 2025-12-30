@@ -1,6 +1,28 @@
 # 🤖 Automatisation Complète SecureVault
 
-Ce document décrit l'automatisation **zéro-intervention** de SecureVault avec gestion intelligente des environnements staging et production.
+---
+
+## 📝 Résumé
+
+Ce guide explique comment automatiser entièrement le déploiement et la gestion des environnements SecureVault (staging et production) : zéro intervention manuelle, sécurité renforcée, et cycle de vie intelligent.
+
+- **Public visé** : DevOps, administrateurs, contributeurs
+- **Objectif** : Comprendre et utiliser l’automatisation CI/CD pour SecureVault
+- **Points clés** : Staging éphémère, production 24/7, auto-destruction, auto-healing
+
+---
+
+## 📋 Table des matières
+
+- [Vue d'ensemble](#vue-densemble)
+- [Workflow Automatique](#workflow-automatique)
+- [Environnements](#environnements)
+- [Destruction Automatique du Staging](#destruction-automatique-du-staging)
+- [Protection de la Production](#protection-de-la-production)
+- [Déploiements](#déploiements)
+- [Résolution de Problèmes](#résolution-de-problèmes)
+
+---
 
 ## 📋 Table des matières
 
@@ -32,6 +54,17 @@ graph LR
 2. **Staging** (`develop`) : Éphémère, détruite automatiquement après merge vers master
 3. **Aucune intervention manuelle** : Tout est automatisé
 
+### Fonctionnement simplifié
+
+- **Push sur `develop`** → Déploiement automatique en staging
+- **Merge vers `master`** → Déploiement automatique en production
+- **Destruction automatique du staging** après merge
+- **Production** : toujours en ligne, jamais détruite
+- **Aucune intervention manuelle** : tout est automatisé
+
+![Cycle de vie](https://github.com/christophe-freijanes/freijstack/assets/mermaid-automation-cycle.png)
+
+
 ## 🔄 Workflow Automatique
 
 ### Développement sur `develop`
@@ -51,9 +84,26 @@ git push origin feature/ma-fonctionnalite
 ```
 
 **Ce qui se passe automatiquement :**
-- ✅ Validation du code
-- ✅ Tests de sécurité
-- ❌ Pas de déploiement (c'est une feature branch)
+
+### Étapes principales
+
+1. **Développement sur une branche feature**
+   - `git checkout develop && git checkout -b feature/ma-fonctionnalite`
+   - `git add . && git commit -m "feat: ..." && git push origin feature/ma-fonctionnalite`
+2. **Merge vers `develop`**
+   - Déclenche le déploiement automatique en staging
+3. **Tests sur staging**
+   - Accès : [vault-staging.freijstack.com](https://vault-staging.freijstack.com)
+4. **Merge vers `master`**
+   - Déclenche le déploiement en production
+   - Staging détruit automatiquement
+   - Accès : [vault.freijstack.com](https://vault.freijstack.com)
+
+**Automatisations incluses** :
+- Validation du code
+- Tests de sécurité
+- Déploiement automatique
+- Destruction automatique du staging
 
 ### Merge vers `develop` (Staging)
 
