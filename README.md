@@ -10,6 +10,7 @@
 [![Stars](https://img.shields.io/github/stars/christophe-freijanes/freijstack?style=flat-square&color=orange&logo=star)](https://github.com/christophe-freijanes/freijstack/stargazers)
 [![Issues](https://img.shields.io/github/issues/christophe-freijanes/freijstack?style=flat-square&color=critical)](https://github.com/christophe-freijanes/freijstack/issues)
 [![Pull Requests](https://img.shields.io/github/issues-pr/christophe-freijanes/freijstack?style=flat-square&color=success)](https://github.com/christophe-freijanes/freijstack/pulls)
+[![Prod HealthCheck](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/production-healthcheck.yml?branch=master&label=Prod%20HealthCheck&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/production-healthcheck.yml)
 
 Portfolio et projets cloud & sécurité de **Christophe FREIJANES** - Senior Cloud & Security Specialist (DevSecOps).
 
