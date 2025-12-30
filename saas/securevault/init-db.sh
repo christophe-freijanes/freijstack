@@ -17,14 +17,15 @@ if [ -n "$CONTAINER_PREFIX_OVERRIDE" ]; then
   CONTAINER_PREFIX="$CONTAINER_PREFIX_OVERRIDE"
 fi
 
-# Compose the actual container name
-POSTGRES_CONTAINER="${CONTAINER_PREFIX}-postgres"
+
+# Always use the service name for docker compose exec
+POSTGRES_SERVICE="postgres"
 
 echo "🔐 SecureVault - Database Initialization ($ENVIRONMENT)"
 echo "========================================"
 
-echo "⏳ Waiting for PostgreSQL container: $POSTGRES_CONTAINER ..."
-until docker-compose exec -T "$POSTGRES_CONTAINER" pg_isready -U $DB_USER > /dev/null 2>&1; do
+echo "⏳ Waiting for PostgreSQL service: $POSTGRES_SERVICE ..."
+until docker-compose exec -T "$POSTGRES_SERVICE" pg_isready -U $DB_USER > /dev/null 2>&1; do
   sleep 1
 done
 
@@ -32,7 +33,7 @@ docker-compose exec -T postgres psql -U $DB_USER -d $DB_NAME << 'EOF'
 echo "✅ PostgreSQL is ready"
 
 echo "📊 Creating database tables..."
-docker-compose exec -T "$POSTGRES_CONTAINER" psql -U $DB_USER -d $DB_NAME << 'EOF'
+docker-compose exec -T "$POSTGRES_SERVICE" psql -U $DB_USER -d $DB_NAME << 'EOF'
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
