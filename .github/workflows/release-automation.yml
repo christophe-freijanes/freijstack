@@ -40,42 +40,39 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
         continue-on-error: true
 
+      - name: ✅ Security gate passed
+        if: ${{ steps.gate.outputs.report_present == 'true' && steps.gate.outputs.total == '0' }}
+        run: |
+          echo "## 🔐 Security Gate" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "✅ No gitleaks findings detected. Release allowed." >> "$GITHUB_STEP_SUMMARY"
+
       - name: 🛑 Stop release (gitleaks findings detected) + diagnostics
-        if: ${{ steps.gate.outcome == 'success' }}
+        if: ${{ steps.gate.outputs.report_present == 'true' && steps.gate.outputs.total != '0' }}
         run: |
           set -euo pipefail
-      
+
           REPORT="security/gitleaks-report.json"
-      
-          TOTAL=$(jq 'length' "$REPORT")
-      
+          TOTAL="${{ steps.gate.outputs.total }}"
+
           echo "🚨 Gitleaks findings detected. Blocking release."
           echo "🔢 Total findings: $TOTAL"
-          echo ""
-      
-          # -----------------------------
-          # 📊 GitHub UI Summary
-          # -----------------------------
+
           echo "## 🚨 Gitleaks – Release blocked" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Total findings:** $TOTAL" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Health Check run:** ${{ github.event.workflow_run.html_url }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Commit:** \`${{ github.event.workflow_run.head_sha }}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-      
+
           echo "### 📍 Findings (metadata only)" >> "$GITHUB_STEP_SUMMARY"
           jq -r '.[] | "- rule=\(.RuleID) file=\(.File):\(.StartLine) commit=\(.Commit|tostring|.[0:8])"' "$REPORT" \
             | head -n 20 >> "$GITHUB_STEP_SUMMARY"
-      
+
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "> ℹ️ Values are redacted. Full report available as artifact in the Health Check workflow." >> "$GITHUB_STEP_SUMMARY"
-      
-          # -----------------------------
-          # 🛑 Stop release
-          # -----------------------------
+          echo "> ℹ️ Values are redacted. Full report is attached to the Health Check run as an artifact." >> "$GITHUB_STEP_SUMMARY"
+
           exit 1
-      
-      
 
       - name: 🧾 Detect JS lockfile
         id: lock

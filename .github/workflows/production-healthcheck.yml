@@ -56,7 +56,9 @@ jobs:
             --report-format json \
             --report-path gitleaks-report.json \
             --verbose || true
-      
+          
+          test -f gitleaks-report.json || echo "[]" > gitleaks-report.json
+
           echo ""
           echo "📄 Findings (safe metadata):"
           if [ -s gitleaks-report.json ]; then
@@ -70,13 +72,24 @@ jobs:
           echo "leaks_count=${leaks_count}" >> "$GITHUB_OUTPUT"
           echo "🔢 leaks_count=${leaks_count}"
 
-      - name: 📎 Upload gitleaks report (only if leaks found)
+      - name: 📎 Upload gitleaks report (always)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: gitleaks-report
           path: gitleaks-report.json
           retention-days: 7
-         
+          if-no-files-found: error
+
+      - name: 🧾 Confirm artifact file exists
+        if: always()
+        run: |
+          echo "📄 gitleaks-report.json size:"
+          ls -la gitleaks-report.json || true
+          echo "🔎 head:"
+          head -c 200 gitleaks-report.json || true
+          echo ""
+          
       - name: 🧰 Prepare tools
         run: |
           set -euo pipefail
