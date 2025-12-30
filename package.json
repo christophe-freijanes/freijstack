@@ -1,32 +1,44 @@
 {
-  "name": "freijstack",
-  "version": "1.0.0",
-  "description": "Portfolio et projets cloud & sécurité de Christophe FREIJANES - Senior Cloud & Security Specialist (DevSecOps)",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"No tests specified\" && exit 0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/christophe-freijanes/freijstack.git"
-  },
-  "keywords": [
-    "portfolio",
-    "devops",
-    "devsecops",
-    "cloud",
-    "security"
-  ],
-  "author": "Christophe FREIJANES <christophe.freijanes@gmail.com>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/christophe-freijanes/freijstack/issues"
-  },
-  "homepage": "https://github.com/christophe-freijanes/freijstack#readme",
-  "devDependencies": {
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^12.0.2",
-    "semantic-release": "^25.0.2"
-  }
+  "branches": ["master"],
+  "tagFormat": "v${version}",
+  "plugins": [
+    [
+      "@semantic-release/commit-analyzer",
+      {
+        "preset": "conventionalcommits",
+        "releaseRules": [
+          { "breaking": true, "release": "major" },
+
+          { "type": "feat", "release": "minor" },
+
+          { "type": "fix", "release": "patch" },
+          { "type": "perf", "release": "patch" },
+          { "type": "refactor", "release": "patch" },
+          { "type": "revert", "release": "patch" },
+
+          { "type": "docs", "release": false },
+          { "type": "style", "release": false },
+          { "type": "test", "release": false },
+          { "type": "chore", "release": false },
+          { "type": "build", "release": false },
+          { "type": "ci", "release": false }
+        ]
+      }
+    ],
+    [
+      "@semantic-release/release-notes-generator",
+      {
+        "preset": "conventionalcommits"
+      }
+    ],
+    ["@semantic-release/changelog", { "changelogFile": "CHANGELOG.md" }],
+    [
+      "@semantic-release/git",
+      {
+        "assets": ["CHANGELOG.md", "package.json", "package-lock.json"],
+        "message": "chore(release): ${nextRelease.version} 🏷️🚀\n\n[skip ci]"
+      }
+    ],
+    "@semantic-release/github"
+  ]
 }
