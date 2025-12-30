@@ -27,22 +27,22 @@ echo "========================================"
 echo "⏳ Waiting for PostgreSQL service: $POSTGRES_SERVICE ..."
 WAIT_LIMIT=60
 WAIT_COUNT=0
-until docker-compose exec -T "$POSTGRES_SERVICE" pg_isready -U $DB_USER > /dev/null 2>&1; do
+until docker compose exec -T "$POSTGRES_SERVICE" pg_isready -U $DB_USER > /dev/null 2>&1; do
   WAIT_COUNT=$((WAIT_COUNT+1))
   echo "  Still waiting... ($WAIT_COUNT s)"
   if [ $WAIT_COUNT -ge $WAIT_LIMIT ]; then
     echo "❌ Timeout: PostgreSQL service did not become ready after $WAIT_LIMIT seconds."
-    docker-compose logs "$POSTGRES_SERVICE" --tail=40
+    docker compose logs "$POSTGRES_SERVICE" --tail=40
     exit 1
   fi
   sleep 1
 done
 
-docker-compose exec -T postgres psql -U $DB_USER -d $DB_NAME << 'EOF'
+docker compose exec -T postgres psql -U $DB_USER -d $DB_NAME << 'EOF'
 echo "✅ PostgreSQL is ready"
 
 echo "📊 Creating database tables..."
-docker-compose exec -T "$POSTGRES_SERVICE" psql -U $DB_USER -d $DB_NAME << 'EOF'
+docker compose exec -T "$POSTGRES_SERVICE" psql -U $DB_USER -d $DB_NAME << 'EOF'
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
