@@ -1,23 +1,48 @@
 #!/bin/bash
 
-# SecureVault - Database Initialization Script
-# This script initializes the database with tables
+# Usage: ./init-db.sh [staging|production]
+ENVIRONMENT=${1:-staging}
+if [ "$ENVIRONMENT" = "production" ]; then
+  DB_USER="securevault"
+  DB_NAME="securevault"
+  CONTAINER_PREFIX="securevault"
+else
+  DB_USER="securevault_staging"
+  DB_NAME="securevault_staging"
+  CONTAINER_PREFIX="securevault-staging"
+fi
 
-echo "🔐 SecureVault - Database Initialization"
+# Allow override from environment (for CI or custom runs)
+if [ -n "$CONTAINER_PREFIX_OVERRIDE" ]; then
+  CONTAINER_PREFIX="$CONTAINER_PREFIX_OVERRIDE"
+fi
+
+
+# Always use the service name for docker compose exec
+POSTGRES_SERVICE="postgres"
+
+echo "🔐 SecureVault - Database Initialization ($ENVIRONMENT)"
 echo "========================================"
 
-# Wait for PostgreSQL to be ready
-echo "⏳ Waiting for PostgreSQL..."
-until docker-compose exec -T postgres pg_isready -U securevault > /dev/null 2>&1; do
+echo "⏳ Waiting for PostgreSQL service: $POSTGRES_SERVICE ..."
+WAIT_LIMIT=60
+WAIT_COUNT=0
+until docker compose exec -T "$POSTGRES_SERVICE" pg_isready -U $DB_USER > /dev/null 2>&1; do
+  WAIT_COUNT=$((WAIT_COUNT+1))
+  echo "  Still waiting... ($WAIT_COUNT s)"
+  if [ $WAIT_COUNT -ge $WAIT_LIMIT ]; then
+    echo "❌ Timeout: PostgreSQL service did not become ready after $WAIT_LIMIT seconds."
+    docker compose logs "$POSTGRES_SERVICE" --tail=40
+    exit 1
+  fi
   sleep 1
 done
 
+docker compose exec -T postgres psql -U $DB_USER -d $DB_NAME << 'EOF'
 echo "✅ PostgreSQL is ready"
 
-# Run initialization SQL
 echo "📊 Creating database tables..."
-
-docker-compose exec -T postgres psql -U securevault -d securevault << 'EOF'
+docker compose exec -T "$POSTGRES_SERVICE" psql -U $DB_USER -d $DB_NAME << 'EOF'
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
@@ -71,6 +96,11 @@ EOF
 echo "✅ Database initialized successfully"
 echo ""
 echo "📋 Next steps:"
-echo "  1. Access frontend: https://vault.freijstack.com"
-echo "  2. Access backend API: https://vault-api.freijstack.com/health"
+if [ "$ENVIRONMENT" = "production" ]; then
+  echo "  1. Access frontend: https://vault.freijstack.com"
+  echo "  2. Access backend API: https://vault-api.freijstack.com/health"
+else
+  echo "  1. Access frontend: https://vault-staging.freijstack.com"
+  echo "  2. Access backend API: https://vault-api-staging.freijstack.com/health"
+fi
 echo "  3. Create your first user account"

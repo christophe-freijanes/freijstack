@@ -2,7 +2,7 @@ name: 🔐 Deploy SecureVault
 
 on:
   push:
-    branches: [develop]  # Auto-deploy staging only
+    branches: [develop, master]  # Auto-deploy staging (develop) and production (master)
     paths:
       - 'saas/securevault/**'
       - '.github/workflows/securevault-deploy.yml'
@@ -23,6 +23,11 @@ on:
           - production
       restart_traefik:
         description: 'Redémarrer Traefik après déploiement'
+        required: false
+        default: false
+        type: boolean
+      destroy_staging:
+        description: '🔥 Détruire Staging (ATTENTION!)'
         required: false
         default: false
         type: boolean
@@ -55,7 +60,9 @@ jobs:
   validate:
     name: ✅ Validate VPS Configuration
     runs-on: ubuntu-latest
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/develop') || github.event_name == 'workflow_dispatch'
+    if: |
+      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) || 
+      github.event_name == 'workflow_dispatch'
 
     steps:
       - name: 📥 Checkout code
@@ -431,7 +438,9 @@ jobs:
     name: 🧹 Cleanup Old Containers
     runs-on: ubuntu-latest
     needs: test
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/develop') || github.event_name == 'workflow_dispatch'
+    if: |
+      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) || 
+      github.event_name == 'workflow_dispatch'
 
     steps:
       - name: 🔐 Prepare SSH key
@@ -509,7 +518,9 @@ jobs:
     name: 🚀 Deploy to VPS
     runs-on: ubuntu-latest
     needs: cleanup
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/develop') || github.event_name == 'workflow_dispatch'
+    if: |
+      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) || 
+      github.event_name == 'workflow_dispatch'
     environment:
       name: ${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
       url: ${{ github.ref == 'refs/heads/master' && 'https://vault.freijstack.com' || 'https://vault-staging.freijstack.com' }}
@@ -670,10 +681,26 @@ jobs:
             echo "📂 Current directory: $(pwd)"
             echo "🐳 PostgreSQL container: ${CONTAINER_PREFIX}-postgres"
             
+            # Auto-detect PostgreSQL user and database from .env
+            echo ""
+            echo "🔍 Detecting PostgreSQL credentials from .env..."
+            if [ -f ".env" ]; then
+              PGUSER=$(grep "^POSTGRES_USER=" .env | cut -d'=' -f2 | tr -d '\r' || echo "postgres")
+              PGDATABASE=$(grep "^POSTGRES_DB=" .env | cut -d'=' -f2 | tr -d '\r' || echo "securevault")
+              
+              echo "  ✓ PostgreSQL User: $PGUSER"
+              echo "  ✓ Database: $PGDATABASE"
+            else
+              echo "  ⚠️  .env not found, using defaults"
+              PGUSER="postgres"
+              PGDATABASE="securevault"
+            fi
+            
             # Attendre que PostgreSQL soit prêt
+            echo ""
             echo "⏳ Waiting for PostgreSQL to be ready..."
             for i in {1..30}; do
-              if docker compose exec -T postgres pg_isready -U postgres &> /dev/null; then
+              if docker compose exec -T postgres pg_isready -U "$PGUSER" &> /dev/null; then
                 echo "✅ PostgreSQL is ready!"
                 break
               fi
@@ -681,51 +708,92 @@ jobs:
               sleep 2
             done
             
+            # Test de connexion
+            echo ""
+            echo "🔌 Testing database connection..."
+            if docker compose exec -T postgres psql -U "$PGUSER" -d "$PGDATABASE" -c "SELECT version();" &> /dev/null; then
+              echo "✅ Database connection successful"
+            else
+              echo "❌ Cannot connect to database"
+              echo "   Trying to list available databases..."
+              docker compose exec -T postgres psql -U "$PGUSER" -l 2>&1 || echo "   Connection failed"
+              exit 1
+            fi
+            
             # Vérifier que les fichiers de migration existent
             echo ""
             echo "📋 Available migration files:"
             ls -lh backend/migrations/ || echo "⚠️ No migrations directory found"
             
-            # Exécuter migration 001 (si existe et non déjà appliquée)
-            echo ""
-            echo "1️⃣ Checking migration 001_add_features.sql..."
-            if [ -f "backend/migrations/001_add_features.sql" ]; then
-              # Vérifier si la table 'roles' existe (indique que la migration 001 a déjà été appliquée)
-              if docker compose exec -T postgres psql -U postgres -d securevault -tAc "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'roles');" | grep -q "t"; then
-                echo "  ℹ️  Migration 001 already applied (roles table exists)"
-              else
-                echo "  ▶️  Applying migration 001_add_features.sql..."
-                docker compose exec -T postgres psql -U postgres -d securevault < backend/migrations/001_add_features.sql
-                echo "  ✅ Migration 001 applied successfully"
+            # Fonction pour exécuter une migration
+            run_migration() {
+              local migration_file=$1
+              local migration_num=$2
+              local check_table=$3
+              
+              echo ""
+              echo "${migration_num} Checking ${migration_file}..."
+              
+              if [ ! -f "backend/migrations/${migration_file}" ]; then
+                echo "  ⚠️ Migration file not found, skipping"
+                return
               fi
-            else
-              echo "  ⚠️ Migration 001 file not found, skipping"
-            fi
+              
+              # Vérifier si déjà appliquée via table indicatrice
+              if docker compose exec -T postgres psql -U "$PGUSER" -d "$PGDATABASE" -tAc \
+                "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '$check_table');" 2>/dev/null | grep -q "t"; then
+                echo "  ℹ️  Migration already applied ($check_table table exists)"
+              else
+                echo "  ▶️  Applying ${migration_file}..."
+                
+                # Appliquer la migration
+                if docker compose exec -T postgres psql -U "$PGUSER" -d "$PGDATABASE" < "backend/migrations/${migration_file}" 2>&1 | tee /tmp/migration.log; then
+                  echo "  ✅ Migration applied successfully"
+                else
+                  echo "  ❌ Migration failed! Check logs above"
+                  cat /tmp/migration.log
+                  return 1
+                fi
+              fi
+            }
             
-            # Exécuter migration 002 (si existe et non déjà appliquée)
-            echo ""
-            echo "2️⃣ Checking migration 002_pro_features.sql..."
-            if [ -f "backend/migrations/002_pro_features.sql" ]; then
-              # Vérifier si la table 'folders' existe (indique que la migration 002 a déjà été appliquée)
-              if docker compose exec -T postgres psql -U postgres -d securevault -tAc "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'folders');" | grep -q "t"; then
-                echo "  ℹ️  Migration 002 already applied (folders table exists)"
-              else
-                echo "  ▶️  Applying migration 002_pro_features.sql..."
-                docker compose exec -T postgres psql -U postgres -d securevault < backend/migrations/002_pro_features.sql
-                echo "  ✅ Migration 002 applied successfully"
-              fi
-            else
-              echo "  ⚠️ Migration 002 file not found, skipping"
-            fi
+            # Exécuter les migrations dans l'ordre
+            run_migration "001_add_features.sql" "1️⃣" "roles"
+            run_migration "002_pro_features.sql" "2️⃣" "folders"
             
             # Afficher un résumé des tables
             echo ""
             echo "📊 Database schema summary:"
-            docker compose exec -T postgres psql -U postgres -d securevault -c "\dt" || echo "  ⚠️ Could not list tables"
+            docker compose exec -T postgres psql -U "$PGUSER" -d "$PGDATABASE" -c "\dt" 2>&1 | head -30 || echo "  ⚠️ Could not list tables"
+            
+            # Compter quelques tables importantes
+            echo ""
+            echo "📈 Database statistics:"
+            for table in users secrets roles folders secret_types; do
+              COUNT=$(docker compose exec -T postgres psql -U "$PGUSER" -d "$PGDATABASE" -tAc \
+                "SELECT COUNT(*) FROM $table;" 2>/dev/null | tr -d ' \r\n' || echo "N/A")
+              if [ "$COUNT" != "N/A" ]; then
+                echo "  • $table: $COUNT rows"
+              fi
+            done
             
             echo ""
             echo "✅ Database migrations completed!"
           MIGRATION_SCRIPT
+
+      - name: 🏗️ Initialize Database Schema (init-db.sh)
+        env:
+          TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
+        run: |
+          echo "🏗️ Running init-db.sh for $TARGET_ENV..."
+          if [ "$TARGET_ENV" = "production" ]; then
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
+            PROJECT_PATH="${{ env.PROJECT_PATH }}"
+          else
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
+            PROJECT_PATH="${{ env.PROJECT_PATH }}"
+          fi
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "cd $DEPLOY_DIR/$PROJECT_PATH && chmod +x ./init-db.sh && ./init-db.sh $TARGET_ENV"
 
       - name: Verify Deployment
         env:
@@ -857,12 +925,104 @@ jobs:
             echo "❌ Post-deployment verification failed"
             exit 1
           fi
-          echo "✅ Post-deployment verification successful"
+  destroy-staging:
+    name: 🔥 Destroy Staging After Merge
+    runs-on: ubuntu-latest
+    needs: [deploy, post-verify]
+    # Détruire staging uniquement si :
+    # 1. Push vers master (merge depuis develop) OU
+    # 2. Manuel avec flag destroy_staging=true
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
+      (github.event_name == 'workflow_dispatch' && inputs.destroy_staging == true)
+    
+    steps:
+      - name: 🔐 Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+      
+      - name: 🔒 Mask sensitive values
+        run: |
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_HOST }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+      
+      - name: 🔥 Destroy Staging Environment
+        run: |
+          echo "🔥 Destroying staging environment..."
+          echo "⚠️  This will stop and remove all staging containers"
+          echo ""
+          
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'DESTROY_SCRIPT'
+            set -e
+            
+            STAGING_DIR="/srv/www/securevault-staging"
+            
+            echo "🎯 Target: Staging environment"
+            echo "📂 Directory: $STAGING_DIR"
+            echo ""
+            
+            if [ -d "$STAGING_DIR/saas/securevault" ]; then
+              cd "$STAGING_DIR/saas/securevault"
+              
+              echo "🛑 Stopping all staging containers..."
+              docker compose down 2>/dev/null || echo "  ℹ️  No containers running"
+              
+              echo "🗑️  Removing staging containers..."
+              for container in securevault-staging-backend securevault-staging-frontend securevault-staging-postgres; do
+                if docker ps -a --format '{{.Names}}' | grep -q "^${container}$"; then
+                  echo "  • Removing $container"
+                  docker rm -f "$container" 2>/dev/null || true
+                fi
+              done
+              
+              echo "🔌 Removing staging network..."
+              docker network rm securevault_staging_network 2>/dev/null || echo "  ℹ️  Network already removed"
+              
+              echo "💾 Preserving volumes (data safety)..."
+              echo "  ℹ️  Volumes kept for potential recovery"
+              echo "  ℹ️  To remove volumes manually: docker volume rm securevault-staging_postgres_data"
+              
+              echo ""
+              echo "✅ Staging environment destroyed successfully!"
+              echo ""
+              echo "📊 Remaining staging resources:"
+              echo ""
+              echo "Volumes (preserved):"
+              docker volume ls | grep staging || echo "  None"
+              echo ""
+              echo "To completely remove staging including data:"
+              echo "  docker volume rm \$(docker volume ls -q | grep staging)"
+            else
+              echo "⚠️  Staging directory not found, nothing to destroy"
+            fi
+          DESTROY_SCRIPT
+      
+      - name: ✅ Staging Destroyed
+        if: success()
+        run: |
+          echo "✅ Staging environment destroyed"
+          echo ""
+          echo "🎯 Production is now the only active environment"
+          echo "📍 https://vault.freijstack.com"
+          echo ""
+          echo "ℹ️  To recreate staging:"
+          echo "   1. Push to develop branch"
+          echo "   2. Workflow will automatically deploy staging"
+      
+      - name: ❌ Destruction Failed
+        if: failure()
+        run: |
+          echo "❌ Failed to destroy staging environment"
+          echo "Manual cleanup may be required"
 
   notify:
     name: 📢 Notify Status
     runs-on: ubuntu-latest
-    needs: [validate, test, deploy, post-verify]
+    needs: [validate, test, deploy, post-verify, destroy-staging]
     if: always()
     
     steps:
@@ -877,11 +1037,18 @@ jobs:
             echo "✅ SecureVault staging deployment completed"
             echo "📍 https://vault-staging.freijstack.com"
             echo "📍 API: https://vault-api-staging.freijstack.com"
+            echo ""
+            echo "ℹ️  This environment is temporary and will be destroyed on merge to master"
           elif [ "${{ github.ref }}" == "refs/heads/master" ]; then
-            echo "🚀 PRODUCTION Environment - Push Event"
+            echo "🚀 PRODUCTION Environment - Merge Complete"
             echo "✅ SecureVault production deployment completed"
             echo "🎯 https://vault.freijstack.com"
             echo "🎯 API: https://vault-api.freijstack.com"
+            echo ""
+            if [ "${{ needs.destroy-staging.result }}" == "success" ]; then
+              echo "🔥 Staging environment destroyed automatically"
+              echo "✅ Production is now the only active environment"
+            fi
           else
             echo "ℹ️ Event: ${{ github.event_name }} on ${{ github.ref }}"
           fi
@@ -894,6 +1061,10 @@ jobs:
           echo "🧪 Tests: ✅"
           echo "🚀 Deployment: ✅"
           echo "🔎 Post-verification: ✅"
+          
+          if [ "${{ needs.destroy-staging.result }}" == "success" ]; then
+            echo "🔥 Staging cleanup: ✅"
+          fi
 
       - name: ⚠️ Partial Success
         if: ${{ (needs.validate.result == 'failure' || needs.test.result == 'failure' || needs.deploy.result == 'failure' || needs.post-verify.result == 'failure') }}
@@ -903,5 +1074,4 @@ jobs:
           echo "Tests: ${{ needs.test.result }}"
           echo "Deploy: ${{ needs.deploy.result }}"
           echo "Post-verify: ${{ needs.post-verify.result }}"
-
-
+          echo "Destroy-staging: ${{ needs.destroy-staging.result }}"

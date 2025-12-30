@@ -1,0 +1,164 @@
+name: 🏥 Production Health Check
+
+on:
+  schedule:
+    # Vérifier la santé toutes les 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      auto_heal:
+        description: 'Redémarrer automatiquement si problème détecté'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  health-check:
+    name: 🏥 Check Production Health
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔎 Check Frontend
+        id: frontend
+        continue-on-error: true
+        run: |
+          echo "🌐 Checking https://vault.freijstack.com..."
+          
+          response=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 https://vault.freijstack.com || echo "000")
+          
+          if [ "$response" == "200" ]; then
+            echo "✅ Frontend OK (HTTP $response)"
+            echo "status=healthy" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Frontend DOWN (HTTP $response)"
+            echo "status=unhealthy" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+      
+      - name: 🔎 Check Backend API
+        id: backend
+        continue-on-error: true
+        run: |
+          echo "🌐 Checking https://vault-api.freijstack.com/api/health..."
+          
+          response=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 https://vault-api.freijstack.com/api/health || echo "000")
+          
+          if [ "$response" == "200" ]; then
+            echo "✅ Backend API OK (HTTP $response)"
+            echo "status=healthy" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Backend API DOWN (HTTP $response)"
+            echo "status=unhealthy" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+      
+      - name: 🔎 Check Database Connectivity
+        id: database
+        continue-on-error: true
+        run: |
+          echo "🔐 Setup SSH..."
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+          
+          echo "🗄️  Checking PostgreSQL..."
+          db_status=$(ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            "cd /srv/www/securevault && docker compose exec -T postgres pg_isready -U securevault" 2>&1 || echo "FAILED")
+          
+          if echo "$db_status" | grep -q "accepting connections"; then
+            echo "✅ Database OK"
+            echo "status=healthy" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Database DOWN"
+            echo "status=unhealthy" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+  
+  auto-heal:
+    name: 🔧 Auto-Heal Production
+    runs-on: ubuntu-latest
+    needs: health-check
+    if: |
+      always() && 
+      (needs.health-check.result == 'failure') &&
+      (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.auto_heal == true))
+    
+    steps:
+      - name: 🔐 Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+      
+      - name: 🔧 Restart Production Services
+        run: |
+          echo "🚨 Production health check failed, attempting auto-heal..."
+          
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'HEAL_SCRIPT'
+            set -e
+            
+            PROD_DIR="/srv/www/securevault"
+            cd "$PROD_DIR/saas/securevault"
+            
+            echo "📊 Current container status:"
+            docker compose ps
+            echo ""
+            
+            echo "🔄 Restarting all production services..."
+            docker compose restart
+            
+            echo "⏳ Waiting for services to stabilize..."
+            sleep 30
+            
+            echo "📊 New container status:"
+            docker compose ps
+            echo ""
+            
+            echo "🔎 Checking health..."
+            backend_health=$(docker compose exec -T backend curl -s http://localhost:3001/api/health || echo "FAILED")
+            
+            if echo "$backend_health" | grep -q "ok"; then
+              echo "✅ Auto-heal successful!"
+            else
+              echo "⚠️  Services restarted but health check still failing"
+              echo "Manual intervention may be required"
+            fi
+          HEAL_SCRIPT
+      
+      - name: 📧 Send Alert
+        if: failure()
+        run: |
+          echo "🚨 CRITICAL ALERT: Production auto-heal failed!"
+          echo "Manual intervention required immediately"
+          echo "Check: https://vault.freijstack.com"
+          # Vous pouvez ajouter ici une intégration Slack/Discord/Email
+  
+  notify:
+    name: 📢 Health Status Notification
+    runs-on: ubuntu-latest
+    needs: [health-check, auto-heal]
+    if: always()
+    
+    steps:
+      - name: 📊 Summary
+        run: |
+          echo "🏥 Production Health Check Summary"
+          echo "=================================="
+          echo ""
+          echo "Health Check: ${{ needs.health-check.result }}"
+          echo "Auto-Heal: ${{ needs.auto-heal.result }}"
+          echo ""
+          
+          if [ "${{ needs.health-check.result }}" == "success" ]; then
+            echo "✅ Production is HEALTHY"
+            echo "🎯 https://vault.freijstack.com - Online"
+            echo "🎯 https://vault-api.freijstack.com - Online"
+          elif [ "${{ needs.auto-heal.result }}" == "success" ]; then
+            echo "⚠️  Production had issues but auto-heal succeeded"
+            echo "✅ Services restored automatically"
+          else
+            echo "🚨 CRITICAL: Production health check failed"
+            echo "❌ Manual intervention required"
+          fi
