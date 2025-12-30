@@ -38,11 +38,9 @@ until docker compose exec -T "$POSTGRES_SERVICE" pg_isready -U $DB_USER > /dev/n
   sleep 1
 done
 
-docker compose exec -T postgres psql -U $DB_USER -d $DB_NAME << 'EOF'
 echo "✅ PostgreSQL is ready"
-
 echo "📊 Creating database tables..."
-docker compose exec -T "$POSTGRES_SERVICE" psql -U $DB_USER -d $DB_NAME << 'EOF'
+docker compose exec -T postgres psql -U $DB_USER -d $DB_NAME << 'EOF'
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
