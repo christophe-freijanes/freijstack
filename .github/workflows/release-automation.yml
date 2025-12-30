@@ -1,4 +1,4 @@
-name: 🚀 Release & Tag (Semantic Release)
+name: 🚀 Release Automation • Semantic Versioning
 
 on:
   workflow_run:
@@ -8,26 +8,88 @@ on:
     branches:
       - master
 
+permissions:
+  contents: write
+  security-events: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   release:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: 🏷️ Secure Release Pipeline
+    # ✅ 1) seulement si Health Check = success
+    # ✅ 2) seulement si le Health Check a été déclenché par un push (donc merge/push master)
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      !contains(github.event.workflow_run.head_commit.message, '[skip ci]')
+
     runs-on: ubuntu-latest
+
     steps:
-      - name: ⬇️ Checkout code
+      - name: 📥 Checkout repository (same commit as Health Check)
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Important pour semantic-release
+          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: ⚙️ Setup Node.js
+      - name: 🟢 Setup Node.js (LTS)
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 22
+          cache: npm
 
-      - name: 📦 Install dependencies
-        run: |
-          npm install --no-audit --no-fund --ignore-scripts || true
-
-      - name: 🚦 Run semantic-release
+      # ---------------------------
+      # 🔐 SECURITY — Secret Scan
+      # ---------------------------
+      - name: 🔐 Secret scanning (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          fail: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
+
+      # ---------------------------
+      # 🔐 SECURITY — Dependency Scan (only if lockfile exists)
+      # ---------------------------
+      - name: 🧾 Detect lockfile
+        id: lockfile
+        run: |
+          if [ -f package-lock.json ]; then echo "has_lock=true" >> $GITHUB_OUTPUT; fi
+
+      - name: 📦 Install dependencies (npm ci)
+        if: ${{ steps.lockfile.outputs.has_lock == 'true' }}
+        run: |
+          echo "📦 Installing dependencies with npm ci..."
+          npm ci
+
+      - name: 🔍 Dependency vulnerability scan (high+)
+        if: ${{ steps.lockfile.outputs.has_lock == 'true' }}
+        run: |
+          echo "🧠 Running dependency security audit..."
+          npm audit --audit-level=high
+
+      # ---------------------------
+      # 🚀 RELEASE
+      # ---------------------------
+      - name: 📦 Install semantic-release tooling
+        run: |
+          echo "✨ Installing release tooling..."
+          npm install -D semantic-release \
+            @semantic-release/commit-analyzer \
+            @semantic-release/release-notes-generator \
+            @semantic-release/github \
+            @semantic-release/changelog \
+            @semantic-release/git
+
+      - name: 🏷️ Create tag & GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🚀 Publishing secure release..."
+          npx semantic-release
+
+      - name: 🎉 Pipeline completed
+        run: echo "✅ Secure release successfully published!"
