@@ -1,0 +1,9 @@
+title = "freijstack gitleaks config"
+
+[allowlist]
+description = "Allowlist documentation examples (README/SECURITY) - portfolio-safe"
+paths = [
+  '''^saas/securevault/README\.md$''',
+  '''^saas/app1/README\.md$''',
+  '''^SECURITY\.md$'''
+]
