@@ -131,9 +131,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-  # Job 4: Deploy to GitHub Pages (Staging - develop)
+  # Job 4: Deploy to GitHub Pages
   deploy-pages-staging:
-    name: 📄 Deploy to GitHub Pages (Staging)
+    name: 📄 Deploy to GitHub Pages
     runs-on: ubuntu-latest
     needs: [validate, build, security]
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
@@ -157,9 +157,9 @@ jobs:
 
       - name: Build static site
         run: |
-          mkdir -p _site/portfolio
-          cp -r saas/portfolio/* _site/portfolio/
-          echo "<!-- STAGING ENVIRONMENT -->" >> _site/portfolio/index.html
+          mkdir -p _site
+          cp -r saas/portfolio/* _site/
+          echo "<!-- STAGING ENVIRONMENT -->" >> _site/index.html
           echo "✅ Staging site built"
       - name: Upload artifact
         continue-on-error: true

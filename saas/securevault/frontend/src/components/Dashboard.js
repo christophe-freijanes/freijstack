@@ -137,9 +137,28 @@ function Dashboard({ onLogout }) {
         >
           📝 Audit Logs ({auditLogs.length})
         </button>
+        <button 
+          className={`tab ${activeTab === 'settings' ? 'active' : ''}`}
+          onClick={() => setActiveTab('settings')}
+        >
+          ⚙️ Paramètres
+        </button>
       </div>
 
       <main className="dashboard-content">
+        {activeTab === 'settings' && (
+          <div className="settings-section">
+            <h2>Paramètres du compte</h2>
+            <div className="settings-list">
+              <div className="settings-item"><strong>Profil utilisateur</strong> (à venir)</div>
+              <div className="settings-item"><strong>RBAC</strong> (contrôle d'accès, à venir)</div>
+              <div className="settings-item"><strong>MFA</strong> (authentification multi-facteurs, à venir)</div>
+              <div className="settings-item"><strong>SSO</strong> (connexion unique, à venir)</div>
+              <div className="settings-item"><strong>Préférences</strong> (langue, thème, etc. à venir)</div>
+            </div>
+            <p style={{marginTop: '2rem', color: '#94a3b8'}}>⚡ Cette section est en construction pour la gestion avancée du profil, des accès et de la sécurité.</p>
+          </div>
+        )}
         {activeTab === 'secrets' && (
           <div className="secrets-section">
             <div className="section-header">
