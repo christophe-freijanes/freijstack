@@ -781,6 +781,20 @@ jobs:
             echo "✅ Database migrations completed!"
           MIGRATION_SCRIPT
 
+      - name: 🏗️ Initialize Database Schema (init-db.sh)
+        env:
+          TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
+        run: |
+          echo "🏗️ Running init-db.sh for $TARGET_ENV..."
+          if [ "$TARGET_ENV" = "production" ]; then
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
+            PROJECT_PATH="${{ env.PROJECT_PATH }}"
+          else
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
+            PROJECT_PATH="${{ env.PROJECT_PATH }}"
+          fi
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "cd $DEPLOY_DIR/$PROJECT_PATH && chmod +x ./init-db.sh && ./init-db.sh $TARGET_ENV"
+
       - name: Verify Deployment
         env:
           TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
