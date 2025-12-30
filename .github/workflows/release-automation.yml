@@ -3,10 +3,8 @@ name: 🚀 Release Automation • Semantic Versioning
 on:
   workflow_run:
     workflows: ["🏥 Production Health Check"]
-    types:
-      - completed
-    branches:
-      - master
+    types: [completed]
+    branches: [master]
 
 permissions:
   contents: write
@@ -19,8 +17,6 @@ concurrency:
 jobs:
   release:
     name: 🏷️ Secure Release Pipeline
-    # ✅ 1) seulement si Health Check = success
-    # ✅ 2) seulement si le Health Check a été déclenché par un push (donc merge/push master)
     if: >
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
@@ -35,11 +31,39 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: 🟢 Setup Node.js (LTS)
+      - name: 🧾 Detect JS lockfile
+        id: lock
+        run: |
+          set -euo pipefail
+          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ] || [ -f yarn.lock ]; then
+            echo "has_lock=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_lock=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 🧾 Debug root files (optional)
+        run: |
+          set -euo pipefail
+          echo "📁 PWD: $(pwd)"
+          ls -la
+          ls -la package.json package-lock.json || true
+
+      - name: 🟢 Setup Node.js (LTS) — with cache
+        if: ${{ steps.lock.outputs.has_lock == 'true' }}
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            npm-shrinkwrap.json
+            yarn.lock
+
+      - name: 🟢 Setup Node.js (LTS) — no cache
+        if: ${{ steps.lock.outputs.has_lock != 'true' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
       # ---------------------------
       # 🔐 SECURITY — Secret Scan
@@ -52,22 +76,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # ---------------------------
-      # 🔐 SECURITY — Dependency Scan (only if lockfile exists)
+      # 🔐 SECURITY — Dependency Scan
       # ---------------------------
-      - name: 🧾 Detect lockfile
-        id: lockfile
-        run: |
-          if [ -f package-lock.json ]; then echo "has_lock=true" >> $GITHUB_OUTPUT; fi
-
       - name: 📦 Install dependencies (npm ci)
-        if: ${{ steps.lockfile.outputs.has_lock == 'true' }}
+        if: ${{ steps.lock.outputs.has_lock == 'true' }}
         run: |
+          set -euo pipefail
           echo "📦 Installing dependencies with npm ci..."
           npm ci
 
       - name: 🔍 Dependency vulnerability scan (high+)
-        if: ${{ steps.lockfile.outputs.has_lock == 'true' }}
+        if: ${{ steps.lock.outputs.has_lock == 'true' }}
         run: |
+          set -euo pipefail
           echo "🧠 Running dependency security audit..."
           npm audit --audit-level=high
 
@@ -76,6 +97,7 @@ jobs:
       # ---------------------------
       - name: 📦 Install semantic-release tooling
         run: |
+          set -euo pipefail
           echo "✨ Installing release tooling..."
           npm install -D semantic-release \
             @semantic-release/commit-analyzer \
@@ -88,6 +110,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
           echo "🚀 Publishing secure release..."
           npx semantic-release
 
