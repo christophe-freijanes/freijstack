@@ -200,8 +200,7 @@ ssh-keygen -t ed25519 -C "github-actions@freijstack" -f ~/.ssh/gh-actions
 ### Format à mettre dans GitHub Secrets
 ```
 -----BEGIN OPENSSH PRIVATE KEY-----
-MIGfMA0GCSq...
-... (contenu complet)
+[EXAMPLE — DO NOT USE REAL KEYS]
 -----END OPENSSH PRIVATE KEY-----
 ```
 

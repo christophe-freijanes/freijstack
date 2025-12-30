@@ -51,7 +51,7 @@ jobs:
           echo "🔎 Running gitleaks with ignore file (redacted)..."
           gitleaks detect \
             --source . \
-            --gitleaks-ignore-path .gitleaksignore \
+            --config .gitleaks.toml \
             --redact \
             --report-format json \
             --report-path gitleaks-report.json \
@@ -89,7 +89,7 @@ jobs:
           echo "🔎 head:"
           head -c 200 gitleaks-report.json || true
           echo ""
-          
+
       - name: 🧰 Prepare tools
         run: |
           set -euo pipefail
