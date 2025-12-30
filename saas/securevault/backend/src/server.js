@@ -18,6 +18,7 @@ const { isSamlEnabled } = require('./config/saml');
 const { errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
+app.set('trust proxy', 1); // Trust Traefik/NGINX proxy for correct IP detection
 const PORT = process.env.PORT || 3001;
 
 // Security Middleware
