@@ -1,0 +1,80 @@
+name: 🕵️ Security Triage • Gitleaks
+
+on:
+  workflow_run:
+    workflows: ["🏥 Production Health Check"]
+    types: [completed]
+    branches: [master]
+
+permissions:
+  actions: read
+  contents: read
+  issues: write
+
+jobs:
+  triage:
+    name: 🧯 Triage gitleaks findings
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Download gitleaks artifact (if present)
+        id: download
+        uses: actions/download-artifact@v4
+        with:
+          name: gitleaks-report
+          path: triage
+          run-id: ${{ github.event.workflow_run.id }}
+        continue-on-error: true
+
+      - name: 💤 No leaks found — nothing to triage
+        if: ${{ steps.download.outcome != 'success' }}
+        run: |
+          echo "✅ No gitleaks artifact found. Nothing to triage."
+
+      - name: 🧾 Summarize findings (metadata only)
+        if: ${{ steps.download.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          echo "## 🔐 Gitleaks findings (metadata only)" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Source run: ${{ github.event.workflow_run.html_url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Commit: ${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Findings" >> "$GITHUB_STEP_SUMMARY"
+          jq -r '.[] | "- rule=\(.RuleID) file=\(.File) line=\(.StartLine) commit=\(.Commit|tostring|.[0:8])"' triage/gitleaks-report.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 📝 Create GitHub Issue (optional but nice)
+        if: ${{ steps.download.outcome == 'success' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('triage/gitleaks-report.json','utf8'));
+            const count = data.length;
+
+            const sha = context.payload.workflow_run.head_sha.slice(0,7);
+            const title = `🔐 Gitleaks triage: ${count} finding(s) on ${sha}`;
+
+            const lines = data.slice(0, 50).map((f, i) =>
+              `${i+1}. rule=${f.RuleID} file=${f.File} line=${f.StartLine} commit=${String(f.Commit||'').slice(0,7)}`
+            );
+
+            const body = [
+              `### Summary`,
+              `- Findings: **${count}**`,
+              `- Workflow run: ${context.payload.workflow_run.html_url}`,
+              `- Commit: ${context.payload.workflow_run.head_sha}`,
+              ``,
+              `### Findings (metadata only)`,
+              ...lines,
+              ``,
+              `> Report generated with --redact.`
+            ].join('\n');
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: ['security', 'gitleaks', 'triage']
+            });
