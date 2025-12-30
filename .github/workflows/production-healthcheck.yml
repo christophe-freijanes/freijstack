@@ -38,22 +38,46 @@ jobs:
           fetch-depth: 0
 
       - name: 🔐 Secret scanning (Gitleaks CLI)
+        id: gitleaks
         run: |
           set -euo pipefail
+      
           echo "⬇️ Installing gitleaks (pinned version)..."
           GITLEAKS_VERSION="8.21.2"
           curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
             | tar -xz gitleaks
           sudo mv gitleaks /usr/local/bin/gitleaks
-
-          echo "🔎 Running gitleaks with ignore file..."
-          test -f .gitleaksignore || (echo "❌ .gitleaksignore not found at repo root" && exit 1)
-
+      
+          echo "🔎 Running gitleaks with ignore file (redacted)..."
           gitleaks detect \
             --source . \
             --gitleaks-ignore-path .gitleaksignore \
-            --redact
+            --redact \
+            --report-format json \
+            --report-path gitleaks-report.json \
+            --verbose || true
+      
+          echo ""
+          echo "📄 Findings (safe metadata):"
+          if [ -s gitleaks-report.json ]; then
+            jq -r '.[] | "\(.RuleID) file=\(.File) line=\(.StartLine) commit=\(.Commit|tostring|.[0:8])"' gitleaks-report.json | nl -w2 -s'. '
+            leaks_count="$(jq 'length' gitleaks-report.json)"
+          else
+            echo "✅ No findings report (empty file)."
+            leaks_count="0"
+          fi
+      
+          echo "leaks_count=${leaks_count}" >> "$GITHUB_OUTPUT"
+          echo "🔢 leaks_count=${leaks_count}"
 
+      - name: 📎 Upload gitleaks report (only if leaks found)
+        if: ${{ steps.gitleaks.outputs.leaks_count != '0' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-report
+          path: gitleaks-report.json
+          retention-days: 7
+         
       - name: 🧰 Prepare tools
         run: |
           set -euo pipefail
