@@ -25,48 +25,69 @@ Le dépôt `freijstack` héberge un **portfolio professionnel moderne** avec des
 
 ### 1.1. Structure Actuelle
 
+
 ```
 freijstack/
 ├── .github/
-│   ├── workflows/
-│   │   └── main.yml              # CI/CD pipeline (validation, security, deploy)
-│   └── pull_request_template.md  # Checklist validation PR
-├── docs/
-│   ├── architecture.md            # Ce document
-│   └── README.md                  # Index documentation
-├── portfolio/
-│   ├── index.html                 # Page principale
-│   ├── style.css                  # Styles (+ responsive)
-│   ├── script.js                  # Logique frontend (i18n, animations, saisonnier)
-│   ├── data.json                  # Données projets/skills
-│   ├── public/                    # Assets publics
-│   └── README.md                  # Documentation portfolio
+│   ├── workflows/                  # CI/CD pipelines (GitHub Actions)
+│   │   ├── infrastructure-deploy.yml
+│   │   ├── securevault-deploy.yml
+│   │   ├── production-healthcheck.yml
+│   │   ├── release.yml
+│   │   └── ...
+│   └── pull_request_template.md    # Checklist validation PR
+├── base-infra/                     # 🏗️ Infrastructure centralisée (Traefik, n8n, etc.)
+│   ├── docker-compose.yml          # Traefik + n8n + portfolio (prod + staging)
+│   ├── BASE_INTEGRATION.md         # Guide d'intégration
+│   └── README.md                   # Documentation infrastructure
 ├── saas/
-│   ├── securevault/               # SecureVault Manager (secrets chiffrés)
+│   ├── portfolio/                  # 🌐 Portfolio web multilingue
+│   │   ├── index.html
+│   │   ├── style.css
+│   │   ├── script.js
+│   │   ├── public/
+│   │   └── README.md
+│   ├── securevault/                # 🔐 SecureVault Manager (secrets chiffrés)
 │   │   ├── backend/
 │   │   ├── frontend/
 │   │   ├── docker-compose.yml
 │   │   ├── init-db.sh
 │   │   └── README.md
-│   └── README.md                  # Vue d'ensemble SaaS
-├── package.json                   # Scripts et dépendances
-└── README.md                      # Documentation principale
+│   └── README.md                   # Vue d'ensemble SaaS
+├── docs/
+│   ├── architecture.md             # Ce document
+│   ├── DEPLOYMENT.md
+│   ├── MONITORING.md
+│   ├── PRO_DEPLOYMENT.md
+│   ├── AUTOMATION.md
+│   ├── README.md                   # Index documentation
+│   └── ...
+├── scripts/                        # Scripts d'automatisation et de maintenance
+│   ├── generate-secrets.ps1
+│   ├── rotate-secrets.sh
+│   └── ...
+├── package.json                    # Dépendances Node.js (pour outils, CI/CD)
+├── .releaserc                      # Config semantic-release
+├── CHANGELOG.md                    # Changelog généré automatiquement
+└── README.md                       # Documentation principale
 ```
+
 
 ### 1.2. Objectifs Techniques
 
-- ✅ **Portfolio Responsive** - Desktop, tablet, mobile (768px, 480px, 360px breakpoints)
-- ✅ **Multilingue** - FR/EN avec 150+ clés de traduction
-- ✅ **Sécurisé** - CSP, WCAG AA, scans automatiques (CodeQL, Gitleaks, Trivy)
-- ✅ **Déploiement Automatisé** - CI/CD complet via GitHub Actions
-- ✅ **High Availability** - Traefik + nginx avec TLS automatique
-- ✅ **SaaS Demo** - SecureVault Manager (secrets chiffrés, audit logs, PostgreSQL)
+- ✅ **Portfolio Responsive** – Desktop, tablette, mobile (breakpoints 768px, 480px, 360px)
+- ✅ **Multilingue** – FR/EN avec 150+ clés de traduction
+- ✅ **Sécurisé** – CSP, WCAG AA, scans automatiques (CodeQL, Gitleaks, Trivy)
+- ✅ **Déploiement Automatisé** – CI/CD complet via GitHub Actions
+- ✅ **High Availability** – Traefik + nginx avec TLS automatique
+- ✅ **SaaS Demo** – SecureVault Manager (secrets chiffrés, audit logs, PostgreSQL)
 
 ---
 
 ## 2. Composants Principaux
 
-### 2.1. Portfolio (`/portfolio`)
+
+### 2.1. Portfolio (`/saas/portfolio`)
 
 **Description**: Portfolio web professionnel multilingue présentant compétences, expériences, projets et certifications.
 
@@ -93,34 +114,41 @@ freijstack/
 - **Production**: https://portfolio.freijstack.com (branch master)
 - **Staging**: https://portfolio-staging.freijstack.com (branch develop)
 
-**Documentation**: [portfolio/README.md](../saas/portfolio/README.md)
+**Documentation**: [saas/portfolio/README.md](../saas/portfolio/README.md)
 
 ---
+
 
 ### 2.2. Applications SaaS (`/saas`)
 
 **Description**: Exemple d'application conteneurisée démontrant architecture sécurisée et DevSecOps.
 
+
 #### SecureVault Manager: Gestionnaire de Secrets Chiffrés
 - **Stack**: Node.js 18 + Express + React 18 + PostgreSQL 15 + Traefik
-- **Features**: 
+- **Features** :
   - Chiffrement AES-256-GCM des secrets
   - Authentification JWT + RBAC (admin, user)
   - Audit logs détaillés
   - Intégration Traefik avec TLS/ACME
-- **Architecture**: Backend API + Frontend SPA + Database + Docker Compose
-- **Status**: ✅ Production-ready
+- **Architecture** : Backend API + Frontend SPA + Database + Docker Compose
+- **Status** : ✅ Production-ready
 
-**Documentation**:
+**Documentation** :
 - [Vue d'ensemble SaaS](../saas/README.md)
 - [SecureVault Manager](../saas/securevault/README.md)
 
 ---
 
+
 ### 2.3. Documentation (`/docs`)
 
-- **architecture.md** (ce fichier) - Architecture technique complète
-- **README.md** - Index de la documentation
+- **architecture.md** (ce fichier) – Architecture technique complète
+- **DEPLOYMENT.md** – Guide de déploiement
+- **PRO_DEPLOYMENT.md** – Déploiement avancé SecureVault
+- **AUTOMATION.md** – Automatisation CI/CD
+- **MONITORING.md** – Monitoring & observabilité
+- **README.md** – Index de la documentation
 
 ---
 
@@ -179,7 +207,8 @@ Internet (HTTPS)
 - `443` (HTTPS) → Traefik entry point
 - `22` (SSH) → Administration et déploiement CI/CD
 
-**Paths Système**:
+
+**Paths Système** :
 ```
 /srv/www/
 ├── portfolio/              # Production (master branch)
@@ -187,17 +216,22 @@ Internet (HTTPS)
 │   ├── style.css
 │   ├── script.js
 │   └── ...
-└── portfolio-staging/      # Staging (develop branch)
-    ├── index.html
-    ├── style.css
-    ├── script.js
-    └── ...
+├── portfolio-staging/      # Staging (develop branch)
+│   ├── index.html
+│   ├── style.css
+│   ├── script.js
+│   └── ...
+├── securevault/            # SecureVault (prod)
+│   ├── backend/
+│   ├── frontend/
+│   └── ...
+└── ...
 
 /home/deploy/
 └── backups/
-    ├── portfolio-2025-12-28-143022.tar.gz
-    ├── portfolio-2025-12-27-120015.tar.gz
-    └── ... (garde 7 derniers backups)
+  ├── portfolio-2025-12-28-143022.tar.gz
+  ├── portfolio-2025-12-27-120015.tar.gz
+  └── ... (garde 7 derniers backups)
 ```
 
 ### 3.4. Docker Compose Configuration
