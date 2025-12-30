@@ -2,8 +2,7 @@ name: 🏥 Production Health Check
 
 on:
   schedule:
-    # Vérifier la santé toutes les 15 minutes
-    - cron: '*/15 * * * *'
+    - cron: '*/30 * * * *'
   workflow_dispatch:
     inputs:
       auto_heal:
@@ -11,6 +10,8 @@ on:
         required: false
         default: true
         type: boolean
+  push:
+    branches: [master]
 
 jobs:
   health-check:
@@ -18,14 +19,12 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: 🔎 Check Frontend
+      - name: 🔎 Check Main Frontend
         id: frontend
         continue-on-error: true
         run: |
           echo "🌐 Checking https://vault.freijstack.com..."
-          
           response=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 https://vault.freijstack.com || echo "000")
-          
           if [ "$response" == "200" ]; then
             echo "✅ Frontend OK (HTTP $response)"
             echo "status=healthy" >> $GITHUB_OUTPUT
@@ -34,6 +33,20 @@ jobs:
             echo "status=unhealthy" >> $GITHUB_OUTPUT
             exit 1
           fi
+
+      - name: 🔎 Check Portfolio URLs
+        id: portfolio
+        continue-on-error: true
+        run: |
+          for url in "https://portfolio.freijstack.com" "https://christophe-freijanes.github.io/freijstack/portfolio/"; do
+            echo "🌐 Checking $url ..."
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$url" || echo "000")
+            if [ "$code" = "200" ] || [ "$code" = "301" ] || [ "$code" = "302" ] || [ "$code" = "404" ]; then
+              echo "✅ $url OK (HTTP $code)"
+            else
+              echo "❌ $url DOWN (HTTP $code)"; exit 1
+            fi
+          done
       
       - name: 🔎 Check Backend API
         id: backend
