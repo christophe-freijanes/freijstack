@@ -39,13 +39,10 @@ function App() {
 
   return (
     <Router>
-      <div className="App" style={{position: 'relative'}}>
-        {/* DEMO Background repeated */}
-        <div className="demo-bg"></div>
-        <div className="demo-bg-text">
-          {Array.from({length: 60}).map((_, i) => (
-            <span key={i} style={{margin: '1vw', transform: `rotate(${(i%2===0)?-20:20}deg)`}}>DEMO</span>
-          ))}
+      <div className="App">
+        {/* DEMO Watermark */}
+        <div className="demo-watermark">
+          <span className="demo-watermark-text">DEMO</span>
         </div>
         <Routes>
           <Route 

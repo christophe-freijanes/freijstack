@@ -12,6 +12,15 @@ function Register({ onRegister }) {
     password: '',
     confirmPassword: ''
   });
+  // Générateur de mot de passe
+  const generatePassword = () => {
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
+    let pass = "";
+    for (let i = 0; i < 16; i++) {
+      pass += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    setFormData(f => ({ ...f, password: pass, confirmPassword: pass }));
+  };
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -121,16 +130,22 @@ function Register({ onRegister }) {
               <Lock size={20} />
               Mot de passe
             </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              minLength="8"
-              placeholder="••••••••"
-            />
+            <div style={{display: 'flex', gap: '0.5rem'}}>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                minLength="8"
+                placeholder="••••••••"
+                style={{flex: 1}}
+              />
+              <button type="button" className="btn btn-secondary" onClick={generatePassword} style={{whiteSpace: 'nowrap'}}>
+                Générer
+              </button>
+            </div>
           </div>
 
           <div className="form-group">
