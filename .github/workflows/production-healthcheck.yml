@@ -44,7 +44,7 @@ jobs:
 
           URLS=(
             "https://portfolio.freijstack.com"
-            "https://christophe-freijanes.github.io/freijstack/portfolio/"
+            "https://christophe-freijanes.github.io/freijstack/"
             "https://vault.freijstack.com"
           )
 
