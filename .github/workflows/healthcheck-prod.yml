@@ -9,9 +9,6 @@ on:
         default: true
         type: boolean
 
-  push:
-    branches:  [master]
-
   schedule:
     - cron: "*/30 * * * *"
 
