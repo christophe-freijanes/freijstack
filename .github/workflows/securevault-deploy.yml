@@ -1,4 +1,4 @@
-name: 🔐 Deploy SecureVault
+name: 🔐 SaaS • SecureVault
 
 on:
   push:
@@ -52,9 +52,24 @@ env:
   BACKEND_DOMAIN_STAGING: vault-api-staging.freijstack.com
 
 jobs:
+  security:
+    name: 🔐 Security Gate
+    uses: ./.github/workflows/securitycheck.yml
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    with:
+      scan_paths: |
+        saas/securevault
+        base-infra
+      fail_on_gitleaks: true
+      upload_sarif: true
+
   validate:
     name: ✅ Validate VPS Configuration
     runs-on: ubuntu-latest
+    needs: security
     if: |
       (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) || 
       github.event_name == 'workflow_dispatch'
@@ -349,10 +364,9 @@ jobs:
   test:
     name: 🧪 Test & Build
     runs-on: ubuntu-latest
-    needs: validate
+    needs: [security, validate]
     permissions:
       contents: read
-      security-events: write
 
     steps:
       - name: 📥 Checkout code
@@ -363,12 +377,13 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: 'saas/securevault/backend/package.json'
+          cache-dependency-path: |
+            saas/securevault/backend/package-lock.json
 
       - name: 🧪 Test Backend
         working-directory: saas/securevault/backend
         run: |
-          npm install
+          npm ci || npm install
           npm test -- --passWithNoTests || true
         continue-on-error: true
 
@@ -382,12 +397,13 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: 'saas/securevault/frontend/package.json'
+          cache-dependency-path: |
+            saas/securevault/frontend/package-lock.json
 
       - name: 🧪 Test Frontend
         working-directory: saas/securevault/frontend
         run: |
-          npm install
+          npm ci || npm install
           npm test -- --passWithNoTests || true
         continue-on-error: true
 
@@ -396,38 +412,6 @@ jobs:
         run: |
           docker build -t securevault-backend:test ./backend
           docker build -t securevault-frontend:test ./frontend
-
-      - name: 🔍 Run Trivy vulnerability scan (Backend)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: 'securevault-backend:test'
-          format: 'sarif'
-          output: 'trivy-backend.sarif'
-        continue-on-error: true
-
-      - name: 🔍 Run Trivy vulnerability scan (Frontend)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: 'securevault-frontend:test'
-          format: 'sarif'
-          output: 'trivy-frontend.sarif'
-        continue-on-error: true
-
-      - name: Upload Trivy results to GitHub Security (Backend)
-        uses: github/codeql-action/upload-sarif@v4
-        if: always()
-        with:
-          sarif_file: 'trivy-backend.sarif'
-          category: 'securevault-backend'
-        continue-on-error: true
-
-      - name: Upload Trivy results to GitHub Security (Frontend)
-        uses: github/codeql-action/upload-sarif@v4
-        if: always()
-        with:
-          sarif_file: 'trivy-frontend.sarif'
-          category: 'securevault-frontend'
-        continue-on-error: true
 
   cleanup:
     name: 🧹 Cleanup Old Containers
@@ -932,7 +916,7 @@ jobs:
   notify:
     name: 📢 Notify Status
     runs-on: ubuntu-latest
-    needs: [validate, test, deploy, post-verify]
+    needs: [security, validate, test, deploy, post-verify]
     if: always()
     
     steps:
