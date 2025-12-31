@@ -392,7 +392,7 @@ jobs:
       - name: 🔧 Set up Node.js (Frontend)
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: |
             saas/securevault/frontend/package-lock.json
