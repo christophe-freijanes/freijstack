@@ -375,10 +375,7 @@ jobs:
       - name: 🔧 Set up Node.js (Backend)
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: |
-            saas/securevault/backend/package-lock.json
+          node-version: '22'
 
       - name: 🧪 Test Backend
         working-directory: saas/securevault/backend
