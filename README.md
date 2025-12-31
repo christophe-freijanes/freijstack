@@ -10,7 +10,7 @@
 [![SecureVault](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/securevault-deploy.yml?branch=master&label=SecureVault&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/securevault-deploy.yml)
 [![Portfolio](https://img.shields.io/website?down_color=red&down_message=offline&label=Portfolio&style=flat-square&up_color=brightgreen&up_message=online&url=https%3A%2F%2Fportfolio.freijstack.com)](https://portfolio.freijstack.com)
 [![Last Commit](https://img.shields.io/github/last-commit/christophe-freijanes/freijstack?label=Mise%20%C3%A0%20jour&style=flat-square&color=blue)](https://github.com/christophe-freijanes/freijstack/commits)
-[![Security Score](https://img.shields.io/endpoint?cacheSeconds=60&url=https%3A%2F%2Fchristophe-freijanes.github.io%2Ffreijstack%2Fsecurity-score.json)](https://christophe-freijanes.github.io/freijstack/)
+[![Security Score](https://img.shields.io/endpoint?style=flat-square&cacheSeconds=60&url=https%3A%2F%2Fchristophe-freijanes.github.io%2Ffreijstack%2Fsecurity-score.json)](https://christophe-freijanes.github.io/freijstack/)
 [![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square&logo=readme)](LICENSE)
 ---
 
