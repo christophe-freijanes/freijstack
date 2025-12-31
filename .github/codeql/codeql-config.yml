@@ -1,0 +1,17 @@
+name: "CodeQL config • freijstack"
+
+paths:
+  - saas
+  - base-infra
+
+paths-ignore:
+  - portfolio
+  - "**/*.min.js"
+  - "**/dist"
+  - "**/build"
+  - "**/.next"
+  - "**/coverage"
+  - "**/node_modules"
+  - "**/.terraform"
+  - "**/.serverless"
+  - "**/.cache"
