@@ -4,10 +4,10 @@ on:
   workflow_call:
     inputs:
       scan_paths:
-        description: "Paths to scan (newline-separated). Example: 'saas/securevault\\nbase-infra'"
+        description: "Paths to scan (newline-separated). Example: 'saas/securevault\nbase-infra'"
         required: false
         type: string
-        default: "saas/securevault\\nbase-infra"
+        default: "saas/securevault\nbase-infra"
       fail_on_gitleaks:
         description: "Fail the job if gitleaks finds leaks"
         required: false
@@ -18,11 +18,11 @@ on:
         required: false
         type: boolean
         default: true
-      trivy_fail_severity:
-        description: "Optional: fail Trivy if vulnerabilities >= this severity (UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL)"
+      publish_score_artifact:
+        description: "Publish security-score.json as an artifact (recommended)"
         required: false
-        type: string
-        default: ""
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -34,6 +34,12 @@ jobs:
     name: 🔭 Security Inspection
     runs-on: ubuntu-latest
 
+    outputs:
+      gitleaks_total: ${{ steps.gitleaks.outputs.total }}
+      security_score: ${{ steps.score.outputs.score }}
+      security_color: ${{ steps.score.outputs.color }}
+      security_message: ${{ steps.score.outputs.message }}
+
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
@@ -41,14 +47,8 @@ jobs:
           fetch-depth: 0
 
       - name: 🧾 Resolve scan paths
-        id: paths
         run: |
           set -euo pipefail
-          # Inputs can be "." or newline-separated paths
-          echo "SCAN_PATHS<<EOF" >> "$GITHUB_OUTPUT"
-          echo "${{ inputs.scan_paths }}" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
-
           echo "## 🔐 Security Check" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Scan paths:**" >> "$GITHUB_STEP_SUMMARY"
@@ -65,7 +65,6 @@ jobs:
           scan-ref: "."
           format: "sarif"
           output: "trivy-results.sarif"
-          # ignore-unfixed: true   # optionnel
         continue-on-error: true
 
       - name: 📤 Upload Trivy SARIF (optional)
@@ -75,16 +74,6 @@ jobs:
           sarif_file: "trivy-results.sarif"
           category: "trivy-fs"
         continue-on-error: true
-
-      # Optional strict gate on Trivy if you want it
-      - name: 🚦 Trivy gate (optional severity)
-        if: ${{ inputs.trivy_fail_severity != '' }}
-        run: |
-          set -euo pipefail
-          echo "⚠️ Trivy strict gating is requested, but SARIF parsing is non-trivial here."
-          echo "✅ Recommendation: use Trivy table/json output for strict gating, keep SARIF for upload."
-          echo "➡️ For now, this step is a placeholder."
-          exit 0
 
       # -------------------------
       # Gitleaks (CLI) with report
@@ -103,19 +92,16 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Build --source args from scan_paths (newline-separated)
           SOURCES=()
           while IFS= read -r p; do
             [ -z "$p" ] && continue
             SOURCES+=("--source" "$p")
           done <<< "${{ inputs.scan_paths }}"
 
-          # Default behavior if empty
           if [ "${#SOURCES[@]}" -eq 0 ]; then
             SOURCES=(--source ".")
           fi
 
-          # Run (never fail here; we gate after counting)
           gitleaks detect \
             "${SOURCES[@]}" \
             --config .gitleaks.toml \
@@ -151,10 +137,59 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
+      # -------------------------
+      # Security score JSON (badge endpoint)
+      # -------------------------
+      - name: 🧮 Compute Security Score (from gitleaks total)
+        id: score
+        run: |
+          set -euo pipefail
+          leaks="${{ steps.gitleaks.outputs.total }}"
+          [ -z "$leaks" ] && leaks="0"
+
+          if [ "$leaks" -eq 0 ]; then
+            score="10/10"; color="brightgreen"
+          elif [ "$leaks" -le 2 ]; then
+            score="8/10"; color="yellow"
+          elif [ "$leaks" -le 5 ]; then
+            score="6/10"; color="orange"
+          else
+            score="4/10"; color="red"
+          fi
+
+          message="Security ${score} • leaks=${leaks}"
+
+          echo "score=$score" >> "$GITHUB_OUTPUT"
+          echo "color=$color" >> "$GITHUB_OUTPUT"
+          echo "message=$message" >> "$GITHUB_OUTPUT"
+
+          cat > security-score.json <<EOF
+          {
+            "schemaVersion": 1,
+            "label": "Security Score",
+            "message": "${score} (leaks:${leaks})",
+            "color": "${color}"
+          }
+          EOF
+
+          echo "### 📊 Security Score" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Security Score:** ${score}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Leaks:** ${leaks}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Badge color:** ${color}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 📎 Upload Security Score JSON (artifact)
+        if: ${{ inputs.publish_score_artifact }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-score
+          path: security-score.json
+          retention-days: 14
+          if-no-files-found: error
+
       - name: 🛑 Block if leaks found
         if: ${{ inputs.fail_on_gitleaks && steps.gitleaks.outputs.total != '0' }}
         run: |
           set -euo pipefail
           echo "❌ Gitleaks found ${{ steps.gitleaks.outputs.total }} leaks. Blocking."
           exit 1
-        

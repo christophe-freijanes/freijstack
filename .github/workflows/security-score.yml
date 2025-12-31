@@ -1,0 +1,56 @@
+name: 📤 Pages • Inject Security Score
+
+on:
+  workflow_run:
+    workflows: ["📄 Portfolio"]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: 🧩 Merge security-score.json into Pages site
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: 🧾 Download Pages artifact from Portfolio run
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          name: github-pages
+          path: site
+
+      - name: 🧾 Download security score artifact (latest from same commit)
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          name: security-score
+          path: score
+        continue-on-error: true
+
+      - name: 🔎 Inject security-score.json at root
+        run: |
+          set -euo pipefail
+          if [ -f score/security-score.json ]; then
+            cp score/security-score.json site/security-score.json
+            echo "✅ Injected security-score.json into Pages root"
+          else
+            echo "⚠️ No security-score.json artifact found for this run; skipping injection"
+          fi
+
+      - name: 📦 Upload merged Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: 🚀 Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
