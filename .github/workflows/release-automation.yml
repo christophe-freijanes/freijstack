@@ -86,7 +86,7 @@ jobs:
       - name: 🚦 Security gate — fetch gitleaks report from Health Check run
         id: gate
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           RUN_ID: ${{ github.event.workflow_run.id }}
           REPO: ${{ github.repository }}
         run: |
@@ -208,7 +208,7 @@ jobs:
 
       - name: 🏷️ Create tag & GitHub Release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
           set -euo pipefail
           npx semantic-release
