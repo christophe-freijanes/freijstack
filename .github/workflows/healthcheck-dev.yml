@@ -1,4 +1,4 @@
-name: 🧪 Development Health Check
+name: 🧪 Health Check Development 
 
 on:
   workflow_dispatch:

@@ -1,4 +1,4 @@
-name: 🏥 Production Health Check
+name: 🏥 Health Check Production
 
 on:
   workflow_dispatch:
