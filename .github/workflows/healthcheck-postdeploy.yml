@@ -1,4 +1,4 @@
-name: 🩺 Post-Deploy Health Check
+name: 🩺 Health Check • Post-Deploy 
 
 on:
   workflow_run:
