@@ -1,8 +1,8 @@
-name: 🐳 Deploy Harbor Registry
+name: 🐳 SaaS • Harbor Registry
 
 on:
   push:
-    branches: [develop]  # Auto-deploy staging only
+    branches: [develop]
     paths:
       - 'saas/harbor/**'
       - '.github/workflows/harbor-deploy.yml'

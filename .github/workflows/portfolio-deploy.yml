@@ -28,11 +28,18 @@ env:
 jobs:
   # Job 1: Security Scanning
   security:
-    name: 🔐 Security Gate
+    name: 🕵️ Security • Inspector
     uses: ./.github/workflows/securitycheck.yml
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
     with:
+      scan_paths: |
+        saas/portfolio
+        base-infra
       fail_on_gitleaks: true
-      trivy_severity: "CRITICAL,HIGH"
+      upload_sarif: true
 
   # Job 2: Validation et Linting
   validate:
