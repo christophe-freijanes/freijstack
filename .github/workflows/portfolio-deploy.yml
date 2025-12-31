@@ -26,18 +26,19 @@ env:
   IS_STAGING: ${{ github.ref == 'refs/heads/develop' }}
 
 jobs:
-
   # Job 1: Security Scanning
   security:
     name: 🔐 Security Gate
     uses: ./.github/workflows/securitycheck.yml
     with:
       fail_on_gitleaks: true
+      trivy_severity: "CRITICAL,HIGH"
 
   # Job 2: Validation et Linting
   validate:
     name: ✅ Validate & Lint
     runs-on: ubuntu-latest
+    needs: security
     
     steps:
       - name: Checkout code
@@ -70,7 +71,7 @@ jobs:
   build:
     name: 🏗️ Build & Optimize
     runs-on: ubuntu-latest
-    needs: validate
+    needs: [security, validate]
     
     steps:
       - name: Checkout code

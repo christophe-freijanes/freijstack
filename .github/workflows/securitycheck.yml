@@ -1,4 +1,4 @@
-name: 🕵️ Security • Inspector
+name: 🔐 securitycheck
 
 on:
   workflow_call:
@@ -100,7 +100,7 @@ jobs:
           exit 1
 
   trivy:
-    name: 🛡️ Trivy (IaC/FS)
+    name: 🛡️ Trivy (FS/IaC)
     runs-on: ubuntu-latest
 
     steps:
@@ -124,7 +124,11 @@ jobs:
           sarif_file: "trivy-results.sarif"
 
   codeql:
-    name: 🧠 CodeQL
+    name: 🧠 CodeQL (master + schedule only)
+    if: >
+      github.event_name == 'schedule' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/master')
+
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -139,6 +143,7 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
+          config-file: ./.github/codeql/codeql-config.yml
 
       - name: 🔎 Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4

@@ -5,13 +5,27 @@ paths:
   - base-infra
 
 paths-ignore:
-  - portfolio
+  # portfolio specific
+  - saas/portfolio/**
+  - portfolio/**
+
+  # artefacts build / bundlers
   - "**/*.min.js"
-  - "**/dist"
-  - "**/build"
-  - "**/.next"
-  - "**/coverage"
-  - "**/node_modules"
-  - "**/.terraform"
-  - "**/.serverless"
-  - "**/.cache"
+  - "**/*.min.css"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/.next/**"
+  - "**/coverage/**"
+
+  # dépendances / caches
+  - "**/node_modules/**"
+  - "**/.cache/**"
+
+  # infra / tooling généré
+  - "**/.terraform/**"
+  - "**/.serverless/**"
+
+queries:
+  - uses: security-extended
+  - uses: security-and-quality
+
