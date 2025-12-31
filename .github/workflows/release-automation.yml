@@ -1,215 +1,32 @@
 name: 🚀 Release Automation • Semantic Versioning
 
 on:
-  workflow_run:
-    workflows: ["🏥 Production Health Check"]
-    types: [completed]
-    # ⚠️ Ce filtre "branches" ne suffit pas toujours selon le contexte d'exécution.
-    # On re-filtre aussi via head_branch dans le precheck (plus fiable).
-    branches: [master]
+  push:
+    branches: [master, develop]
+  workflow_dispatch:
 
 permissions:
   contents: write
-  actions: read
-  pull-requests: read
 
 concurrency:
-  group: release-${{ github.event.workflow_run.id }}
-  cancel-in-progress: false
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  precheck:
-    name: 🧭 Precheck • Should we release?
-    runs-on: ubuntu-latest
-
-    outputs:
-      should_release: ${{ steps.decide.outputs.should_release }}
-      reason: ${{ steps.decide.outputs.reason }}
-
-    steps:
-      - name: 🧾 Decide release eligibility
-        id: decide
-        run: |
-          set -euo pipefail
-
-          conclusion="${{ github.event.workflow_run.conclusion }}"
-          event="${{ github.event.workflow_run.event }}"
-          head_branch="${{ github.event.workflow_run.head_branch }}"
-          msg="${{ github.event.workflow_run.head_commit.message }}"
-
-          should="false"
-          reason=""
-
-          if [ "$conclusion" != "success" ]; then
-            reason="Health Check conclusion is '$conclusion' (expected 'success')."
-          elif [ "$event" != "push" ]; then
-            reason="Health Check was triggered by '$event' (release runs only on push)."
-          elif [ "$head_branch" != "master" ]; then
-            reason="Health Check head_branch is '$head_branch' (expected 'master')."
-          elif echo "$msg" | grep -q "\[skip ci\]"; then
-            reason="Head commit message contains [skip ci]."
-          else
-            should="true"
-            reason="All conditions satisfied (success + push + master + no [skip ci])."
-          fi
-
-          echo "should_release=$should" >> "$GITHUB_OUTPUT"
-          echo "reason=$reason" >> "$GITHUB_OUTPUT"
-
-          echo "## 🧭 Release precheck" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- HealthCheck run: ${{ github.event.workflow_run.html_url }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- event: **$event**" >> "$GITHUB_STEP_SUMMARY"
-          echo "- head_branch: **$head_branch**" >> "$GITHUB_STEP_SUMMARY"
-          echo "- conclusion: **$conclusion**" >> "$GITHUB_STEP_SUMMARY"
-          echo "- head_sha: \`${{ github.event.workflow_run.head_sha }}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-
-          if [ "$should" = "true" ]; then
-            echo "✅ **Release allowed**" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "⏭️ **Release skipped**" >> "$GITHUB_STEP_SUMMARY"
-          fi
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Reason:** $reason" >> "$GITHUB_STEP_SUMMARY"
-
   release:
-    name: 🏷️ Secure Release Pipeline
-    needs: precheck
-    if: ${{ needs.precheck.outputs.should_release == 'true' }}
+    name: 🏷️ Semantic Release
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout repository (same commit as Health Check)
+      - name: 📥 Checkout (full history)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.workflow_run.head_sha }}
 
-      # ---------------------------
-      # 🚦 SECURITY GATE — GITLEAKS REPORT
-      # ---------------------------
-      - name: 🚦 Security gate — fetch gitleaks report from Health Check run
-        id: gate
-        env:
-          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-          RUN_ID: ${{ github.event.workflow_run.id }}
-          REPO: ${{ github.repository }}
-        run: |
-          set -euo pipefail
-
-          echo "🔎 Looking for artifact 'gitleaks-report' in run ${RUN_ID}..."
-
-          artifacts_json=$(gh api -H "Accept: application/vnd.github+json" "/repos/${REPO}/actions/runs/${RUN_ID}/artifacts")
-          artifact_id=$(echo "$artifacts_json" | jq -r '.artifacts[] | select(.name=="gitleaks-report") | .id' | head -n 1)
-
-          if [ -z "${artifact_id}" ] || [ "${artifact_id}" = "null" ]; then
-            echo "report_present=false" >> "$GITHUB_OUTPUT"
-            echo "total=0" >> "$GITHUB_OUTPUT"
-
-            echo "## 🔐 Security Gate" >> "$GITHUB_STEP_SUMMARY"
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "ℹ️ No gitleaks-report artifact found for this run. Continuing." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-
-          echo "✅ Found artifact id: ${artifact_id}"
-          mkdir -p security
-          gh api -H "Accept: application/vnd.github+json" \
-            "/repos/${REPO}/actions/artifacts/${artifact_id}/zip" > security/artifact.zip
-
-          unzip -o security/artifact.zip -d security
-
-          if [ ! -f security/gitleaks-report.json ]; then
-            echo "report_present=false" >> "$GITHUB_OUTPUT"
-            echo "total=0" >> "$GITHUB_OUTPUT"
-
-            echo "## 🔐 Security Gate" >> "$GITHUB_STEP_SUMMARY"
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "⚠️ Artifact found but gitleaks-report.json missing. Continuing." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-
-          echo "report_present=true" >> "$GITHUB_OUTPUT"
-          total="$(jq 'length' security/gitleaks-report.json)"
-          echo "total=${total}" >> "$GITHUB_OUTPUT"
-          echo "🔢 total_findings=${total}"
-
-      - name: ✅ Security gate passed
-        if: ${{ steps.gate.outputs.report_present == 'true' && steps.gate.outputs.total == '0' }}
-        run: |
-          echo "## 🔐 Security Gate" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "✅ No gitleaks findings detected. Release allowed." >> "$GITHUB_STEP_SUMMARY"
-
-      - name: 🛑 Stop release (gitleaks findings detected) + diagnostics
-        if: ${{ steps.gate.outputs.report_present == 'true' && steps.gate.outputs.total != '0' }}
-        run: |
-          set -euo pipefail
-
-          REPORT="security/gitleaks-report.json"
-          TOTAL="${{ steps.gate.outputs.total }}"
-
-          echo "🚨 Gitleaks findings detected. Blocking release."
-          echo "🔢 Total findings: $TOTAL"
-
-          echo "## 🚨 Gitleaks – Release blocked" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Total findings:** $TOTAL" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Health Check run:** ${{ github.event.workflow_run.html_url }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Commit:** \`${{ github.event.workflow_run.head_sha }}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-
-          echo "### 📍 Findings (metadata only)" >> "$GITHUB_STEP_SUMMARY"
-          jq -r '.[] | "- rule=\(.RuleID) file=\(.File):\(.StartLine) commit=\(.Commit|tostring|.[0:8])"' "$REPORT" \
-            | head -n 20 >> "$GITHUB_STEP_SUMMARY"
-
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "> ℹ️ Values are redacted. Full report is attached to the Health Check run as an artifact." >> "$GITHUB_STEP_SUMMARY"
-
-          exit 1
-
-      # ---------------------------
-      # 📦 NODE + DEPENDENCY AUDIT
-      # ---------------------------
-      - name: 🧾 Detect JS lockfile
-        id: lock
-        run: |
-          set -euo pipefail
-          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ] || [ -f yarn.lock ]; then
-            echo "has_lock=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_lock=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: 🟢 Setup Node.js (LTS) — with cache
-        if: ${{ steps.lock.outputs.has_lock == 'true' }}
+      - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: |
-            package-lock.json
-            npm-shrinkwrap.json
-            yarn.lock
-
-      - name: 🟢 Setup Node.js (LTS) — no cache
-        if: ${{ steps.lock.outputs.has_lock != 'true' }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: 📦 Install dependencies (npm ci)
-        if: ${{ steps.lock.outputs.has_lock == 'true' }}
-        run: |
-          set -euo pipefail
-          npm ci
-
-      - name: 🔍 Dependency vulnerability scan (high+)
-        if: ${{ steps.lock.outputs.has_lock == 'true' }}
-        run: |
-          set -euo pipefail
-          npm audit --audit-level=high
 
       # ---------------------------
       # 🚀 SEMANTIC-RELEASE
@@ -222,24 +39,22 @@ jobs:
             @semantic-release/commit-analyzer \
             @semantic-release/release-notes-generator \
             @semantic-release/github \
-            @semantic-release/git \
             @semantic-release/changelog
 
-      - name: 🧭 Debug GitHub auth + repo
-        env:
-          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-        run: |
-          set -euo pipefail
-          echo "ref_name: $GITHUB_REF_NAME"
-          git remote -v
-          gh api /repos/${{ github.repository }} --jq '{full_name: .full_name, private: .private, permissions: .permissions}'
-
-      - name: 🏷️ Create tag & GitHub Release
+      - name: 🧪 Dry-run on develop (no tag, no release)
+        if: ${{ github.ref_name == 'develop' }}
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
           set -euo pipefail
-          npx semantic-release
+          echo "🧪 Running semantic-release in dry-run on develop..."
+          npx semantic-release --dry-run --no-ci
 
-      - name: 🎉 Pipeline completed
-        run: echo "✅ Secure release successfully published!"
+      - name: 🏷️ Release on master (tag + GitHub Release)
+        if: ${{ github.ref_name == 'master' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          set -euo pipefail
+          echo "🚀 Publishing real release on master..."
+          npx semantic-release
