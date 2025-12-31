@@ -132,7 +132,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
   # Job 4: Deploy to GitHub Pages
-  deploy-pages-staging:
+  deploy-pages:
     name: 📄 Deploy to GitHub Pages
     runs-on: ubuntu-latest
     needs: [validate, build, security]
@@ -144,7 +144,7 @@ jobs:
       id-token: write
     
     environment:
-      name: github-pages-staging
+      name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     
     steps:
