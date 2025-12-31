@@ -97,36 +97,65 @@ jobs:
           echo "🧰 Tools versions"
           curl --version | head -n 1
 
-      - name: 🌐 Check Public URLs (Portfolio + SecureVault)
+      - name: 🌐 Check Public URLs (Portfolio + SecureVault Frontend)
         id: public-urls
         run: |
           set -euo pipefail
-
+      
+          echo "## 🌐 Public URLs Health Check" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+      
+          MAX_RETRIES=3
+          SLEEP_BETWEEN=5
+      
+          # Format: "url|allowed_codes|label"
           URLS=(
-            "https://portfolio.freijstack.com"
-            "https://christophe-freijanes.github.io/freijstack/"
-            "https://vault.freijstack.com"
+            "https://portfolio.freijstack.com|200,301,302|Portfolio"
+            "https://christophe-freijanes.github.io/freijstack/|200,301,302|GitHub Pages"
+            "https://vault.freijstack.com/login|200,301,302|SecureVault Frontend"
           )
-
-          echo "## 🌐 Public URLs" >> "$GITHUB_STEP_SUMMARY"
-
-          for url in "${URLS[@]}"; do
-            echo "🔎 Checking $url ..."
-
-            # -L pour suivre redirects (plus réaliste en prod)
-            code=$(
-              curl -s -L -o /dev/null -w "%{http_code}" \
-                --max-time 15 \
-                --retry 2 --retry-delay 2 --retry-all-errors \
-                "$url" || echo "000"
-            )
-
-            if [ "$code" = "200" ] || [ "$code" = "301" ] || [ "$code" = "302" ]; then
-              echo "✅ $url OK (HTTP $code)"
-              echo "- ✅ $url (HTTP $code)" >> "$GITHUB_STEP_SUMMARY"
-            else
-              echo "❌ $url DOWN (HTTP $code)"
-              echo "- ❌ $url (HTTP $code)" >> "$GITHUB_STEP_SUMMARY"
+      
+          for entry in "${URLS[@]}"; do
+            url="${entry%%|*}"
+            rest="${entry#*|}"
+            allowed="${rest%%|*}"
+            label="${rest##*|}"
+      
+            echo ""
+            echo "🔎 Checking $label → $url"
+            echo "- **$label** ($url)" >> "$GITHUB_STEP_SUMMARY"
+      
+            attempt=1
+            success=false
+      
+            while [ "$attempt" -le "$MAX_RETRIES" ]; do
+              echo "  ⏳ Attempt $attempt/$MAX_RETRIES..."
+      
+              code=$(
+                curl -s -L -o /dev/null -w "%{http_code}" \
+                  --max-time 15 \
+                  "$url" || echo "000"
+              )
+      
+              if echo ",$allowed," | grep -q ",$code,"; then
+                echo "  ✅ OK (HTTP $code)"
+                echo "  - ✅ HTTP $code (attempt $attempt)" >> "$GITHUB_STEP_SUMMARY"
+                success=true
+                break
+              else
+                echo "  ⚠️  HTTP $code (attempt $attempt)"
+                if [ "$attempt" -lt "$MAX_RETRIES" ]; then
+                  echo "  ⏱️  Waiting ${SLEEP_BETWEEN}s before retry..."
+                  sleep "$SLEEP_BETWEEN"
+                fi
+              fi
+      
+              attempt=$((attempt + 1))
+            done
+      
+            if [ "$success" != "true" ]; then
+              echo "❌ $label is DOWN after $MAX_RETRIES attempts"
+              echo "  - ❌ Failed after $MAX_RETRIES attempts" >> "$GITHUB_STEP_SUMMARY"
               exit 1
             fi
           done
