@@ -52,6 +52,7 @@ jobs:
   backup-production:
     needs: security
     name: 💾 Backup Production to Cloud
+    needs: security
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'production')
 
@@ -175,6 +176,7 @@ jobs:
   backup-staging:
     needs: security
     name: 💾 Backup Staging to Cloud
+    needs: security
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && inputs.environment == 'staging'
 
