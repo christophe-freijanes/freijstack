@@ -1,4 +1,4 @@
-name: 🔍 CodeQL • Secure Monorepo Scan
+name: 🔍 CodeQL • Secure Scan
 
 on:
   push:

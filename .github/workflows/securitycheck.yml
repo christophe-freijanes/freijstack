@@ -1,0 +1,146 @@
+name: 🕵️ Security • Inspector
+
+on:
+  workflow_call:
+    inputs:
+      fail_on_gitleaks:
+        description: "Block if gitleaks findings > 0"
+        required: false
+        type: boolean
+        default: true
+      gitleaks_version:
+        description: "Gitleaks version"
+        required: false
+        type: string
+        default: "8.21.2"
+      trivy_severity:
+        description: "Trivy severities to report"
+        required: false
+        type: string
+        default: "CRITICAL,HIGH"
+
+  push:
+    branches: [develop, master]
+  pull_request:
+    branches: [develop, master]
+  schedule:
+    - cron: "33 2 * * 4"
+
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+
+concurrency:
+  group: securitycheck-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gitleaks:
+    name: 🔐 Gitleaks (secrets)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔎 Scan secrets (Gitleaks CLI)
+        id: scan
+        run: |
+          set -euo pipefail
+
+          echo "⬇️ Installing Gitleaks CLI..."
+          GITLEAKS_VERSION="${{ inputs.gitleaks_version }}"
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            | tar -xz gitleaks
+          sudo mv gitleaks /usr/local/bin/gitleaks
+
+          echo "🔎 Running Gitleaks (JSON report, redacted)..."
+          gitleaks detect \
+            --source . \
+            --config .gitleaks.toml \
+            --redact \
+            --report-format json \
+            --report-path gitleaks-report.json \
+            --verbose || true
+
+          test -f gitleaks-report.json || echo "[]" > gitleaks-report.json
+
+          total="$(jq 'length' gitleaks-report.json)"
+          echo "total=${total}" >> "$GITHUB_OUTPUT"
+
+          echo "## 🔐 Gitleaks" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Total findings:** ${total}" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$total" -gt 0 ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "### 📍 Findings (metadata only, top 20)" >> "$GITHUB_STEP_SUMMARY"
+            jq -r '.[] | "- rule=\(.RuleID) file=\(.File):\(.StartLine)"' gitleaks-report.json \
+              | head -n 20 >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "✅ No findings." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: 📎 Upload gitleaks report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-report
+          path: gitleaks-report.json
+          retention-days: 7
+
+      - name: 🚦 Block on findings
+        if: ${{ inputs.fail_on_gitleaks && steps.scan.outputs.total != '0' }}
+        run: |
+          echo "🚨 Blocking: gitleaks findings detected."
+          exit 1
+
+  trivy:
+    name: 🛡️ Trivy (IaC/FS)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🛡️ Trivy scan (SARIF)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "${{ inputs.trivy_severity }}"
+          ignore-unfixed: true
+
+      - name: 📤 Upload Trivy SARIF
+        uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
+        with:
+          sarif_file: "trivy-results.sarif"
+
+  codeql:
+    name: 🧠 CodeQL
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [actions, javascript-typescript]
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🧠 Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: 🔎 Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{ matrix.language }}"
