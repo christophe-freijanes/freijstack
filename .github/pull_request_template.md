@@ -1,40 +1,59 @@
-# Pull Request
+## ✅ Status (tout doit être vert avant merge)
+
+[![Infrastructure](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/infrastructure-deploy.yml?branch=master&label=Infrastructure&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/infrastructure-deploy.yml)
+[![Prod Health](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/healthcheck-prod.yml?branch=develop&label=Prod%20Health&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/healthcheck-prod.yml)
+[![Dev Health](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/healthcheck-dev.yml?branch=develop&label=Dev%20Health&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/healthcheck-dev.yml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/codeql.yml?branch=master&label=CodeQL&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/codeql.yml)
+[![Security Inspector](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/securitycheck.yml?branch=master&label=Security%20Inspector&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/securitycheck.yml)
+[![Security Score](https://img.shields.io/endpoint?cacheSeconds=60&url=https%3A%2F%2Fchristophe-freijanes.github.io%2Ffreijstack%2Fsecurity-score.json&style=flat-square)](https://christophe-freijanes.github.io/freijstack/)
+
+---
 
 ## 📝 Description
-<!-- Décrivez brièvement les changements apportés -->
+<!-- Décris brièvement le changement et le contexte -->
+Ex :
+- Pourquoi ce changement ?
+- Quel problème est résolu ?
+- Impact attendu ?
 
-## 🎯 Type de changement
+---
+
+## 🎯 Type de changement (1–2 max)
 - [ ] 🐛 Bug fix
 - [ ] ✨ Nouvelle fonctionnalité
-- [ ] 🔧 Amélioration technique
-- [ ] 📚 Documentation
+- [ ] 🔧 Amélioration technique / refactor
 - [ ] 🔐 Sécurité
-- [ ] 🎨 UI/UX
-- [ ] ⚙️ Infrastructure/DevOps
+- [ ] ⚙️ Infrastructure / DevOps
+- [ ] 📚 Documentation
+- [ ] 🎨 UI / UX
 
 ---
 
-## ✅ Checklist Critique (10 contrôles essentiels)
+## ✅ Checklist essentielle (rapide)
 
-- [ ] ✅ **Code review** effectuée et approuvée
-- [ ] 🔀 **Pas de conflits** de merge
-- [ ] 🚦 **CI/CD pipeline** réussit (GitHub Actions OK)
-- [ ] 🔐 **Gitleaks scan** OK - aucun secret exposé
-- [ ] 🛡️ **CodeQL analysis** OK - aucune vulnérabilité critique
-- [ ] 📚 **Documentation** mise à jour (README/Architecture si nécessaire)
-- [ ] 📱 **Responsive** testé (mobile/tablet si changement frontend)
-- [ ] 🐳 **Docker/Traefik** config valide (si changement infra)
-- [ ] ✅ **Tests en staging** validés avant merge
-- [ ] 🔄 **Rollback plan** prêt en cas de problème
+- [ ] 🚦 **CI GitHub Actions** verte
+- [ ] 🔐 **Security Inspector** OK (pas de leaks)
+- [ ] 🧠 **CodeQL** sans vulnérabilité critique
+- [ ] 🧪 **Tests / staging** validés (si applicable)
+- [ ] 📚 **Docs mises à jour** si nécessaire
+- [ ] 🔄 **Rollback possible** (au moins identifié)
 
 ---
 
-## 📸 Screenshots (si applicable)
-<!-- Ajoutez des captures d'écran si pertinent -->
+## 📸 Screenshots / Preuve (si UI ou frontend)
+<!-- Screenshots, GIF, lien staging -->
+
+---
 
 ## 🔗 Issues liées
 <!-- Closes #123 -->
 
 ---
 
-**Merci pour votre contribution ! 🎉**
+### 🧠 Notes reviewer (optionnel)
+<!-- Points d’attention, décisions techniques, risques connus -->
+
+---
+
+🙏 **Merci pour la review !**
+> Rappel : le merge n’est autorisé que si tous les checks sont 🟢
