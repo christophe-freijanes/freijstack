@@ -361,16 +361,17 @@ jobs:
     timeout-minutes: 3
 
     steps:
-      - name: 📊 Summary
+      - name: 📢 Production Health Summary
+        if: always()
         run: |
           set -euo pipefail
-
+      
           echo "## 📢 Production Health Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "- 🏥 Health Check: **${{ needs.health-check.result }}**" >> "$GITHUB_STEP_SUMMARY"
           echo "- 🔧 Auto-Heal: **${{ needs.auto-heal.result }}**" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-
+      
           if [ "${{ needs.health-check.result }}" = "success" ]; then
             echo "✅ Production is **HEALTHY**" >> "$GITHUB_STEP_SUMMARY"
             echo "- 🎯 https://vault.freijstack.com/login" >> "$GITHUB_STEP_SUMMARY"
@@ -379,6 +380,7 @@ jobs:
             echo "⚠️ Production had issues but **auto-heal succeeded**" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "🚨 **CRITICAL**: Health check failed and auto-heal did not recover" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: 📣 Console output
         run: |
