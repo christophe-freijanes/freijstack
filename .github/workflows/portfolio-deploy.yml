@@ -1,4 +1,4 @@
-name: 📄 Portfolio
+name: 📄 SaaS • Portfolio
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - 'saas/portfolio/**'
       - '.github/workflows/portfolio-deploy.yml'
       - 'package.json'
-      - 'README.md'
+
   pull_request:
     branches:
       - master
@@ -26,10 +26,26 @@ env:
   IS_STAGING: ${{ github.ref == 'refs/heads/develop' }}
 
 jobs:
-  # Job 1: Validation et Linting
+  # Job 1: Security Scanning
+  security:
+    name: 🛡️ Shield Protection
+    uses: ./.github/workflows/securitycheck.yml
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    with:
+      scan_paths: |
+        saas/portfolio
+        base-infra
+      fail_on_gitleaks: true
+      upload_sarif: true
+
+  # Job 2: Validation et Linting
   validate:
     name: ✅ Validate & Lint
     runs-on: ubuntu-latest
+    needs: security
     
     steps:
       - name: Checkout code
@@ -58,11 +74,11 @@ jobs:
       - name: Security audit
         run: npm audit --audit-level=moderate || true
 
-  # Job 2: Build & Optimize Assets
+  # Job 3: Build & Optimize Assets
   build:
     name: 🏗️ Build & Optimize
     runs-on: ubuntu-latest
-    needs: validate
+    needs: [security, validate]
     
     steps:
       - name: Checkout code
@@ -97,45 +113,11 @@ jobs:
           path: saas/portfolio/
           retention-days: 5
 
-  # Job 3: Security Scanning
-  security:
-    name: 🔒 Security Scan
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-
-      - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v4
-        continue-on-error: true
-        with:
-          sarif_file: 'trivy-results.sarif'
-
-      - name: Check for hardcoded secrets
-        uses: gitleaks/gitleaks-action@v2
-        continue-on-error: true
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
   # Job 4: Deploy to GitHub Pages
   deploy-pages:
     name: 📄 Deploy to GitHub Pages
     runs-on: ubuntu-latest
-    needs: [validate, build, security]
+    needs: [security, validate, build]
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     
     permissions:
@@ -178,7 +160,7 @@ jobs:
   deploy-VPS-staging:
     name: 🧪 Deploy to VPS (Staging)
     runs-on: ubuntu-latest
-    needs: [validate, build, security]
+    needs: [security, validate, build]
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     
     steps:
@@ -226,7 +208,7 @@ jobs:
   deploy-VPS:
     name: 🚀 Deploy to VPS (Production)
     runs-on: ubuntu-latest
-    needs: [validate, build, security]
+    needs: [security, validate, build]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     
     steps:
@@ -273,7 +255,7 @@ jobs:
   notify:
     name: 📢 Notify Status
     runs-on: ubuntu-latest
-    needs: [validate, build, security]
+    needs: [security, validate, build]
     if: always()
     
     steps:

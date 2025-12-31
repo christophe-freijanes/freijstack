@@ -1,0 +1,160 @@
+name: 🕵️ Security • Inspector
+
+on:
+  workflow_call:
+    inputs:
+      scan_paths:
+        description: "Paths to scan (newline-separated). Example: 'saas/securevault\\nbase-infra'"
+        required: false
+        type: string
+        default: "saas/securevault\\nbase-infra"
+      fail_on_gitleaks:
+        description: "Fail the job if gitleaks finds leaks"
+        required: false
+        type: boolean
+        default: true
+      upload_sarif:
+        description: "Upload Trivy SARIF to GitHub code scanning"
+        required: false
+        type: boolean
+        default: true
+      trivy_fail_severity:
+        description: "Optional: fail Trivy if vulnerabilities >= this severity (UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL)"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+
+jobs:
+  security:
+    name: 🔭 Security Inspection
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🧾 Resolve scan paths
+        id: paths
+        run: |
+          set -euo pipefail
+          # Inputs can be "." or newline-separated paths
+          echo "SCAN_PATHS<<EOF" >> "$GITHUB_OUTPUT"
+          echo "${{ inputs.scan_paths }}" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          echo "## 🔐 Security Check" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Scan paths:**" >> "$GITHUB_STEP_SUMMARY"
+          echo '${{ inputs.scan_paths }}' | sed 's/^/- /' >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+      # -------------------------
+      # Trivy filesystem scan
+      # -------------------------
+      - name: 🛡️ Trivy (filesystem) → SARIF
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
+          # ignore-unfixed: true   # optionnel
+        continue-on-error: true
+
+      - name: 📤 Upload Trivy SARIF (optional)
+        if: ${{ inputs.upload_sarif }}
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: "trivy-results.sarif"
+          category: "trivy-fs"
+        continue-on-error: true
+
+      # Optional strict gate on Trivy if you want it
+      - name: 🚦 Trivy gate (optional severity)
+        if: ${{ inputs.trivy_fail_severity != '' }}
+        run: |
+          set -euo pipefail
+          echo "⚠️ Trivy strict gating is requested, but SARIF parsing is non-trivial here."
+          echo "✅ Recommendation: use Trivy table/json output for strict gating, keep SARIF for upload."
+          echo "➡️ For now, this step is a placeholder."
+          exit 0
+
+      # -------------------------
+      # Gitleaks (CLI) with report
+      # -------------------------
+      - name: 🔎 Install gitleaks (pinned)
+        run: |
+          set -euo pipefail
+          GITLEAKS_VERSION="8.21.2"
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            | tar -xz gitleaks
+          sudo mv gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+
+      - name: 🔐 Run gitleaks (json report)
+        id: gitleaks
+        run: |
+          set -euo pipefail
+
+          # Build --source args from scan_paths (newline-separated)
+          SOURCES=()
+          while IFS= read -r p; do
+            [ -z "$p" ] && continue
+            SOURCES+=("--source" "$p")
+          done <<< "${{ inputs.scan_paths }}"
+
+          # Default behavior if empty
+          if [ "${#SOURCES[@]}" -eq 0 ]; then
+            SOURCES=(--source ".")
+          fi
+
+          # Run (never fail here; we gate after counting)
+          gitleaks detect \
+            "${SOURCES[@]}" \
+            --config .gitleaks.toml \
+            --redact \
+            --report-format json \
+            --report-path gitleaks-report.json \
+            --verbose || true
+
+          test -f gitleaks-report.json || echo "[]" > gitleaks-report.json
+
+          total="$(jq 'length' gitleaks-report.json)"
+          echo "total=${total}" >> "$GITHUB_OUTPUT"
+
+          echo "### 🧨 Gitleaks" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Total findings:** ${total}" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$total" -gt 0 ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "**Top 20 findings (metadata only):**" >> "$GITHUB_STEP_SUMMARY"
+            jq -r '.[] | "- rule=\(.RuleID) file=\(.File):\(.StartLine) commit=\(.Commit|tostring|.[0:8])"' gitleaks-report.json \
+              | head -n 20 >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- ✅ No findings." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: 📎 Upload gitleaks report (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-report
+          path: gitleaks-report.json
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: 🛑 Block if leaks found
+        if: ${{ inputs.fail_on_gitleaks && steps.gitleaks.outputs.total != '0' }}
+        run: |
+          set -euo pipefail
+          echo "❌ Gitleaks found ${{ steps.gitleaks.outputs.total }} leaks. Blocking."
+          exit 1
+        
