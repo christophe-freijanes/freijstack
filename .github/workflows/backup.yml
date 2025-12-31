@@ -34,7 +34,22 @@ env:
   PROVIDER: ${{ github.event_name == 'workflow_dispatch' && inputs.provider || '' }}
 
 jobs:
+  security:
+    name: 🕵️ Security • Inspector
+    uses: ./.github/workflows/securitycheck.yml
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    with:
+      scan_paths: |
+        scripts
+        .github
+      fail_on_gitleaks: true
+      upload_sarif: false
+
   backup-production:
+    needs: security
     name: 💾 Backup Production to Cloud
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'production')
@@ -135,6 +150,7 @@ jobs:
           exit 1
 
   backup-staging:
+    needs: security
     name: 💾 Backup Staging to Cloud
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && inputs.environment == 'staging'
@@ -184,9 +200,9 @@ jobs:
           echo "✅ Staging backup completed successfully!"
 
   notify:
+    needs: [security, backup-production, backup-staging]
     name: 📢 Notify Backup Status
     runs-on: ubuntu-latest
-    needs: [backup-production, backup-staging]
     if: always()
     
     steps:
