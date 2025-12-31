@@ -9,9 +9,6 @@ on:
         default: false
         type: boolean
 
-  push:
-    branches: [develop]
-
   # DEV: monitoring léger
   schedule:
     - cron: "0 * * * *" # toutes les heures

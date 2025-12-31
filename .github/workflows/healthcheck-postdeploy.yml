@@ -1,0 +1,116 @@
+name: 🩺 Health Check • Post-Deploy 
+
+on:
+  workflow_run:
+    workflows:
+      - 🏗️ Infrastructure • VPS
+      - 📄 SaaS • Portfolio
+      - 🔐 SaaS • SecureVault
+    types: [completed]
+
+concurrency:
+  group: postdeploy-healthcheck-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  healthcheck:
+    name: 🩺 Run after deploy
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      (github.event.workflow_run.head_branch == 'master' || github.event.workflow_run.head_branch == 'develop')
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+
+    steps:
+      - name: 🧾 Summary (source workflow)
+        run: |
+          echo "## 🩺 Post-Deploy Health Check" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Source workflow: **${{ github.event.workflow_run.name }}**" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Branch: **${{ github.event.workflow_run.head_branch }}**" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Conclusion: **${{ github.event.workflow_run.conclusion }}**" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Run: ${{ github.event.workflow_run.html_url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Commit: \`${{ github.event.workflow_run.head_sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: ⏳ Cooldown (warm-up after deploy)
+        run: sleep 75
+
+      - name: 🌐 Check Public URLs (with retries)
+        run: |
+          set -euo pipefail
+
+          MAX_RETRIES=8
+          SLEEP_BETWEEN=10
+
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+
+          if [ "$BRANCH" = "master" ]; then
+            VAULT_FE="https://vault.freijstack.com/"
+            VAULT_API="https://vault-api.freijstack.com/api/health"
+          else
+            VAULT_FE="https://vault-staging.freijstack.com/"
+            VAULT_API="https://vault-api-staging.freijstack.com/api/health"
+          fi
+
+          # NOTE: pour éviter les faux 404 sur /login, on check la racine "/"
+          URLS=(
+            "https://portfolio.freijstack.com|200,301,302|Portfolio"
+            "https://christophe-freijanes.github.io/freijstack/|200,301,302|GitHub Pages"
+            "${VAULT_FE}|200,301,302,304|SecureVault Frontend"
+            "${VAULT_API}|200|SecureVault API"
+          )
+
+          echo "## 🌐 URL checks" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Branch: **$BRANCH**" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          for entry in "${URLS[@]}"; do
+            url="${entry%%|*}"
+            rest="${entry#*|}"
+            allowed="${rest%%|*}"
+            label="${rest##*|}"
+
+            echo ""
+            echo "🔎 Checking $label → $url"
+
+            attempt=1
+            success=false
+
+            while [ "$attempt" -le "$MAX_RETRIES" ]; do
+              code=$(
+                curl -s -L -o /dev/null -w "%{http_code}" \
+                  --connect-timeout 10 \
+                  --max-time 20 \
+                  "$url" || echo "000"
+              )
+
+              if echo ",$allowed," | grep -q ",$code,"; then
+                echo "✅ OK (HTTP $code)"
+                echo "- ✅ **$label**: HTTP $code (attempt $attempt/$MAX_RETRIES)" >> "$GITHUB_STEP_SUMMARY"
+                success=true
+                break
+              fi
+
+              echo "⚠️ HTTP $code (attempt $attempt/$MAX_RETRIES)"
+              if [ "$attempt" -lt "$MAX_RETRIES" ]; then
+                sleep "$SLEEP_BETWEEN"
+              fi
+              attempt=$((attempt + 1))
+            done
+
+            if [ "$success" != "true" ]; then
+              echo "❌ $label is DOWN after $MAX_RETRIES attempts"
+              echo "- ❌ **$label**: FAILED after $MAX_RETRIES attempts (last HTTP $code)" >> "$GITHUB_STEP_SUMMARY"
+              exit 1
+            fi
+          done
+
+      - name: 🎉 Health check OK
+        run: |
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "✅ **All checks passed**" >> "$GITHUB_STEP_SUMMARY"
