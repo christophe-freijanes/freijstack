@@ -18,23 +18,34 @@ on:
         required: false
         type: boolean
         default: true
+      publish_score_artifact:
+        description: "Always publish security-score.json as an artifact"
+        required: false
+        type: boolean
+        default: true
       trivy_fail_severity:
         description: "Optional: fail Trivy if vulnerabilities >= this severity (UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL)"
         required: false
         type: string
         default: ""
-      publish_score_to_pages:
-        description: "Publish security-score.json to GitHub Pages (gh-pages/pages)"
-        required: false
-        type: boolean
-        default: false
+    outputs:
+      gitleaks_total:
+        description: "Total gitleaks findings"
+        value: ${{ jobs.security.outputs.gitleaks_total }}
+      security_score:
+        description: "Security score (e.g. 10/10)"
+        value: ${{ jobs.security.outputs.security_score }}
+      security_color:
+        description: "Badge color"
+        value: ${{ jobs.security.outputs.security_color }}
+      security_message:
+        description: "Badge message"
+        value: ${{ jobs.security.outputs.security_message }}
 
 permissions:
   contents: read
   actions: read
   security-events: write
-  pages: write
-  id-token: write
 
 jobs:
   security:
@@ -56,6 +67,7 @@ jobs:
       - name: 🧾 Resolve scan paths
         run: |
           set -euo pipefail
+
           echo "## 🔐 Security Check" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Scan paths:**" >> "$GITHUB_STEP_SUMMARY"
@@ -145,6 +157,9 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
+      # -------------------------
+      # Security score (badge endpoint JSON at ROOT)
+      # -------------------------
       - name: 🧮 Compute Security Score (from gitleaks total)
         id: score
         run: |
@@ -152,7 +167,7 @@ jobs:
           leaks="${{ steps.gitleaks.outputs.total }}"
           [ -z "$leaks" ] && leaks="0"
 
-          # Simple scoring model (adjust as you want)
+          # Simple scoring model
           # 0 leaks -> 10/10, 1-2 -> 8/10, 3-5 -> 6/10, >5 -> 4/10
           if [ "$leaks" -eq 0 ]; then
             score="10/10"; color="brightgreen"
@@ -164,14 +179,14 @@ jobs:
             score="4/10"; color="red"
           fi
 
-          message="Score ${score} • leaks=${leaks}"
+          message="Security ${score} • leaks=${leaks}"
 
           echo "score=$score" >> "$GITHUB_OUTPUT"
           echo "color=$color" >> "$GITHUB_OUTPUT"
           echo "message=$message" >> "$GITHUB_OUTPUT"
 
-          mkdir -p security-badges
-          cat > security-badges/security-score.json <<EOF
+          # IMPORTANT: write at repo root so Pages can host it at /security-score.json
+          cat > security-score.json <<EOF
           {
             "schemaVersion": 1,
             "label": "Security Score",
@@ -187,11 +202,11 @@ jobs:
           echo "- **Badge color:** ${color}" >> "$GITHUB_STEP_SUMMARY"
 
       - name: 📎 Upload Security Score JSON (artifact)
-        if: always()
+        if: ${{ inputs.publish_score_artifact }}
         uses: actions/upload-artifact@v4
         with:
           name: security-score
-          path: security-badges/security-score.json
+          path: security-score.json
           retention-days: 14
           if-no-files-found: error
 
@@ -201,27 +216,3 @@ jobs:
           set -euo pipefail
           echo "❌ Gitleaks found ${{ steps.gitleaks.outputs.total }} leaks. Blocking."
           exit 1
-
-  publish-security-score:
-    name: 📤 Publish Security Score (Pages)
-    runs-on: ubuntu-latest
-    needs: [security]
-    if: ${{ inputs.publish_score_to_pages }}
-    permissions:
-      pages: write
-      id-token: write
-      contents: read
-    steps:
-      - name: 📥 Download score artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: security-score
-          path: public
-
-      - name: 📦 Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: public
-
-      - name: 🚀 Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4

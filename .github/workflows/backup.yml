@@ -47,6 +47,7 @@ jobs:
         .github
       fail_on_gitleaks: true
       upload_sarif: false
+      publish_score_to_pages: true
 
   backup-production:
     name: 💾 Backup Production to Cloud
