@@ -28,6 +28,9 @@ jobs:
         with:
           node-version: 22
 
+      # ---------------------------
+      # 🚀 SEMANTIC-RELEASE
+      # ---------------------------
       - name: 📦 Install semantic-release tooling
         run: |
           set -euo pipefail
