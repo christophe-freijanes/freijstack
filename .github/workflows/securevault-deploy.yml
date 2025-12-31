@@ -372,6 +372,12 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
+      - name: Ensure package-lock.json exists (Backend)
+        run: |
+          if [ ! -f package-lock.json ]; then
+            npm install --package-lock-only
+          fi
+
       - name: 🔧 Set up Node.js (Backend)
         uses: actions/setup-node@v4
         with:
