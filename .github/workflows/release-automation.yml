@@ -196,16 +196,6 @@ jobs:
           set -euo pipefail
           npm audit --audit-level=high
 
-      - name: 📦 Install semantic-release tooling
-        run: |
-          set -euo pipefail
-          npm install -D semantic-release \
-            @semantic-release/commit-analyzer \
-            @semantic-release/release-notes-generator \
-            @semantic-release/github \
-            @semantic-release/changelog \
-            @semantic-release/git
-
       - name: 🏷️ Create tag & GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
