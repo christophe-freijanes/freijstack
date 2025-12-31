@@ -9,7 +9,7 @@ on:
       - 'saas/portfolio/**'
       - '.github/workflows/portfolio-deploy.yml'
       - 'package.json'
-      - 'README.md'
+
   pull_request:
     branches:
       - master
