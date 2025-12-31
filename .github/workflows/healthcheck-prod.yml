@@ -10,8 +10,7 @@ on:
         type: boolean
 
   push:
-    branches:
-      - master
+    branches:  [master]
 
   schedule:
     - cron: "*/30 * * * *"
