@@ -4,14 +4,17 @@ on:
   workflow_run:
     workflows: ["🏥 Production Health Check"]
     types: [completed]
+    # ⚠️ Ce filtre "branches" ne suffit pas toujours selon le contexte d'exécution.
+    # On re-filtre aussi via head_branch dans le precheck (plus fiable).
     branches: [master]
 
 permissions:
   contents: write
   actions: read
+  pull-requests: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ github.event.workflow_run.id }}
   cancel-in-progress: false
 
 jobs:
@@ -83,6 +86,9 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.workflow_run.head_sha }}
 
+      # ---------------------------
+      # 🚦 SECURITY GATE — GITLEAKS REPORT
+      # ---------------------------
       - name: 🚦 Security gate — fetch gitleaks report from Health Check run
         id: gate
         env:
@@ -100,7 +106,10 @@ jobs:
           if [ -z "${artifact_id}" ] || [ "${artifact_id}" = "null" ]; then
             echo "report_present=false" >> "$GITHUB_OUTPUT"
             echo "total=0" >> "$GITHUB_OUTPUT"
-            echo "✅ No gitleaks-report artifact found. Continuing."
+
+            echo "## 🔐 Security Gate" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "ℹ️ No gitleaks-report artifact found for this run. Continuing." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
@@ -114,7 +123,10 @@ jobs:
           if [ ! -f security/gitleaks-report.json ]; then
             echo "report_present=false" >> "$GITHUB_OUTPUT"
             echo "total=0" >> "$GITHUB_OUTPUT"
-            echo "⚠️ gitleaks-report.json not found after extraction. Continuing."
+
+            echo "## 🔐 Security Gate" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "⚠️ Artifact found but gitleaks-report.json missing. Continuing." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
@@ -157,6 +169,9 @@ jobs:
 
           exit 1
 
+      # ---------------------------
+      # 📦 NODE + DEPENDENCY AUDIT
+      # ---------------------------
       - name: 🧾 Detect JS lockfile
         id: lock
         run: |
@@ -196,6 +211,9 @@ jobs:
           set -euo pipefail
           npm audit --audit-level=high
 
+      # ---------------------------
+      # 🚀 SEMANTIC-RELEASE
+      # ---------------------------
       - name: 📦 Install semantic-release tooling
         run: |
           set -euo pipefail
@@ -211,10 +229,10 @@ jobs:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
           set -euo pipefail
+          echo "ref_name: $GITHUB_REF_NAME"
           git remote -v
-          gh auth status || true
           gh api /repos/${{ github.repository }} --jq '{full_name: .full_name, private: .private, permissions: .permissions}'
-      
+
       - name: 🏷️ Create tag & GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
