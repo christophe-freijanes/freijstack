@@ -1,0 +1,119 @@
+name: 📝 Release PR • Update CHANGELOG
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-changelog-pr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changelog-pr:
+    name: 📝 Generate CHANGELOG PR
+    runs-on: ubuntu-latest
+
+    # Évite boucle infinie : si le dernier commit vient déjà d'une PR release/changelog
+    if: >
+      !contains(github.event.head_commit.message, 'chore(release): update CHANGELOG') &&
+      !contains(github.event.head_commit.message, '[skip changelog]') &&
+      github.actor != 'github-actions[bot]'
+
+    steps:
+      - name: 📥 Checkout (full history required)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🟢 Setup Node.js (LTS)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 📦 Install semantic-release tooling
+        run: |
+          set -euo pipefail
+          npm install -D \
+            semantic-release \
+            @semantic-release/commit-analyzer \
+            @semantic-release/release-notes-generator \
+            @semantic-release/changelog \
+            @semantic-release/github
+
+      - name: 🧠 Compute next version + update CHANGELOG (dry-run)
+        id: sr
+        env:
+          # PAT recommandé pour éviter les surprises de permissions
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          echo "🔎 Running semantic-release in dry-run to update CHANGELOG..."
+          # --dry-run : pas de tag/release
+          # --no-ci   : évite certains gardes CI
+          # On capture les logs pour extraire la prochaine version
+          npx semantic-release --dry-run --no-ci | tee sr.log
+
+          # Cas "no release"
+          if grep -q "The commit should not trigger a release" sr.log && ! grep -q "The next release version is" sr.log; then
+            echo "next_release=false" >> "$GITHUB_OUTPUT"
+            echo "✅ No release detected from commits. Exiting."
+            exit 0
+          fi
+
+          version="$(grep -Eo 'The next release version is [0-9]+\.[0-9]+\.[0-9]+' sr.log | tail -n1 | awk '{print $6}')"
+          if [ -z "${version:-}" ]; then
+            echo "next_release=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ Could not determine next version. Exiting."
+            exit 0
+          fi
+
+          echo "next_release=true" >> "$GITHUB_OUTPUT"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "✅ Next version: ${version}"
+
+      - name: 🔍 Detect CHANGELOG changes
+        id: diff
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- CHANGELOG.md; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "✅ No CHANGELOG.md changes."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "✅ CHANGELOG.md updated."
+          fi
+
+      - name: 🧾 Add changelog summary to UI
+        if: ${{ steps.sr.outputs.next_release == 'true' }}
+        run: |
+          echo "## 📝 Release PR (CHANGELOG)" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- 🔢 Next version: **${{ steps.sr.outputs.version }}**" >> "$GITHUB_STEP_SUMMARY"
+          echo "- 📄 CHANGELOG updated: **${{ steps.diff.outputs.changed }}**" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 🚀 Create Pull Request for CHANGELOG
+        if: ${{ steps.sr.outputs.next_release == 'true' && steps.diff.outputs.changed == 'true' }}
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.RELEASE_TOKEN }}
+          base: master
+          branch: chore/release-changelog-v${{ steps.sr.outputs.version }}
+          delete-branch: true
+          commit-message: "chore(release): update CHANGELOG for v${{ steps.sr.outputs.version }} [skip ci]"
+          title: "chore(release): update CHANGELOG for v${{ steps.sr.outputs.version }}"
+          body: |
+            📝 Cette PR met à jour `CHANGELOG.md` pour la version **v${{ steps.sr.outputs.version }}**.
+            
+            ✅ Générée automatiquement via `semantic-release --dry-run`.
+            🔒 Compatible avec une branche `master` protégée (PR-only).
+            
+            > Tip: merge cette PR, puis le workflow Release créera le tag + la GitHub Release.
+          labels: |
+            release
+            changelog
