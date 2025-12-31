@@ -65,7 +65,7 @@ jobs:
         base-infra
       fail_on_gitleaks: true
       upload_sarif: true
-      publish_score_to_pages: true
+      publish_score_artifact: true
 
   validate:
     name: ✅ Validate VPS Configuration
