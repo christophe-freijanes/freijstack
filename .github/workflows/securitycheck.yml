@@ -31,7 +31,7 @@ permissions:
 
 jobs:
   security:
-    name: 🛡️ Security • Guardian
+    name: 🕵️ Security • Inspector
     runs-on: ubuntu-latest
 
     steps:

@@ -35,7 +35,7 @@ env:
 
 jobs:
   security:
-    name: 🛡️ Security • Guardian
+    name: 🛡️ Shield • Guardian
     uses: ./.github/workflows/securitycheck.yml
     permissions:
       contents: read
