@@ -1,0 +1,21 @@
+name: 🕒 Security • Scheduled
+
+on:
+  schedule:
+    - cron: "0 4 * * *"   # chaque jour à 04:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+
+jobs:
+  security:
+    uses: ./.github/workflows/securitycheck.yml
+    with:
+      scan_paths: |
+        .
+      fail_on_gitleaks: true
+      upload_sarif: true
+      publish_score_artifact: true
