@@ -26,7 +26,7 @@ permissions:
 
 jobs:
   health-check:
-    name: 🧪 Check Dev Health
+    name: 🧪 Check Development Health
     runs-on: ubuntu-latest
     timeout-minutes: 6
 

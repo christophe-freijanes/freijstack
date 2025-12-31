@@ -28,7 +28,7 @@ env:
 jobs:
   # Job 1: Security Scanning
   security:
-    name: 🕵️ Security • Inspector
+    name: 🛡️ Security • Guardian
     uses: ./.github/workflows/securitycheck.yml
     permissions:
       contents: read

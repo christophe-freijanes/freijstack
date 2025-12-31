@@ -1,4 +1,4 @@
-name: 🏥 Health Check • Production
+name: 🧪 Health Check • Production
 
 on:
   workflow_dispatch:
@@ -26,7 +26,7 @@ permissions:
 
 jobs:
   health-check:
-    name: 🏥 Check Production Health
+    name: 🧪 Check Production Health
     runs-on: ubuntu-latest
     timeout-minutes: 6
 

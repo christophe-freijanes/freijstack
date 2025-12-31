@@ -53,7 +53,7 @@ env:
 
 jobs:
   security:
-    name: 🕵️ Security • Inspector
+    name: 🛡️ Security • Guardian
     uses: ./.github/workflows/securitycheck.yml
     permissions:
       contents: read
