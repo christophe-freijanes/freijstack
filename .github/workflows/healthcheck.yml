@@ -1,4 +1,4 @@
-name: 🏥 Production Health Check
+name: 🏥 Health Check
 
 on:
   schedule:
@@ -14,7 +14,7 @@ on:
     branches: [master]
 
 concurrency:
-  group: production-healthcheck
+  group: healthcheck
   cancel-in-progress: true
 
 permissions:
@@ -23,7 +23,7 @@ permissions:
 
 jobs:
   health-check:
-    name: 🏥 Check Production Health
+    name: 🏥 Check Health
     runs-on: ubuntu-latest
     timeout-minutes: 6
 
@@ -244,7 +244,7 @@ jobs:
           rm -f ~/.ssh/deploy_key || true
 
   auto-heal:
-    name: 🔧 Auto-Heal Production
+    name: 🔧 Auto-Heal
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: health-check
