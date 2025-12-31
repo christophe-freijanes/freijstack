@@ -204,8 +204,18 @@ jobs:
             @semantic-release/commit-analyzer \
             @semantic-release/release-notes-generator \
             @semantic-release/github \
+            @semantic-release/git \
             @semantic-release/changelog
 
+      - name: 🧭 Debug GitHub auth + repo
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          set -euo pipefail
+          git remote -v
+          gh auth status || true
+          gh api /repos/${{ github.repository }} --jq '{full_name: .full_name, private: .private, permissions: .permissions}'
+      
       - name: 🏷️ Create tag & GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
