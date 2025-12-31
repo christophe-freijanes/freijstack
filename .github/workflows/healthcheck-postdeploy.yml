@@ -48,26 +48,59 @@ jobs:
 
           BRANCH="${{ github.event.workflow_run.head_branch }}"
 
-          if [ "$BRANCH" = "master" ]; then
-            VAULT_FE="https://vault.freijstack.com/"
-            VAULT_API="https://vault-api.freijstack.com/api/health"
-          else
-            VAULT_FE="https://vault-staging.freijstack.com/"
-            VAULT_API="https://vault-api-staging.freijstack.com/api/health"
-          fi
-
-          # NOTE: pour éviter les faux 404 sur /login, on check la racine "/"
-          URLS=(
-            "https://portfolio.freijstack.com|200,301,302|Portfolio"
-            "https://christophe-freijanes.github.io/freijstack/|200,301,302|GitHub Pages"
-            "${VAULT_FE}|200,301,302,304|SecureVault Frontend"
-            "${VAULT_API}|200|SecureVault API"
-          )
-
           echo "## 🌐 URL checks" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "- Branch: **$BRANCH**" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # Always check portfolio + pages (global)
+          BASE_URLS=(
+            "https://portfolio.freijstack.com|200,301,302|Portfolio"
+            "https://christophe-freijanes.github.io/freijstack/|200,301,302|GitHub Pages"
+          )
+
+          # Decide which SecureVault endpoints to check
+          if [ "$BRANCH" = "master" ]; then
+            VAULT_FE="https://vault.freijstack.com/"
+            VAULT_API="https://vault-api.freijstack.com/api/health"
+            VAULT_URLS=(
+              "${VAULT_FE}|200,301,302,304|SecureVault Frontend"
+              "${VAULT_API}|200|SecureVault API"
+            )
+          else
+            # develop → staging, BUT staging may be intentionally destroyed after prod deploy
+            VAULT_FE_STAGING="https://vault-staging.freijstack.com/"
+            VAULT_API_STAGING="https://vault-api-staging.freijstack.com/api/health"
+
+            echo "- SecureVault mode: **staging candidate**" >> "$GITHUB_STEP_SUMMARY"
+
+            # --- Probe staging once to decide if it exists ---
+            probe_code=$(
+              curl -s -L -o /dev/null -w "%{http_code}" \
+                --connect-timeout 6 \
+                --max-time 12 \
+                "$VAULT_FE_STAGING" || echo "000"
+            )
+
+            # If staging is destroyed, typical results: 404, 000 (DNS/timeout), 502/503 depending on infra.
+            # We treat 200/301/302/304 as "staging is up", everything else as "staging disabled" (skip).
+            case "$probe_code" in
+              200|301|302|304)
+                echo "- ✅ Staging detected (probe HTTP $probe_code). Running staging checks." >> "$GITHUB_STEP_SUMMARY"
+                VAULT_URLS=(
+                  "${VAULT_FE_STAGING}|200,301,302,304|SecureVault Frontend (staging)"
+                  "${VAULT_API_STAGING}|200|SecureVault API (staging)"
+                )
+                ;;
+              *)
+                echo "- ⚠️ Staging seems disabled (probe HTTP $probe_code). Skipping SecureVault staging checks." >> "$GITHUB_STEP_SUMMARY"
+                VAULT_URLS=()
+                ;;
+            esac
+          fi
+
+          # Merge URL lists
+          URLS=("${BASE_URLS[@]}" "${VAULT_URLS[@]}")
 
           for entry in "${URLS[@]}"; do
             url="${entry%%|*}"
