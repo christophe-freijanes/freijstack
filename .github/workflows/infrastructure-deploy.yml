@@ -53,7 +53,7 @@ env:
 
 jobs:
   security:
-    name: 🛡️ Shield • Guardian
+    name: 🛡️ Shield Protection
     uses: ./.github/workflows/securitycheck.yml
     permissions:
       contents: read

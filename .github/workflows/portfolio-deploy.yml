@@ -28,7 +28,7 @@ env:
 jobs:
   # Job 1: Security Scanning
   security:
-    name: 🛡️ Shield • Guardian
+    name: 🛡️ Shield Protection
     uses: ./.github/workflows/securitycheck.yml
     permissions:
       contents: read
