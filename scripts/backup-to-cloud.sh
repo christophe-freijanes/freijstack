@@ -8,7 +8,7 @@
 # Usage: ./backup-to-cloud.sh [staging|production] [provider]
 #
 
-set -e
+set -euo pipefail
 
 # Colors
 RED='\033[0;31m'
