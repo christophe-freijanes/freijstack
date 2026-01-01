@@ -1,10 +1,17 @@
 {
-  "branches": ["master"],
+  "branches": [
+    "master",
+    { "name": "release-test", "prerelease": "rc" }
+  ],
   "tagFormat": "v${version}",
   "plugins": [
     [
       "@semantic-release/commit-analyzer",
-      { "releaseRules": [{ "type": "refactor", "release": "patch" }] }
+      {
+        "releaseRules": [
+          { "type": "refactor", "release": "patch" }
+        ]
+      }
     ],
     "@semantic-release/release-notes-generator",
     ["@semantic-release/changelog", { "changelogFile": "CHANGELOG.md" }],
