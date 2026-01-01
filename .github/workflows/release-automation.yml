@@ -35,6 +35,7 @@ jobs:
       - name: 📦 Install semantic-release tooling
         run: |
           set -euo pipefail
+          # Note: Même stack que release-changelog-pr.yml
           npm install -D \
             semantic-release \
             @semantic-release/commit-analyzer \
@@ -65,4 +66,5 @@ jobs:
         run: |
           set -euo pipefail
           echo "🚀 Publishing real release on master..."
+          echo "ℹ️  CHANGELOG déjà mis à jour via PR (release-changelog-pr.yml)"
           npx semantic-release
