@@ -178,19 +178,26 @@ jobs:
           # Vérifier s'il y a des changements
           if [ -n "$(git status --porcelain docs/.generated docs/.index.json docs/.summary.txt 2>/dev/null)" ]; then
             git add docs/.generated docs/.index.json docs/.summary.txt || true
-            git commit -m "docs: auto-generate diagrams and index" || true
+            git commit -m "docs: auto-generate diagrams and index [skip ci]" || true
             git push origin HEAD:${{ github.ref }} || echo "No changes to push"
           else
             echo "✅ No generated files to commit"
           fi
 
-      - name: Publish to GitHub Pages
+      - name: Setup Pages
         if: github.ref == 'refs/heads/master'
-        uses: peaceiris/actions-gh-pages@v3
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
+        if: github.ref == 'refs/heads/master'
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
-          cname: docs.freijstack.com
+          path: ./docs
+
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/master'
+        id: deployment
+        uses: actions/deploy-pages@v4
 
       - name: Generate security report
         if: always()
