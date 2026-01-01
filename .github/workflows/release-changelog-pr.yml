@@ -32,21 +32,11 @@ jobs:
           # Important: utiliser le PAT pour pouvoir push une branche
           token: ${{ secrets.RELEASE_TOKEN }}
 
-      - name: 🟢 Setup Node.js (LTS)
+      - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
-      - name: 📦 Install semantic-release tooling
-        run: |
-          set -euo pipefail
-          npm install -D \
-            semantic-release \
-            @semantic-release/commit-analyzer \
-            @semantic-release/release-notes-generator \
-            @semantic-release/changelog \
-            @semantic-release/github
 
       - name: 🧠 Compute next version + update CHANGELOG (dry-run)
         id: sr
@@ -55,7 +45,14 @@ jobs:
         run: |
           set -euo pipefail
 
-          npx semantic-release --dry-run --no-ci | tee sr.log
+          echo "🔎 Running semantic-release in dry-run..."
+          npx -y \
+            -p semantic-release \
+            -p @semantic-release/commit-analyzer \
+            -p @semantic-release/release-notes-generator \
+            -p @semantic-release/changelog \
+            -p @semantic-release/github \
+            semantic-release --dry-run --no-ci | tee sr.log
 
           # Pas de release => stop
           if grep -q "no new version is released" sr.log; then
@@ -111,10 +108,7 @@ jobs:
           git checkout -b "$BRANCH"
           git add CHANGELOG.md
           git commit -m "chore(release): update CHANGELOG for v${VERSION} [skip ci]"
-
           git push origin "$BRANCH"
-
-          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
       - name: 🧷 Create Pull Request (via gh)
         if: ${{ steps.sr.outputs.next_release == 'true' && steps.diff.outputs.changed == 'true' }}
