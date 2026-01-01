@@ -13,6 +13,8 @@ scripts/
 ├── diagnose-cors.sh                # Diagnostic CORS SecureVault
 ├── diagnose-registration.ps1       # Diagnostic registration
 ├── diagnose-registration.sh        # Diagnostic registration (shell)
+├── docs-generate.ps1               # Générer docs (Windows)
+├── docs-generate.sh                # Générer docs (Unix)
 ├── fix-network-issue.sh            # Corriger problèmes réseau
 ├── generate-secrets.ps1            # Générer secrets et clés
 ├── rotate-secrets.sh               # Rotation des secrets
@@ -22,6 +24,87 @@ scripts/
 ├── validate-automation.sh           # Valider workflows CI/CD
 └── README.md                       # Ce fichier
 ```
+
+---
+
+## 📚 Scripts Documentation
+
+### `docs-generate.sh` / `docs-generate.ps1` - Générer la Documentation
+
+Génération et validation automatique de la documentation.
+
+**Usage (Bash/Linux/Mac)**:
+```bash
+./scripts/docs-generate.sh [command]
+```
+
+**Usage (PowerShell/Windows)**:
+```powershell
+.\scripts\docs-generate.ps1 -Command <command>
+```
+
+**Commands**:
+| Command | Description |
+|---------|-------------|
+| `all` | Génération complète (validation + diagrams + index) |
+| `validate` | Valider markdown + scan secrets + vérifier liens |
+| `diagrams` | Générer diagrams Mermaid (PNG + SVG) |
+| `index` | Générer index JSON des documents |
+| `summary` | Générer résumé avec statistiques |
+| `scan` | Scanner les secrets sensibles dans /docs |
+| `links` | Valider les liens internes (broken links) |
+| `compare` | Comparer documents publics vs privés |
+| `clean` | Nettoyer fichiers générés (.generated, .index.json) |
+
+**Exemples**:
+```bash
+# Bash
+./scripts/docs-generate.sh all         # Génération complète
+./scripts/docs-generate.sh scan        # Vérifier les secrets
+./scripts/docs-generate.sh diagrams    # Générer diagrams Mermaid seulement
+./scripts/docs-generate.sh validate    # Valider markdown + liens
+./scripts/docs-generate.sh clean       # Nettoyer fichiers générés
+
+# PowerShell
+.\scripts\docs-generate.ps1 -Command all
+.\scripts\docs-generate.ps1 -Command scan
+.\scripts\docs-generate.ps1 -Command diagrams
+```
+
+**Outputs**:
+- `docs/.generated/` - Diagrams convertis (PNG, SVG)
+- `docs/.index.json` - Index JSON de tous les documents
+- `docs/.summary.txt` - Résumé avec statistiques
+- Console output - Détails de validation
+
+**Dépendances**:
+- Node.js 16+ (pour markdownlint et mermaid-cli)
+- npm (optionnel, pour installation tools)
+- ripgrep `rg` (optionnel, pour scan secrets avancé)
+
+**Installation dépendances** (première utilisation):
+```bash
+# Installation globale des tools
+npm install -g markdownlint-cli2 @mermaid-js/mermaid-cli
+
+# Ou sur Windows avec Chocolatey
+choco install markdownlint ripgrep
+
+# Ou sur Mac avec brew
+brew install markdownlint ripgrep
+```
+
+**Configuration**:
+Voir [.github/docs-config.yml](../.github/docs-config.yml) pour:
+- Patterns de secrets à détecter
+- Règles de linting Markdown
+- Plannification des générations (cron)
+
+**Sécurité**:
+- ✅ Scan automatique pour AWS keys, GitHub tokens, DB passwords, webhooks
+- ✅ Redaction patterns: `<REDACTED>`, `<VPS_HOST>`, `<DB_PASSWORD>`
+- ✅ Détection faux positifs via `.gitleaksignore`
+- ✅ Bloque commit si secrets en public (CI/CD)
 
 ---
 

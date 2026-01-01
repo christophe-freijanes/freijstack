@@ -37,75 +37,80 @@ Le système CI/CD de FreijStack est entièrement automatisé via **GitHub Action
 
 ## Diagramme CI/CD
 
-### Architecture Complète
+### 🎯 Architecture Haute Disponibilité
+
+Voir aussi: **[cicd.mmd](cicd.mmd)** - Diagramme interactif Mermaid
 
 ```mermaid
 %%{init: {'theme':'dark', 'themeVariables': { 'fontSize':'14px'}}}%%
 graph TB
     %% Sources
-    DEV[👨‍💻 Développeur]
-    GITHUB[📦 GitHub Repository]
+    DEV["👨‍💻 Développeur"]
+    GITHUB["📦 GitHub Repository"]
     
     %% Branches
-    DEVELOP[🌿 Branch: develop]
-    MASTER[🌿 Branch: master]
-    PR[🔀 Pull Request]
+    DEVELOP["🌿 Branch: develop<br/>(staging)"]
+    MASTER["🌿 Branch: master<br/>(production)"]
+    PR["🔀 Pull Request"]
     
     %% CI Workflows
-    PR_CHECK[✅ PR Title Automation]
-    CODEQL[🕵️ CodeQL Analysis]
-    SECURITY[🛡️ Security Check]
+    PR_CHECK["✅ PR Title Automation<br/>Conventional Commits"]
+    CODEQL["🕵️ CodeQL Analysis<br/>JavaScript/TypeScript/Python"]
+    SECURITY["🛡️ Security Check<br/>Trivy + Gitleaks"]
+    SECURITY_SCORE["📊 Security Score<br/>JSON Badge"]
     
     %% Build & Deploy
-    INFRA_DEPLOY[🏗️ Infrastructure Deploy]
-    PORTFOLIO_DEPLOY[🌐 Portfolio Deploy]
-    VAULT_DEPLOY[🔐 SecureVault Deploy]
-    HARBOR_DEPLOY[⚓ Harbor Deploy]
+    INFRA_DEPLOY["🏗️ Infrastructure Deploy<br/>Traefik + n8n"]
+    PORTFOLIO_DEPLOY["🌐 Portfolio Deploy<br/>HTML/CSS/JS"]
+    VAULT_DEPLOY["🔐 SecureVault Deploy<br/>Node.js + React + PostgreSQL"]
+    HARBOR_DEPLOY["⚓ Harbor Deploy<br/>Docker Registry"]
     
     %% Post-Deploy
-    HEALTHCHECK_POST[🏥 Post-Deploy Health]
-    HEALTHCHECK_PROD[🏥 Health Check Prod]
-    HEALTHCHECK_DEV[🏥 Health Check Dev]
+    HEALTHCHECK_POST["🏥 Health Check Post-Deploy<br/>HTTP Status + Response Time"]
+    HEALTHCHECK_PROD["🏥 Health Check Prod<br/>Every 30 minutes"]
+    HEALTHCHECK_DEV["🏥 Health Check Dev<br/>Every hour"]
     
     %% Releases
-    RELEASE_PR[📝 Release Changelog PR]
-    RELEASE_AUTO[🚀 Release Automation]
+    RELEASE_PR["📝 Release Changelog PR<br/>semantic-release --dry-run"]
+    RELEASE_AUTO["🚀 Release Automation<br/>semantic-release + tag"]
     
     %% Maintenance
-    BACKUP[💾 Backup]
-    ROTATE[🔄 Rotate Secrets]
-    SECURITY_SCORE[📊 Security Score]
+    BACKUP["💾 Backup to Cloud<br/>PostgreSQL + Config"]
+    ROTATE["🔄 Rotate Secrets<br/>JWT + DB Passwords"]
     
     %% Environments
-    VPS_STAGING[🖥️ VPS Staging]
-    VPS_PROD[🖥️ VPS Production]
+    VPS_STAGING["🖥️ VPS Staging<br/>Docker Compose"]
+    VPS_PROD["🖥️ VPS Production<br/>Docker Compose"]
     
     %% Cloud
-    S3[☁️ AWS S3]
-    AZURE[☁️ Azure Blob]
-    PAGES[📄 GitHub Pages]
+    S3["☁️ AWS S3<br/>Backup Storage"]
+    AZURE["☁️ Azure Blob<br/>Backup Storage"]
+    PAGES["📄 GitHub Pages<br/>Security Badge"]
     
     %% Notifications
-    NOTIFY[📧 Notifications]
+    DISCORD["📧 Discord Webhook<br/>Notifications"]
     
     %% Flow Development
-    DEV -->|git push| DEVELOP
-    DEV -->|git push| MASTER
-    DEV -->|create| PR
+    DEV -->|git push develop| DEVELOP
+    DEV -->|git push master| MASTER
+    DEV -->|create PR| PR
     
     DEVELOP --> GITHUB
     MASTER --> GITHUB
     PR --> GITHUB
     
-    %% PR Flow
+    %% PR Checks
     PR -->|on open/edit| PR_CHECK
     PR -->|trigger| CODEQL
+    PR_CHECK -->|status check| GITHUB
+    CODEQL -->|results| GITHUB
     
     %% Security Scheduled
     GITHUB -.->|cron: daily 04:00| SECURITY
     GITHUB -.->|cron: weekly| CODEQL
     SECURITY -->|publish| SECURITY_SCORE
     SECURITY_SCORE -->|upload| PAGES
+    SECURITY -->|if leaks found| DISCORD
     
     %% Deploy from develop
     DEVELOP -->|push trigger| INFRA_DEPLOY
@@ -113,10 +118,10 @@ graph TB
     DEVELOP -->|push trigger| VAULT_DEPLOY
     DEVELOP -->|push trigger| HARBOR_DEPLOY
     
-    INFRA_DEPLOY -->|deploy| VPS_STAGING
-    PORTFOLIO_DEPLOY -->|deploy| VPS_STAGING
-    VAULT_DEPLOY -->|deploy| VPS_STAGING
-    HARBOR_DEPLOY -->|deploy| VPS_STAGING
+    INFRA_DEPLOY -->|docker-compose up| VPS_STAGING
+    PORTFOLIO_DEPLOY -->|rsync + nginx reload| VPS_STAGING
+    VAULT_DEPLOY -->|docker-compose + migrations| VPS_STAGING
+    HARBOR_DEPLOY -->|docker-compose| VPS_STAGING
     
     %% Deploy from master
     MASTER -->|push trigger| INFRA_DEPLOY
@@ -124,66 +129,68 @@ graph TB
     MASTER -->|push trigger| VAULT_DEPLOY
     MASTER -->|push trigger| HARBOR_DEPLOY
     
-    INFRA_DEPLOY -->|deploy| VPS_PROD
-    PORTFOLIO_DEPLOY -->|deploy| VPS_PROD
-    VAULT_DEPLOY -->|deploy| VPS_PROD
-    HARBOR_DEPLOY -->|deploy| VPS_PROD
+    INFRA_DEPLOY -->|docker-compose up| VPS_PROD
+    PORTFOLIO_DEPLOY -->|rsync + nginx reload| VPS_PROD
+    VAULT_DEPLOY -->|docker-compose + migrations| VPS_PROD
+    HARBOR_DEPLOY -->|docker-compose| VPS_PROD
     
     %% Post-Deploy Checks
-    PORTFOLIO_DEPLOY -->|trigger| HEALTHCHECK_POST
-    VAULT_DEPLOY -->|trigger| HEALTHCHECK_POST
-    HARBOR_DEPLOY -->|trigger| HEALTHCHECK_POST
+    PORTFOLIO_DEPLOY -->|workflow_run: success| HEALTHCHECK_POST
+    VAULT_DEPLOY -->|workflow_run: success| HEALTHCHECK_POST
+    HARBOR_DEPLOY -->|workflow_run: success| HEALTHCHECK_POST
+    INFRA_DEPLOY -->|workflow_run: success| HEALTHCHECK_POST
     
     %% Continuous Monitoring
     VPS_PROD -.->|cron: */30 min| HEALTHCHECK_PROD
     VPS_STAGING -.->|cron: hourly| HEALTHCHECK_DEV
     
-    HEALTHCHECK_PROD -->|if issues| VPS_PROD
-    HEALTHCHECK_DEV -->|if issues| VPS_STAGING
+    HEALTHCHECK_PROD -->|if status >= 3| DISCORD
+    HEALTHCHECK_DEV -->|if status >= 3| DISCORD
     
-    %% Auto-healing
-    HEALTHCHECK_PROD -->|auto-restart| VPS_PROD
-    HEALTHCHECK_DEV -->|auto-restart| VPS_STAGING
+    HEALTHCHECK_PROD -->|auto-restart if 3x fail| VPS_PROD
+    HEALTHCHECK_DEV -->|auto-restart if 3x fail| VPS_STAGING
     
     %% Release Flow
     MASTER -->|push trigger| RELEASE_PR
     RELEASE_PR -->|create PR| GITHUB
-    MASTER -->|after merge| RELEASE_AUTO
+    GITHUB -->|merge PR| RELEASE_AUTO
     RELEASE_AUTO -->|create tag| GITHUB
-    RELEASE_AUTO -->|update| GITHUB
+    RELEASE_AUTO -->|publish release| GITHUB
     
     %% Maintenance Scheduled
     GITHUB -.->|cron: daily 03:00| BACKUP
-    GITHUB -.->|cron: monthly| ROTATE
+    GITHUB -.->|cron: monthly 1st| ROTATE
     
-    BACKUP -->|upload| S3
-    BACKUP -->|upload| AZURE
-    ROTATE -->|update secrets| VPS_PROD
-    ROTATE -->|update secrets| VPS_STAGING
+    BACKUP -->|compress + encrypt| S3
+    BACKUP -->|compress + encrypt| AZURE
+    BACKUP -->|notify| DISCORD
     
-    %% Notifications
-    HEALTHCHECK_PROD -->|on failure| NOTIFY
-    HEALTHCHECK_DEV -->|on failure| NOTIFY
-    BACKUP -->|on failure| NOTIFY
-    ROTATE -->|summary| NOTIFY
-    SECURITY -->|on leaks| NOTIFY
+    ROTATE -->|new secrets| VPS_PROD
+    ROTATE -->|new secrets| VPS_STAGING
+    ROTATE -->|summary email| DISCORD
     
     %% Styling
     classDef sourceNode fill:#1a1a2e,stroke:#16213e,stroke-width:2px,color:#fff
     classDef branchNode fill:#0f3460,stroke:#16213e,stroke-width:2px,color:#fff
-    classDef ciNode fill:#16213e,stroke:#0f3460,stroke-width:2px,color:#fff
+    classDef prNode fill:#16213e,stroke:#0f3460,stroke-width:2px,color:#fff
+    classDef secNode fill:#d32f2f,stroke:#9a0007,stroke-width:2px,color:#fff
     classDef deployNode fill:#533483,stroke:#6c4f9e,stroke-width:2px,color:#fff
+    classDef healthNode fill:#f39c12,stroke:#c87f0a,stroke-width:2px,color:#fff
     classDef envNode fill:#e94560,stroke:#a83244,stroke-width:3px,color:#fff
     classDef cloudNode fill:#048ba8,stroke:#0a6e7f,stroke-width:2px,color:#fff
-    classDef notifyNode fill:#f77f00,stroke:#d67000,stroke-width:2px,color:#fff
+    classDef releaseNode fill:#27ae60,stroke:#1e8449,stroke-width:2px,color:#fff
+    classDef notifyNode fill:#9b59b6,stroke:#6c3483,stroke-width:2px,color:#fff
     
     class DEV,GITHUB sourceNode
-    class DEVELOP,MASTER,PR branchNode
-    class PR_CHECK,CODEQL,SECURITY,HEALTHCHECK_POST,HEALTHCHECK_PROD,HEALTHCHECK_DEV,RELEASE_PR,RELEASE_AUTO,SECURITY_SCORE ciNode
+    class DEVELOP,MASTER branchNode
+    class PR,PR_CHECK prNode
+    class CODEQL,SECURITY,SECURITY_SCORE secNode
     class INFRA_DEPLOY,PORTFOLIO_DEPLOY,VAULT_DEPLOY,HARBOR_DEPLOY,BACKUP,ROTATE deployNode
+    class HEALTHCHECK_POST,HEALTHCHECK_PROD,HEALTHCHECK_DEV healthNode
     class VPS_STAGING,VPS_PROD envNode
     class S3,AZURE,PAGES cloudNode
-    class NOTIFY notifyNode
+    class RELEASE_PR,RELEASE_AUTO releaseNode
+    class DISCORD notifyNode
 ```
 
 ---
@@ -698,7 +705,12 @@ docker-compose up -d
 - [DEPLOYMENT.md](./DEPLOYMENT.md) - Guide déploiement détaillé
 - [MONITORING.md](./MONITORING.md) - Setup monitoring
 - [SECURITY.md](../SECURITY.md) - Politique sécurité
+- [SECURITY_AUDIT.md](./SECURITY_AUDIT.md) - Audit documentation publique/privée
+- [REDACTION_GUIDE.md](./REDACTION_GUIDE.md) - Guide de redaction des secrets
 - [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) - Guide dépannage
+
+### Diagrammes
+- **[cicd.mmd](cicd.mmd)** - Diagramme Mermaid interactif (réf. exacte en haut de page)
 
 ### Outils
 - [GitHub Actions Docs](https://docs.github.com/en/actions)
