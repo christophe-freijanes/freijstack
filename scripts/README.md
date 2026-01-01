@@ -95,7 +95,7 @@ brew install markdownlint ripgrep
 ```
 
 **Configuration**:
-Voir [.github/docs-config.yml](../.github/docs-config.yml) pour:
+Voir [DOCS_CONFIG_REFERENCE.md](../docs/DOCS_CONFIG_REFERENCE.md) pour:
 - Patterns de secrets à détecter
 - Règles de linting Markdown
 - Plannification des générations (cron)

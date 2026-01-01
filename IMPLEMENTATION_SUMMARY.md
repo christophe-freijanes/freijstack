@@ -247,7 +247,7 @@ Tests passés: ✅ GitHub Secret Scanning
 
 ### Configuration
 1. [.github/workflows/docs-generate.yml](.github/workflows/docs-generate.yml) - Main workflow
-2. [.github/docs-config.yml](.github/docs-config.yml) - Patterns + schedules
+2. [docs/DOCS_CONFIG_REFERENCE.md](docs/DOCS_CONFIG_REFERENCE.md) - Patterns + schedules (référence)
 3. [.gitleaksignore](.gitleaksignore) - Ignore rules
 
 ### Scripts
