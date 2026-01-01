@@ -1,10 +1,10 @@
-## ✅ Status (tout doit être vert avant merge)
+## ✅ Status
 
 [![Infrastructure](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/infrastructure-deploy.yml?branch=master&label=Infrastructure&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/infrastructure-deploy.yml)
 [![Prod Health](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/healthcheck-prod.yml?branch=develop&label=Prod%20Health&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/healthcheck-prod.yml)
 [![Dev Health](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/healthcheck-dev.yml?branch=develop&label=Dev%20Health&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/healthcheck-dev.yml)
 [![CodeQL](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/codeql.yml?branch=master&label=CodeQL&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/codeql.yml)
-[![Security Inspector](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/securitycheck.yml?branch=master&label=Security%20Inspector&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/securitycheck.yml)
+[![Security Check](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/securitycheck-schedule.yml?branch=develop&label=Security%20Check&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/securitycheck-schedule.yml)
 [![Security Score](https://img.shields.io/endpoint?cacheSeconds=60&url=https%3A%2F%2Fchristophe-freijanes.github.io%2Ffreijstack%2Fsecurity-score.json&style=flat-square)](https://christophe-freijanes.github.io/freijstack/)
 
 ---
