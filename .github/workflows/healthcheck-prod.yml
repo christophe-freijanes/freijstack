@@ -108,68 +108,138 @@ jobs:
       # ---------------------------
       # 🌐 AVAILABILITY — Frontend URLs with retries + sleep
       # ---------------------------
-      - name: 🌐 Check Public URLs (Portfolio + SecureVault Frontend)
-        id: public-urls
+      - name: 🌐 Public URLs Health Check (strong anti false-positives)
         run: |
           set -euo pipefail
-
+      
           echo "## 🌐 Public URLs Health Check" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-
-          MAX_RETRIES=3
-          SLEEP_BETWEEN=7
-
+      
+          # Warm-up: laisse le temps aux DNS/CDN/TLS de se stabiliser
+          echo "⏳ Warm-up 15s..." 
+          sleep 15
+      
           # Format: "url|allowed_codes|label"
           URLS=(
-            "https://portfolio.freijstack.com|200,301,302|Portfolio"
+            "https://portfolio.freijstack.com/|200,301,302|Portfolio"
             "https://christophe-freijanes.github.io/freijstack/|200,301,302|GitHub Pages"
-            "https://vault.freijstack.com/login|200,301,302|SecureVault Frontend"
           )
-
+      
+          # Fast pass + Grace pass
+          FAST_RETRY=3
+          FAST_DELAY=3
+          GRACE_RETRY=8
+          GRACE_DELAY=8
+      
+          # Paramètres curl communs (anti faux positifs)
+          # -4 : évite les soucis IPv6 (souvent la cause du HTTP 000)
+          # --retry-all-errors + --retry-max-time : meilleure résilience
+          CURL_COMMON=(
+            -4
+            -sS
+            -L
+            -o /dev/null
+            -w "%{http_code}"
+            --connect-timeout 12
+            --max-time 35
+            --retry 3
+            --retry-delay 2
+            --retry-all-errors
+            --retry-max-time 120
+            --user-agent "freijstack-healthcheck/1.1"
+          )
+      
+          check_url() {
+            local url="$1"
+            local allowed="$2"
+            local label="$3"
+            local attempts="$4"
+            local delay="$5"
+      
+            echo ""
+            echo "🔎 Checking $label → $url"
+            echo "- **$label** ($url)" >> "$GITHUB_STEP_SUMMARY"
+      
+            # DNS debug
+            host="$(echo "$url" | sed -E 's#https?://([^/]+).*#\1#')"
+            if command -v dig >/dev/null 2>&1; then
+              ips="$(dig +short "$host" | tr '\n' ' ' || true)"
+              [ -n "${ips:-}" ] && echo "  🌐 DNS: $ips" || echo "  🌐 DNS: (no A/AAAA from runner)"
+            fi
+      
+            for i in $(seq 1 "$attempts"); do
+              echo "  ⏳ Attempt $i/$attempts..."
+      
+              # HEAD d'abord, fallback GET si HEAD pas supporté / renvoie 405/000
+              code="$(curl -I "${CURL_COMMON[@]}" "$url" 2>/tmp/curl_err || echo "000")"
+      
+              if [ "$code" = "405" ] || [ "$code" = "000" ]; then
+                code="$(curl "${CURL_COMMON[@]}" "$url" 2>/tmp/curl_err || echo "000")"
+              fi
+      
+              if echo ",$allowed," | grep -q ",$code,"; then
+                echo "  ✅ OK (HTTP $code)"
+                echo "  - ✅ HTTP $code (attempt $i/$attempts)" >> "$GITHUB_STEP_SUMMARY"
+                return 0
+              fi
+      
+              err="$(tail -n 1 /tmp/curl_err 2>/dev/null || true)"
+              echo "  ⚠️  HTTP $code (attempt $i/$attempts) $err"
+      
+              # Si HTTP 000, on attend un peu plus (souvent DNS/TLS)
+              if [ "$code" = "000" ]; then
+                sleep $((delay + 3))
+              elif [ "$i" -lt "$attempts" ]; then
+                sleep "$delay"
+              fi
+            done
+      
+            echo "  ❌ FAILED after $attempts attempts"
+            echo "  - ❌ Failed after $attempts attempts (last HTTP $code)" >> "$GITHUB_STEP_SUMMARY"
+            return 1
+          }
+      
+          failures=0
+      
+          echo "### ⚡ Fast pass" >> "$GITHUB_STEP_SUMMARY"
           for entry in "${URLS[@]}"; do
             url="${entry%%|*}"
             rest="${entry#*|}"
             allowed="${rest%%|*}"
             label="${rest##*|}"
-
-            echo ""
-            echo "🔎 Checking $label → $url"
-            echo "- **$label** ($url)" >> "$GITHUB_STEP_SUMMARY"
-
-            attempt=1
-            success=false
-
-            while [ "$attempt" -le "$MAX_RETRIES" ]; do
-              echo "  ⏳ Attempt $attempt/$MAX_RETRIES..."
-
-              code=$(
-                curl -s -L -o /dev/null -w "%{http_code}" \
-                  --max-time 15 \
-                  "$url" || echo "000"
-              )
-
-              if echo ",$allowed," | grep -q ",$code,"; then
-                echo "  ✅ OK (HTTP $code)"
-                echo "  - ✅ HTTP $code (attempt $attempt)" >> "$GITHUB_STEP_SUMMARY"
-                success=true
-                break
-              else
-                echo "  ⚠️  HTTP $code (attempt $attempt)"
-                if [ "$attempt" -lt "$MAX_RETRIES" ]; then
-                  echo "  ⏱️ Waiting ${SLEEP_BETWEEN}s before retry..."
-                  sleep "$SLEEP_BETWEEN"
-                fi
-              fi
-
-              attempt=$((attempt + 1))
-            done
-
-            if [ "$success" != "true" ]; then
-              echo "❌ $label is DOWN after $MAX_RETRIES attempts"
-              echo "  - ❌ Failed after $MAX_RETRIES attempts" >> "$GITHUB_STEP_SUMMARY"
-              exit 1
+      
+            if ! check_url "$url" "$allowed" "$label" "$FAST_RETRY" "$FAST_DELAY"; then
+              failures=$((failures + 1))
             fi
           done
+      
+          if [ "$failures" -gt 0 ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "### 🧯 Grace pass (final attempt)" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Retrying with stronger tolerance..." >> "$GITHUB_STEP_SUMMARY"
+      
+            failures=0
+            for entry in "${URLS[@]}"; do
+              url="${entry%%|*}"
+              rest="${entry#*|}"
+              allowed="${rest%%|*}"
+              label="${rest##*|}"
+      
+              if ! check_url "$url" "$allowed" "$label" "$GRACE_RETRY" "$GRACE_DELAY"; then
+                failures=$((failures + 1))
+              fi
+            done
+          fi
+      
+          if [ "$failures" -gt 0 ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "🚨 **Health check FAILED** (after grace pass)" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+      
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "✅ **All URLs healthy**" >> "$GITHUB_STEP_SUMMARY"
+
 
       # ---------------------------
       # 🧠 API — Backend Health

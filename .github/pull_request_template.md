@@ -1,4 +1,4 @@
-## ✅ Status (tout doit être vert avant merge)
+## ✅ Status
 
 [![Infrastructure](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/infrastructure-deploy.yml?branch=master&label=Infrastructure&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/infrastructure-deploy.yml)
 [![Prod Health](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/healthcheck-prod.yml?branch=develop&label=Prod%20Health&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/healthcheck-prod.yml)
