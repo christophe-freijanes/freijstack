@@ -39,6 +39,7 @@ jobs:
             @semantic-release/commit-analyzer \
             @semantic-release/release-notes-generator \
             @semantic-release/github \
+            @semantic-release/git \
             @semantic-release/changelog
 
       - name: 🧪 Dry-run on develop (no tag, no release)
