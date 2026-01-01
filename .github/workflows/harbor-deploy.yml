@@ -704,9 +704,23 @@ jobs:
     steps:
       - name: 📬 Deployment Status
         run: |
-          if [ "${{ needs.deploy.result }}" = "success" ]; then
-            echo "✅ Harbor deployment completed successfully!"
-          else
-            echo "❌ Harbor deployment failed"
-            exit 1
-          fi
+          DEPLOY_RESULT="${{ needs.deploy.result }}"
+          
+          case "$DEPLOY_RESULT" in
+            success)
+              echo "✅ Harbor deployment completed successfully!"
+              exit 0
+              ;;
+            skipped)
+              echo "⏭️  Deployment was skipped"
+              echo "   This is normal for:"
+              echo "   - Pull Requests (validation only)"
+              echo "   - Branches other than develop/master"
+              echo "   - workflow_dispatch without matching conditions"
+              exit 0
+              ;;
+            *)
+              echo "❌ Harbor deployment failed (status: $DEPLOY_RESULT)"
+              exit 1
+              ;;
+          esac
