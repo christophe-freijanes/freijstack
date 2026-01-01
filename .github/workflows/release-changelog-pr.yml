@@ -36,7 +36,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          # Pas de cache sinon erreur si pas de lockfile
+          cache: npm
 
       - name: 📦 Install semantic-release tooling
         run: |
