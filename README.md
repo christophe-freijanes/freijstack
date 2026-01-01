@@ -10,15 +10,22 @@
 [![SecureVault](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/securevault-deploy.yml?branch=master&label=SecureVault&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/securevault-deploy.yml)
 [![Portfolio](https://img.shields.io/website?down_color=red&down_message=offline&label=Portfolio&style=flat-square&up_color=brightgreen&up_message=online&url=https%3A%2F%2Fportfolio.freijstack.com)](https://portfolio.freijstack.com)
 [![Last Commit](https://img.shields.io/github/last-commit/christophe-freijanes/freijstack?label=Mise%20%C3%A0%20jour&style=flat-square&color=blue)](https://github.com/christophe-freijanes/freijstack/commits)
-[![Security Score](https://img.shields.io/endpoint?style=flat-square&cacheSeconds=60&url=https%3A%2F%2Fchristophe-freijanes.github.io%2Ffreijstack%2Fsecurity-score.json)](https://christophe-freijanes.github.io/freijstack/)
 [![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square&logo=readme)](LICENSE)
+
 ---
 
 ## 📝 Résumé
 
-**FreijStack** est une stack DevSecOps complète pour déployer, monitorer et sécuriser des applications SaaS (Portfolio, SecureVault, n8n...) sur VPS, avec CI/CD automatisé, infrastructure Docker, monitoring avancé et sécurité intégrée.
+**FreijStack** est une stack DevSecOps complète et production-ready pour déployer, monitorer et sécuriser des applications SaaS (Portfolio, SecureVault, Harbor, n8n...) sur VPS, avec :
 
-Projet maintenu par **Christophe FREIJANES** – Senior Cloud & Security Specialist (DevSecOps).
+✅ **CI/CD automatisé** - GitHub Actions avec 16+ workflows  
+✅ **Infrastructure Docker** - Traefik, nginx, services conteneurisés  
+✅ **Sécurité intégrée** - AES-256-GCM, JWT, RBAC, audit logs  
+✅ **Monitoring 24/7** - Prometheus, Grafana, Loki, alertes  
+✅ **High Availability** - Auto-healing, backups multi-cloud, health checks  
+✅ **Staging automatisé** - Environnements éphémères, tests CI/CD  
+
+Projet maintenu par **Christophe FREIJANES** – Senior Cloud & Security Specialist (DevSecOps)
 
 ---
 
@@ -80,20 +87,24 @@ docker compose up -d --build
 ---
 
 
-## 📚 Documentation
+## 📚 Documentation Complète
 
 | Document | Description |
 |----------|-------------|
-| 📘 [Architecture Technique](docs/architecture.md) | Vue d'ensemble de l'infrastructure, CI/CD, sécurité |
-| 🏗️ [Infrastructure Base](base-infra/README.md) | Docker Compose, Traefik, n8n, intégration |
-| 📌 [Guide Déploiement](docs/DEPLOYMENT.md) | Déploiement complet sur VPS |
-| 🚀 [SecureVault Pro](docs/PRO_DEPLOYMENT.md) | Déploiement avancé SecureVault |
-| 🔐 [SecureVault Manager](saas/securevault/README.md) | Gestionnaire de secrets chiffrés |
-| 🤖 [Automatisation](docs/AUTOMATION.md) | CI/CD, staging éphémère, production 24/7 |
-| 🔄 [Rotation des secrets](docs/SECRET_ROTATION.md) | Automatisation de la rotation des secrets |
-| 📊 [Monitoring](docs/MONITORING.md) | Prometheus, Grafana, alertes, dashboards |
-| 🔍 [Troubleshooting](docs/TROUBLESHOOTING.md) | Diagnostic et résolution des problèmes |
-| 🔖 [Pull Request Template](.github/pull_request_template.md) | Checklist de validation pour les PR |
+| 🗺️ [Index & Navigation](docs/INDEX.md) | Guide complet de navigation de la documentation |
+| 📘 [Architecture Technique](docs/ARCHITECTURE.md) | Vue d'ensemble infrastructure, CI/CD, déploiement |
+| 🏗️ [Infrastructure Base](base-infra/README.md) | Docker Compose, Traefik v2, n8n, intégration |
+| 📌 [Guide Déploiement](docs/DEPLOYMENT.md) | Déploiement complet sur VPS, étape par étape |
+| 🚀 [SecureVault Pro](docs/PRO_DEPLOYMENT.md) | Déploiement avancé SecureVault production |
+| 📊 [CI/CD Architecture](docs/CI_CD_ARCHITECTURE.md) | Diagramme Mermaid, 16 workflows documentés |
+| 🤖 [Guide Automatisation](docs/AUTOMATION_GUIDE.md) | CI/CD, staging éphémère, health checks, rollback |
+| 🔐 [SecureVault Manager](saas/securevault/README.md) | Gestionnaire de secrets chiffrés, AES-256-GCM |
+| 🐳 [Applications SaaS](saas/README.md) | Portfolio, SecureVault, Harbor - Vue d'ensemble |
+| 📊 [Monitoring & Alertes](docs/MONITORING.md) | Prometheus, Grafana, Loki, dashboards |
+| 🔍 [Troubleshooting](docs/TROUBLESHOOTING.md) | Diagnostic, CORS, Registration, déploiement |
+| 🔐 [Sécurité](SECURITY.md) | Bonnes pratiques, secrets, chiffrement |
+| 📋 [Audit Documentaire](docs/DOCUMENTATION_AUDIT.md) | Audit complet de la documentation |
+| 🔖 [Pull Request Template](.github/pull_request_template.md) | Checklist validation PR |
 
 ---
 
@@ -105,35 +116,71 @@ docker compose up -d --build
 ```
 freijstack/
 ├── .github/
-│   ├── workflows/           # CI/CD pipelines (GitHub Actions)
-│   │   ├── infrastructure-deploy.yml  # Traefik, n8n, portfolio
-│   │   ├── securevault-deploy.yml     # SecureVault (staging auto, prod manual)
-│   │   ├── rotate-secrets.yml         # Rotation secrets SecureVault
-│   │   └── pr-title-automation.yml    # Auto-format PR titles
+│   ├── workflows/                    # 16+ GitHub Actions workflows
+│   │   ├── infrastructure-deploy.yml    # Traefik + n8n + portfolio
+│   │   ├── securevault-deploy.yml      # SecureVault prod/staging
+│   │   ├── codeql.yml                  # SAST security scanning
+│   │   ├── gitleaks.yml                # Secret detection
+│   │   ├── trivy-scan.yml              # Vulnerability scanning
+│   │   ├── healthcheck-prod.yml        # 24/7 monitoring production
+│   │   └── ...autres workflows
 │   └── pull_request_template.md
-├── base-infra/              # 🏗️ Infrastructure centralisée
-│   ├── docker compose.yml   # Traefik + n8n + portfolio (prod + staging)
-│   ├── BASE_INTEGRATION.md  # Guide d'intégration
-│   └── README.md            # Documentation infrastructure
-├── saas/                    # 🚀 Applications SaaS
-│   ├── README.md            # Vue d'ensemble SaaS
-│   └── securevault/         # 🔐 Gestionnaire de secrets chiffrés
-│       ├── backend/
-│       ├── frontend/
-│       ├── docker compose.yml          # Production
-│       ├── docker compose.staging.yml  # Staging
-│       └── README.md
-├── docs/
-│   ├── architecture.md      # Documentation technique
-│   ├── DEPLOYMENT.md
-│   ├── MONITORING.md
-│   ├── README.md
-│   └── ...
-├── scripts/
-│   ├── generate-secrets.ps1
-│   └── rotate-secrets.sh
-├── package.json
-└── README.md                # Ce fichier
+│
+├── base-infra/                      # 🏗️ Infrastructure centralisée
+│   ├── docker-compose.yml              # Traefik + n8n + portfolio
+│   ├── BASE_INTEGRATION.md             # Guide d'intégration services
+│   └── README.md                       # Documentation infrastructure
+│
+├── saas/                            # 🚀 Applications SaaS
+│   ├── portfolio/                      # 🌐 Portfolio multilingue
+│   │   ├── index.html
+│   │   ├── style.css
+│   │   ├── script.js
+│   │   ├── public/                     # Images, favicons, assets
+│   │   └── README.md
+│   ├── securevault/                    # 🔐 Gestionnaire secrets
+│   │   ├── backend/                    # Node.js + Express
+│   │   ├── frontend/                   # React 18
+│   │   ├── docker-compose.yml          # Production
+│   │   ├── docker-compose.staging.yml  # Staging overrides
+│   │   └── README.md
+│   ├── harbor/                         # 🐳 Container Registry
+│   │   ├── docker-compose.yml
+│   │   └── README.md
+│   └── README.md                       # Vue d'ensemble SaaS
+│
+├── docs/                            # 📚 Documentation
+│   ├── INDEX.md                        # Navigation principale
+│   ├── ARCHITECTURE.md                 # Architecture technique
+│   ├── CI_CD_ARCHITECTURE.md           # CI/CD avec Mermaid
+│   ├── AUTOMATION_GUIDE.md             # Guide automatisation
+│   ├── DEPLOYMENT.md                   # Déploiement VPS
+│   ├── MONITORING.md                   # Prometheus/Grafana/Loki
+│   ├── TROUBLESHOOTING.md              # Diagnostic & solutions
+│   ├── PRO_DEPLOYMENT.md               # Features avancées
+│   └── ...autres documentations
+│
+├── docs-private/                    # 🔒 Documentation sensible
+│   ├── SECRET_ROTATION.md              # Rotation des secrets
+│   ├── SSO_SAML_CONFIG.md              # Configuration SAML
+│   └── README_RESET_PASSWORD.md        # Reset PostgreSQL
+│
+├── scripts/                         # 🛠️ Scripts utilitaires
+│   ├── backup-to-cloud.sh              # Backup AWS S3 + Azure
+│   ├── generate-secrets.ps1            # Génération secrets
+│   ├── rotate-secrets.sh               # Rotation sécurisée
+│   ├── run-migrations.sh               # Migrations DB
+│   ├── security-check.sh               # Audits sécurité
+│   └── ...autres scripts
+│
+├── .gitignore
+├── .gitleaks.toml                   # Config Gitleaks
+├── .releaserc                       # Config semantic-release
+├── CHANGELOG.md                     # Historique releases
+├── SECURITY.md                      # Politique sécurité
+├── LICENSE                          # All Rights Reserved
+├── package.json                     # Config sémantic-release
+└── README.md                        # Ce fichier
 ```
 
 ## 🎯 Sections
