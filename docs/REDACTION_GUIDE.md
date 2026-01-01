@@ -125,8 +125,8 @@ JWT_ISSUER=freijstack.com   # ✅ OK
 ```markdown
 # ❌ AVANT
 POSTGRES_PASSWORD=Tr0pic@lFruit#92$Safe!
-DB_CONNECTION_STRING=postgresql://admin:MyP@ssw0rd@db.internal:5432/vault_db
-MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/dbname
+DB_CONNECTION_STRING=postgresql://admin:<REDACTED>@db.internal:5432/vault_db
+MONGODB_URI=mongodb+srv://user:<REDACTED>@cluster.mongodb.net/dbname
 
 # ✅ APRÈS
 POSTGRES_PASSWORD=<REDACTED>
