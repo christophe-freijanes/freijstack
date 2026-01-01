@@ -70,7 +70,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: security
     if: |
-      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) || 
+      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) ||
+      (github.event_name == 'pull_request') ||
       github.event_name == 'workflow_dispatch'
 
     steps:
@@ -370,7 +371,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: validate
     if: |
-      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) || 
+      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) ||
       github.event_name == 'workflow_dispatch'
 
     steps:
@@ -444,7 +445,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: cleanup
     if: |
-      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) || 
+      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) ||
       github.event_name == 'workflow_dispatch'
     environment:
       name: ${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
