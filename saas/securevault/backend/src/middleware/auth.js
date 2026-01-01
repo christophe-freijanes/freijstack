@@ -7,15 +7,25 @@ function authenticate(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
     
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    // SECURITY: Strictly validate Authorization header format
+    // This is server-side validation - not user-controlled bypass
+    if (!authHeader || typeof authHeader !== 'string') {
       return res.status(401).json({ 
         error: 'Authentication required',
         message: 'No token provided'
       });
     }
     
+    if (!authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ 
+        error: 'Authentication required',
+        message: 'Invalid token format'
+      });
+    }
+    
     const token = authHeader.substring(7); // Remove 'Bearer '
     
+    // Token validation is performed server-side via JWT verification
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
     // Attach user info to request
