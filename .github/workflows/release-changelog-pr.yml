@@ -3,6 +3,7 @@ name: 📝 Release PR • Update CHANGELOG
 on:
   push:
     branches: [master]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -17,6 +18,7 @@ jobs:
     name: 📝 Generate CHANGELOG PR
     runs-on: ubuntu-latest
 
+    # Évite boucle infinie (commits auto)
     if: >
       !contains(github.event.head_commit.message, 'chore(release): update CHANGELOG') &&
       !contains(github.event.head_commit.message, '[skip changelog]') &&
@@ -27,11 +29,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # Important: utiliser le PAT pour pouvoir push une branche
+          token: ${{ secrets.RELEASE_TOKEN }}
 
       - name: 🟢 Setup Node.js (LTS)
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
 
       - name: 📦 Install semantic-release tooling
         run: |
@@ -50,18 +55,25 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "🔎 Running semantic-release in dry-run…"
           npx semantic-release --dry-run --no-ci | tee sr.log
 
-          if grep -q "The next release version is" sr.log; then
-            version="$(grep -Eo 'The next release version is [0-9]+\.[0-9]+\.[0-9]+' sr.log | tail -n1 | awk '{print $6}')"
-            echo "next_release=true" >> "$GITHUB_OUTPUT"
-            echo "version=${version}" >> "$GITHUB_OUTPUT"
-            echo "✅ Next version: ${version}"
-          else
+          # Pas de release => stop
+          if grep -q "no new version is released" sr.log; then
             echo "next_release=false" >> "$GITHUB_OUTPUT"
             echo "✅ No release detected."
+            exit 0
           fi
+
+          version="$(grep -Eo 'The next release version is [0-9]+\.[0-9]+\.[0-9]+' sr.log | tail -n1 | awk '{print $6}')"
+          if [ -z "${version:-}" ]; then
+            echo "next_release=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ Could not determine next version."
+            exit 0
+          fi
+
+          echo "next_release=true" >> "$GITHUB_OUTPUT"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "✅ Next version: ${version}"
 
       - name: 🔍 Detect CHANGELOG changes
         id: diff
@@ -84,7 +96,27 @@ jobs:
           echo "- 🔢 Next version: **${{ steps.sr.outputs.version }}**" >> "$GITHUB_STEP_SUMMARY"
           echo "- 📄 CHANGELOG updated: **${{ steps.diff.outputs.changed }}**" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: 🚀 Create/Update PR for CHANGELOG (via gh)
+      - name: 🌿 Create branch + commit CHANGELOG
+        if: ${{ steps.sr.outputs.next_release == 'true' && steps.diff.outputs.changed == 'true' }}
+        env:
+          VERSION: ${{ steps.sr.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          BRANCH="chore/release-changelog-v${VERSION}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b "$BRANCH"
+          git add CHANGELOG.md
+          git commit -m "chore(release): update CHANGELOG for v${VERSION} [skip ci]"
+
+          git push origin "$BRANCH"
+
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: 🧷 Create Pull Request (via gh)
         if: ${{ steps.sr.outputs.next_release == 'true' && steps.diff.outputs.changed == 'true' }}
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
@@ -93,42 +125,20 @@ jobs:
           set -euo pipefail
 
           BRANCH="chore/release-changelog-v${VERSION}"
-          TITLE="chore(release): update CHANGELOG for v${VERSION}"
-          BODY=$(cat <<'EOF'
-          📝 Cette PR met à jour `CHANGELOG.md` pour la version **v'"${VERSION}"'**.
 
-          ✅ Générée automatiquement via `semantic-release --dry-run`.
-          🔒 Compatible avec une branche `master` protégée (PR-only).
-
-          > Tip: merge cette PR, puis le workflow Release créera le tag + la GitHub Release.
-          EOF
-          )
-
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git checkout -b "$BRANCH"
-
-          git add CHANGELOG.md
-          git commit -m "chore(release): update CHANGELOG for v${VERSION} [skip ci]"
-
-          git push --force --set-upstream origin "$BRANCH"
-
-          # Si une PR existe déjà, on ne la recrée pas
-          existing="$(gh pr list --base master --head "$BRANCH" --json number --jq '.[0].number // empty' || true)"
-          if [ -n "$existing" ]; then
-            echo "✅ PR already exists: #$existing"
-            echo "- 🔁 PR already exists: **#$existing**" >> "$GITHUB_STEP_SUMMARY"
+          # Si la PR existe déjà, ne rien faire
+          if gh pr list --base master --head "$BRANCH" --json number --jq 'length' | grep -q '^[1-9]'; then
+            echo "✅ PR already exists for $BRANCH"
             exit 0
           fi
 
-          pr_url="$(gh pr create \
+          gh pr create \
             --base master \
             --head "$BRANCH" \
-            --title "$TITLE" \
-            --body "$BODY" \
+            --title "chore(release): update CHANGELOG for v${VERSION}" \
+            --body $'📝 Cette PR met à jour `CHANGELOG.md` pour la version **v'${VERSION}$'**.\n\n✅ Générée automatiquement via `semantic-release --dry-run`.\n🔒 Compatible avec une branche `master` protégée (PR-only).\n\n> Tip: merge cette PR, puis le workflow Release créera le tag + la GitHub Release.' \
             --label "release" \
-            --label "changelog")"
+            --label "changelog"
 
-          echo "✅ PR created: $pr_url"
-          echo "- 🧷 PR: $pr_url" >> "$GITHUB_STEP_SUMMARY"
+      - name: ✅ Done
+        run: echo "✅ Release changelog PR pipeline finished."
