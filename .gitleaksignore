@@ -1,0 +1,23 @@
+# .gitleaksignore
+# 
+# Patterns à ignorer lors des scans Gitleaks
+# Format: <filepath>:<line_number>
+
+# Documentation REDACTION_GUIDE.md - exemples de patterns
+docs/REDACTION_GUIDE.md:146
+docs/REDACTION_GUIDE.md:150
+docs/REDACTION_GUIDE.md:154
+
+# Documentation SECURITY_AUDIT.md - exemples API keys
+docs/SECURITY_AUDIT.md:131
+
+# Code examples et documentation
+docs/EXAMPLES.md:*
+
+# Template files
+.env.example
+
+# Test fixtures
+tests/fixtures/**
+
+# End of gitleaksignore
