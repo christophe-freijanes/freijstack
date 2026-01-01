@@ -3,29 +3,46 @@
 [![GitHub](https://img.shields.io/badge/repo-github-blue?style=flat-square&logo=github)](https://github.com/christophe-freijanes/freijstack)
 [![Status](https://img.shields.io/badge/status-active-success?style=flat-square&logo=checklist)](../README.md)
 [![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square)](../LICENSE)
-[![Last Updated](https://img.shields.io/badge/updated-December%202025-blue?style=flat-square&logo=calendar)](../README.md)
+[![Last Updated](https://img.shields.io/badge/updated-January%202026-blue?style=flat-square&logo=calendar)](../README.md)
 
-Index de la documentation technique du projet.
+Index de la documentation technique du projet FreijStack.
 
 ---
 
-## 📖 Documents Disponibles
+## 🎯 Navigation Rapide
+
+### 📖 Lire l'Index Complet
+👉 **[INDEX.md](./INDEX.md)** - Guide complet de navigation par besoin, par rôle, par mot-clé
+
+### 🚀 Démarrage Rapide
+- **Nouveau sur le projet ?** → [README Principal](../README.md) + [QUICK_DEPLOY_GUIDE.md](./QUICK_DEPLOY_GUIDE.md)
+- **Besoin de déployer ?** → [DEPLOYMENT.md](./DEPLOYMENT.md) + [CI_CD_ARCHITECTURE.md](./CI_CD_ARCHITECTURE.md)
+- **Un problème à résoudre ?** → [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
+
+---
+
+## 📖 Documents Disponibles (16)
 
 | Document | Description | Lien |
 |----------|-------------|------|
+| 📚 **INDEX Navigation** | 🆕 Guide complet navigation par besoin/rôle | [INDEX.md](INDEX.md) |
 | 🏠 **README Principal** | Vue d'ensemble du projet | [../README.md](../README.md) |
 | 🔗 **Integration Guide** | Guide d'intégration infrastructure + apps | [../base-infra/BASE_INTEGRATION.md](../base-infra/BASE_INTEGRATION.md) |
-| 🏗️ **Infrastructure Base** | Docker Compose, Traefik, n8n, portfolio | [../base-infra/README.md](../base-infra/README.md) |
-| 🐳 **Structure Docker** | Organisation containers, volumes, réseaux | [DOCKER_STRUCTURE.md](DOCKER_STRUCTURE.md) |
-| 🏗️ **Architecture Technique** | Infrastructure, CI/CD, déploiement | [architecture.md](architecture.md) |
-| 📌 **Guide Déploiement** | VPS, Docker, Traefik, rollback | [DEPLOYMENT.md](DEPLOYMENT.md) |
-| 🔐 **SecureVault Deployment** | Pipeline CI/CD dédiée, configuration VPS | [SECUREVAULT_DEPLOYMENT.md](SECUREVAULT_DEPLOYMENT.md) |
-| 🤖 **Automatisation Complète** | Zéro-intervention, staging éphémère, prod 24/7 | [AUTOMATION.md](AUTOMATION.md) |
-| 🔄 **Secret Rotation** | Automatisation rotation des secrets | [SECRET_ROTATION.md](SECRET_ROTATION.md) |
-| 🔍 **Guide Troubleshooting** | Diagnostic et résolution des problèmes | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) |
-| 📊 **Guide Monitoring** | Prometheus, Grafana, Loki, alertes | [MONITORING.md](MONITORING.md) |
-| 🚀 **SecureVault** | Gestionnaire de secrets chiffrés | [../saas/securevault/README.md](../saas/securevault/README.md) |
-| ✅ **Pull Request Template** | Checklist de validation PR | [../.github/pull_request_template.md](../.github/pull_request_template.md) |
+| 🏗️ **Architecture Technique** | Infrastructure, stack, CI/CD, sécurité | [ARCHITECTURE.md](ARCHITECTURE.md) |
+| 📊 **CI/CD Architecture** | 🆕 Diagramme Mermaid + 16 workflows | [CI_CD_ARCHITECTURE.md](CI_CD_ARCHITECTURE.md) |
+| 🤖 **Automatisation Guide** | 🆕 Guide complet automation consolidé | [AUTOMATION_GUIDE.md](AUTOMATION_GUIDE.md) |
+| 📌 **Guide Déploiement** | VPS setup, Docker, Traefik, rollback | [DEPLOYMENT.md](DEPLOYMENT.md) |
+| 🐳 **Structure Docker** | Containers, volumes, réseaux, composition | [DOCKER_STRUCTURE.md](DOCKER_STRUCTURE.md) |
+| 🚀 **Démarrage Rapide** | 5 minutes pour déployer | [QUICK_DEPLOY_GUIDE.md](QUICK_DEPLOY_GUIDE.md) |
+| 🔐 **SecureVault Deploy** | Pipeline CI/CD dédiée SecureVault | [SECUREVAULT_DEPLOYMENT.md](SECUREVAULT_DEPLOYMENT.md) |
+| 🔍 **Troubleshooting** | ✨ Enrichi : dépannage + CORS + Registration | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) |
+| 📊 **Guide Monitoring** | Prometheus, Grafana, Loki, alertes, dashboards | [MONITORING.md](MONITORING.md) |
+| 👤 **Guide Utilisateur** | SecureVault features, utilisation | [USER_GUIDE.md](USER_GUIDE.md) |
+| 🔍 **Système d'Audit** | Audit logs, traçabilité, compliance | [AUDIT_SYSTEM.md](AUDIT_SYSTEM.md) |
+| 💾 **Cloud Backup** | Stratégie AWS S3 + Azure Blob, rétention | [CLOUD_BACKUP.md](CLOUD_BACKUP.md) |
+| 🏢 **PRO Deployment** | Guide PRO/Enterprise avec SLA | [PRO_DEPLOYMENT.md](PRO_DEPLOYMENT.md) |
+| 🗺️ **Features Roadmap** | Roadmap produit, features plannifiées | [FEATURES_ROADMAP.md](FEATURES_ROADMAP.md) |
+| 📋 **Documentation Audit** | 🆕 Audit + plan d'optimisation | [DOCUMENTATION_AUDIT.md](DOCUMENTATION_AUDIT.md)
 
 ---
 
