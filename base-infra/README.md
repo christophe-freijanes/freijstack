@@ -1,131 +1,181 @@
 # 🏗️ Infrastructure de Base
 
 [![Docker Compose](https://img.shields.io/badge/docker-compose-2496ED?style=flat-square&logo=docker)](./docker-compose.yml)
-[![Traefik](https://img.shields.io/badge/proxy-Traefik%20v2-blue?style=flat-square&logo=traefik)](./docker-compose.yml)
-[![nginx](https://img.shields.io/badge/webserver-nginx-green?style=flat-square&logo=nginx)](./docker-compose.yml)
-[![n8n](https://img.shields.io/badge/automation-n8n-orange?style=flat-square&logo=n8n)](./docker-compose.yml)
+[![Traefik](https://img.shields.io/badge/proxy-Traefik%20v2.10-blue?style=flat-square&logo=traefik)](./docker-compose.yml)
+[![nginx](https://img.shields.io/badge/webserver-nginx:alpine-green?style=flat-square&logo=nginx)](./docker-compose.yml)
+[![n8n](https://img.shields.io/badge/automation-n8n%20latest-orange?style=flat-square&logo=n8n)](./docker-compose.yml)
 [![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square)](../LICENSE)
 
-Infrastructure centralisée partagée par toutes les applications (Portfolio, SecureVault, etc.).
+---
+
+## 📋 Vue d'ensemble
+
+**Infrastructure centralisée** et partagée par toutes les applications SaaS (Portfolio, SecureVault, Harbor, etc.).
+
+Gère le reverse proxy, l'automation, et les services web statiques avec SSL/TLS automatique, santé checks, et monitoring.
 
 ---
 
-## 📋 Contenu
+## 📦 Services Inclus
 
-### Services Gérés
+### 🔄 Traefik v2.10 (Reverse Proxy)
 
+Reverse proxy moderne avec gestion SSL/TLS automatique et routage intelligent.
+
+```yaml
+Ports:
+  80 (HTTP) → Redirect 301 vers HTTPS
+  443 (HTTPS) → TLS 1.3
+  8080 (API) → Dashboard (insecure mode, localhost only)
 ```
-base-infra/
-├── docker-compose.yml      # Configuration centralisée
-├── README.md               # Ce fichier
-└── BASE_INTEGRATION.md     # Guide d'intégration globale
-```
 
-### 🔧 Services Inclus
+**Fonctionnalités**:
+- ✅ Certificats Let's Encrypt (ACME HTTP-01)
+- ✅ Renouvellement automatique
+- ✅ Routage par hostname (virtualhosts)
+- ✅ Middleware de sécurité (HSTS, CSP, etc.)
+- ✅ Health checks intégrés
+- ✅ Dashboard web
+- ✅ Métriques Prometheus
 
-1. **Traefik v2.10**
-   - Reverse proxy moderne
-   - Gestion automatique SSL/TLS (Let's Encrypt)
-   - Routage par hostname
-   - API dashboard disponible
-   - Network `web` pour communication avec toutes les apps
-
-2. **n8n (latest)**
-   - Plateforme d'automation no-code
-   - Domain: automation.freijstack.com
-   - Volume: n8n_data (persistant)
-
-3. **Portfolio (nginx alpine)**
-   - Production: portfolio.freijstack.com
-   - Staging: portfolio-staging.freijstack.com
-   - Fichiers statiques depuis /srv/www/
-
-### 🏛️ Applications Séparées
-
-Seul **SecureVault** a sa propre configuration :
-
-| Application | Emplacement | Docker Compose |
-|-------------|-------------|----------------|
-| **SecureVault** | `saas/securevault/` | `docker-compose.yml` (prod) + `docker-compose.staging.yml` |
-
-**Toutes communiquent** avec Traefik via le network Docker `web`.
-
-**Guide complet**: [BASE_INTEGRATION.md](./BASE_INTEGRATION.md)
+**Network**: `web` (partagé avec toutes les apps)
 
 ---
 
-## 🚀 Déploiement
+### 🤖 n8n (Automation Platform)
+
+Plateforme no-code/low-code d'automation et de workflows.
+
+```
+Domain: automation.freijstack.com (ou n8n.freijstack.com)
+Port (local): 5678
+Volume: n8n_data (persistant)
+```
+
+**Fonctionnalités**:
+- 📦 400+ intégrations natives
+- 🎯 Visual workflow builder
+- ⏰ Scheduling & webhooks
+- 📊 Data transformation
+- 🔐 Credential management
+- 📈 Audit logs
+
+**Démarrage**:
+```bash
+# Via docker-compose ci-dessous
+# Accessible sur: https://n8n.freijstack.com
+```
+
+---
+
+### 📁 Portfolio (nginx:alpine)
+
+Serveur web statique pour le portfolio avec support multi-environnement.
+
+```
+Production:  portfolio.freijstack.com
+Staging:     portfolio-staging.freijstack.com
+Port (local): 80
+Volume:      /srv/www/ (servi par nginx)
+```
+
+**Fichiers servis**:
+- `index.html` - Page principale
+- `style.css` - Styles
+- `script.js` - Logique client
+- `public/` - Assets (images, favicons, etc.)
+
+---
+
+## 🚀 Démarrage Rapide
 
 ### Prérequis
 
 - Docker 20.10+
 - Docker Compose v2+
-- Accès SSH au VPS (pour production)
-- Variables d'environnement configurées
+- 1GB RAM minimum
+- Accès aux ports 80 et 443
 
-### Variables d'Environnement
+### 1. Cloner & Configurer
 
-Créer un fichier `.env` à la racine ou dans `base-infra/` :
+```bash
+cd base-infra
 
-```env
-# Domaine principal
-DOMAIN_NAME=freijstack.com
-SSL_EMAIL=your-email@example.com
+# Créer le fichier .env
+cp .env.example .env
+nano .env
 
-# Portfolio
+# Variables essentielles:
+DOMAIN_NAME=freijstack.com           # Votre domaine
+SSL_EMAIL=your-email@example.com     # Email Let's Encrypt
 SUBDOMAIN_PORTFOLIO=portfolio
 SUBDOMAIN_PORTFOLIO_STAGING=portfolio-staging
-
-# n8n
 SUBDOMAIN_N8N=n8n
 GENERIC_TIMEZONE=Europe/Paris
 ```
 
-### Démarrer Localement
+### 2. Créer les Volumes & Networks
 
 ```bash
-cd base-infra
-
-# Créer volumes
+# Créer volume pour Traefik (certificats)
 docker volume create traefik_data
+
+# Créer volume pour n8n
+docker volume create n8n_data
 
 # Créer network Docker partagé
 docker network create web
-
-# Démarrer Traefik
-docker-compose up -d
 ```
 
-Services accessibles :
-- **Traefik Dashboard**: http://localhost:8080 (insecure mode)
-- **Pour les applications**: voir [BASE_INTEGRATION.md](./BASE_INTEGRATION.md)
-
-### En Production (VPS)
+### 3. Démarrer les Services
 
 ```bash
-# SSH vers VPS
-ssh user@your-vps.com
+# Démarrer tous les services
+docker compose up -d
 
-# Cloner le repo
-git clone https://github.com/christophe-freijanes/freijstack.git
-cd freijstack
+# Vérifier le statut
+docker compose ps
 
-# Créer network Docker
-docker network create web
+# Vérifier les logs
+docker compose logs -f
+```
 
-# Démarrer Traefik
-cd base-infra
-docker volume create traefik_data
-docker-compose up -d
+### 4. Accès Services
 
-# Vérifier status
-docker-compose ps
-docker-compose logs -f
+```
+✅ Traefik Dashboard:    http://localhost:8080  (insecure mode)
+✅ n8n:                  https://n8n.freijstack.com
+✅ Portfolio:            https://portfolio.freijstack.com
+✅ Portfolio Staging:    https://portfolio-staging.freijstack.com
+```
 
-# Démarrer les applications (voir BASE_INTEGRATION.md)
-cd ../saas/portfolio && docker-compose up -d
-cd ../saas/n8n && docker-compose up -d
-cd ../saas/securevault && docker-compose up -d
+---
+
+## 🏛️ Configuration Docker Compose
+
+### Services
+
+```yaml
+services:
+  traefik:           # Reverse proxy + SSL
+  n8n:               # Automation platform
+  portfolio:         # Web server statique
+```
+
+### Volumes
+
+```yaml
+volumes:
+  traefik_data:      # Certificats Let's Encrypt (persistant)
+  n8n_data:          # Données n8n (persistant)
+  /srv/www/:         # Portfolio files (bind mount)
+```
+
+### Networks
+
+```yaml
+networks:
+  web:               # Partagé avec toutes les applications
 ```
 
 ---
@@ -133,128 +183,229 @@ cd ../saas/securevault && docker-compose up -d
 ## 📊 Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                  Internet / DNS                      │
-└────────┬─────────────────────────────────────────────┘
-         │
-         ▼
-┌─────────────────────────────────────────────────────┐
-│        Traefik (Reverse Proxy + SSL/TLS)           │
-│  Ports: 80 (redirect → 443), 443 (HTTPS)           │
-└──────┬──────────────────┬──────────────────┬────────┘
-       │                  │                  │
-       ▼                  ▼                  ▼
-┌─────────────────┐ ┌──────────────┐ ┌─────────────────┐
-│   nginx (vol)   │ │     n8n      │ │   portfolio/*   │
-│   /srv/www      │ │   (port 5678)│ │   (staging)     │
-│ (Portfolio)     │ │              │ │                 │
-└─────────────────┘ └──────────────┘ └─────────────────┘
+┌──────────────────────────────────────────┐
+│          Internet / DNS                  │
+│   portfolio.freijstack.com              │
+│   n8n.freijstack.com                    │
+│   automation.freijstack.com             │
+└────────────┬─────────────────────────────┘
+             │
+             ▼
+     ┌───────────────┐
+     │  Traefik v2   │
+     │ (Port 80/443) │
+     └───────┬───────┘
+             │
+    ┌────────┼────────┬────────┐
+    │        │        │        │
+    ▼        ▼        ▼        ▼
+  ┌───┐  ┌─────┐  ┌────┐  ┌──────┐
+  │n8n│  │Port.│  │Port.│  │Other │
+  │   │  │Prod │  │Stage│  │Apps  │
+  └───┘  └─────┘  └────┘  └──────┘
 ```
 
 ---
 
 ## 🔐 Sécurité
 
-✅ **Traefik**:
-- Let's Encrypt ACME challenge (HTTP-01)
-- Certificats SSL/TLS automatiques
-- Redirection HTTP → HTTPS
-- Security headers (HSTS, CSP, etc.)
+### TLS/HTTPS
 
-✅ **Volumes**:
-- Données persistantes dans volumes Docker
-- Backups réguliers des certificats Let's Encrypt
-- Isolation réseau Docker
+✅ Certificats Let's Encrypt automatiques  
+✅ Renouvellement 30 jours avant expiration  
+✅ Redirection HTTP → HTTPS (301)  
+✅ TLS 1.3 uniquement (no TLS 1.0/1.1/1.2)  
+✅ Ciphers modernes (ECDHE, ChaCha20)  
 
-✅ **Authentification n8n**:
-- Configuration via variables d'environnement
-- Tokens sécurisés pour API
-- Logs d'audit des workflows
+### Headers Sécurité
 
----
+```
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-XSS-Protection: 1; mode=block
+Content-Security-Policy: (appliqué par apps)
+```
 
-## 📡 Routage Traefik
+### Network Docker
 
-### Domaines Configurés
-
-Traefik route automatiquement basé sur les labels des applications :
-
-| Service | URL | Géré par |
-|---------|-----|----------|
-| Portfolio Prod | `portfolio.freijstack.com` | saas/portfolio/docker-compose.yml |
-| Portfolio Staging | `portfolio-staging.freijstack.com` | saas/portfolio/docker-compose.yml |
-| SecureVault Frontend | `vault.freijstack.com` | saas/securevault/docker-compose.yml |
-| SecureVault Backend | `vault-api.freijstack.com` | saas/securevault/docker-compose.yml |
-| n8n | `n8n.freijstack.com` | saas/n8n/docker-compose.yml |
-
-**Note**: Chaque application définit ses propres labels Traefik dans son docker-compose.yml
+✅ Services isolés (network `web`)  
+✅ Pas d'exposition de ports internes  
+✅ Communication par DNS Docker  
 
 ---
 
-## 🛠️ Maintenance
+## 🛠️ Maintenance & Monitoring
 
-### Logs & Monitoring
+### Logs en Temps Réel
 
 ```bash
-# Logs Traefik
-docker-compose logs traefik -f
+# Tous les logs
+docker compose logs -f
 
-# Logs n8n
-docker-compose logs n8n -f
+# Traefik uniquement
+docker compose logs -f traefik
 
-# Logs nginx (portfolio)
-docker-compose logs portfolio -f
+# n8n uniquement
+docker compose logs -f n8n
 
-# Status tous les services
-docker-compose ps
+# Portfolio uniquement
+docker compose logs -f portfolio
+```
+
+### Statut Services
+
+```bash
+# Vérifier tous les containers
+docker compose ps
 
 # Vérifier santé Traefik
-curl http://localhost:8080/ping
+curl -v http://localhost:8080/ping
+# Réponse: OK (code 200)
+
+# Vérifier santé n8n
+curl https://n8n.freijstack.com/health
+# Réponse: {"status": "ok"}
+
+# Vérifier Portfolio
+curl -I https://portfolio.freijstack.com
+# Réponse: HTTP/2 200
 ```
 
-### Renouvellement Certificats
-
-Les certificats Let's Encrypt sont gérés automatiquement par Traefik :
+### Redémarrage Services
 
 ```bash
-# Vérifier certificats
-docker-compose exec traefik ls -la /letsencrypt/
+# Redémarrer un service
+docker compose restart traefik
+docker compose restart n8n
+docker compose restart portfolio
 
-# Forcer renouvellement (si besoin)
-docker-compose restart traefik
+# Redémarrer tous les services
+docker compose restart
+
+# Redémarrer avec rebuild (si changements images)
+docker compose up -d --build
 ```
 
-### Mise à Jour
+### Certificats Let's Encrypt
+
+```bash
+# Lister certificats
+docker compose exec traefik ls -la /letsencrypt/
+
+# Vérifier expiration
+docker compose exec traefik openssl x509 -in /letsencrypt/acme.json -text -noout | grep -A2 "Validity"
+
+# Forcer renouvellement
+docker compose restart traefik
+```
+
+### Mises à Jour Images
 
 ```bash
 # Vérifier nouvelles versions
-docker-compose pull
+docker compose pull
 
-# Redémarrer services avec nouvelles images
-docker-compose up -d
+# Appliquer (redémarrage auto)
+docker compose up -d
+
+# Supprimer anciennes images
+docker image prune -f
 ```
 
 ---
 
-## 🔗 Ressources & Liens
+## 🔧 Configuration Avancée
 
-- [Guide d'Intégration Complet](./BASE_INTEGRATION.md) - Architecture et déploiement
-- [Portfolio](../saas/portfolio/README.md) - Application web statique
-- [SecureVault Manager](../saas/securevault/README.md) - Gestionnaire de secrets
-- [n8n Automation](../saas/n8n/README.md) - Plateforme d'automation
-- [Traefik Documentation](https://doc.traefik.io/)
+### Variables d'Environnement Complètes
+
+```env
+# Domaine & Email
+DOMAIN_NAME=freijstack.com
+SSL_EMAIL=admin@freijstack.com
+
+# Portfolio subdomains
+SUBDOMAIN_PORTFOLIO=portfolio
+SUBDOMAIN_PORTFOLIO_STAGING=portfolio-staging
+
+# n8n
+SUBDOMAIN_N8N=n8n
+GENERIC_TIMEZONE=Europe/Paris
+N8N_BASIC_AUTH_ACTIVE=true
+N8N_BASIC_AUTH_USER=admin
+N8N_BASIC_AUTH_PASSWORD=secure_password
+
+# Traefik (optionnel)
+TRAEFIK_DASHBOARD_USER=traefik
+TRAEFIK_DASHBOARD_PASSWORD=secure_password
+```
+
+### Ajouter une Nouvelle Application
+
+Pour ajouter une nouvelle app (ex: Harbor, Redis, etc.):
+
+1. **Créer docker-compose.yml** dans le dossier app:
+   ```yaml
+   version: '3.8'
+   services:
+     app:
+       image: app:latest
+       networks:
+         - web
+       labels:
+         - traefik.enable=true
+         - traefik.http.routers.app.rule=Host(`app.freijstack.com`)
+         - traefik.http.routers.app.entrypoints=websecure
+         - traefik.http.routers.app.tls.certresolver=letsencrypt
+         - traefik.http.services.app.loadbalancer.server.port=3000
+   
+   networks:
+     web:
+       external: true
+   ```
+
+2. **Démarrer l'app**:
+   ```bash
+   cd ../saas/app
+   docker compose up -d
+   ```
+
+3. **Traefik routera automatiquement** vers l'app via labels
 
 ---
 
-## 📝 Notes
+## 🐳 Intégration Applications
 
-- **Traefik API** (insecure mode) : accessible sur `http://localhost:8080` en local uniquement
-- **Network Docker** : Le network `web` doit être créé avant de démarrer les applications
-- **Volumes externes** : `traefik_data` doit être créé avant le premier démarrage
-- **Certificats** : Les certificats Let's Encrypt sont stockés dans le volume `traefik_data`
-- **Applications** : Chaque application a maintenant son propre docker-compose.yml
-- **Déploiement** : Toujours démarrer Traefik en premier, puis les applications
+Voir **[BASE_INTEGRATION.md](./BASE_INTEGRATION.md)** pour :
+- Guide complet d'intégration des services
+- Architecture détaillée de communication
+- Déploiement en production
+- Troubleshooting
 
 ---
 
-**Créé par**: Christophe FREIJANES | **Dernière mise à jour**: Décembre 2025
+## 📚 Documentation Complète
+
+- **Architecture Générale**: [../docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md)
+- **CI/CD Pipeline**: [../docs/CI_CD_ARCHITECTURE.md](../docs/CI_CD_ARCHITECTURE.md)
+- **Guide Déploiement**: [../docs/DEPLOYMENT.md](../docs/DEPLOYMENT.md)
+- **Monitoring**: [../docs/MONITORING.md](../docs/MONITORING.md)
+- **Troubleshooting**: [../docs/TROUBLESHOOTING.md](../docs/TROUBLESHOOTING.md)
+- **SaaS Apps**: [../saas/README.md](../saas/README.md)
+
+---
+
+## 🔗 Ressources
+
+- [Traefik v2.10 Docs](https://doc.traefik.io/)
+- [Let's Encrypt](https://letsencrypt.org/)
+- [Docker Compose](https://docs.docker.com/compose/)
+- [n8n Documentation](https://docs.n8n.io/)
+
+---
+
+**Créé par**: Christophe FREIJANES  
+**Dernière mise à jour**: Janvier 2026  
+**Version**: 1.0.0
+
+

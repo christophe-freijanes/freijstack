@@ -2,7 +2,7 @@
 
 Documentation technique complète de l'infrastructure, du déploiement et de l'architecture du portfolio professionnel de Christophe FREIJANES.
 
-**Dernière mise à jour**: Décembre 2025  
+**Dernière mise à jour**: Janvier 2026  
 **Domaine principal**: https://portfolio.freijstack.com  
 **Environnement staging**: https://portfolio-staging.freijstack.com
 
@@ -294,7 +294,37 @@ services:
 
 ## 4. Pipeline CI/CD
 
-### 4.1. Workflow GitHub Actions
+### 📚 Documentation CI/CD Complète
+
+Pour une documentation exhaustive des workflows CI/CD avec diagramme Mermaid interactif et détails de tous les workflows, consultez :
+
+📋 **[CI/CD Architecture](./CI_CD_ARCHITECTURE.md)** - Architecture complète avec schémas et documentation de tous les workflows
+
+**Ce document contient** :
+- 🎨 Diagramme Mermaid interactif de l'architecture CI/CD
+- 📊 Documentation des 16 workflows GitHub Actions
+- ⚙️ Triggers, schedules et conditions détaillés
+- 🔒 Configuration secrets et variables
+- 📈 Métriques et monitoring des workflows
+
+### 4.1. Vue d'ensemble rapide
+
+**Workflows principaux** :
+- **Déploiement** : Infrastructure, Portfolio, SecureVault, Harbor
+- **Sécurité** : CodeQL, Security Check (Trivy + Gitleaks), Security Score
+- **Monitoring** : Health checks Production (30min), Staging (1h), Post-Deploy
+- **Releases** : Semantic versioning automatique avec changelog
+- **Maintenance** : Backups quotidiens (AWS S3 + Azure), Rotation secrets mensuelle
+
+**Environnements** :
+- `develop` → Staging (éphémère, tests)
+- `master` → Production (24/7, monitoring continu)
+
+[→ Voir le diagramme complet et la documentation détaillée](./CI_CD_ARCHITECTURE.md)
+
+---
+
+### 4.2. Workflow GitHub Actions (Legacy)
 
 **Fichier**: `.github/workflows/main.yml`
 
