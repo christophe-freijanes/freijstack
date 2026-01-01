@@ -2,12 +2,12 @@ name: 🐳 SaaS • Harbor Registry
 
 on:
   push:
-    branches: [develop]
+    branches: [develop, master]  # Auto-deploy staging (develop) and production (master)
     paths:
       - 'saas/harbor/**'
       - '.github/workflows/harbor-deploy.yml'
   pull_request:
-    branches: [develop, master]
+    branches: [develop, master]  # Validation only on PRs (no deploy)
     paths:
       - 'saas/harbor/**'
       - '.github/workflows/harbor-deploy.yml'
@@ -28,6 +28,8 @@ on:
         type: boolean
 
 env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/harbor
   # Paths
   PROJECT_PATH: saas/harbor
   VPS_DEPLOY_DIR_PROD: /srv/www/harbor
@@ -48,10 +50,28 @@ env:
   REGISTRY_DOMAIN_STAGING: registry-staging.freijstack.com
 
 jobs:
+  security:
+    name: 🛡️ Shield Protection
+    uses: ./.github/workflows/securitycheck.yml
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    with:
+      scan_paths: |
+        saas/harbor
+        base-infra
+      fail_on_gitleaks: true
+      upload_sarif: true
+      publish_score_artifact: true
+
   validate:
     name: ✅ Validate VPS Configuration
     runs-on: ubuntu-latest
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/develop') || github.event_name == 'workflow_dispatch'
+    needs: security
+    if: |
+      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) || 
+      github.event_name == 'workflow_dispatch'
 
     steps:
       - name: 📥 Checkout code
@@ -349,7 +369,9 @@ jobs:
     name: 🧹 Cleanup Old Containers
     runs-on: ubuntu-latest
     needs: validate
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/develop') || github.event_name == 'workflow_dispatch'
+    if: |
+      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) || 
+      github.event_name == 'workflow_dispatch'
 
     steps:
       - name: 🔐 Prepare SSH key
@@ -421,7 +443,9 @@ jobs:
     name: 🚀 Deploy to VPS
     runs-on: ubuntu-latest
     needs: cleanup
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/develop') || github.event_name == 'workflow_dispatch'
+    if: |
+      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) || 
+      github.event_name == 'workflow_dispatch'
     environment:
       name: ${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
       url: ${{ github.ref == 'refs/heads/master' && 'https://registry.freijstack.com' || 'https://registry-staging.freijstack.com' }}
@@ -584,6 +608,93 @@ jobs:
           echo "  3. Create projects and configure RBAC"
           echo "  4. Configure Docker clients: docker login $REGISTRY_URL"
 
+  health-check:
+    name: 🏥 Health Check Post-Deployment
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: |
+      success() && 
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Prepare SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 🔒 Mask sensitive values
+        run: |
+          echo "::add-mask::${{ secrets.VPS_SSH_USER }}"
+          echo "::add-mask::${{ secrets.VPS_SSH_HOST }}"
+
+      - name: 🏥 Check Harbor Registry Health
+        env:
+          TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
+        run: |
+          if [ "$TARGET_ENV" = "production" ]; then
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
+            REGISTRY_URL="${{ env.REGISTRY_DOMAIN_PROD }}"
+          else
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
+            REGISTRY_URL="${{ env.REGISTRY_DOMAIN_STAGING }}"
+          fi
+          
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'HEALTH_CHECK'
+            set -e
+            echo "🏥 Running health checks..."
+            echo ""
+            
+            # Check all services running
+            echo "1️⃣ Checking service status..."
+            docker ps --filter "label=com.docker.compose.service" --format "table {{.Names}}\t{{.Status}}" | grep -q "Up" && echo "✅ Services running" || exit 1
+            
+            # Check core container specifically
+            echo "2️⃣ Checking Harbor core container..."
+            CORE_STATUS=$(docker ps --filter "name=harbor-core" --format "{{.Status}}" || echo "")
+            if [ -n "$CORE_STATUS" ]; then
+              echo "✅ Harbor Core: $CORE_STATUS"
+            else
+              echo "⚠️  Harbor Core not found (may still be starting)"
+            fi
+            
+            # Check database
+            echo "3️⃣ Checking database connectivity..."
+            docker ps --filter "name=harbor-db" --format "{{.Status}}" | grep -q "Up" && echo "✅ Database running" || echo "⚠️  Database may need time to start"
+            
+            # Check Redis
+            echo "4️⃣ Checking Redis cache..."
+            docker ps --filter "name=harbor-redis" --format "{{.Status}}" | grep -q "Up" && echo "✅ Redis running" || echo "⚠️  Redis may need time to start"
+            
+            echo ""
+            echo "✅ Health check completed"
+          HEALTH_CHECK
+
+      - name: 📊 Log Summary
+        if: always()
+        env:
+          TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
+        run: |
+          if [ "$TARGET_ENV" = "production" ]; then
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
+            REGISTRY_URL="${{ env.REGISTRY_DOMAIN_PROD }}"
+          else
+            DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
+            REGISTRY_URL="${{ env.REGISTRY_DOMAIN_STAGING }}"
+          fi
+          
+          echo "📊 Post-deployment summary:"
+          echo "Environment: $TARGET_ENV"
+          echo "Registry URL: https://$REGISTRY_URL"
+          echo ""
+          echo "🔗 Resources:"
+          echo "  - GitHub Repository: ${{ github.server_url }}/${{ github.repository }}"
+          echo "  - Workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
   notify:
     name: 📬 Notification
     runs-on: ubuntu-latest
@@ -593,9 +704,23 @@ jobs:
     steps:
       - name: 📬 Deployment Status
         run: |
-          if [ "${{ needs.deploy.result }}" = "success" ]; then
-            echo "✅ Harbor deployment completed successfully!"
-          else
-            echo "❌ Harbor deployment failed"
-            exit 1
-          fi
+          DEPLOY_RESULT="${{ needs.deploy.result }}"
+          
+          case "$DEPLOY_RESULT" in
+            success)
+              echo "✅ Harbor deployment completed successfully!"
+              exit 0
+              ;;
+            skipped)
+              echo "⏭️  Deployment was skipped"
+              echo "   This is normal for:"
+              echo "   - Pull Requests (validation only)"
+              echo "   - Branches other than develop/master"
+              echo "   - workflow_dispatch without matching conditions"
+              exit 0
+              ;;
+            *)
+              echo "❌ Harbor deployment failed (status: $DEPLOY_RESULT)"
+              exit 1
+              ;;
+          esac
