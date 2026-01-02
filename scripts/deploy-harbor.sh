@@ -17,7 +17,7 @@ if ! docker network ls --format '{{.Name}}' | grep -qx "web"; then
   docker network create web
 fi
 
-# Create deploy directory
+# Create deploy directory if not exists
 mkdir -p "$DEPLOY_DIR"
 cd "$DEPLOY_DIR"
 
@@ -69,6 +69,9 @@ trivy:
 
 jobservice:
   max_job_workers: 10
+  job_loggers:
+    - STD_OUTPUT
+    - FILE
 
 notification:
   webhook_job_max_retry: 10
