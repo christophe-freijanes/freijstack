@@ -453,18 +453,20 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "## 📢 Production Health Summary" >> "$GITHUB_STEP_SUMMARY"
-          ec{
+          {
+            echo "## 📢 Production Health Summary"
+            echo ""
+            echo "- 🏥 Health Check: **${{ needs.health-check.result }}**"
+            echo "- 🔧 Auto-Heal: **${{ needs.auto-heal.result }}**"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "${{ needs.health-check.result }}" = "success" ]; then
+            {
               echo "✅ Production is **HEALTHY**"
               echo "- 🎯 https://vault.freijstack.com/login"
               echo "- 🎯 https://vault-api.freijstack.com/api/health"
-            }>> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-
-          if [ "${{ needs.health-check.result }}" = "success" ]; then
-            echo "✅ Production is **HEALTHY**" >> "$GITHUB_STEP_SUMMARY"
-            echo "- 🎯 https://vault.freijstack.com/login" >> "$GITHUB_STEP_SUMMARY"
-            echo "- 🎯 https://vault-api.freijstack.com/api/health" >> "$GITHUB_STEP_SUMMARY"
+            } >> "$GITHUB_STEP_SUMMARY"
           elif [ "${{ needs.auto-heal.result }}" = "success" ]; then
             echo "⚠️ Production had issues but **auto-heal succeeded**" >> "$GITHUB_STEP_SUMMARY"
           else
