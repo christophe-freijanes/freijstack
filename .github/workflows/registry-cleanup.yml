@@ -1,0 +1,91 @@
+name: 🧹 Registry Cleanup • Old Images
+
+on:
+  schedule:
+    - cron: "0 2 * * 0"  # Every Sunday at 2 AM UTC
+  workflow_dispatch:
+    inputs:
+      max_age_days:
+        description: "Maximum age in days (default: 90 = 3 months)"
+        required: false
+        default: "90"
+      dry_run:
+        description: "Dry run (don't actually delete)"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    name: 🧹 Cleanup Old Images
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔐 Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.VPS_SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: 🧹 Run cleanup script
+        run: |
+          MAX_AGE="${{ github.event.inputs.max_age_days || '90' }}"
+          DRY_RUN="${{ github.event.inputs.dry_run || 'false' }}"
+
+          echo "🧹 Registry Cleanup"
+          echo "=================="
+          echo "Max age: ${MAX_AGE} days"
+          echo "Dry run: ${DRY_RUN}"
+          echo ""
+
+          # Upload script to VPS
+          scp -i ~/.ssh/deploy_key scripts/cleanup-registry-images.sh \
+            ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}:/tmp/cleanup-registry.sh
+
+          # Execute cleanup on VPS
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'CLEANUP'
+            set -e
+
+            chmod +x /tmp/cleanup-registry.sh
+
+            echo "🔍 Running cleanup script..."
+            /tmp/cleanup-registry.sh \
+              registry.freijstack.com \
+              ${{ secrets.REGISTRY_USERNAME_PROD }} \
+              '${{ secrets.REGISTRY_PASSWORD_PROD }}' \
+              ${{ github.event.inputs.max_age_days || '90' }}
+
+            echo ""
+            echo "🗑️  Running garbage collection..."
+            cd /srv/www/registry
+            docker compose exec -T registry bin/registry garbage-collect /etc/docker/registry/config.yml --delete-untagged
+
+            echo ""
+            echo "✅ Cleanup completed"
+
+            rm -f /tmp/cleanup-registry.sh
+          CLEANUP
+
+      - name: 🧹 Cleanup SSH key
+        if: always()
+        run: |
+          rm -f ~/.ssh/deploy_key || true
+
+      - name: 📊 Summary
+        run: |
+          {
+            echo "## 🧹 Registry Cleanup Summary"
+            echo ""
+            echo "- Max age: **${{ github.event.inputs.max_age_days || '90' }} days**"
+            echo "- Dry run: **${{ github.event.inputs.dry_run || 'false' }}**"
+            echo ""
+            echo "✅ Cleanup completed successfully"
+          } >> "$GITHUB_STEP_SUMMARY"

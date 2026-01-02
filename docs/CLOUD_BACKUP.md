@@ -419,7 +419,7 @@ export B2_APPLICATION_KEY_ID="..."
 export B2_APPLICATION_KEY="..."
 export B2_BUCKET_NAME="securevault-backups-secondary"
 
-export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/..."
+export SLACK_WEBHOOK_URL="<SLACK_WEBHOOK_URL>"
 ```
 
 ```bash
@@ -502,7 +502,7 @@ aws secretsmanager get-secret-value \
 ### Slack Notifications
 
 ```bash
-export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX"
+export SLACK_WEBHOOK_URL="<SLACK_WEBHOOK_URL>"
 
 # Le script enverra automatiquement des notifications
 ./scripts/backup-to-cloud.sh production s3
@@ -511,7 +511,7 @@ export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/T00000000/B00000000/X
 ### Discord Notifications
 
 ```bash
-export DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/..."
+export DISCORD_WEBHOOK_URL="<DISCORD_WEBHOOK_URL>"
 ./scripts/backup-to-cloud.sh production s3
 ```
 

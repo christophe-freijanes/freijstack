@@ -81,7 +81,7 @@ Outputs:
 ├── GitHub: ghp_*, ghr_*
 ├── Slack: xox*
 ├── Stripe: sk_live_*, pk_live_*
-├── Database: postgresql://*:*@
+├── Database: postgresql://<user>:<password>@<host>
 ├── Private Keys: -----BEGIN
 ├── Discord: webhooks URLs
 ├── Sendgrid: SG.*

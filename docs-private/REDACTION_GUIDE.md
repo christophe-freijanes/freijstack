@@ -26,9 +26,9 @@ Reference rapide pour redacter les infos sensibles dans les documents publics.
 
 ```markdown
 # ❌ AVANT
-AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
-AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-AWS_SESSION_TOKEN=AQoDYXdzEJr...<long string>...
+AWS_ACCESS_KEY_ID=<actual AWS key value>
+AWS_SECRET_ACCESS_KEY=<actual AWS secret value>
+AWS_SESSION_TOKEN=<actual session token value>
 
 # ✅ APRÈS
 AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID>
@@ -90,9 +90,9 @@ GCP_REGION=us-central1         # ✅ OK
 
 ```markdown
 # ❌ AVANT
-GITHUB_TOKEN=ghp_1234567890abcdefghijklmnopqrstuvwxyzABC
-GITHUB_APP_PRIVATE_KEY=-----BEGIN RSA PRIVATE KEY-----\nMIIEvQIBADANBg...
-GITHUB_OAUTH_CLIENT_SECRET=ghu_1234567890abcdefghij
+GITHUB_TOKEN=<actual GitHub token value>
+GITHUB_APP_PRIVATE_KEY=<PEM private key content>
+GITHUB_OAUTH_CLIENT_SECRET=<actual secret value>
 
 # ✅ APRÈS
 GITHUB_TOKEN=<REDACTED>
@@ -124,9 +124,9 @@ JWT_ISSUER=freijstack.com   # ✅ OK
 
 ```markdown
 # ❌ AVANT
-POSTGRES_PASSWORD=Tr0pic@lFruit#92$Safe!
-DB_CONNECTION_STRING=postgresql://admin:<REDACTED>@db.internal:5432/vault_db
-MONGODB_URI=mongodb+srv://user:<REDACTED>@cluster.mongodb.net/dbname
+POSTGRES_PASSWORD=<POSTGRES_PASSWORD>
+DB_CONNECTION_STRING=<DB_CONNECTION_STRING>
+MONGODB_URI=<MONGODB_URI>
 
 # ✅ APRÈS
 POSTGRES_PASSWORD=<REDACTED>
@@ -143,12 +143,12 @@ DATABASE_VERSION=15          # ✅ OK
 
 ```markdown
 # ❌ AVANT - Ne JAMAIS mettre en doc public
-STRIPE_SECRET=sk_live_<REDACTED>
-STRIPE_PUBLIC=pk_live_<REDACTED>
-OPENAI_API_KEY=sk-proj-<REDACTED>
-SENDGRID_API_KEY=SG.<REDACTED>
-SLACK_TOKEN=xoxb-<REDACTED>
-DISCORD_TOKEN=<REDACTED>
+STRIPE_SECRET=<actual Stripe secret key>
+STRIPE_PUBLIC=<actual Stripe public key>
+OPENAI_API_KEY=<actual OpenAI API key>
+SENDGRID_API_KEY=<actual SendGrid API key>
+SLACK_TOKEN=<actual Slack bot token>
+DISCORD_TOKEN=<actual Discord bot token>
 
 # ✅ APRÈS
 STRIPE_SECRET=<STRIPE_SECRET>
@@ -173,9 +173,9 @@ SENDGRID_SENDER_EMAIL=noreply@freijstack.com  # ✅ OK
 
 ```markdown
 # ❌ AVANT
-SLACK_WEBHOOK=https://hooks.slack.com/services/T123456/B789012/abcdefghijklmnopqrst
+SLACK_WEBHOOK=<SLACK_WEBHOOK_URL>
 GITHUB_WEBHOOK_SECRET=whsec_12345abcdefghijklmnop
-DISCORD_WEBHOOK=https://discord.com/api/webhooks/123456789012345678/abcdefghijklmnopqrstuvwxyz_1A2B3C4D5E
+DISCORD_WEBHOOK=<DISCORD_WEBHOOK_URL>
 
 # ✅ APRÈS
 SLACK_WEBHOOK=<REDACTED_SLACK_WEBHOOK>
@@ -193,9 +193,9 @@ Pour configurer Slack:
 
 ```markdown
 # ❌ AVANT
-POSTGRES_URI=postgresql://admin:SecurePass123@db.company.local:5432/production_vault
-MYSQL_CONNECTION=mysql://root:MyP@ssw0rd!@mysql.internal.local:3306/app_db
-MONGODB=mongodb+srv://app_user:encrypted_pass@mongodb-prod.internal.cloud/db?replicaSet=main
+POSTGRES_URI=<actual PostgreSQL connection string>
+MYSQL_CONNECTION=<actual MySQL connection string>
+MONGODB=<actual MongoDB Atlas connection string>
 
 # ✅ APRÈS
 POSTGRES_URI=postgresql://<DB_USER>:<DB_PASSWORD>@<DB_HOST>:<DB_PORT>/<DB_NAME>
@@ -529,8 +529,8 @@ find docs -name "*.md" -type f | while read file; do
     grep -En "192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])" "$file" && \
         echo "  ⚠️ Private IPs detected"
     
-    # Database strings
-    grep -En "postgresql://.*@|mysql://.*@" "$file" && \
+    # Database strings - pattern example
+    # grep -En "postgresql://.*@|mysql://.*@" "$file" && \
         echo "  ⚠️ Database connection strings detected"
 done
 ```

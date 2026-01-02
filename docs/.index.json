@@ -1,0 +1,24 @@
+{
+  "generated_at": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')",
+  "docs": [
+    { "file": "docs/AUDIT_SYSTEM.md", "title": "📊 Système d'Audit SecureVault - Guide Administrateur", "size": 8753 },
+    { "file": "docs/AUTOMATION_GUIDE.md", "title": "🤖 Guide Automatisation - FreijStack", "size": 19740 },
+    { "file": "docs/CHECKLIST_AUTOMATION.md", "title": "✅ Checklist de Déploiement - Automatisation Complète", "size": 11049 },
+    { "file": "docs/CI_CD_ARCHITECTURE.md", "title": "🔄 Architecture CI/CD - FreijStack", "size": 19363 },
+    { "file": "docs/CLOUD_BACKUP.md", "title": "☁️ SecureVault - Configuration des Backups Cloud", "size": 16074 },
+    { "file": "docs/DEPLOYMENT.md", "title": "", "size": 14867 },
+    { "file": "docs/DOCKER_STRUCTURE.md", "title": "🏗️ Structure Docker Réorganisée", "size": 6965 },
+    { "file": "docs/DOCUMENTATION_AUDIT.md", "title": "📊 Audit Documentation - FreijStack", "size": 7778 },
+    { "file": "docs/FEATURES_ROADMAP.md", "title": "🚀 SecureVault - Features Roadmap", "size": 7031 },
+    { "file": "docs/INDEX.md", "title": "📚 Index Documentation - FreijStack", "size": 11581 },
+    { "file": "docs/MONITORING.md", "title": "", "size": 16580 },
+    { "file": "docs/PRO_DEPLOYMENT.md", "title": "", "size": 21735 },
+    { "file": "docs/QUICK_DEPLOY_GUIDE.md", "title": "🚀 Guide de Déploiement Rapide - Staging", "size": 4284 },
+    { "file": "docs/README.md", "title": "📚 Documentation FreijStack", "size": 7829 },
+    { "file": "docs/RELEASE_WORKFLOW.md", "title": "🚀 Release Workflow - Architecture", "size": 11696 },
+    { "file": "docs/SECUREVAULT_DEPLOYMENT.md", "title": "", "size": 6973 },
+    { "file": "docs/TROUBLESHOOTING.md", "title": "🔧 Guide de Dépannage - FreijStack", "size": 21861 },
+    { "file": "docs/USER_GUIDE.md", "title": "🔐 SecureVault Professional - Guide Utilisateur", "size": 12266 },
+    { "file": "docs/architecture.md", "title": "Architecture Technique - FreijStack", "size": 21396 },
+    ]
+}

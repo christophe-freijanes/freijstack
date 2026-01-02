@@ -86,7 +86,7 @@ docs-private/                  # 🔒 Accès restreint
 #### 1️⃣ AWS Credentials
 ```
 # ❌ NON
-AWS_ACCESS_KEY_ID=AKIA2ABCDEFGHIJKLMNO
+AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID>
 AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY
 
 # ✅ OUI
@@ -97,7 +97,7 @@ AWS_SECRET_ACCESS_KEY=<REDACTED>
 #### 2️⃣ Tokens & Keys
 ```
 # ❌ NON
-GITHUB_TOKEN=ghp_1234567890abcdefghijklmnopqrstuvwxyz
+GITHUB_TOKEN=<GITHUB_TOKEN>
 JWT_SECRET=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 # ✅ OUI
@@ -108,8 +108,8 @@ JWT_SECRET=<REDACTED>
 #### 3️⃣ URLs Sensibles
 ```
 # ❌ NON
-Slack webhook: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX
-Database: postgresql://user:pass@internal-db.local:5432/vault_db
+Slack webhook: <SLACK_WEBHOOK_URL>
+Database: <POSTGRES_URI>
 
 # ✅ OUI
 Slack webhook: <REDACTED_SLACK_WEBHOOK>

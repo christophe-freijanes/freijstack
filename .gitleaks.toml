@@ -5,5 +5,10 @@ description = "Allowlist documentation examples (README/SECURITY) - portfolio-sa
 paths = [
   '''^saas/securevault/README\.md$''',
   '''^saas/app1/README\.md$''',
-  '''^SECURITY\.md$'''
+  '''^SECURITY\.md$''',
+  '''^docs-private/REDACTION_GUIDE\.md$''',
+  '''^docs-private/DOCS_CONFIG_REFERENCE\.md$''',
+  '''^docs-private/AUTO_DOCUMENTATION\.md$''',
+  '''^docs-private/IMPLEMENTATION_SUMMARY\.md$''',
+  '''^docs-private/SECURITY_AUDIT\.md$'''
 ]
