@@ -80,6 +80,7 @@ jobs:
       - name: 🚀 Deploy Registry to Staging
         env:
           BRANCH: develop
+          CACHE_BUST: ${{ github.sha }}
         run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'DEPLOY_STAGING'
             set -e
@@ -90,8 +91,8 @@ jobs:
             cd "$DEPLOY_DIR"
             
             echo "📝 Downloading configuration files..."
-            curl -s https://raw.githubusercontent.com/${{ github.repository }}/develop/saas/registry/docker-compose.staging.yml -o docker-compose.yml
-            curl -s https://raw.githubusercontent.com/${{ github.repository }}/develop/saas/registry/config.yml -o config.yml
+            curl -s "https://raw.githubusercontent.com/${{ github.repository }}/develop/saas/registry/docker-compose.staging.yml?${{ github.sha }}" -o docker-compose.yml
+            curl -s "https://raw.githubusercontent.com/${{ github.repository }}/develop/saas/registry/config.yml?${{ github.sha }}" -o config.yml
             
             mkdir -p data/auth logs
             
@@ -143,6 +144,7 @@ jobs:
       - name: 🚀 Deploy Registry to Production
         env:
           BRANCH: main
+          CACHE_BUST: ${{ github.sha }}
         run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'DEPLOY_PROD'
             set -e
@@ -153,8 +155,8 @@ jobs:
             cd "$DEPLOY_DIR"
             
             echo "📝 Downloading configuration files..."
-            curl -s https://raw.githubusercontent.com/${{ github.repository }}/main/saas/registry/docker-compose.prod.yml -o docker-compose.yml
-            curl -s https://raw.githubusercontent.com/${{ github.repository }}/main/saas/registry/config.yml -o config.yml
+            curl -s "https://raw.githubusercontent.com/${{ github.repository }}/main/saas/registry/docker-compose.prod.yml?${{ github.sha }}" -o docker-compose.yml
+            curl -s "https://raw.githubusercontent.com/${{ github.repository }}/main/saas/registry/config.yml?${{ github.sha }}" -o config.yml
             
             mkdir -p data/auth logs
             

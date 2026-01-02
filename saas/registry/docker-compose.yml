@@ -3,8 +3,6 @@
 #   docker compose -f docker-compose.staging.yml up -d  (staging)
 #   docker compose -f docker-compose.prod.yml up -d     (production)
 
-version: '3.8'
-
 services:
   registry:
     image: registry:2
@@ -18,11 +16,11 @@ services:
     networks:
       - web
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/v2/"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5000/v2/"]
       interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   registry-ui:
     image: joxit/docker-registry-ui:latest
@@ -37,10 +35,11 @@ services:
     networks:
       - web
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
       interval: 30s
-      timeout: 5s
-      retries: 3
+      timeout: 10s
+      retries: 5
+      start_period: 15s
 
 volumes:
   registry-data:

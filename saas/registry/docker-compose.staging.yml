@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Docker Registry v2 officiel - stockage des images
   registry:
@@ -14,12 +12,6 @@ services:
       - ./config.yml:/etc/docker/registry/config.yml:ro
     networks:
       - web
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/v2/"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.registry.rule=Host(`registry-staging.freijstack.com`)"
@@ -39,15 +31,15 @@ services:
       DELETE_IMAGES: "true"
       SHOW_CONTENT_DIGEST: "true"
     depends_on:
-      registry:
-        condition: service_healthy
+      - registry
     networks:
       - web
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
       interval: 30s
-      timeout: 5s
-      retries: 3
+      timeout: 10s
+      retries: 5
+      start_period: 15s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.registry-ui.rule=Host(`registry-ui-staging.freijstack.com`)"
