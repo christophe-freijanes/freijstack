@@ -48,7 +48,6 @@ jobs:
 
       - name: 🧾 Resolve scan paths
         run: |
-          # shellcheck disable=SC2129
           set -euo pipefail
           echo "## 🔐 Security Check" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -91,7 +90,6 @@ jobs:
       - name: 🔐 Run gitleaks (json report)
         id: gitleaks
         run: |
-          # shellcheck disable=SC2129
           set -euo pipefail
 
           SOURCES=()
@@ -145,7 +143,6 @@ jobs:
       - name: 🧮 Compute Security Score (from gitleaks total)
         id: score
         run: |
-          # shellcheck disable=SC2129
           set -euo pipefail
           leaks="${{ steps.gitleaks.outputs.total }}"
           [ -z "$leaks" ] && leaks="0"

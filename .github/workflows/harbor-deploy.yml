@@ -605,7 +605,6 @@ jobs:
         env:
           TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
         run: |
-          # shellcheck disable=SC2034
           if [ "$TARGET_ENV" = "production" ]; then
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
             REGISTRY_URL="${{ env.REGISTRY_DOMAIN_PROD }}"

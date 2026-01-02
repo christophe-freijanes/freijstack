@@ -43,7 +43,6 @@ jobs:
       - name: 🔐 Secret scanning (Gitleaks CLI)
         id: gitleaks
         run: |
-          # shellcheck disable=SC2129
           set -euo pipefail
 
           echo "⬇️ Installing gitleaks (pinned version)..."
@@ -111,7 +110,6 @@ jobs:
       # ---------------------------
       - name: 🌐 Public URLs Health Check (strong anti false-positives)
         run: |
-          # shellcheck disable=SC2129
           set -euo pipefail
 
           echo "## 🌐 Public URLs Health Check" >> "$GITHUB_STEP_SUMMARY"
@@ -444,7 +442,6 @@ jobs:
       - name: 📢 Production Health Summary
         if: always()
         run: |
-          # shellcheck disable=SC2129
           set -euo pipefail
 
           echo "## 📢 Production Health Summary" >> "$GITHUB_STEP_SUMMARY"
