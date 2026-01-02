@@ -1,0 +1,55 @@
+# Use docker-compose.staging.yml or docker-compose.prod.yml
+# This file is for reference - deploy with:
+#   docker compose -f docker-compose.staging.yml up -d  (staging)
+#   docker compose -f docker-compose.prod.yml up -d     (production)
+
+version: '3.8'
+
+services:
+  registry:
+    image: registry:2
+    restart: unless-stopped
+    environment:
+      REGISTRY_HTTP_RELATIVEURLS: "true"
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - registry-data:/var/lib/registry
+      - ./config.yml:/etc/docker/registry/config.yml:ro
+    networks:
+      - web
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/v2/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  registry-ui:
+    image: joxit/docker-registry-ui:latest
+    restart: unless-stopped
+    environment:
+      SINGLE_REGISTRY: "true"
+      DELETE_IMAGES: "true"
+      SHOW_CONTENT_DIGEST: "true"
+    depends_on:
+      registry:
+        condition: service_healthy
+    networks:
+      - web
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  registry-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data
+
+networks:
+  web:
+    external: true
