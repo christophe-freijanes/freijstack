@@ -2,13 +2,45 @@
   "branches": ["develop"],
   "tagFormat": "v${version}",
   "plugins": [
-    ["@semantic-release/commit-analyzer", { "releaseRules": [{ "type": "refactor", "release": "patch" }] }],
-    "@semantic-release/release-notes-generator",
-    ["@semantic-release/changelog", { "changelogFile": "CHANGELOG.md" }],
+    ["@semantic-release/commit-analyzer", { 
+      "releaseRules": [
+        { "type": "refactor", "release": "patch" },
+        { "type": "style", "release": "patch" },
+        { "type": "perf", "release": "patch" }
+      ]
+    }],
+    ["@semantic-release/release-notes-generator", {
+      "preset": "conventionalcommits",
+      "presetConfig": {
+        "types": [
+          { "type": "feat", "section": "🚀 Features", "hidden": false },
+          { "type": "fix", "section": "🐛 Bug Fixes", "hidden": false },
+          { "type": "perf", "section": "⚡ Performance", "hidden": false },
+          { "type": "refactor", "section": "♻️ Code Refactoring", "hidden": false },
+          { "type": "docs", "section": "📚 Documentation", "hidden": false },
+          { "type": "style", "section": "💎 Styles", "hidden": false },
+          { "type": "test", "section": "✅ Tests", "hidden": false },
+          { "type": "build", "section": "🔨 Build System", "hidden": false },
+          { "type": "ci", "section": "👷 CI/CD", "hidden": false },
+          { "type": "chore", "section": "🔧 Chores", "hidden": false }
+        ]
+      },
+      "writerOpts": {
+        "commitsSort": ["scope", "subject"]
+      }
+    }],
+    ["@semantic-release/changelog", { 
+      "changelogFile": "CHANGELOG.md",
+      "changelogTitle": "# 📋 Changelog\n\nToutes les modifications notables de ce projet sont documentées dans ce fichier.\n\nLe format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),\net ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).\n"
+    }],
     ["@semantic-release/git", {
       "assets": ["CHANGELOG.md"],
       "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
     }],
-    ["@semantic-release/github", { "successComment": false, "failComment": false, "releasedLabels": false }]
+    ["@semantic-release/github", { 
+      "successComment": false, 
+      "failComment": false, 
+      "releasedLabels": false 
+    }]
   ]
 }
