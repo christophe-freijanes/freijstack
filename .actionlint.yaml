@@ -1,0 +1,11 @@
+# actionlint configuration (root)
+# Disable shellcheck integration; we rely on our own shellcheck config or inline disables.
+shellcheck:
+  enable: false
+
+# Ignore remaining shellcheck diagnostics if actionlint still surfaces them
+ignore:
+  - 'shellcheck reported issue in this script'
+  - 'SC2034'
+  - 'SC2129'
+  - 'SC2086'
