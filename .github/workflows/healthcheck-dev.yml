@@ -68,18 +68,22 @@ jobs:
           echo "leaks_count=${leaks_count}" >> "$GITHUB_OUTPUT"
           echo "🔢 leaks_count=${leaks_count}"
 
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "## 🔐 Gitleaks (secrets scan)" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Total findings:** $leaks_count" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo ""
+            echo "## 🔐 Gitleaks (secrets scan)"
+            echo ""
+            echo "- **Total findings:** $leaks_count"
+          } >> "$GITHUB_STEP_SUMMARY"
 
           if [ "$leaks_count" != "0" ]; then
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "### 🔎 Top 20 findings (metadata only)" >> "$GITHUB_STEP_SUMMARY"
-            jq -r '.[] | "- rule=\(.RuleID) file=\(.File):\(.StartLine) commit=\(.Commit|tostring|.[0:8])"' gitleaks-report.json \
-              | head -n 20 >> "$GITHUB_STEP_SUMMARY"
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "> ℹ️ Values are redacted. See artifact for full metadata." >> "$GITHUB_STEP_SUMMARY"
+            {
+              echo ""
+              echo "### 🔎 Top 20 findings (metadata only)"
+              jq -r '.[] | "- rule=\(.RuleID) file=\(.File):\(.StartLine) commit=\(.Commit|tostring|.[0:8])"' gitleaks-report.json \
+                | head -n 20
+              echo ""
+              echo "> ℹ️ Values are redacted. See artifact for full metadata."
+            } >> "$GITHUB_STEP_SUMMARY"
           else
             echo "- ✅ No findings detected." >> "$GITHUB_STEP_SUMMARY"
           fi
@@ -106,8 +110,10 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "## 🌐 Public URLs Health Check" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## 🌐 Public URLs Health Check"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
 
           # Warm-up: laisse le temps aux DNS/CDN/TLS de se stabiliser
           echo "⏳ Warm-up 15s..."
@@ -316,11 +322,13 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "## 📢 Development Health Summary" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- 🏥 Health Check: **${{ needs.health-check.result }}**" >> "$GITHUB_STEP_SUMMARY"
-          echo "- 🔧 Auto-Heal: **${{ needs.auto-heal.result }}**" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## 📢 Development Health Summary"
+            echo ""
+            echo "- 🏥 Health Check: **${{ needs.health-check.result }}**"
+            echo "- 🔧 Auto-Heal: **${{ needs.auto-heal.result }}**"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
 
           if [ "${{ needs.health-check.result }}" = "success" ]; then
             echo "✅ Development is **HEALTHY**" >> "$GITHUB_STEP_SUMMARY"
