@@ -7,13 +7,13 @@ rules:
   indentation:
     spaces: 2
     indent-sequences: consistent
-  
+
   # Longueur raisonnable (160 pour workflows GitHub Actions)
   line-length:
     max: 160
     allow-non-breakable-words: true
     allow-non-breakable-inline-mappings: true
-  
+
   # Structure medium
   document-start: disable        # Pas besoin de --- partout
   truthy:                         # Active mais permissif
@@ -21,12 +21,12 @@ rules:
   comments:
     min-spaces-from-content: 1   # Au moins 1 espace avant #
   comments-indentation: disable  # Flexibilité sur indentation des commentaires
-  
+
   # Clés et valeurs
   key-duplicates: enable         # Évite les erreurs
   empty-values: disable          # Autorise clés vides (workflows)
   quoted-strings: disable        # Flexibilité sur les quotes
-  
+
   # Brackets et flow
   brackets:
     min-spaces-inside: 0
