@@ -30,6 +30,9 @@ data_volume: /data
 storage_service:
   filesystem:
     rootdirectory: /storage
+  type: filesystem
+  redirect_disabled: false
+  maxrequestsize: 0
 
 # Trivy scanner settings
 trivy:
@@ -43,16 +46,15 @@ trivy:
 # Job service configuration
 jobservice:
   max_job_workers: 10
-  logger_sweeper_duration: 1
+  logger_sweeper_duration: 1h
   job_loggers:
     - STD_OUTPUT
     - FILE
-  logger_sweeper_duration: 1
 
 # Notification settings (required for v2.10.0)
 notification:
-  webhook_job_max_retry: 3
-  webhook_job_http_client_timeout: 3 #seconds
+  webhook_job_max_retry: 10
+  webhook_job_http_client_timeout: 3
 
 # Log configuration
 log:

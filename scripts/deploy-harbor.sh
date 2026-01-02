@@ -53,6 +53,9 @@ hostname: $REGISTRY_DOM
 http:
   port: $HTTP_PORT
 
+https:
+  port: 443
+
 harbor_admin_password: $ADMIN_PASS
 
 database:
@@ -61,6 +64,10 @@ database:
   max_open_conns: 900
 
 data_volume: /data
+
+storage_service:
+  filesystem:
+    rootdirectory: /storage
 
 trivy:
   ignore_unfixed: false
@@ -92,7 +99,28 @@ EOF
 
 # Run prepare script to generate configs
 echo "🔧 Running prepare script..."
-./prepare
+set +e  # Allow prepare script to fail initially
+if [ -f "./prepare" ]; then
+  chmod +x ./prepare
+  ./prepare
+  PREPARE_RESULT=$?
+  if [ $PREPARE_RESULT -ne 0 ]; then
+    echo "❌ Prepare script failed with code $PREPARE_RESULT"
+    echo "📄 Checking harbor.yml..."
+    cat harbor.yml
+    exit 1
+  fi
+else
+  echo "⚠️  prepare script not found, attempting to continue..."
+fi
+set -e
+
+# Verify harbor.yml was created
+if [ ! -f "harbor.yml" ]; then
+  echo "❌ ERROR: harbor.yml was not generated!"
+  exit 1
+fi
+echo "✅ harbor.yml generated successfully"
 
 # Modify generated docker-compose.yml to work with Traefik
 echo "🔨 Adapting docker-compose for Traefik integration..."
