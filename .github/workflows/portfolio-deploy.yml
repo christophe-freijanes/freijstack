@@ -49,8 +49,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Login to Docker Registry
+        run: |
+          echo "${{ secrets.REGISTRY_PASSWORD_PROD }}" | \
+          docker login -u "${{ secrets.REGISTRY_USERNAME_PROD }}" \
+          --password-stdin ${{ env.REGISTRY }}
 
       - name: Verify Docker image integrity
         run: |
@@ -98,8 +101,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Login to Docker Registry
+        run: |
+          echo "${{ secrets.REGISTRY_PASSWORD_PROD }}" | \
+          docker login -u "${{ secrets.REGISTRY_USERNAME_PROD }}" \
+          --password-stdin ${{ env.REGISTRY }}
 
       - name: Verify Docker image integrity
         run: |
