@@ -26,9 +26,9 @@ Reference rapide pour redacter les infos sensibles dans les documents publics.
 
 ```markdown
 # ❌ AVANT
-AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
-AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-AWS_SESSION_TOKEN=AQoDYXdzEJr...<long string>...
+AWS_ACCESS_KEY_ID=<actual AWS key value>
+AWS_SECRET_ACCESS_KEY=<actual AWS secret value>
+AWS_SESSION_TOKEN=<actual session token value>
 
 # ✅ APRÈS
 AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID>
@@ -90,9 +90,9 @@ GCP_REGION=us-central1         # ✅ OK
 
 ```markdown
 # ❌ AVANT
-GITHUB_TOKEN=ghp_1234567890abcdefghijklmnopqrstuvwxyzABC
-GITHUB_APP_PRIVATE_KEY=-----BEGIN RSA PRIVATE KEY-----\nMIIEvQIBADANBg...
-GITHUB_OAUTH_CLIENT_SECRET=ghu_1234567890abcdefghij
+GITHUB_TOKEN=<actual GitHub token value>
+GITHUB_APP_PRIVATE_KEY=<PEM private key content>
+GITHUB_OAUTH_CLIENT_SECRET=<actual secret value>
 
 # ✅ APRÈS
 GITHUB_TOKEN=<REDACTED>
@@ -143,12 +143,12 @@ DATABASE_VERSION=15          # ✅ OK
 
 ```markdown
 # ❌ AVANT - Ne JAMAIS mettre en doc public
-STRIPE_SECRET=sk_live_<REDACTED>
-STRIPE_PUBLIC=pk_live_<REDACTED>
-OPENAI_API_KEY=sk-proj-<REDACTED>
-SENDGRID_API_KEY=SG.<REDACTED>
-SLACK_TOKEN=xoxb-<REDACTED>
-DISCORD_TOKEN=<REDACTED>
+STRIPE_SECRET=<actual Stripe secret key>
+STRIPE_PUBLIC=<actual Stripe public key>
+OPENAI_API_KEY=<actual OpenAI API key>
+SENDGRID_API_KEY=<actual SendGrid API key>
+SLACK_TOKEN=<actual Slack bot token>
+DISCORD_TOKEN=<actual Discord bot token>
 
 # ✅ APRÈS
 STRIPE_SECRET=<STRIPE_SECRET>
@@ -193,9 +193,9 @@ Pour configurer Slack:
 
 ```markdown
 # ❌ AVANT
-POSTGRES_URI=<POSTGRES_URI>
-MYSQL_CONNECTION=<MYSQL_CONNECTION>
-MONGODB=mongodb+srv://app_user:encrypted_pass@mongodb-prod.internal.cloud/db?replicaSet=main
+POSTGRES_URI=<actual PostgreSQL connection string>
+MYSQL_CONNECTION=<actual MySQL connection string>
+MONGODB=<actual MongoDB Atlas connection string>
 
 # ✅ APRÈS
 POSTGRES_URI=postgresql://<DB_USER>:<DB_PASSWORD>@<DB_HOST>:<DB_PORT>/<DB_NAME>
