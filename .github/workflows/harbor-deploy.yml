@@ -450,7 +450,6 @@ jobs:
     environment:
       name: ${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
       url: ${{ github.ref == 'refs/heads/master' && 'https://registry.freijstack.com' || 'https://registry-staging.freijstack.com' }}
-      reviewers: ${{ github.ref == 'refs/heads/master' && fromJSON('["christophe-freijanes"]') || null }}
 
     steps:
       - name: 📥 Checkout code
