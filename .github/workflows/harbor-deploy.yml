@@ -472,111 +472,144 @@ jobs:
         env:
           TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
         run: |
+          set -euo pipefail
           echo "🎯 Target environment: $TARGET_ENV"
-          
+
           if [ "$TARGET_ENV" = "production" ]; then
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
             ENV_FILE="${{ env.VPS_ENV_FILE_PROD }}"
             BRANCH="${{ env.BRANCH_PROD }}"
             ENV_TEMPLATE=".env.production"
             CONTAINER_PREFIX="${{ env.CONTAINER_PREFIX_PROD }}"
-            REGISTRY_DOM="${{ env.REGISTRY_DOMAIN_PROD }}"
             NETWORK="${{ env.NETWORK_PROD }}"
+            REGISTRY_DOM="${{ env.REGISTRY_DOMAIN_PROD }}"
           else
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
             ENV_FILE="${{ env.VPS_ENV_FILE_STAGING }}"
             BRANCH="${{ env.BRANCH_STAGING }}"
             ENV_TEMPLATE=".env.staging"
             CONTAINER_PREFIX="${{ env.CONTAINER_PREFIX_STAGING }}"
-            REGISTRY_DOM="${{ env.REGISTRY_DOMAIN_STAGING }}"
             NETWORK="${{ env.NETWORK_STAGING }}"
+            REGISTRY_DOM="${{ env.REGISTRY_DOMAIN_STAGING }}"
           fi
-          
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << DEPLOY_SCRIPT
-            set -e
-            echo "🚀 Starting Harbor deployment..."
-            echo "🎯 Deploying to: $TARGET_ENV"
-            echo "📂 Deploy directory: $DEPLOY_DIR"
-            
-            # Clone/update repo
-            if [ -d "$DEPLOY_DIR/.git" ]; then
-              echo "✅ Repository already exists, pulling latest changes..."
-              cd "$DEPLOY_DIR"
-              git fetch origin
-              git reset --hard origin/$BRANCH
-              git clean -fd
-            else
-              echo "📥 Cloning repository for the first time..."
-              if [ -d "$DEPLOY_DIR" ]; then
-                echo "🧹 Cleaning existing directory..."
-                rm -rf "$DEPLOY_DIR"
-              fi
-              git clone -b $BRANCH https://github.com/${{ github.repository }}.git "$DEPLOY_DIR"
-              cd "$DEPLOY_DIR"
-            fi
-            
-            # Navigate to harbor
-            cd ${{ env.PROJECT_PATH }}
-            
-            echo "📝 Using environment template: $ENV_TEMPLATE"
-            
-            # Verify template exists
-            if [ ! -f "$ENV_TEMPLATE" ]; then
-              echo "❌ ERROR: Template $ENV_TEMPLATE missing in repo"
+
+          # Sanity checks (avoid empty vars -> empty traefik rule -> 404)
+          for v in DEPLOY_DIR ENV_FILE BRANCH ENV_TEMPLATE CONTAINER_PREFIX NETWORK REGISTRY_DOM; do
+            if [ -z "${!v:-}" ]; then
+              echo "❌ ERROR: variable $v is empty"
               exit 1
             fi
-            
-            # Copy template as base
-            cp "$ENV_TEMPLATE" .env
-            
-            # Inject secrets from VPS .env file
-            if [ -f "$ENV_FILE" ]; then
-              echo "🔐 Injecting secrets from VPS .env file..."
-              
-              for SECRET_VAR in DB_PASSWORD HARBOR_ADMIN_PASSWORD CORE_SECRET JOBSERVICE_SECRET REGISTRY_HTTP_SECRET; do
-                SECRET_VALUE=\$(grep -E "^${SECRET_VAR}=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- || echo "")
-                if [ -n "\$SECRET_VALUE" ]; then
-                  if grep -q "^${SECRET_VAR}=" .env; then
-                    sed -i "s|^${SECRET_VAR}=.*|${SECRET_VAR}=\${SECRET_VALUE}|" .env
+          done
+
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            "TARGET_ENV='$TARGET_ENV' DEPLOY_DIR='$DEPLOY_DIR' ENV_FILE='$ENV_FILE' BRANCH='$BRANCH' ENV_TEMPLATE='$ENV_TEMPLATE' CONTAINER_PREFIX='$CONTAINER_PREFIX' NETWORK='$NETWORK' REGISTRY_DOM='$REGISTRY_DOM'" \
+            bash << 'DEPLOY_SCRIPT'
+              set -euo pipefail
+
+              echo "🚀 Starting Harbor deployment..."
+              echo "🎯 Env: $TARGET_ENV"
+              echo "📂 Deploy dir: $DEPLOY_DIR"
+              echo "🌿 Branch: $BRANCH"
+              echo "📝 Template: $ENV_TEMPLATE"
+              echo "🔐 Secrets env: $ENV_FILE"
+              echo "🏷️ Prefix: $CONTAINER_PREFIX"
+              echo "🕸️ Network: $NETWORK"
+              echo "🌐 Domain: $REGISTRY_DOM"
+
+              # Ensure traefik shared network exists
+              if ! docker network ls --format '{{.Name}}' | grep -qx "web"; then
+                echo "ℹ️ Creating docker network 'web'..."
+                docker network create web
+              fi
+
+              # Clone/update repo
+              if [ -d "$DEPLOY_DIR/.git" ]; then
+                echo "✅ Repo exists, updating..."
+                cd "$DEPLOY_DIR"
+                git fetch origin
+                git reset --hard "origin/$BRANCH"
+                git clean -fd
+              else
+                echo "📥 Cloning repo..."
+                rm -rf "$DEPLOY_DIR"
+                git clone -b "$BRANCH" https://github.com/${{ github.repository }}.git "$DEPLOY_DIR"
+                cd "$DEPLOY_DIR"
+              fi
+
+              cd saas/harbor
+
+              # Build .env
+              if [ ! -f "$ENV_TEMPLATE" ]; then
+                echo "❌ ERROR: missing template $ENV_TEMPLATE"
+                exit 1
+              fi
+              cp "$ENV_TEMPLATE" .env
+
+              # Inject secrets
+              if [ -f "$ENV_FILE" ]; then
+                echo "🔐 Injecting secrets from $ENV_FILE..."
+                for SECRET_VAR in DB_PASSWORD HARBOR_ADMIN_PASSWORD CORE_SECRET JOBSERVICE_SECRET REGISTRY_HTTP_SECRET; do
+                  SECRET_VALUE=$(grep -E "^${SECRET_VAR}=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- || true)
+                  if [ -n "${SECRET_VALUE:-}" ]; then
+                    if grep -q "^${SECRET_VAR}=" .env; then
+                      sed -i "s|^${SECRET_VAR}=.*|${SECRET_VAR}=${SECRET_VALUE}|" .env
+                    else
+                      echo "${SECRET_VAR}=${SECRET_VALUE}" >> .env
+                    fi
+                    echo "  ✅ ${SECRET_VAR}"
                   else
-                    echo "${SECRET_VAR}=\${SECRET_VALUE}" >> .env
+                    echo "  ⚠️ Missing ${SECRET_VAR} in $ENV_FILE"
                   fi
-                  echo "  ✅ Injected ${SECRET_VAR}"
-                else
-                  echo "  ⚠️ ${SECRET_VAR} not found in VPS .env"
-                fi
-              done
-            else
-              echo "⚠️ VPS .env file not found at $ENV_FILE"
-              echo "   Using template defaults (INSECURE for production!)"
-            fi
-            
-            # Inject missing compose variables
-            echo "📋 Injecting docker-compose variables..."
-            {
-              echo ""
-              echo "# Docker Compose variables"
-              echo "CONTAINER_PREFIX=$CONTAINER_PREFIX"
-              echo "REGISTRY_DOMAIN=$REGISTRY_DOM"
-              echo "NETWORK_NAME=$NETWORK"
-            } >> .env
-            
-            echo "🔧 Pulling and starting containers..."
-            docker compose pull
-            docker compose up -d --remove-orphans
-            
-            # Wait for services
-            echo "⏳ Waiting for services to start..."
-            sleep 15
-            
-            # Check health
-            echo "🏥 Checking health..."
-            docker compose ps
-            
-            echo "✅ Deployment successful!"
-            echo "📊 Recent logs:"
-            docker compose logs --tail=30
-          DEPLOY_SCRIPT
+                done
+              else
+                echo "⚠️ WARN: secrets env file not found at $ENV_FILE (not recommended)."
+              fi
+
+              # Inject compose vars (critical for Traefik Host rules + networks)
+              {
+                echo ""
+                echo "# Docker Compose variables (injected by CI)"
+                echo "CONTAINER_PREFIX=$CONTAINER_PREFIX"
+                echo "REGISTRY_DOMAIN=$REGISTRY_DOM"
+                echo "NETWORK_NAME=$NETWORK"
+              } >> .env
+
+              # Override to fix nginx permission issue caused by mounting /etc/nginx
+              # Your base compose mounts a volume to /etc/nginx, preventing nginx from creating client_body_temp.
+              cat > docker-compose.override.yml << 'EOF'
+              services:
+                harbor-nginx:
+                  volumes: []  # remove /etc/nginx volume mount (root-cause of permission denied)
+                  tmpfs:
+                    - /etc/nginx/client_body_temp
+                    - /var/cache/nginx
+                    - /var/run
+              EOF
+
+              echo "🔧 Pull images..."
+              docker compose -f docker-compose.yml -f docker-compose.override.yml pull
+
+              echo "🧱 Up (with override)..."
+              docker compose -f docker-compose.yml -f docker-compose.override.yml up -d --remove-orphans
+
+              echo "⏳ Waiting for services..."
+              sleep 25
+
+              echo "🏥 Compose status:"
+              docker compose -f docker-compose.yml -f docker-compose.override.yml ps || true
+
+              echo "🔎 Crashloop gate:"
+              if docker compose -f docker-compose.yml -f docker-compose.override.yml ps | grep -E "Restarting|Exited|unhealthy"; then
+                echo "❌ Some containers are not healthy."
+                echo "📄 Recent logs:"
+                docker compose -f docker-compose.yml -f docker-compose.override.yml logs --tail=250 || true
+                exit 1
+              fi
+
+              echo "✅ Harbor deployed successfully."
+              echo "🔎 Nginx logs:"
+              docker logs "${CONTAINER_PREFIX}-nginx" --tail=80 || true
+            DEPLOY_SCRIPT
 
       - name: 🔄 Restart Traefik (optional)
         if: github.event_name == 'workflow_dispatch' && inputs.restart_traefik == true
