@@ -153,9 +153,10 @@ validate_links() {
     local broken=0
     
     # Vérifier liens internes
+    local link_regex='\]\(([^)]+)\)'
     while IFS= read -r line; do
         # Extraire fichier from [text](file)
-        if [[ $line =~ \]\(([^)]+)\) ]]; then
+        if [[ $line =~ $link_regex ]]; then
             file="${BASH_REMATCH[1]}"
             
             # Ignorer URLs externes

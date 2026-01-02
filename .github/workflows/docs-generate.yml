@@ -106,7 +106,7 @@ jobs:
           EOF
 
           # List all markdown files
-          find docs -name "*.md" -type f | sort | while read file; do
+          find docs -name "*.md" -type f | sort | while IFS= read -r file; do
             title=$(head -n 1 "$file" | sed 's/^# //')
             size=$(wc -c < "$file")
             echo "    { \"file\": \"$file\", \"title\": \"$title\", \"size\": $size }," >> docs/.index.json
@@ -132,7 +132,7 @@ jobs:
           📈 Metrics:
           - Total documents: $DOC_COUNT
           - Total lines: $LINE_COUNT
-          - Generated diagrams: $(ls docs/.generated/*.png 2>/dev/null | wc -l) PNG + $(ls docs/.generated/*.svg 2>/dev/null | wc -l) SVG
+          - Generated diagrams: $(find docs/.generated -maxdepth 1 -name "*.png" -print 2>/dev/null | wc -l) PNG + $(find docs/.generated -maxdepth 1 -name "*.svg" -print 2>/dev/null | wc -l) SVG
 
           📁 Main Sections:
           - Architecture & CI/CD
@@ -202,14 +202,16 @@ jobs:
       - name: Generate security report
         if: always()
         run: |
-          echo "🔐 Security Documentation Report" > security-docs-report.txt
-          echo "=================================" >> security-docs-report.txt
-          echo "" >> security-docs-report.txt
-          echo "Public Documents (in /docs):" >> security-docs-report.txt
-          find docs -name "*.md" -not -path "*/.*" | wc -l >> security-docs-report.txt
-          echo "" >> security-docs-report.txt
-          echo "Private Documents (in /docs-private):" >> security-docs-report.txt
-          find docs-private -name "*.md" 2>/dev/null | wc -l >> security-docs-report.txt
+          {
+            echo "🔐 Security Documentation Report"
+            echo "================================="
+            echo ""
+            echo "Public Documents (in /docs):"
+            find docs -name "*.md" -not -path "*/.*" | wc -l
+            echo ""
+            echo "Private Documents (in /docs-private):"
+            find docs-private -name "*.md" 2>/dev/null | wc -l
+          } > security-docs-report.txt
 
       - name: Upload security report
         if: always()
@@ -240,8 +242,9 @@ jobs:
           echo "🔗 Checking for broken links..."
 
           # Simple link validation
+          link_regex='^\(([^)]+)\)'
           while IFS= read -r link; do
-            if [[ $link =~ ^\(([^)]+)\) ]]; then
+            if [[ $link =~ $link_regex ]]; then
               file="${BASH_REMATCH[1]}"
               if [[ ! $file =~ ^https?:// ]]; then
                 if [ ! -f "$file" ]; then

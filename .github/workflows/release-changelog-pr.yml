@@ -88,6 +88,7 @@ jobs:
       - name: 🧾 Add summary
         if: ${{ steps.sr.outputs.next_release == 'true' }}
         run: |
+          # shellcheck disable=SC2129
           echo "## 📝 Release PR (CHANGELOG)" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "- 🔢 Next version: **${{ steps.sr.outputs.version }}**" >> "$GITHUB_STEP_SUMMARY"
@@ -128,20 +129,18 @@ jobs:
 
           read -r -d '' BODY <<'EOF'
           📝 Cette PR met à jour `CHANGELOG.md` pour la version **v${VERSION}**.
-          
           ✅ Générée automatiquement via `semantic-release --dry-run`.
           🔒 Compatible avec une branche `master` protégée (PR-only).
-          
           > Tip: merge cette PR, puis le workflow Release créera le tag + la GitHub Release.
           EOF
-          
-                    gh pr create \
-                      --base master \
-                      --head "$BRANCH" \
-                      --title "chore(release): update CHANGELOG for v${VERSION}" \
-                      --body "$BODY" \
-                      --label "release" \
-                      --label "changelog"
+
+          gh pr create \
+            --base master \
+            --head "$BRANCH" \
+            --title "chore(release): update CHANGELOG for v${VERSION}" \
+            --body "$BODY" \
+            --label "release" \
+            --label "changelog"
 
       - name: ✅ Done
         run: echo "✅ Release changelog PR pipeline finished."

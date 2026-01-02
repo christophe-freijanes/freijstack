@@ -84,7 +84,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ secrets.VPS_SSH_HOST }}" >> ~/.ssh/known_hosts
 
       - name: 🔒 Mask sensitive values
         run: |
@@ -103,8 +103,8 @@ jobs:
           check_dns() {
             DOMAIN=$1
             echo "Checking $DOMAIN..."
-            if dig +short $DOMAIN | grep -q '[0-9]'; then
-              IP=$(dig +short $DOMAIN | head -n1)
+            if dig +short "$DOMAIN" | grep -q '[0-9]'; then
+              IP=$(dig +short "$DOMAIN" | head -n1)
               echo "✅ $DOMAIN → $IP"
               return 0
             else
@@ -446,7 +446,7 @@ jobs:
           ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
           ls -l ~/.ssh
           # Vérification permissions et format (ne pas afficher la clé en clair)
-          if [ $(stat -c %a ~/.ssh/deploy_key) != "600" ]; then
+          if [ "$(stat -c %a ~/.ssh/deploy_key)" != "600" ]; then
             echo "❌ Permissions incorrectes sur deploy_key"; exit 1; fi
           head -n 2 ~/.ssh/deploy_key
 
@@ -890,6 +890,9 @@ jobs:
             API_DOM="${{ env.BACKEND_DOMAIN_STAGING }}"
           fi
 
+          echo "Frontend domain: $FRONTEND_DOM"
+          echo "API domain: $API_DOM"
+
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'VERIFY_LOGS'
             TRAEFIK_CONTAINER=$(docker ps --format '{{.Names}}' | grep -i 'traefik' | head -n1)
             if [ -z "$TRAEFIK_CONTAINER" ]; then
@@ -979,13 +982,7 @@ jobs:
           fi
 
       - name: ✅ Success Summary
-        if: >
-          ${{
-            needs.validate.result == 'success' &&
-            needs.test.result == 'success' &&
-            needs.deploy.result == 'success' &&
-            needs.post-verify.result == 'success'
-          }}
+        if: ${{ needs.validate.result == 'success' && needs.test.result == 'success' && needs.deploy.result == 'success' && needs.post-verify.result == 'success' }}
         run: |
           echo "✅ All jobs completed successfully!"
           echo "📊 Validation: ✅"
@@ -994,13 +991,7 @@ jobs:
           echo "🔎 Post-verification: ✅"
 
       - name: ⚠️ Partial Success
-        if: >
-          ${{
-            needs.validate.result == 'failure' ||
-            needs.test.result == 'failure' ||
-            needs.deploy.result == 'failure' ||
-            needs.post-verify.result == 'failure'
-          }}
+        if: ${{ needs.validate.result == 'failure' || needs.test.result == 'failure' || needs.deploy.result == 'failure' || needs.post-verify.result == 'failure' }}
         run: |
           echo "⚠️ Some jobs failed:"
           echo "Validation: ${{ needs.validate.result }}"

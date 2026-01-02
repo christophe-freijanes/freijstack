@@ -106,7 +106,7 @@ jobs:
       - name: Optimize assets
         run: |
           echo "Asset sizes before optimization:"
-          ls -lh saas/portfolio/*.{css,js} | awk '{print $9, $5}'
+          find saas/portfolio -maxdepth 1 -type f \( -name "*.css" -o -name "*.js" \) -exec ls -lh {} + | awk '{print $9, $5}'
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:

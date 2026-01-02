@@ -83,7 +83,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ secrets.VPS_SSH_HOST }}" >> ~/.ssh/known_hosts
 
       - name: 🔒 Mask sensitive values
         run: |
@@ -100,8 +100,8 @@ jobs:
           check_dns() {
             DOMAIN=$1
             echo "Checking $DOMAIN..."
-            if dig +short $DOMAIN | grep -q '[0-9]'; then
-              IP=$(dig +short $DOMAIN | head -n1)
+            if dig +short "$DOMAIN" | grep -q '[0-9]'; then
+              IP=$(dig +short "$DOMAIN" | head -n1)
               echo "✅ $DOMAIN → $IP"
               return 0
             else
@@ -383,7 +383,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ secrets.VPS_SSH_HOST }}" >> ~/.ssh/known_hosts
 
       - name: 🔒 Mask sensitive values
         run: |
@@ -407,6 +407,7 @@ jobs:
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
           fi
 
+          # shellcheck disable=SC2153
           # List of Harbor containers
           CONTAINERS="$CONTAINER_PREFIX-db \
             $CONTAINER_PREFIX-redis \
@@ -418,7 +419,8 @@ jobs:
             $CONTAINER_PREFIX-trivy \
             $CONTAINER_PREFIX-nginx"
 
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << CLEANUP_SCRIPT
+          # shellcheck disable=SC2153
+          ssh -i ~/.ssh/deploy_key "${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}" << 'CLEANUP_SCRIPT'
             set -e
             echo "🧹 Cleaning up old containers and networks..."
             echo "Environment: $TARGET_ENV"
@@ -610,7 +612,9 @@ jobs:
             REGISTRY_URL="${{ env.REGISTRY_DOMAIN_STAGING }}"
           fi
 
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'HEALTH_CHECK'
+          echo "Deploy directory: $DEPLOY_DIR"
+
+          ssh -i ~/.ssh/deploy_key "${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}" << 'HEALTH_CHECK'
             set -e
             echo "🏥 Running health checks..."
             echo ""
@@ -656,6 +660,7 @@ jobs:
           echo "📊 Post-deployment summary:"
           echo "Environment: $TARGET_ENV"
           echo "Registry URL: https://$REGISTRY_URL"
+          echo "Deploy directory: $DEPLOY_DIR"
           echo ""
           echo "🔗 Resources:"
           echo "  - GitHub Repository: ${{ github.server_url }}/${{ github.repository }}"
