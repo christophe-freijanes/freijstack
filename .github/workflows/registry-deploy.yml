@@ -172,10 +172,10 @@ jobs:
             mkdir -p data/auth logs
 
             echo "🔐 Generating authentication credentials..."
-            docker run --rm httpd:alpine htpasswd -nbB ${{ secrets.REGISTRY_USERNAME }} '${{ secrets.REGISTRY_PASSWORD }}' > .htpasswd
+            docker run --rm httpd:alpine htpasswd -nbB ${{ secrets.REGISTRY_USERNAME_PROD }} '${{ secrets.REGISTRY_PASSWORD_PROD }}' > .htpasswd
 
             echo "🔑 Creating UI credentials file..."
-            echo "${{ secrets.REGISTRY_USERNAME }}:${{ secrets.REGISTRY_PASSWORD }}" > .registry-credentials
+            echo "${{ secrets.REGISTRY_USERNAME_PROD }}:${{ secrets.REGISTRY_PASSWORD_PROD }}" > .registry-credentials
 
             echo "🛑 Stopping existing services..."
             docker compose down || true
