@@ -1,18 +1,15 @@
 # .github/actionlint.yaml
 
-# IMPORTANT : L'option 'shellcheck: enable: false' n'existe pas dans le fichier YAML.
-# Pour désactiver shellcheck globalement via la config, on utilise 'shellcheck: ""'
+# Désactive l'intégration ShellCheck au niveau binaire (optionnel si ignore est complet)
 shellcheck: ""
 
-# Ignorer globalement des erreurs par Regex
+# Ignorer globalement les erreurs ShellCheck par message
 ignore:
   - 'shellcheck reported issue in this script: SC2034'
   - 'shellcheck reported issue in this script: SC2129'
   - 'shellcheck reported issue in this script: SC2086'
-  # Pour tout couper si 'shellcheck: ""' ne suffit pas selon votre version :
-  - 'shellcheck reported issue in this script:.*'
 
-# Configuration spécifique par fichier
+# Configuration spécifique par fichier (si vous voulez être plus précis)
 paths:
   ".github/workflows/harbor-deploy.yml":
     ignore:
