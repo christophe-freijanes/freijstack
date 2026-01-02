@@ -23,4 +23,4 @@ http:
 auth:
   htpasswd:
     realm: Docker Registry
-    path: /var/lib/registry/auth/htpasswd
+    path: /etc/docker/registry/auth/htpasswd
