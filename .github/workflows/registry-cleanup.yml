@@ -39,38 +39,38 @@ jobs:
         run: |
           MAX_AGE="${{ github.event.inputs.max_age_days || '90' }}"
           DRY_RUN="${{ github.event.inputs.dry_run || 'false' }}"
-          
+
           echo "🧹 Registry Cleanup"
           echo "=================="
           echo "Max age: ${MAX_AGE} days"
           echo "Dry run: ${DRY_RUN}"
           echo ""
-          
+
           # Upload script to VPS
           scp -i ~/.ssh/deploy_key scripts/cleanup-registry-images.sh \
             ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}:/tmp/cleanup-registry.sh
-          
+
           # Execute cleanup on VPS
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'CLEANUP'
             set -e
-            
+
             chmod +x /tmp/cleanup-registry.sh
-            
+
             echo "🔍 Running cleanup script..."
             /tmp/cleanup-registry.sh \
               registry.freijstack.com \
               ${{ secrets.REGISTRY_USERNAME_PROD }} \
               '${{ secrets.REGISTRY_PASSWORD_PROD }}' \
               ${{ github.event.inputs.max_age_days || '90' }}
-            
+
             echo ""
             echo "🗑️  Running garbage collection..."
             cd /srv/www/registry
             docker compose exec -T registry bin/registry garbage-collect /etc/docker/registry/config.yml --delete-untagged
-            
+
             echo ""
             echo "✅ Cleanup completed"
-            
+
             rm -f /tmp/cleanup-registry.sh
           CLEANUP
 
@@ -81,9 +81,11 @@ jobs:
 
       - name: 📊 Summary
         run: |
-          echo "## 🧹 Registry Cleanup Summary" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Max age: **${{ github.event.inputs.max_age_days || '90' }} days**" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Dry run: **${{ github.event.inputs.dry_run || 'false' }}**" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "✅ Cleanup completed successfully" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## 🧹 Registry Cleanup Summary"
+            echo ""
+            echo "- Max age: **${{ github.event.inputs.max_age_days || '90' }} days**"
+            echo "- Dry run: **${{ github.event.inputs.dry_run || 'false' }}**"
+            echo ""
+            echo "✅ Cleanup completed successfully"
+          } >> "$GITHUB_STEP_SUMMARY"
