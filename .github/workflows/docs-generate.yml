@@ -36,7 +36,7 @@ jobs:
       - name: Install documentation tools
         run: |
           npm install -g \
-            markdown-lint-cli@latest \
+            markdownlint-cli@latest \
             typedoc@latest \
             @mermaid-js/mermaid-cli@latest
 
