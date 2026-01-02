@@ -450,6 +450,7 @@ jobs:
     environment:
       name: ${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
       url: ${{ github.ref == 'refs/heads/master' && 'https://registry.freijstack.com' || 'https://registry-staging.freijstack.com' }}
+      reviewers: ${{ github.ref == 'refs/heads/master' && fromJSON('["christophe-freijanes"]') || null }}
 
     steps:
       - name: 📥 Checkout code
@@ -544,6 +545,16 @@ jobs:
               echo "⚠️ VPS .env file not found at $ENV_FILE"
               echo "   Using template defaults (INSECURE for production!)"
             fi
+            
+            # Inject missing compose variables
+            echo "📋 Injecting docker-compose variables..."
+            {
+              echo ""
+              echo "# Docker Compose variables"
+              echo "CONTAINER_PREFIX=$CONTAINER_PREFIX"
+              echo "REGISTRY_DOMAIN=$REGISTRY_DOM"
+              echo "NETWORK_NAME=$NETWORK"
+            } >> .env
             
             echo "🔧 Pulling and starting containers..."
             docker compose pull
