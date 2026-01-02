@@ -124,6 +124,8 @@ jobs:
             "https://portfolio.freijstack.com/|200,301,302|Portfolio"
             "https://christophe-freijanes.github.io/freijstack/|200,301,302|GitHub Pages"
             "https://vault.freijstack.com/login|200,301,302,404|SecureVault Frontend (shared)"
+            "https://registry-staging.freijstack.com/v2/|401,200|Docker Registry API (staging)"
+            "https://registry-ui-staging.freijstack.com/|200,301,302|Docker Registry UI (staging)"
           )
 
           # Fast pass + Grace pass
