@@ -1,7 +1,7 @@
 # ShellCheck configuration
-# Focus on critical/high severity issues only
+# Only show critical errors (syntax errors, undefined vars, etc.)
 
-# Disable style/info level checks (SC2xxx series that are informational)
+# Disable style/info/warning level checks
 disable=SC2129  # Consider using { cmd1; cmd2; } >> file (style suggestion)
 disable=SC2034  # Variable appears unused (often false positive in sourced files)
 disable=SC2153  # Possible misspelling (false positives on env vars)
@@ -10,16 +10,13 @@ disable=SC2086  # Double quote to prevent globbing (sometimes intentional)
 disable=SC2087  # Quote heredoc delimiter (client vs server expansion)
 disable=SC2155  # Declare and assign separately (style suggestion, doesn't affect correctness)
 
-# Keep enabled: critical issues
-# - SC1xxx: Syntax errors
-# - SC2001-2100: Semantic errors (logic bugs, security)
-# - Command not found, undefined variables, etc.
+# Severity threshold: only show errors (syntax, logic bugs)
+# Skips: warning, info, style
+severity=error
 
-# Severity levels:
-# - error: Always shown (syntax errors, undefined vars)
-# - warning: Security and correctness issues (keep these)
-# - info: Best practices (disabled above)
-# - style: Cosmetic suggestions (disabled above)
+# Keep enabled: critical issues only
+# - SC1xxx: Syntax errors
+# - Undefined variables, command not found, etc.
 
 # External sources (allow sourcing from /etc, /usr, common paths)
 source-path=SCRIPTDIR
