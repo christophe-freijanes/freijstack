@@ -4,14 +4,36 @@ set -e
 # 🐳 Docker Registry Deployment Script
 # Déploie un registre Docker privé avec UI
 
+# Usage:
+#   ./deploy-registry.sh staging
+#   ./deploy-registry.sh production
+#   Or set environment variables:
+#   TARGET_ENV=staging REGISTRY_DOM=... ./deploy-registry.sh
+
+ENVIRONMENT="${1:-staging}"
+
+if [ "$ENVIRONMENT" != "staging" ] && [ "$ENVIRONMENT" != "production" ]; then
+  echo "❌ Invalid environment. Use 'staging' or 'production'"
+  exit 1
+fi
+
+# Configuration par environnement
+if [ "$ENVIRONMENT" = "staging" ]; then
+  DEPLOY_DIR="${DEPLOY_DIR:-/srv/www/registry-staging}"
+  REGISTRY_DOM="${REGISTRY_DOM:-registry-staging.freijstack.com}"
+  REGISTRY_UI_DOM="${REGISTRY_UI_DOM:-registry-ui-staging.freijstack.com}"
+  CONTAINER_PREFIX="registry-staging"
+  REGISTRY_TITLE="Freijstack Private Registry (Staging)"
+else
+  DEPLOY_DIR="${DEPLOY_DIR:-/srv/www/registry}"
+  REGISTRY_DOM="${REGISTRY_DOM:-registry.freijstack.com}"
+  REGISTRY_UI_DOM="${REGISTRY_UI_DOM:-registry-ui.freijstack.com}"
+  CONTAINER_PREFIX="registry"
+  REGISTRY_TITLE="Freijstack Private Registry (Production)"
+fi
+
 echo "🚀 Starting Docker Registry deployment..."
-
-# Configuration
-ENV_FILE="${1:-.env}"
-DEPLOY_DIR="${DEPLOY_DIR:-/srv/www/registry-staging}"
-REGISTRY_DOM="${REGISTRY_DOM:-registry-staging.freijstack.com}"
-REGISTRY_UI_DOM="${REGISTRY_UI_DOM:-registry-ui-staging.freijstack.com}"
-
+echo "🎯 Environment: $ENVIRONMENT"
 echo "📂 Deploy directory: $DEPLOY_DIR"
 echo "🌐 Registry domain: $REGISTRY_DOM"
 echo "🌐 Registry UI domain: $REGISTRY_UI_DOM"
@@ -20,16 +42,28 @@ echo "🌐 Registry UI domain: $REGISTRY_UI_DOM"
 mkdir -p "$DEPLOY_DIR"
 cd "$DEPLOY_DIR"
 
-# Copier les fichiers de configuration
-if [ ! -f "docker-compose.yml" ]; then
-  echo "📝 Creating docker-compose.yml..."
+# Copier les fichiers de configuration depuis GitHub ou créer localement
+REPO_URL="https://raw.githubusercontent.com/christophe-freijanes/freijstack"
+BRANCH=$([ "$ENVIRONMENT" = "staging" ] && echo "develop" || echo "main")
+COMPOSE_FILE=$([ "$ENVIRONMENT" = "staging" ] && echo "docker-compose.staging.yml" || echo "docker-compose.prod.yml")
+
+echo ""
+echo "📝 Setting up configuration files..."
+
+# Télécharger ou créer docker-compose.yml
+if command -v curl &> /dev/null; then
+  echo "   Downloading $COMPOSE_FILE from GitHub..."
+  curl -s "$REPO_URL/$BRANCH/saas/registry/$COMPOSE_FILE" -o docker-compose.yml
+  curl -s "$REPO_URL/$BRANCH/saas/registry/config.yml" -o config.yml
+else
+  echo "   Creating docker-compose.yml locally..."
+  # Créer localement si pas de curl
   cat > docker-compose.yml <<'COMPOSE'
 version: '3.8'
 
 services:
   registry:
     image: registry:2
-    container_name: registry-staging
     restart: unless-stopped
     environment:
       REGISTRY_HTTP_RELATIVEURLS: "true"
@@ -45,21 +79,12 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.registry.rule=Host(`registry-staging.freijstack.com`)"
-      - "traefik.http.routers.registry.entrypoints=websecure"
-      - "traefik.http.routers.registry.tls.certresolver=mytlschallenge"
-      - "traefik.http.services.registry.loadbalancer.server.port=5000"
 
   registry-ui:
     image: joxit/docker-registry-ui:latest
-    container_name: registry-ui-staging
     restart: unless-stopped
     environment:
       SINGLE_REGISTRY: "true"
-      REGISTRY_TITLE: "Freijstack Private Registry"
-      REGISTRY_URL: "https://registry-staging.freijstack.com"
       DELETE_IMAGES: "true"
       SHOW_CONTENT_DIGEST: "true"
     depends_on:
@@ -72,25 +97,20 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.registry-ui.rule=Host(`registry-ui-staging.freijstack.com`)"
-      - "traefik.http.routers.registry-ui.entrypoints=websecure"
-      - "traefik.http.routers.registry-ui.tls.certresolver=mytlschallenge"
-      - "traefik.http.services.registry-ui.loadbalancer.server.port=80"
 
 volumes:
   registry-data:
     driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data
 
 networks:
   web:
     external: true
 COMPOSE
-fi
 
-if [ ! -f "config.yml" ]; then
-  echo "⚙️ Creating registry config..."
   cat > config.yml <<'CONFIG'
 version: 0.1
 log:
@@ -118,14 +138,16 @@ CONFIG
 fi
 
 # Créer le répertoire de données
-mkdir -p data/auth
+mkdir -p data/auth logs
 
-# Démarrer les services
-echo "🐳 Starting Docker Registry and UI..."
+echo "🛑 Stopping existing services (if any)..."
+docker compose down || true
+
+echo "🆙 Starting Docker Registry and UI..."
 docker compose up -d
 
 echo "⏳ Waiting for services to be healthy..."
-sleep 10
+sleep 15
 
 # Vérifier la santé
 echo ""
@@ -134,24 +156,45 @@ docker compose ps
 
 echo ""
 echo "🏥 Health check:"
-echo "- Registry API:"
-docker compose exec -T registry curl -s -o /dev/null -w "HTTP %{http_code}\n" http://localhost:5000/v2/ || echo "❌ Registry not responding"
 
-echo "- Registry UI:"
-docker compose exec -T registry-ui curl -s -o /dev/null -w "HTTP %{http_code}\n" http://localhost:80/ || echo "❌ Registry UI not responding"
+# Attendre que registry soit healthy
+MAX_ATTEMPTS=30
+ATTEMPT=0
+while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+  if docker compose exec -T registry curl -s -f http://localhost:5000/v2/ > /dev/null 2>&1; then
+    echo "✅ Registry API is healthy"
+    break
+  fi
+  ATTEMPT=$((ATTEMPT + 1))
+  echo "   Attempt $ATTEMPT/$MAX_ATTEMPTS - waiting for registry..."
+  sleep 2
+done
+
+if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+  echo "⚠️  Registry API not responding after $MAX_ATTEMPTS attempts"
+fi
+
+# Vérifier registry-ui
+if docker compose exec -T registry-ui curl -s -f http://localhost:80/ > /dev/null 2>&1; then
+  echo "✅ Registry UI is healthy"
+else
+  echo "⚠️  Registry UI not responding (may still be starting)"
+fi
 
 echo ""
-echo "✅ Docker Registry deployment complete!"
+echo "✅ Docker Registry deployment complete for $ENVIRONMENT!"
 echo ""
 echo "🌐 Access points:"
 echo "   Registry API: https://$REGISTRY_DOM"
 echo "   Registry UI: https://$REGISTRY_UI_DOM"
 echo ""
 echo "🔧 Usage:"
-echo "   docker build -t $REGISTRY_DOM/myimage:latest ."
-echo "   docker push $REGISTRY_DOM/myimage:latest"
+echo "   docker build -t $REGISTRY_DOM/portfolio:latest ./saas/portfolio"
+echo "   docker push $REGISTRY_DOM/portfolio:latest"
+echo "   docker login $REGISTRY_DOM"
 echo ""
 echo "📂 Configuration files in: $DEPLOY_DIR"
 echo "   - docker-compose.yml"
 echo "   - config.yml"
-echo "   - data/ (storage)"
+echo "   - data/ (persistent storage)"
+echo "   - logs/ (optional)"
