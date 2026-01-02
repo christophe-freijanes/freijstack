@@ -1,10 +1,11 @@
 # actionlint configuration
 # https://github.com/rhysd/actionlint/blob/main/docs/config.md
 
-# Disable shellcheck integration (use local shellcheck in CI instead)
-shellcheck:
-
 self-hosted-runner:
   labels: []
 
 config-variables: []
+
+# Ignore all shellcheck messages reported by actionlint (shellcheck disabled)
+ignore:
+  - 'shellcheck reported issue in this script'
