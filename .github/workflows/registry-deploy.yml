@@ -51,6 +51,7 @@ jobs:
         saas/registry
       fail_on_gitleaks: true
       upload_sarif: true
+      publish_score_artifact: true
 
   deploy-staging:
     name: 🚀 Deploy to Staging
