@@ -107,6 +107,13 @@ jobs:
             echo "🛑 Stopping existing services..."
             docker compose down || true
 
+            echo "🧹 Force cleanup of registry containers..."
+            docker stop registry registry-ui 2>/dev/null || true
+            docker rm registry registry-ui 2>/dev/null || true
+
+            echo "⏳ Waiting for port 5000 to be released..."
+            sleep 3
+
             echo "🆙 Starting new services..."
             docker compose up -d
 
@@ -157,6 +164,15 @@ jobs:
             set -e
             echo "🚀 Deploying Docker Registry to PRODUCTION..."
 
+            echo "🛑 Stopping STAGING environment..."
+            STAGING_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
+            if [ -d "$STAGING_DIR" ]; then
+              cd "$STAGING_DIR"
+              docker compose down || true
+              cd -
+              echo "✅ Staging stopped (data preserved)"
+            fi
+
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
             mkdir -p "$DEPLOY_DIR"
             cd "$DEPLOY_DIR"
@@ -179,6 +195,13 @@ jobs:
 
             echo "🛑 Stopping existing services..."
             docker compose down || true
+
+            echo "🧹 Force cleanup of registry containers..."
+            docker stop registry registry-ui 2>/dev/null || true
+            docker rm registry registry-ui 2>/dev/null || true
+
+            echo "⏳ Waiting for port 5000 to be released..."
+            sleep 3
 
             echo "🆙 Starting new services..."
             docker compose up -d
