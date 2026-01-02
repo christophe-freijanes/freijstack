@@ -6,6 +6,46 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.9.4](https://github.com/christophe-freijanes/freijstack/compare/v1.9.3...v1.9.4) (2026-01-02)
+
+### 🐛 Bug Fixes
+
+* add docker login before image verification and remove duplicate checkouts ([d894022](https://github.com/christophe-freijanes/freijstack/commit/d894022d2cd54fcd392a7a073746863e4afc6b26))
+
+### 📚 Documentation
+
+* auto-generate diagrams and index ([#114](https://github.com/christophe-freijanes/freijstack/issues/114)) ([7c57eb0](https://github.com/christophe-freijanes/freijstack/commit/7c57eb090bd2ae2904e09414a4d1234c61d7d931)), closes [#64](https://github.com/christophe-freijanes/freijstack/issues/64) [#66](https://github.com/christophe-freijanes/freijstack/issues/66) [#67](https://github.com/christophe-freijanes/freijstack/issues/67) [#69](https://github.com/christophe-freijanes/freijstack/issues/69) [#73](https://github.com/christophe-freijanes/freijstack/issues/73) [#75](https://github.com/christophe-freijanes/freijstack/issues/75) [#78](https://github.com/christophe-freijanes/freijstack/issues/78) [#79](https://github.com/christophe-freijanes/freijstack/issues/79) [#81](https://github.com/christophe-freijanes/freijstack/issues/81) [#82](https://github.com/christophe-freijanes/freijstack/issues/82) [#83](https://github.com/christophe-freijanes/freijstack/issues/83) [#85](https://github.com/christophe-freijanes/freijstack/issues/85) [#87](https://github.com/christophe-freijanes/freijstack/issues/87) [#89](https://github.com/christophe-freijanes/freijstack/issues/89) [#90](https://github.com/christophe-freijanes/freijstack/issues/90) [#91](https://github.com/christophe-freijanes/freijstack/issues/91) [#92](https://github.com/christophe-freijanes/freijstack/issues/92) [#93](https://github.com/christophe-freijanes/freijstack/issues/93) [#94](https://github.com/christophe-freijanes/freijstack/issues/94) [#96](https://github.com/christophe-freijanes/freijstack/issues/96) [#97](https://github.com/christophe-freijanes/freijstack/issues/97) [#98](https://github.com/christophe-freijanes/freijstack/issues/98)
+
+## [1.9.3](https://github.com/christophe-freijanes/freijstack/compare/v1.9.2...v1.9.3) (2026-01-02)
+
+### 🐛 Bug Fixes
+
+* remove extra blank lines in docker-compose.yml (yamllint) ([a844e2e](https://github.com/christophe-freijanes/freijstack/commit/a844e2eb98e4fb1fe579074aa42b5fade193fd2f))
+
+## [1.9.2](https://github.com/christophe-freijanes/freijstack/compare/v1.9.1...v1.9.2) (2026-01-02)
+
+### 🐛 Bug Fixes
+
+* break long if condition in portfolio-deploy.yml to comply with yamllint ([c6d7b5e](https://github.com/christophe-freijanes/freijstack/commit/c6d7b5e55ac67ff6515ca6936803d211b0f44cd9))
+
+## [1.9.1](https://github.com/christophe-freijanes/freijstack/compare/v1.9.0...v1.9.1) (2026-01-02)
+
+### ♻️ Code Refactoring
+
+* remove portfolio services managed by separate docker-compose ([4a6ac9a](https://github.com/christophe-freijanes/freijstack/commit/4a6ac9a82221630f813745745687adc5dba69b0f))
+
+## [1.9.0](https://github.com/christophe-freijanes/freijstack/compare/v1.8.0...v1.9.0) (2026-01-02)
+
+### 🚀 Features
+
+* add security scanning to portfolio deployment workflow ([2342c0f](https://github.com/christophe-freijanes/freijstack/commit/2342c0f8f0a1a0667c5721aa0e383688f3231d9c))
+
+## [1.8.0](https://github.com/christophe-freijanes/freijstack/compare/v1.7.0...v1.8.0) (2026-01-02)
+
+### 🚀 Features
+
+* migrate portfolio deployment from rsync to Docker Compose ([1dbe23a](https://github.com/christophe-freijanes/freijstack/commit/1dbe23a792b258c95ebb9298499db09587029e98))
+
 ## [1.7.0](https://github.com/christophe-freijanes/freijstack/compare/v1.6.0...v1.7.0) (2026-01-02)
 
 ### 🚀 Features
