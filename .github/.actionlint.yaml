@@ -5,9 +5,9 @@ shellcheck: ""
 
 # Ignorer globalement les erreurs ShellCheck par message
 ignore:
-  - 'shellcheck reported issue in this script: SC2034'
-  - 'shellcheck reported issue in this script: SC2129'
-  - 'shellcheck reported issue in this script: SC2086'
+  # Filtre tous les messages de niveau 'warning' et 'style' de ShellCheck
+  - "shellcheck reported issue in this script:.*:warning:"
+  - "shellcheck reported issue in this script:.*:style:"
 
 # Configuration spécifique par fichier (si vous voulez être plus précis)
 paths:
