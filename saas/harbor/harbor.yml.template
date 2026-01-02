@@ -49,8 +49,10 @@ trivy:
 # Job service configuration
 jobservice:
   max_job_workers: 10
-  logger_sweeper_duration: 1h
+  logger_sweeper_duration: 3600  # seconds (1 hour = 3600)
   job_loggers:
+    - STD_OUTPUT
+    - FILE
     - STD_OUTPUT
     - FILE
 
