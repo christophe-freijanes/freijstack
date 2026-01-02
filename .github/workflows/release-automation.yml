@@ -57,6 +57,14 @@ jobs:
           echo "https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com" > ~/.git-credentials
           git remote set-url origin "https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com/${{ github.repository }}.git"
 
+      - name: 🏷️ Fetch all tags from repository
+        run: |
+          set -euo pipefail
+          echo "📥 Fetching all existing tags..."
+          git fetch --tags --force
+          echo "✅ Current tags:"
+          git tag --sort=-version:refname | head -5
+
       - name: 🏷️ Release on develop (tag + GitHub Release)
         if: ${{ github.ref_name == 'develop' }}
         env:
