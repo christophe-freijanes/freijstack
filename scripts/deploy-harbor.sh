@@ -76,6 +76,7 @@ jobservice:
 
 notification:
   webhook_job_max_retry: 10
+  webhook_job_http_client_timeout: 3
 
 log:
   level: info
