@@ -132,7 +132,11 @@ jobs:
           📈 Metrics:
           - Total documents: $DOC_COUNT
           - Total lines: $LINE_COUNT
-          - Generated diagrams: $(find docs/.generated -maxdepth 1 -name "*.png" -print 2>/dev/null | wc -l) PNG + $(find docs/.generated -maxdepth 1 -name "*.svg" -print 2>/dev/null | wc -l) SVG
+          - Generated diagrams: $(
+              find docs/.generated -maxdepth 1 -name "*.png" -print 2>/dev/null | wc -l
+            ) PNG + $(
+              find docs/.generated -maxdepth 1 -name "*.svg" -print 2>/dev/null | wc -l
+            ) SVG
 
           📁 Main Sections:
           - Architecture & CI/CD
