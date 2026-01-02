@@ -479,11 +479,17 @@ jobs:
             ENV_FILE="${{ env.VPS_ENV_FILE_PROD }}"
             BRANCH="${{ env.BRANCH_PROD }}"
             ENV_TEMPLATE=".env.production"
+            CONTAINER_PREFIX="${{ env.CONTAINER_PREFIX_PROD }}"
+            REGISTRY_DOM="${{ env.REGISTRY_DOMAIN_PROD }}"
+            NETWORK="${{ env.NETWORK_PROD }}"
           else
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
             ENV_FILE="${{ env.VPS_ENV_FILE_STAGING }}"
             BRANCH="${{ env.BRANCH_STAGING }}"
             ENV_TEMPLATE=".env.staging"
+            CONTAINER_PREFIX="${{ env.CONTAINER_PREFIX_STAGING }}"
+            REGISTRY_DOM="${{ env.REGISTRY_DOMAIN_STAGING }}"
+            NETWORK="${{ env.NETWORK_STAGING }}"
           fi
           
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << DEPLOY_SCRIPT
