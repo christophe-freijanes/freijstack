@@ -174,6 +174,20 @@ try:
     registry_dom = os.environ['REGISTRY_DOM']
     http_port = os.environ['HTTP_PORT']
 
+    # Get default Harbor network name (usually 'harbor' or similar)
+    harbor_net = None
+    for svc in compose['services'].values():
+        if 'networks' in svc:
+            if isinstance(svc['networks'], list) and svc['networks']:
+                harbor_net = svc['networks'][0]
+                break
+            elif isinstance(svc['networks'], dict):
+                harbor_net = list(svc['networks'].keys())[0]
+                break
+    
+    if not harbor_net:
+        harbor_net = 'harbor'  # fallback
+
     # Rename services with prefix and add network aliases for internal DNS
     services_copy = dict(compose['services'])
     compose['services'] = {}
@@ -185,38 +199,52 @@ try:
         if 'depends_on' in svc_config:
             svc_config['depends_on'] = [f"{prefix}-{dep}" for dep in svc_config['depends_on']]
         
-        # Add network aliases to preserve original service names for internal Harbor DNS
-        if 'networks' not in svc_config:
-            svc_config['networks'] = {}
+        # Ensure networks is a dict and add aliases to Harbor internal network
+        if 'networks' not in svc_config or not svc_config['networks']:
+            svc_config['networks'] = {harbor_net: {}}
         
-        # Convert networks list to dict with aliases if needed
+        # Convert networks list to dict with aliases
         if isinstance(svc_config['networks'], list):
             nets = svc_config['networks']
             svc_config['networks'] = {}
             for net in nets:
                 svc_config['networks'][net] = {'aliases': [svc_name]}
         else:
-            # Add alias to each existing network
-            for net_name in svc_config['networks'].keys():
+            # Add alias to each existing network (dict format)
+            for net_name in list(svc_config['networks'].keys()):
                 if svc_config['networks'][net_name] is None:
                     svc_config['networks'][net_name] = {}
-                svc_config['networks'][net_name]['aliases'] = [svc_name]
+                if 'aliases' not in svc_config['networks'][net_name]:
+                    svc_config['networks'][net_name]['aliases'] = []
+                if svc_name not in svc_config['networks'][net_name]['aliases']:
+                    svc_config['networks'][net_name]['aliases'].append(svc_name)
 
     # Add Traefik labels to nginx (proxy)
     proxy_service = f"{prefix}-proxy"
     if proxy_service in compose['services']:
         svc = compose['services'][proxy_service]
         
-        # Ensure networks is a dict
-        if 'networks' not in svc or svc['networks'] is None:
+        # Ensure proxy is on both Harbor internal network AND web network
+        if 'networks' not in svc or not svc['networks']:
             svc['networks'] = {}
+        
+        # Convert list to dict if needed
         if isinstance(svc['networks'], list):
             nets = svc['networks']
             svc['networks'] = {}
             for net in nets:
-                svc['networks'][net] = {}
+                svc['networks'][net] = {'aliases': ['proxy']}
         
-        # Add web network with alias
+        # Ensure proxy has alias on Harbor internal network
+        if harbor_net in svc['networks']:
+            if svc['networks'][harbor_net] is None:
+                svc['networks'][harbor_net] = {}
+            if 'aliases' not in svc['networks'][harbor_net]:
+                svc['networks'][harbor_net]['aliases'] = []
+            if 'proxy' not in svc['networks'][harbor_net]['aliases']:
+                svc['networks'][harbor_net]['aliases'].append('proxy')
+        
+        # Add web network for Traefik with alias
         svc['networks']['web'] = {'aliases': ['proxy']}
         
         # Remove host port bindings to avoid 80/443 conflicts (Traefik handles ingress)
