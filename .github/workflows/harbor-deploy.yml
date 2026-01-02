@@ -548,25 +548,19 @@ jobs:
 
               # Generate harbor.yml from template
               echo "📝 Generating harbor.yml..."
-              cat > harbor.yml << EOF
-              hostname: $REGISTRY_DOM
+              cat > harbor.yml << 'HARBOR_YML'
+              hostname: ${REGISTRY_DOM}
               
               # HTTP is handled by Traefik, so we use custom ports to avoid conflicts
               http:
-                port: $HTTP_PORT
-              
-              # We'll use Traefik for HTTPS termination
-              # https:
-              #   port: $HTTPS_PORT
-              #   certificate: /your/certificate/path
-              #   private_key: /your/private/key/path
+                port: ${HTTP_PORT}
               
               # Harbor admin password
-              harbor_admin_password: $ADMIN_PASS
+              harbor_admin_password: ${ADMIN_PASS}
               
               # Database
               database:
-                password: $DB_PASS
+                password: ${DB_PASS}
                 max_idle_conns: 100
                 max_open_conns: 900
               
@@ -596,10 +590,16 @@ jobs:
                   location: /var/log/harbor
               
               # External URL (via Traefik)
-              external_url: https://$REGISTRY_DOM
+              external_url: https://${REGISTRY_DOM}
               
               _version: 2.10.0
-              EOF
+HARBOR_YML
+
+              # Substitute variables in harbor.yml
+              sed -i "s|\${REGISTRY_DOM}|$REGISTRY_DOM|g" harbor.yml
+              sed -i "s|\${HTTP_PORT}|$HTTP_PORT|g" harbor.yml
+              sed -i "s|\${ADMIN_PASS}|$ADMIN_PASS|g" harbor.yml
+              sed -i "s|\${DB_PASS}|$DB_PASS|g" harbor.yml
 
               # Run prepare script to generate configs
               echo "🔧 Running prepare script..."
@@ -612,15 +612,19 @@ jobs:
               cp docker-compose.yml docker-compose.yml.backup
               
               # Add Traefik labels to proxy service (nginx)
-              python3 << 'PYTHON_SCRIPT'
+              python3 << 'PYTHON_END'
               import yaml
-              import sys
+              import os
               
               with open('docker-compose.yml', 'r') as f:
                   compose = yaml.safe_load(f)
               
+              # Get variables from environment
+              prefix = os.environ['CONTAINER_PREFIX']
+              registry_dom = os.environ['REGISTRY_DOM']
+              http_port = os.environ['HTTP_PORT']
+              
               # Rename services with prefix
-              prefix = "$CONTAINER_PREFIX"
               services_copy = dict(compose['services'])
               compose['services'] = {}
               for svc_name, svc_config in services_copy.items():
@@ -649,11 +653,11 @@ jobs:
                   # Add Traefik labels
                   svc['labels'] = [
                       'traefik.enable=true',
-                      f'traefik.http.routers.{prefix}.rule=Host(`$REGISTRY_DOM`)',
+                      f'traefik.http.routers.{prefix}.rule=Host(`{registry_dom}`)',
                       f'traefik.http.routers.{prefix}.entrypoints=websecure',
                       f'traefik.http.routers.{prefix}.tls=true',
                       f'traefik.http.routers.{prefix}.tls.certresolver=mytlschallenge',
-                      f'traefik.http.services.{prefix}.loadbalancer.server.port=$HTTP_PORT',
+                      f'traefik.http.services.{prefix}.loadbalancer.server.port={http_port}',
                   ]
               
               # Add external web network
@@ -685,7 +689,7 @@ jobs:
               
               with open('docker-compose.yml', 'w') as f:
                   yaml.dump(compose, f, default_flow_style=False, sort_keys=False)
-              PYTHON_SCRIPT
+PYTHON_END
 
               echo "🔧 Starting Harbor..."
               docker compose up -d
@@ -696,8 +700,8 @@ jobs:
               echo "🏥 Checking service status:"
               docker compose ps
 
-              # Check for unhealthy containers
-              UNHEALTHY=$(docker compose ps --format json | jq -r 'select(.State != "running") | .Name' 2>/dev/null || true)
+              # Check for unhealthy containers (with fallback if jq not available)
+              UNHEALTHY=$(docker compose ps --format json 2>/dev/null | jq -r 'select(.State != "running") | .Name' 2>/dev/null || docker compose ps | grep -v "Up" | tail -n +2 || true)
               if [ -n "$UNHEALTHY" ]; then
                 echo "⚠️ Some containers are not running:"
                 echo "$UNHEALTHY"
@@ -713,7 +717,7 @@ jobs:
               echo "🌐 Access Harbor at: https://$REGISTRY_DOM"
               echo "👤 Username: admin"
               echo "🔑 Password: (check $ENV_FILE)"
-            DEPLOY_SCRIPT
+DEPLOY_SCRIPT
 
       - name: 🔄 Restart Traefik (optional)
         if: github.event_name == 'workflow_dispatch' && inputs.restart_traefik == true
