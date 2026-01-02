@@ -111,6 +111,7 @@ jobs:
       # ---------------------------
       - name: 🌐 Public URLs Health Check (strong anti false-positives)
         run: |
+          # shellcheck disable=SC2129
           set -euo pipefail
 
           echo "## 🌐 Public URLs Health Check" >> "$GITHUB_STEP_SUMMARY"
