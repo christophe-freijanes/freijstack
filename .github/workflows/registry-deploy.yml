@@ -91,8 +91,10 @@ jobs:
             echo "📝 Downloading configuration files..."
             REPO="${{ github.repository }}"
             SHA="${{ github.sha }}"
-            curl -fsSL "https://raw.githubusercontent.com/$REPO/develop/saas/registry/docker-compose.staging.yml?$SHA" -o docker-compose.yml || { echo "❌ Failed to download docker-compose.staging.yml"; exit 1; }
-            curl -fsSL "https://raw.githubusercontent.com/$REPO/develop/saas/registry/config.yml?$SHA" -o config.yml || { echo "❌ Failed to download config.yml"; exit 1; }
+            curl -fsSL "https://raw.githubusercontent.com/$REPO/develop/saas/registry/docker-compose.staging.yml?$SHA" \
+              -o docker-compose.yml || { echo "❌ Failed to download docker-compose.staging.yml"; exit 1; }
+            curl -fsSL "https://raw.githubusercontent.com/$REPO/develop/saas/registry/config.yml?$SHA" \
+              -o config.yml || { echo "❌ Failed to download config.yml"; exit 1; }
 
             mkdir -p data/auth logs
 
@@ -162,8 +164,10 @@ jobs:
             echo "📝 Downloading configuration files..."
             REPO="${{ github.repository }}"
             SHA="${{ github.sha }}"
-            curl -fsSL "https://raw.githubusercontent.com/$REPO/master/saas/registry/docker-compose.prod.yml?$SHA" -o docker-compose.yml || { echo "❌ Failed to download docker-compose.prod.yml"; exit 1; }
-            curl -fsSL "https://raw.githubusercontent.com/$REPO/master/saas/registry/config.yml?$SHA" -o config.yml || { echo "❌ Failed to download config.yml"; exit 1; }
+            curl -fsSL "https://raw.githubusercontent.com/$REPO/master/saas/registry/docker-compose.prod.yml?$SHA" \
+              -o docker-compose.yml || { echo "❌ Failed to download docker-compose.prod.yml"; exit 1; }
+            curl -fsSL "https://raw.githubusercontent.com/$REPO/master/saas/registry/config.yml?$SHA" \
+              -o config.yml || { echo "❌ Failed to download config.yml"; exit 1; }
 
             mkdir -p data/auth logs
 
