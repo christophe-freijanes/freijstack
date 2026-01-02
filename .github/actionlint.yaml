@@ -11,9 +11,6 @@ ignore:
 
 # Configuration spécifique par fichier (si vous voulez être plus précis)
 paths:
-  ".github/workflows/harbor-deploy.yml":
-    ignore:
-      - 'SC2034'
   ".github/workflows/healthcheck-prod.yml":
     ignore:
       - 'SC2034'

@@ -1,0 +1,109 @@
+name: 🐳 SaaS • Docker Registry
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'saas/registry/**'
+      - '.github/workflows/registry-deploy.yml'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'saas/registry/**'
+      - '.github/workflows/registry-deploy.yml'
+
+concurrency:
+  group: registry-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY_DOMAIN_STAGING: registry-staging.freijstack.com
+  REGISTRY_DOMAIN_PROD: registry.freijstack.com
+
+jobs:
+  deploy-staging:
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to staging VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            echo "🚀 Deploying Docker Registry to staging..."
+            
+            DEPLOY_DIR="/srv/www/registry-staging"
+            mkdir -p "$DEPLOY_DIR"
+            cd "$DEPLOY_DIR"
+            
+            # Copy docker-compose and config
+            curl -s https://raw.githubusercontent.com/${{ github.repository }}/develop/saas/registry/docker-compose.yml -o docker-compose.yml
+            curl -s https://raw.githubusercontent.com/${{ github.repository }}/develop/saas/registry/config.yml -o config.yml
+            
+            mkdir -p data/auth
+            
+            # Restart services
+            docker compose down || true
+            docker compose up -d
+            
+            # Wait for health
+            sleep 15
+            
+            echo "✅ Registry deployed successfully"
+            echo "🌐 Access: https://${{ env.REGISTRY_DOMAIN_STAGING }}"
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to production VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            echo "🚀 Deploying Docker Registry to production..."
+            
+            DEPLOY_DIR="/srv/www/registry"
+            mkdir -p "$DEPLOY_DIR"
+            cd "$DEPLOY_DIR"
+            
+            # Update domain
+            sed -i 's/registry-staging/registry/g' docker-compose.yml
+            sed -i 's/registry-ui-staging/registry-ui/g' docker-compose.yml
+            
+            # Copy files
+            curl -s https://raw.githubusercontent.com/${{ github.repository }}/main/saas/registry/docker-compose.yml -o docker-compose.yml
+            curl -s https://raw.githubusercontent.com/${{ github.repository }}/main/saas/registry/config.yml -o config.yml
+            
+            # Update domains for production
+            sed -i 's/registry-staging.freijstack.com/${{ env.REGISTRY_DOMAIN_PROD }}/g' docker-compose.yml
+            sed -i 's/registry-ui-staging.freijstack.com/registry-ui.${{ env.REGISTRY_DOMAIN_PROD }}/g' docker-compose.yml
+            
+            mkdir -p data/auth
+            
+            # Backup and restart
+            docker compose down || true
+            docker compose up -d
+            
+            sleep 15
+            
+            echo "✅ Registry deployed to production"
+            echo "🌐 Access: https://${{ env.REGISTRY_DOMAIN_PROD }}"

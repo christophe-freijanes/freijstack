@@ -1,0 +1,10 @@
+# Données du registre (volumineuses)
+data/
+
+# Fichiers temporaires
+*.tmp
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
