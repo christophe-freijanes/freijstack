@@ -29,7 +29,7 @@ services:
     environment:
       SINGLE_REGISTRY: "true"
       REGISTRY_TITLE: "Freijstack Private Registry (Production)"
-      REGISTRY_URL: "http://registry:5000"
+      REGISTRY_URL: "https://registry.freijstack.com"
       DELETE_IMAGES: "true"
       SHOW_CONTENT_DIGEST: "true"
     depends_on:
