@@ -546,6 +546,16 @@ jobs:
               echo "   Using template defaults (INSECURE for production!)"
             fi
             
+            # Inject missing compose variables
+            echo "📋 Injecting docker-compose variables..."
+            {
+              echo ""
+              echo "# Docker Compose variables"
+              echo "CONTAINER_PREFIX=$CONTAINER_PREFIX"
+              echo "REGISTRY_DOMAIN=$REGISTRY_DOM"
+              echo "NETWORK_NAME=$NETWORK"
+            } >> .env
+            
             echo "🔧 Pulling and starting containers..."
             docker compose pull
             docker compose up -d --remove-orphans
