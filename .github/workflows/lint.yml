@@ -14,8 +14,7 @@ jobs:
       - name: Install actionlint
         run: |
           set -euo pipefail
-          curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash | bash -s v1.7.10
-          sudo mv actionlint /usr/local/bin/actionlint
+          curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash | bash -s latest /usr/local/bin
       - name: Run actionlint
         run: actionlint
 
@@ -71,7 +70,9 @@ jobs:
             Write-Host 'No PowerShell scripts to lint'
             exit 0
           }
-          Invoke-ScriptAnalyzer -Path $files.FullName -Recurse -ErrorAction Stop
+          $files | ForEach-Object {
+            Invoke-ScriptAnalyzer -Path $_.FullName -ErrorAction Stop
+          }
 
   ansible:
     runs-on: ubuntu-latest

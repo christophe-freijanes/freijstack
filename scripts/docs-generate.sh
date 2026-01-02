@@ -155,7 +155,7 @@ validate_links() {
     # Vérifier liens internes
     while IFS= read -r line; do
         # Extraire fichier from [text](file)
-        if [[ $line =~ \]\(([^)]+)\) ]]; then
+        if [[ "$line" =~ \]\([^)]+\) ]]; then
             file="${BASH_REMATCH[1]}"
             
             # Ignorer URLs externes
