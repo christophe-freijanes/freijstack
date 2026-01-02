@@ -6,9 +6,13 @@ self-hosted-runner:
 
 config-variables: []
 
-# Ignore all shellcheck messages reported by actionlint (shellcheck disabled)
+# Disable shellcheck integration in actionlint
+shellcheck:
+  enable: false
+
+# Ignore shellcheck messages surfaced by actionlint (fallback)
 ignore:
-  - 'shellcheck reported issue in this script'  # blanket ignore from actionlint
+  - 'shellcheck reported issue in this script'
   - 'SC2034'  # variable appears unused (false positives in heredocs/ssh)
   - 'SC2129'  # multiple >> append style warning
   - 'SC2086'  # word splitting / globbing quoting advice
