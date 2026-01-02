@@ -57,21 +57,17 @@ jobs:
           echo "https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com" > ~/.git-credentials
           git remote set-url origin "https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com/${{ github.repository }}.git"
 
-      - name: 🧪 Dry-run on develop (no tag, no release)
+      - name: 🏷️ Release on develop (tag + GitHub Release)
         if: ${{ github.ref_name == 'develop' }}
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
           set -euo pipefail
-          echo "🧪 Running semantic-release in dry-run on develop..."
-          npx semantic-release --dry-run --no-ci
-
-      - name: 🏷️ Release on master (tag + GitHub Release + commit CHANGELOG)
-        if: ${{ github.ref_name == 'master' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-        run: |
-          set -euo pipefail
-          echo "🚀 Publishing real release on master..."
-          echo "ℹ️  CHANGELOG déjà mis à jour via PR (release-changelog-pr.yml)"
+          echo "🚀 Publishing release on develop..."
           npx semantic-release
+
+      - name: ⚠️ Skip release on master
+        if: ${{ github.ref_name == 'master' }}
+        run: |
+          echo "⚠️ Releases are now created on develop branch only"
+          echo "ℹ️ Master branch is kept for historical compatibility"
