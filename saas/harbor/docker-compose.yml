@@ -266,20 +266,29 @@ services:
       - harbor-core
       - harbor-portal
       - harbor-registry
+
     volumes:
+      # Keep nginx config persistent (certs, conf.d) on a dedicated volume
       - harbor-nginx-config:/etc/nginx:z
+
+    # Give nginx writable temp areas safely (RAM) to avoid permission issues
+    tmpfs:
+      - /etc/nginx/client_body_temp
+      - /var/cache/nginx
+      - /var/run
+
     networks:
       - harbor
       - web
+
     labels:
       - traefik.enable=true
-      # Router HTTP
       - traefik.http.routers.${CONTAINER_PREFIX}.rule=Host(`${REGISTRY_DOMAIN}`)
       - traefik.http.routers.${CONTAINER_PREFIX}.entrypoints=websecure
       - traefik.http.routers.${CONTAINER_PREFIX}.tls=true
       - traefik.http.routers.${CONTAINER_PREFIX}.tls.certresolver=mytlschallenge
       - traefik.http.services.${CONTAINER_PREFIX}.loadbalancer.server.port=8080
-      # Security headers
+
       - traefik.http.middlewares.${CONTAINER_PREFIX}-headers.headers.SSLRedirect=true
       - traefik.http.middlewares.${CONTAINER_PREFIX}-headers.headers.STSSeconds=315360000
       - traefik.http.middlewares.${CONTAINER_PREFIX}-headers.headers.browserXSSFilter=true
@@ -289,6 +298,7 @@ services:
       - traefik.http.middlewares.${CONTAINER_PREFIX}-headers.headers.STSIncludeSubdomains=true
       - traefik.http.middlewares.${CONTAINER_PREFIX}-headers.headers.STSPreload=true
       - traefik.http.routers.${CONTAINER_PREFIX}.middlewares=${CONTAINER_PREFIX}-headers@docker
+
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080 || exit 1"]
       interval: 30s
@@ -312,10 +322,10 @@ volumes:
     name: ${CONTAINER_PREFIX}_jobservice
   harbor-trivy:
     name: ${CONTAINER_PREFIX}_trivy_cache
-  harbor-nginx-config:
-    name: ${CONTAINER_PREFIX}_nginx_config
   harbor-registryctl-config:
     name: ${CONTAINER_PREFIX}_registryctl_config
+  harbor-nginx-config:
+    name: ${CONTAINER_PREFIX}_nginx_config
 
 networks:
   harbor:

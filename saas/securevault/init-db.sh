@@ -5,16 +5,9 @@ ENVIRONMENT=${1:-staging}
 if [ "$ENVIRONMENT" = "production" ]; then
   DB_USER="securevault"
   DB_NAME="securevault"
-  CONTAINER_PREFIX="securevault"
 else
   DB_USER="securevault_staging"
   DB_NAME="securevault_staging"
-  CONTAINER_PREFIX="securevault-staging"
-fi
-
-# Allow override from environment (for CI or custom runs)
-if [ -n "$CONTAINER_PREFIX_OVERRIDE" ]; then
-  CONTAINER_PREFIX="$CONTAINER_PREFIX_OVERRIDE"
 fi
 
 
