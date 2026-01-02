@@ -6,10 +6,7 @@ paths = [
   '''^saas/securevault/README\.md$''',
   '''^saas/app1/README\.md$''',
   '''^SECURITY\.md$''',
-  '''^docs/REDACTION_GUIDE\.md$''',
-  '''^docs/SECURITY_AUDIT\.md$''',
-  '''^docs/AUTO_DOCUMENTATION\.md$''',
-  '''^docs/CLOUD_BACKUP\.md$''',
-  '''^docs/DOCS_CONFIG_REFERENCE\.md$''',
-  '''^docs/IMPLEMENTATION_SUMMARY\.md$'''
+  '''^docs-private/REDACTION_GUIDE\.md$''',
+  '''^docs-private/DOCS_CONFIG_REFERENCE\.md$''',
+  '''^docs-private/AUTO_DOCUMENTATION\.md$'''
 ]
