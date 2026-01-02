@@ -68,10 +68,7 @@ services:
       - traefik.http.middlewares.n8n-headers.headers.forceSTSHeader=true
       - traefik.http.middlewares.n8n-headers.headers.SSLHost=automation.freijstack.com
       - traefik.http.middlewares.n8n-headers.headers.STSIncludeSubdomains=true
-      - traefik.http.middlewares.n8n-headers.headers.STSPreload=true
       - traefik.http.routers.n8n.middlewares=n8n-headers@docker
-
-
 
 # ============================================
 # VOLUMES - Persistent Data
