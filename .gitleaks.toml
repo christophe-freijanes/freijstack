@@ -8,5 +8,7 @@ paths = [
   '''^SECURITY\.md$''',
   '''^docs-private/REDACTION_GUIDE\.md$''',
   '''^docs-private/DOCS_CONFIG_REFERENCE\.md$''',
-  '''^docs-private/AUTO_DOCUMENTATION\.md$'''
+  '''^docs-private/AUTO_DOCUMENTATION\.md$''',
+  '''^docs-private/IMPLEMENTATION_SUMMARY\.md$''',
+  '''^docs-private/SECURITY_AUDIT\.md$'''
 ]
