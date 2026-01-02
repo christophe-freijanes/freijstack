@@ -1,0 +1,66 @@
+services:
+  # Docker Registry v2 officiel - stockage des images
+  registry:
+    image: registry:2
+    container_name: registry
+    restart: unless-stopped
+    environment:
+      REGISTRY_HTTP_RELATIVEURLS: "true"
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    ports:
+      - "5000:5000"
+    volumes:
+      - registry-data:/var/lib/registry
+      - ./config.yml:/etc/docker/registry/config.yml:ro
+      - ./.htpasswd:/etc/docker/registry/auth/htpasswd:ro
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.registry.rule=Host(`registry.freijstack.com`)"
+      - "traefik.http.routers.registry.entrypoints=websecure"
+      - "traefik.http.routers.registry.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.registry.loadbalancer.server.port=5000"
+
+  # UI web pour visualiser et gérer les images du registre
+  registry-ui:
+    image: joxit/docker-registry-ui:latest
+    container_name: registry-ui
+    restart: unless-stopped
+    environment:
+      SINGLE_REGISTRY: "true"
+      REGISTRY_TITLE: "Freijstack Private Registry (Production)"
+      NGINX_PROXY_PASS_URL: "http://registry:5000"
+      DELETE_IMAGES: "true"
+      SHOW_CONTENT_DIGEST: "true"
+      REGISTRY_SECURED: "true"
+      REGISTRY_USERNAME: "${REGISTRY_USERNAME:-admin}"
+      REGISTRY_PASSWORD: "${REGISTRY_PASSWORD:-admin}"
+    depends_on:
+      - registry
+    networks:
+      - web
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /var/run/nginx.pid || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.registry-ui.rule=Host(`registry-ui.freijstack.com`)"
+      - "traefik.http.routers.registry-ui.entrypoints=websecure"
+      - "traefik.http.routers.registry-ui.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.registry-ui.loadbalancer.server.port=80"
+
+volumes:
+  registry-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data
+
+networks:
+  web:
+    external: true

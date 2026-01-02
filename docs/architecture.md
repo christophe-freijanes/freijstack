@@ -310,7 +310,7 @@ Pour une documentation exhaustive des workflows CI/CD avec diagramme Mermaid int
 ### 4.1. Vue d'ensemble rapide
 
 **Workflows principaux** :
-- **Déploiement** : Infrastructure, Portfolio, SecureVault, Harbor
+- **Déploiement** : Infrastructure, Portfolio, SecureVault, Docker Registry
 - **Sécurité** : CodeQL, Security Check (Trivy + Gitleaks), Security Score
 - **Monitoring** : Health checks Production (30min), Staging (1h), Post-Deploy
 - **Releases** : Semantic versioning automatique avec changelog

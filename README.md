@@ -16,7 +16,7 @@
 
 ## 📝 Résumé
 
-**FreijStack** est une stack DevSecOps complète et production-ready pour déployer, monitorer et sécuriser des applications SaaS (Portfolio, SecureVault, Harbor, n8n...) sur VPS, avec :
+**FreijStack** est une stack DevSecOps complète et production-ready pour déployer, monitorer et sécuriser des applications SaaS (Portfolio, SecureVault, Registre Docker, n8n...) sur VPS, avec :
 
 ✅ **CI/CD automatisé** - GitHub Actions avec 16+ workflows  
 ✅ **Infrastructure Docker** - Traefik, nginx, services conteneurisés  

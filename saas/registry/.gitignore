@@ -1,0 +1,16 @@
+# Données du registre (volumineuses)
+data/
+
+# Authentication file (contains sensitive password hash)
+.htpasswd
+
+# Registry credentials for UI (contains plaintext password)
+.registry-credentials
+
+# Fichiers temporaires
+*.tmp
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

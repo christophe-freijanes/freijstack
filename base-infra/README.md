@@ -10,7 +10,7 @@
 
 ## 📋 Vue d'ensemble
 
-**Infrastructure centralisée** et partagée par toutes les applications SaaS (Portfolio, SecureVault, Harbor, etc.).
+**Infrastructure centralisée** et partagée par toutes les applications SaaS (Portfolio, SecureVault, Docker Registry, etc.).
 
 Gère le reverse proxy, l'automation, et les services web statiques avec SSL/TLS automatique, santé checks, et monitoring.
 
@@ -342,7 +342,7 @@ TRAEFIK_DASHBOARD_PASSWORD=secure_password
 
 ### Ajouter une Nouvelle Application
 
-Pour ajouter une nouvelle app (ex: Harbor, Redis, etc.):
+Pour ajouter une nouvelle app (ex: Docker Registry, Redis, etc.):
 
 1. **Créer docker-compose.yml** dans le dossier app:
    ```yaml
