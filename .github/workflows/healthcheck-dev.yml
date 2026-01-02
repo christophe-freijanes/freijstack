@@ -27,12 +27,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 6
 
+    outputs:
+      backend_status: ${{ steps.backend.outputs.status }}
+      leaks_count: ${{ steps.gitleaks.outputs.leaks_count }}
+
     steps:
-      - name: 📥 Checkout repository (develop commit)
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # ---------------------------
+      # 🔐 SECURITY — Secret Scan (DEV = non-blocking)
+      # ---------------------------
       - name: 🔐 Secret scanning (Gitleaks CLI)
         id: gitleaks
         run: |
@@ -45,6 +52,7 @@ jobs:
           sudo mv gitleaks /usr/local/bin/gitleaks
 
           echo "🔎 Running gitleaks (redacted)..."
+          # On ne stoppe pas tout de suite pour pouvoir produire le report
           gitleaks detect \
             --source . \
             --config .gitleaks.toml \
@@ -53,20 +61,32 @@ jobs:
             --report-path gitleaks-report.json \
             --verbose || true
 
+          # Garantit un JSON valide même si gitleaks n'a rien écrit
           test -f gitleaks-report.json || echo "[]" > gitleaks-report.json
 
-          echo ""
-          echo "📄 Findings (metadata only):"
-          if [ -s gitleaks-report.json ]; then
-            jq -r '.[] | "\(.RuleID) file=\(.File) line=\(.StartLine) commit=\(.Commit|tostring|.[0:8])"' gitleaks-report.json | nl -w2 -s'. '
-            leaks_count="$(jq 'length' gitleaks-report.json)"
-          else
-            echo "✅ No findings."
-            leaks_count="0"
-          fi
-
+          leaks_count="$(jq 'length' gitleaks-report.json)"
           echo "leaks_count=${leaks_count}" >> "$GITHUB_OUTPUT"
           echo "🔢 leaks_count=${leaks_count}"
+
+          {
+            echo ""
+            echo "## 🔐 Gitleaks (secrets scan)"
+            echo ""
+            echo "- **Total findings:** $leaks_count"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$leaks_count" != "0" ]; then
+            {
+              echo ""
+              echo "### 🔎 Top 20 findings (metadata only)"
+              jq -r '.[] | "- rule=\(.RuleID) file=\(.File):\(.StartLine) commit=\(.Commit|tostring|.[0:8])"' gitleaks-report.json \
+                | head -n 20
+              echo ""
+              echo "> ℹ️ Values are redacted. See artifact for full metadata."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- ✅ No findings detected." >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: 📎 Upload gitleaks report (always)
         if: always()
@@ -77,75 +97,169 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
-      - name: 🌐 Check Public URLs (DEV signal)
-        id: public-urls
+      - name: 🧰 Prepare tools
+        run: |
+          set -euo pipefail
+          echo "🧰 Tools versions"
+          curl --version | head -n 1
+
+      # ---------------------------
+      # 🌐 AVAILABILITY — Frontend URLs with retries + sleep (anti false-positives)
+      # ---------------------------
+      - name: 🌐 Public URLs Health Check (strong anti false-positives)
         run: |
           set -euo pipefail
 
-          echo "## 🌐 Dev URLs Health Check" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## 🌐 Public URLs Health Check"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
 
-          MAX_RETRIES=3
-          SLEEP_BETWEEN=7
+          # Warm-up: laisse le temps aux DNS/CDN/TLS de se stabiliser
+          echo "⏳ Warm-up 15s..."
+          sleep 15
 
+          # Format: "url|allowed_codes|label"
           URLS=(
-            "https://portfolio.freijstack.com|200,301,302|Portfolio"
+            "https://portfolio.freijstack.com/|200,301,302|Portfolio"
             "https://christophe-freijanes.github.io/freijstack/|200,301,302|GitHub Pages"
             "https://vault.freijstack.com/login|200,301,302,404|SecureVault Frontend (shared)"
           )
 
+          # Fast pass + Grace pass
+          FAST_RETRY=3
+          FAST_DELAY=3
+          GRACE_RETRY=8
+          GRACE_DELAY=8
+
+          # Paramètres curl communs (anti faux positifs)
+          # -4 : évite les soucis IPv6 (souvent la cause du HTTP 000)
+          # --retry-all-errors + --retry-max-time : meilleure résilience
+          CURL_COMMON=(
+            -4
+            -sS
+            -L
+            -o /dev/null
+            -w "%{http_code}"
+            --connect-timeout 12
+            --max-time 35
+            --retry 3
+            --retry-delay 2
+            --retry-all-errors
+            --retry-max-time 120
+            --user-agent "freijstack-healthcheck/1.1"
+          )
+
+          check_url() {
+            local url="$1"
+            local allowed="$2"
+            local label="$3"
+            local attempts="$4"
+            local delay="$5"
+
+            echo ""
+            echo "🔎 Checking $label → $url"
+            echo "- **$label** ($url)" >> "$GITHUB_STEP_SUMMARY"
+
+            # DNS debug
+            host="$(echo "$url" | sed -E 's#https?://([^/]+).*#\1#')"
+            if command -v dig >/dev/null 2>&1; then
+              ips="$(dig +short "$host" | tr '\n' ' ' || true)"
+              [ -n "${ips:-}" ] && echo "  🌐 DNS: $ips" || echo "  🌐 DNS: (no A/AAAA from runner)"
+            fi
+
+            for i in $(seq 1 "$attempts"); do
+              echo "  ⏳ Attempt $i/$attempts..."
+
+              # HEAD d'abord, fallback GET si HEAD pas supporté / renvoie 405/000
+              code="$(curl -I "${CURL_COMMON[@]}" "$url" 2>/tmp/curl_err || echo "000")"
+
+              if [ "$code" = "405" ] || [ "$code" = "000" ]; then
+                code="$(curl "${CURL_COMMON[@]}" "$url" 2>/tmp/curl_err || echo "000")"
+              fi
+
+              if echo ",$allowed," | grep -q ",$code,"; then
+                echo "  ✅ OK (HTTP $code)"
+                echo "  - ✅ HTTP $code (attempt $i/$attempts)" >> "$GITHUB_STEP_SUMMARY"
+                return 0
+              fi
+
+              err="$(tail -n 1 /tmp/curl_err 2>/dev/null || true)"
+              echo "  ⚠️  HTTP $code (attempt $i/$attempts) $err"
+
+              # Si HTTP 000, on attend un peu plus (souvent DNS/TLS)
+              if [ "$code" = "000" ]; then
+                sleep $((delay + 3))
+              elif [ "$i" -lt "$attempts" ]; then
+                sleep "$delay"
+              fi
+            done
+
+            echo "  ❌ FAILED after $attempts attempts"
+            echo "  - ❌ Failed after $attempts attempts (last HTTP $code)" >> "$GITHUB_STEP_SUMMARY"
+            return 1
+          }
+
+          failures=0
+
+          echo "### ⚡ Fast pass" >> "$GITHUB_STEP_SUMMARY"
           for entry in "${URLS[@]}"; do
             url="${entry%%|*}"
             rest="${entry#*|}"
             allowed="${rest%%|*}"
             label="${rest##*|}"
 
-            echo ""
-            echo "🔎 Checking $label → $url"
-            echo "- **$label** ($url)" >> "$GITHUB_STEP_SUMMARY"
-
-            attempt=1
-            success=false
-
-            while [ "$attempt" -le "$MAX_RETRIES" ]; do
-              echo "  ⏳ Attempt $attempt/$MAX_RETRIES..."
-
-              code=$(
-                curl -s -L -o /dev/null -w "%{http_code}" \
-                  --max-time 15 \
-                  "$url" || echo "000"
-              )
-
-              if echo ",$allowed," | grep -q ",$code,"; then
-                echo "  ✅ OK (HTTP $code)"
-                echo "  - ✅ HTTP $code (attempt $attempt)" >> "$GITHUB_STEP_SUMMARY"
-                success=true
-                break
-              else
-                echo "  ⚠️  HTTP $code (attempt $attempt)"
-                if [ "$attempt" -lt "$MAX_RETRIES" ]; then
-                  echo "  ⏱️ Waiting ${SLEEP_BETWEEN}s before retry..."
-                  sleep "$SLEEP_BETWEEN"
-                fi
-              fi
-
-              attempt=$((attempt + 1))
-            done
-
-            if [ "$success" != "true" ]; then
-              echo "❌ $label is DOWN after $MAX_RETRIES attempts"
-              echo "  - ❌ Failed after $MAX_RETRIES attempts" >> "$GITHUB_STEP_SUMMARY"
-              exit 1
+            if ! check_url "$url" "$allowed" "$label" "$FAST_RETRY" "$FAST_DELAY"; then
+              failures=$((failures + 1))
             fi
           done
 
-      - name: 🔎 Check Backend API (/api/health) (shared)
+          if [ "$failures" -gt 0 ]; then
+            {
+              echo ""
+              echo "### 🧯 Grace pass (final attempt)"
+              echo "- Retrying with stronger tolerance..."
+            } >> "$GITHUB_STEP_SUMMARY"
+
+            failures=0
+            for entry in "${URLS[@]}"; do
+              url="${entry%%|*}"
+              rest="${entry#*|}"
+              allowed="${rest%%|*}"
+              label="${rest##*|}"
+
+              if ! check_url "$url" "$allowed" "$label" "$GRACE_RETRY" "$GRACE_DELAY"; then
+                failures=$((failures + 1))
+              fi
+            done
+          fi
+
+          if [ "$failures" -gt 0 ]; then
+            {
+              echo ""
+              echo "🚨 **Health check FAILED** (after grace pass)"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          {
+            echo ""
+            echo "✅ **All URLs healthy**"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+
+      # ---------------------------
+      # 🧠 API — Backend Health
+      # ---------------------------
+      - name: 🔎 Check Backend SecureVault API (/api/health)
         id: backend
         run: |
           set -euo pipefail
-          echo "## 🧠 Backend API (shared)" >> "$GITHUB_STEP_SUMMARY"
+          echo "## 🧠 Backend API" >> "$GITHUB_STEP_SUMMARY"
 
           url="https://vault-api.freijstack.com/api/health"
+          echo "🔎 Checking $url ..."
+
           code=$(
             curl -s -o /dev/null -w "%{http_code}" \
               --max-time 10 \
@@ -154,20 +268,23 @@ jobs:
           )
 
           if [ "$code" = "200" ]; then
-            echo "✅ API OK (HTTP $code)"
+            echo "✅ Backend API OK (HTTP $code)"
+            echo "status=healthy" >> "$GITHUB_OUTPUT"
             echo "- ✅ API healthy (HTTP $code)" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "❌ API DOWN (HTTP $code)"
+            echo "❌ Backend API DOWN (HTTP $code)"
+            echo "status=unhealthy" >> "$GITHUB_OUTPUT"
             echo "- ❌ API unhealthy (HTTP $code)" >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
 
-      - name: 🧹 Cleanup
+      - name: 🧹 Cleanup SSH key
         if: always()
-        run: echo "✅ Cleanup done"
+        run: |
+          rm -f ~/.ssh/deploy_key || true
 
   auto-heal:
-    name: 🔧 Auto-Heal (manual only)
+    name: 🔧 Auto-Heal Development
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: health-check
@@ -192,3 +309,46 @@ jobs:
         run: |
           echo "🧯 Manual auto-heal triggered (DEV/shared)."
           echo "➡️ Ici tu mets tes commandes SSH si tu as un environnement DEV."
+
+      - name: 🧹 Cleanup SSH key
+        if: always()
+        run: |
+          rm -f ~/.ssh/deploy_key || true
+
+  notify:
+    name: 📢 Health Status Notification
+    runs-on: ubuntu-latest
+    needs: [health-check, auto-heal]
+    if: always()
+    timeout-minutes: 3
+
+    steps:
+      - name: 📢 Development Health Summary
+        if: always()
+        run: |
+          set -euo pipefail
+
+          {
+            echo "## 📢 Development Health Summary"
+            echo ""
+            echo "- 🏥 Health Check: **${{ needs.health-check.result }}**"
+            echo "- 🔧 Auto-Heal: **${{ needs.auto-heal.result }}**"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "${{ needs.health-check.result }}" = "success" ]; then
+            {
+              echo "✅ Development is **HEALTHY**"
+              echo "- 🎯 https://vault.freijstack.com/login"
+              echo "- 🎯 https://vault-api.freijstack.com/api/health"
+            } >> "$GITHUB_STEP_SUMMARY"
+          elif [ "${{ needs.auto-heal.result }}" = "success" ]; then
+            echo "⚠️ Development had issues but **auto-heal succeeded**" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "🚨 **CRITICAL**: Health check failed and auto-heal did not recover" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: 📣 Console output
+        run: |
+          echo "🏥 Health Check: ${{ needs.health-check.result }}"
+          echo "🔧 Auto-Heal: ${{ needs.auto-heal.result }}"
