@@ -23,7 +23,7 @@ with open('.htpasswd', 'w') as f:
     f.write(f'admin:{hashed}\n')
 
 print('✅ Password generated and saved!')
-print(f'Username: admin')
+print('Username: admin')
 print(f'Password: {password}')
 print('')
 print('📝 Save this password in a secure location!')
