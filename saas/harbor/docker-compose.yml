@@ -267,12 +267,11 @@ services:
       - harbor-portal
       - harbor-registry
 
-    # ✅ Fix: DO NOT mount /etc/nginx as a volume (breaks nginx temp dirs permissions)
-    # Remove this line from your previous compose:
-    # volumes:
-    #   - harbor-nginx-config:/etc/nginx:z
+    volumes:
+      # Keep nginx config persistent (certs, conf.d) on a dedicated volume
+      - harbor-nginx-config:/etc/nginx:z
 
-    # ✅ Fix: give nginx writable temp areas safely (RAM)
+    # Give nginx writable temp areas safely (RAM) to avoid permission issues
     tmpfs:
       - /etc/nginx/client_body_temp
       - /var/cache/nginx
@@ -325,6 +324,8 @@ volumes:
     name: ${CONTAINER_PREFIX}_trivy_cache
   harbor-registryctl-config:
     name: ${CONTAINER_PREFIX}_registryctl_config
+  harbor-nginx-config:
+    name: ${CONTAINER_PREFIX}_nginx_config
 
 networks:
   harbor:

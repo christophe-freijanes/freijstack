@@ -574,12 +574,10 @@ jobs:
                 echo "NETWORK_NAME=$NETWORK"
               } >> .env
 
-              # Override to fix nginx permission issue caused by mounting /etc/nginx
-              # Your base compose mounts a volume to /etc/nginx, preventing nginx from creating client_body_temp.
+              # Override: only add tmpfs for nginx temps (keep config volume intact)
               cat > docker-compose.override.yml << 'EOF'
               services:
                 harbor-nginx:
-                  volumes: []  # remove /etc/nginx volume mount (root-cause of permission denied)
                   tmpfs:
                     - /etc/nginx/client_body_temp
                     - /var/cache/nginx
