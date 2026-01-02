@@ -982,12 +982,11 @@ jobs:
           fi
 
       - name: ✅ Success Summary
-        if: ${{
+        if: |
           needs.validate.result == 'success' &&
           needs.test.result == 'success' &&
           needs.deploy.result == 'success' &&
           needs.post-verify.result == 'success'
-        }}
         run: |
           echo "✅ All jobs completed successfully!"
           echo "📊 Validation: ✅"
@@ -996,12 +995,11 @@ jobs:
           echo "🔎 Post-verification: ✅"
 
       - name: ⚠️ Partial Success
-        if: ${{
+        if: |
           needs.validate.result == 'failure' ||
           needs.test.result == 'failure' ||
           needs.deploy.result == 'failure' ||
           needs.post-verify.result == 'failure'
-        }}
         run: |
           echo "⚠️ Some jobs failed:"
           echo "Validation: ${{ needs.validate.result }}"
