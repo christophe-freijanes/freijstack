@@ -193,6 +193,13 @@ try:
             svc['networks'] = []
         if isinstance(svc['networks'], list):
             svc['networks'].append('web')
+      # Remove host port bindings to avoid 80/443 conflicts (Traefik handles ingress)
+      if 'ports' in svc:
+        svc.pop('ports', None)
+      # Ensure container port exposed for Traefik target
+      svc.setdefault('expose', [])
+      if str(http_port) not in [str(p) for p in svc['expose']]:
+        svc['expose'].append(int(http_port))
         svc['labels'] = [
             'traefik.enable=true',
             f'traefik.http.routers.{prefix}.rule=Host(`{registry_dom}`)',
