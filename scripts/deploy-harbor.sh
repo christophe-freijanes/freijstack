@@ -80,13 +80,15 @@ echo "📝 Generating harbor.yml..."
 cat > harbor.yml <<EOF
 hostname: $REGISTRY_DOM
 
+# Harbor behind Traefik: HTTP only, Traefik handles TLS
 http:
   port: $HTTP_PORT
 
-https:
-  port: 443
-  certificate: $CERT_PATH
-  private_key: $CERT_KEY_PATH
+# No HTTPS section - Traefik terminates TLS
+# https:
+#   port: 443
+#   certificate: $CERT_PATH
+#   private_key: $CERT_KEY_PATH
 
 harbor_admin_password: $ADMIN_PASS
 
@@ -303,39 +305,46 @@ echo "🔧 Starting Harbor..."
 docker compose up -d
 
 echo "⏳ Waiting for services to initialize..."
-sleep 15
+sleep 20
 
 echo "🏥 Checking service status:"
 docker compose ps
 
 echo ""
 echo "🔍 Diagnostic info:"
+PROXY_SERVICE="${CONTAINER_PREFIX}-proxy"
+CORE_SERVICE="${CONTAINER_PREFIX}-core"
+NETWORK_NAME="${CONTAINER_PREFIX}_harbor"
+
+echo "- Checking network aliases..."
+docker network inspect "$NETWORK_NAME" --format '{{range .Containers}}{{.Name}}: {{.Aliases}}{{println}}{{end}}' 2>/dev/null || echo "⚠️  Network $NETWORK_NAME not found"
+
 echo "- Checking if core is reachable from proxy..."
-docker compose exec -T proxy sh -c "nc -zv core 8080 2>&1 || wget -qO- http://core:8080/api/v2.0/health 2>&1 | head -5" || echo "❌ Cannot reach core from proxy"
+docker compose exec -T "$PROXY_SERVICE" sh -c "nc -zv core 8080 2>&1 || wget -qO- http://core:8080/api/v2.0/health 2>&1 | head -5" || echo "❌ Cannot reach core from proxy"
 
 echo "- Checking if proxy is listening on port $HTTP_PORT..."
-docker compose exec -T proxy sh -c "netstat -tlnp 2>/dev/null | grep $HTTP_PORT || ss -tlnp | grep $HTTP_PORT" || echo "⚠️  netstat/ss not available in proxy"
+docker compose exec -T "$PROXY_SERVICE" sh -c "netstat -tlnp 2>/dev/null | grep $HTTP_PORT || ss -tlnp | grep $HTTP_PORT" || echo "⚠️  netstat/ss not available in proxy"
 
 echo "- Testing proxy directly..."
-docker compose exec -T proxy sh -c "curl -s -o /dev/null -w 'HTTP %{http_code}\n' http://localhost:$HTTP_PORT/ 2>&1" || echo "❌ Proxy not responding"
+docker compose exec -T "$PROXY_SERVICE" sh -c "curl -s -o /dev/null -w 'HTTP %{http_code}\n' http://localhost:$HTTP_PORT/ 2>&1" || echo "❌ Proxy not responding"
 
 echo ""
 echo "📊 Container health summary:"
 docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
 
 echo ""
-echo "📄 Core logs (last 20 lines):"
-docker compose logs --tail=20 core 2>/dev/null || echo "Core not running"
+echo "📄 Core logs (last 30 lines):"
+docker compose logs --tail=30 "$CORE_SERVICE" 2>/dev/null || echo "Core not available yet"
 
 echo ""
-echo "📄 Proxy logs (last 20 lines):"
-docker compose logs --tail=20 proxy 2>/dev/null || echo "Proxy not running"
+echo "📄 Proxy logs (last 30 lines):"
+docker compose logs --tail=30 "$PROXY_SERVICE" 2>/dev/null || echo "Proxy not available yet"
 
 # Check for unhealthy containers (with fallback if jq not available)
-UNHEALTHY=$(docker compose ps --format json 2>/dev/null | jq -r 'select(.State != "running") | .Name' 2>/dev/null || docker compose ps | grep -v "Up" | tail -n +2 || true)
+UNHEALTHY=$(docker compose ps --format json 2>/dev/null | jq -r 'select(.State != "running" and .State != "healthy") | .Name' 2>/dev/null || docker compose ps | grep -v "Up" | tail -n +2 || true)
 if [ -n "$UNHEALTHY" ]; then
   echo ""
-  echo "⚠️ Some containers are not running:"
+  echo "⚠️ Some containers are not running properly:"
   echo "$UNHEALTHY"
 else
   echo ""
@@ -348,8 +357,12 @@ echo "🌐 Access Harbor at: https://$REGISTRY_DOM"
 echo "👤 Username: admin"
 echo "🔑 Password: (check $ENV_FILE)"
 echo ""
+echo "� IMPORTANT: Docker Compose files are in: $DEPLOY_DIR/harbor/"
+echo "   Run troubleshooting commands from there:"
+echo ""
 echo "🔧 Troubleshooting commands:"
-echo "  docker compose logs -f              # View all logs"
-echo "  docker compose logs -f proxy core   # View proxy + core logs"
-echo "  docker compose ps                   # Check container status"
-echo "  docker network inspect ${CONTAINER_PREFIX}_harbor  # Check network"
+echo "  cd $DEPLOY_DIR/harbor"
+echo "  docker compose logs -f                      # View all logs"
+echo "  docker compose logs -f $PROXY_SERVICE $CORE_SERVICE   # View proxy + core logs"
+echo "  docker compose ps                           # Check container status"
+echo "  docker network ls | grep ${CONTAINER_PREFIX}  # Check networks"

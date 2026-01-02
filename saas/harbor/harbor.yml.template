@@ -1,16 +1,19 @@
 # Harbor configuration template for v2.10.0
 # This file should be customized per environment (staging/production)
+# NOTE: When deployed behind Traefik, Harbor uses HTTP only (Traefik handles TLS)
 
 hostname: ${REGISTRY_DOMAIN}
 
-# HTTP/HTTPS protocol
+# HTTP protocol (Traefik terminates TLS upstream)
 http:
-  port: 80
+  port: 8081
 
-https:
-  port: 443
-  certificate: /etc/harbor/ssl/cert.crt
-  private_key: /etc/harbor/ssl/cert.key
+# HTTPS disabled when behind Traefik reverse proxy
+# Traefik provides TLS termination with Let's Encrypt
+# https:
+#   port: 443
+#   certificate: /etc/harbor/ssl/cert.crt
+#   private_key: /etc/harbor/ssl/cert.key
 
 # Harbor admin initial password (change immediately after first login)
 harbor_admin_password: ${HARBOR_ADMIN_PASSWORD}
