@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import secrets
 import string
 import subprocess
@@ -18,8 +19,6 @@ except ImportError:
     import bcrypt
     hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12)).decode()
 
-# Read username from environment (set by GitHub Actions)
-import os
 username = os.getenv('REGISTRY_USERNAME', 'user')
 
 # Write to .htpasswd file
