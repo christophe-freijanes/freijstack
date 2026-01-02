@@ -12,4 +12,3 @@ ignore:
   - 'SC2034'  # variable appears unused (false positives in heredocs/ssh)
   - 'SC2129'  # multiple >> append style warning
   - 'SC2086'  # word splitting / globbing quoting advice
-    
