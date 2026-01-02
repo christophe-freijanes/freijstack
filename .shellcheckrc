@@ -8,6 +8,7 @@ disable=SC2153  # Possible misspelling (false positives on env vars)
 disable=SC2012  # Use find instead of ls (acceptable for simple listings)
 disable=SC2086  # Double quote to prevent globbing (sometimes intentional)
 disable=SC2087  # Quote heredoc delimiter (client vs server expansion)
+disable=SC2155  # Declare and assign separately (style suggestion, doesn't affect correctness)
 
 # Keep enabled: critical issues
 # - SC1xxx: Syntax errors

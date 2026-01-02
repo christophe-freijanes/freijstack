@@ -1,32 +1,7 @@
 # actionlint configuration
-# Only critical/high severity issues will fail
+# https://github.com/rhysd/actionlint/blob/main/docs/config.md
 
 self-hosted-runner:
-  # Allow custom labels for self-hosted runners
   labels: []
 
-config-variables:
-  # Ignore unknown variables (useful for custom contexts)
-  strict: false
-
-# Shellcheck integration (uses .shellcheckrc)
-shellcheck:
-  # Let shellcheck handle its own severity levels
-  enable: true
-
-# Pyflakes integration
-pyflakes:
-  enable: false
-
-# Ignore specific rules (style/info only)
-ignore:
-  # Line length warnings (handle in yamllint)
-  - 'line too long'
-  
-  # Style suggestions that don't affect functionality
-  - 'SC2129'  # Consider using { cmd1; cmd2; } >> file (style)
-  - 'SC2034'  # Variable appears unused (often false positive)
-  - 'SC2153'  # Possible misspelling (often env vars)
-  
-  # Allow common patterns
-  - 'SC2012'  # Use find instead of ls (acceptable in simple cases)
+config-variables: []
