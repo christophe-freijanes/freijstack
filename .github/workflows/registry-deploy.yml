@@ -97,7 +97,10 @@ jobs:
 
             mkdir -p data/auth logs
 
-            echo "🛑 Stopping existing services..."
+            echo "� Generating authentication credentials..."
+            echo "admin:$(echo -n '${{ secrets.REGISTRY_PASSWORD }}' | openssl passwd -apr1 -stdin)" > .htpasswd
+
+            echo "�🛑 Stopping existing services..."
             docker compose down || true
 
             echo "🆙 Starting new services..."
@@ -164,7 +167,10 @@ jobs:
 
             mkdir -p data/auth logs
 
-            echo "🛑 Stopping existing services..."
+            echo "� Generating authentication credentials..."
+            echo "admin:$(echo -n '${{ secrets.REGISTRY_PASSWORD }}' | openssl passwd -apr1 -stdin)" > .htpasswd
+
+            echo "�🛑 Stopping existing services..."
             docker compose down || true
 
             echo "🆙 Starting new services..."

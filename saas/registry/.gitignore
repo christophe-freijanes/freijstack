@@ -1,6 +1,9 @@
 # Données du registre (volumineuses)
 data/
 
+# Authentication file (contains sensitive password hash)
+.htpasswd
+
 # Fichiers temporaires
 *.tmp
 *.log
