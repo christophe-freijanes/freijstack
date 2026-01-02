@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.9.3](https://github.com/christophe-freijanes/freijstack/compare/v1.9.2...v1.9.3) (2026-01-02)
+
+### 🐛 Bug Fixes
+
+* remove extra blank lines in docker-compose.yml (yamllint) ([a844e2e](https://github.com/christophe-freijanes/freijstack/commit/a844e2eb98e4fb1fe579074aa42b5fade193fd2f))
+
 ## [1.9.2](https://github.com/christophe-freijanes/freijstack/compare/v1.9.1...v1.9.2) (2026-01-02)
 
 ### 🐛 Bug Fixes
