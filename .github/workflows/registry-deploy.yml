@@ -99,7 +99,7 @@ jobs:
 
             echo "🔐 Generating authentication credentials..."
             docker run --rm httpd:alpine htpasswd -nbB ${{ secrets.REGISTRY_USERNAME }} '${{ secrets.REGISTRY_PASSWORD }}' > .htpasswd
-            
+
             echo "🔑 Creating UI credentials file..."
             echo "${{ secrets.REGISTRY_USERNAME }}:${{ secrets.REGISTRY_PASSWORD }}" > .registry-credentials
 
@@ -172,7 +172,7 @@ jobs:
 
             echo "🔐 Generating authentication credentials..."
             docker run --rm httpd:alpine htpasswd -nbB ${{ secrets.REGISTRY_USERNAME }} '${{ secrets.REGISTRY_PASSWORD }}' > .htpasswd
-            
+
             echo "🔑 Creating UI credentials file..."
             echo "${{ secrets.REGISTRY_USERNAME }}:${{ secrets.REGISTRY_PASSWORD }}" > .registry-credentials
 
