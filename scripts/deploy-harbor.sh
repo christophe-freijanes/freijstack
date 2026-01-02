@@ -172,6 +172,10 @@ try:
     with open('docker-compose.yml', 'r') as f:
         compose = yaml.safe_load(f)
 
+    # Remove obsolete version field
+    if 'version' in compose:
+        del compose['version']
+
     prefix = os.environ['CONTAINER_PREFIX']
     registry_dom = os.environ['REGISTRY_DOM']
     http_port = os.environ['HTTP_PORT']
@@ -268,6 +272,11 @@ try:
     # Add external web network
     if 'networks' not in compose:
         compose['networks'] = {}
+    
+    # Ensure Harbor internal network exists
+    if harbor_net not in compose['networks']:
+        compose['networks'][harbor_net] = {}
+    
     compose['networks']['web'] = {'external': True}
 
     # Rename volumes with prefix
@@ -320,15 +329,13 @@ echo "- Checking network aliases..."
 docker network inspect "$NETWORK_NAME" --format '{{range .Containers}}{{.Name}}: {{.Aliases}}{{println}}{{end}}' 2>/dev/null || echo "⚠️  Network $NETWORK_NAME not found"
 
 echo "- Checking if core is reachable from proxy..."
-docker compose exec -T "$PROXY_SERVICE" sh -c "nc -zv core 8080 2>&1 || wget -qO- http://core:8080/api/v2.0/health 2>&1 | head -5" || echo "❌ Cannot reach core from proxy"
+docker compose exec -T "$PROXY_SERVICE" sh -c "curl -s -o /dev/null -w 'HTTP %{http_code}\n' http://core:8080/ 2>&1 || echo 'Core unreachable'" || echo "❌ Cannot reach core from proxy"
 
 echo "- Checking if proxy is listening on port $HTTP_PORT..."
-docker compose exec -T "$PROXY_SERVICE" sh -c "netstat -tlnp 2>/dev/null | grep $HTTP_PORT || ss -tlnp | grep $HTTP_PORT" || echo "⚠️  netstat/ss not available in proxy"
+docker compose exec -T "$PROXY_SERVICE" sh -c "curl -s -o /dev/null -w 'HTTP %{http_code}\n' http://localhost:$HTTP_PORT/ 2>&1 || echo 'Proxy not listening'" || echo "⚠️  Proxy not responding"
 
 echo "- Testing proxy directly..."
 docker compose exec -T "$PROXY_SERVICE" sh -c "curl -s -o /dev/null -w 'HTTP %{http_code}\n' http://localhost:$HTTP_PORT/ 2>&1" || echo "❌ Proxy not responding"
-
-echo ""
 echo "📊 Container health summary:"
 docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
 
