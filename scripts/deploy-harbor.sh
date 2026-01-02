@@ -174,7 +174,7 @@ try:
     registry_dom = os.environ['REGISTRY_DOM']
     http_port = os.environ['HTTP_PORT']
 
-    # Rename services with prefix
+    # Rename services with prefix and add network aliases for internal DNS
     services_copy = dict(compose['services'])
     compose['services'] = {}
     for svc_name, svc_config in services_copy.items():
@@ -184,15 +184,41 @@ try:
             svc_config['container_name'] = f"{prefix}-{svc_config['container_name']}"
         if 'depends_on' in svc_config:
             svc_config['depends_on'] = [f"{prefix}-{dep}" for dep in svc_config['depends_on']]
+        
+        # Add network aliases to preserve original service names for internal Harbor DNS
+        if 'networks' not in svc_config:
+            svc_config['networks'] = {}
+        
+        # Convert networks list to dict with aliases if needed
+        if isinstance(svc_config['networks'], list):
+            nets = svc_config['networks']
+            svc_config['networks'] = {}
+            for net in nets:
+                svc_config['networks'][net] = {'aliases': [svc_name]}
+        else:
+            # Add alias to each existing network
+            for net_name in svc_config['networks'].keys():
+                if svc_config['networks'][net_name] is None:
+                    svc_config['networks'][net_name] = {}
+                svc_config['networks'][net_name]['aliases'] = [svc_name]
 
     # Add Traefik labels to nginx (proxy)
     proxy_service = f"{prefix}-proxy"
     if proxy_service in compose['services']:
         svc = compose['services'][proxy_service]
-        if 'networks' not in svc:
-            svc['networks'] = []
+        
+        # Ensure networks is a dict
+        if 'networks' not in svc or svc['networks'] is None:
+            svc['networks'] = {}
         if isinstance(svc['networks'], list):
-            svc['networks'].append('web')
+            nets = svc['networks']
+            svc['networks'] = {}
+            for net in nets:
+                svc['networks'][net] = {}
+        
+        # Add web network with alias
+        svc['networks']['web'] = {'aliases': ['proxy']}
+        
         # Remove host port bindings to avoid 80/443 conflicts (Traefik handles ingress)
         if 'ports' in svc:
             svc.pop('ports', None)
