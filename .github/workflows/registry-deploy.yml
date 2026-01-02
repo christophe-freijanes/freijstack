@@ -85,31 +85,37 @@ jobs:
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'DEPLOY_STAGING'
             set -e
             echo "🚀 Deploying Docker Registry to STAGING..."
-            
+
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
             mkdir -p "$DEPLOY_DIR"
             cd "$DEPLOY_DIR"
-            
+
             echo "📝 Downloading configuration files..."
-            curl -s "https://raw.githubusercontent.com/${{ github.repository }}/develop/saas/registry/docker-compose.staging.yml?${{ github.sha }}" -o docker-compose.yml
-            curl -s "https://raw.githubusercontent.com/${{ github.repository }}/develop/saas/registry/config.yml?${{ github.sha }}" -o config.yml
-            
+            REPO="${{ github.repository }}"
+            SHA="${{ github.sha }}"
+            curl -s "https://raw.githubusercontent.com/$REPO/develop/saas/registry/docker-compose.staging.yml?$SHA" \
+              -o docker-compose.yml
+            curl -s "https://raw.githubusercontent.com/$REPO/develop/saas/registry/config.yml?$SHA" \
+              -o config.yml
+
             mkdir -p data/auth logs
-            
+
             echo "🛑 Stopping existing services..."
             docker compose down || true
-            
+
             echo "🆙 Starting new services..."
             docker compose up -d
-            
+
             echo "⏳ Waiting for services to be healthy..."
             sleep 10
-            
+
             echo "✅ Staging deployment completed"
           DEPLOY_STAGING
 
-      - name: 🏥 Health Check Staging
-        run: |
+      - nameREGISTRY_URL="https://${{ env.REGISTRY_DOMAIN_STAGING }}/v2/"
+            UI_URL="https://${{ env.REGISTRY_UI_DOMAIN_STAGING }}/"
+            curl -s -k "$REGISTRY_URL" && echo "✅ Registry API healthy" || echo "⚠️  Registry not responding yet"
+            curl -s -k "$UI_URL"
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'HEALTH_CHECK'
             echo "🏥 Health checking staging registry..."
             curl -s -k https://${{ env.REGISTRY_DOMAIN_STAGING }}/v2/ && echo "✅ Registry API healthy" || echo "⚠️  Registry not responding yet"
@@ -147,33 +153,39 @@ jobs:
           CACHE_BUST: ${{ github.sha }}
         run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'DEPLOY_PROD'
-            set -e
-            echo "🚀 Deploying Docker Registry to PRODUCTION..."
-            
+
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
             mkdir -p "$DEPLOY_DIR"
             cd "$DEPLOY_DIR"
-            
+
             echo "📝 Downloading configuration files..."
-            curl -s "https://raw.githubusercontent.com/${{ github.repository }}/main/saas/registry/docker-compose.prod.yml?${{ github.sha }}" -o docker-compose.yml
-            curl -s "https://raw.githubusercontent.com/${{ github.repository }}/main/saas/registry/config.yml?${{ github.sha }}" -o config.yml
-            
+            REPO="${{ github.repository }}"
+            SHA="${{ github.sha }}"
+            curl -s "https://raw.githubusercontent.com/$REPO/main/saas/registry/docker-compose.prod.yml?$SHA" \
+              -o docker-compose.yml
+            curl -s "https://raw.githubusercontent.com/$REPO/main/saas/registry/config.yml?$SHA" \
+              -o config.yml
+
             mkdir -p data/auth logs
-            
+
             echo "🛑 Stopping existing services..."
             docker compose down || true
-            
+
             echo "🆙 Starting new services..."
             docker compose up -d
-            
+
             echo "⏳ Waiting for services to be healthy..."
+            sleep 10
+echo "⏳ Waiting for services to be healthy..."
             sleep 10
             
             echo "✅ Production deployment completed"
           DEPLOY_PROD
 
-      - name: 🏥 Health Check Production
-        run: |
+      - nameREGISTRY_URL="https://${{ env.REGISTRY_DOMAIN_PROD }}/v2/"
+            UI_URL="https://${{ env.REGISTRY_UI_DOMAIN_PROD }}/"
+            curl -s -k "$REGISTRY_URL" && echo "✅ Registry API healthy" || echo "⚠️  Registry not responding yet"
+            curl -s -k "$UI_URL"
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'HEALTH_CHECK'
             echo "🏥 Health checking production registry..."
             curl -s -k https://${{ env.REGISTRY_DOMAIN_PROD }}/v2/ && echo "✅ Registry API healthy" || echo "⚠️  Registry not responding yet"
@@ -186,13 +198,13 @@ jobs:
     needs: [deploy-staging, deploy-production]
     if: always()
 
-    steps:
-      - name: ✅ Deployment Summary
-        run: |
-          echo "📊 Deployment Summary"
-          echo "===================="
-          echo ""
-          
+
+          STAGING_RESULT="${{ needs.deploy-staging.result }}"
+          PROD_RESULT="${{ needs.deploy-production.result }}"
+
+          echo "Staging: $STAGING_RESULT"
+          [ "$STAGING_RESULT" = "success" ] && echo "  🌐 https://${{ env.REGISTRY_DOMAIN_STAGING }}"
+
           STAGING_RESULT="${{ needs.deploy-staging.result }}"
           PROD_RESULT="${{ needs.deploy-production.result }}"
           
