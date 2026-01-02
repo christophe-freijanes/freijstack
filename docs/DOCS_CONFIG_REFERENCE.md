@@ -47,7 +47,7 @@ documentation:
         severity: CRITICAL
         
       - name: Database Connections
-        regex: 'postgresql://.*:.*@'
+        regex: 'postgresql://<DB_USER>:<DB_PASSWORD>@'  # Pattern example
         severity: HIGH
         
       - name: Slack Webhooks

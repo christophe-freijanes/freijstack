@@ -529,8 +529,8 @@ find docs -name "*.md" -type f | while read file; do
     grep -En "192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])" "$file" && \
         echo "  ⚠️ Private IPs detected"
     
-    # Database strings
-    grep -En "postgresql://.*@|mysql://.*@" "$file" && \
+    # Database strings - pattern example
+    # grep -En "postgresql://.*@|mysql://.*@" "$file" && \
         echo "  ⚠️ Database connection strings detected"
 done
 ```

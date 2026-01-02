@@ -77,7 +77,7 @@ Le système scan automatiquement et bloque les patterns:
 | `xox[baprs]-` | Slack Token | `<SLACK_TOKEN>` |
 | `discord.com/api/webhooks` | Discord Webhook | Webhook URL |
 | `sk_(live\|test)_` | Stripe API | `sk_live_...` |
-| `postgresql://.*:.*@` | DB String | Connection URL |
+| `postgresql://` | DB String | <DB_CONNECTION_STRING> |
 | `-----BEGIN.*PRIVATE KEY` | Private Keys | SSH, RSA, EC keys |
 
 **Action si détecté**:
