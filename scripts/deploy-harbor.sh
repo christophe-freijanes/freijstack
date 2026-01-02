@@ -38,13 +38,33 @@ cd harbor
 echo "🔐 Loading secrets from $ENV_FILE..."
 DB_PASS=$(grep -E "^DB_PASSWORD=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- || openssl rand -hex 32)
 ADMIN_PASS=$(grep -E "^HARBOR_ADMIN_PASSWORD=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- || openssl rand -hex 32)
-CERT_PATH=$(grep -E "^CERT_PATH=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- || echo "/etc/letsencrypt/live/$REGISTRY_DOM/fullchain.pem")
-CERT_KEY_PATH=$(grep -E "^CERT_KEY_PATH=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- || echo "/etc/letsencrypt/live/$REGISTRY_DOM/privkey.pem")
+
+# TLS certs: prefer values from .env; fallback to deploy-local self-signed paths
+CERT_PATH=$(grep -E "^CERT_PATH=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- || echo "$DEPLOY_DIR/certs/fullchain.pem")
+CERT_KEY_PATH=$(grep -E "^CERT_KEY_PATH=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- || echo "$DEPLOY_DIR/certs/privkey.pem")
 
 # Save admin password if generated
 if ! grep -q "^HARBOR_ADMIN_PASSWORD=" "$ENV_FILE" 2>/dev/null; then
   echo "HARBOR_ADMIN_PASSWORD=$ADMIN_PASS" >> "$ENV_FILE"
   echo "🔑 Generated Harbor admin password (saved in $ENV_FILE)"
+fi
+
+# Persist cert paths if they were defaulted
+if ! grep -q "^CERT_PATH=" "$ENV_FILE" 2>/dev/null; then
+  echo "CERT_PATH=$CERT_PATH" >> "$ENV_FILE"
+fi
+if ! grep -q "^CERT_KEY_PATH=" "$ENV_FILE" 2>/dev/null; then
+  echo "CERT_KEY_PATH=$CERT_KEY_PATH" >> "$ENV_FILE"
+fi
+
+# Ensure TLS certs exist (generate self-signed if missing)
+mkdir -p "$(dirname "$CERT_PATH")"
+if [ ! -f "$CERT_PATH" ] || [ ! -f "$CERT_KEY_PATH" ]; then
+  echo "⚠️ TLS cert/key not found; generating self-signed certificate for $REGISTRY_DOM"
+  openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -subj "/CN=$REGISTRY_DOM" \
+    -keyout "$CERT_KEY_PATH" \
+    -out "$CERT_PATH"
 fi
 
 # Persist cert paths if they were defaulted
