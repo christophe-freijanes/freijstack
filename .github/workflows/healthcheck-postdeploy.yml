@@ -6,6 +6,7 @@ on:
       - 🏗️ Infrastructure • VPS
       - 📄 SaaS • Portfolio
       - 🔐 SaaS • SecureVault
+      - 🐳 SaaS • Docker Registry
     types: [completed]
 
 concurrency:
@@ -69,6 +70,12 @@ jobs:
               "${VAULT_FE}|200,301,302,304|SecureVault Frontend"
               "${VAULT_API}|200|SecureVault API"
             )
+
+            # Production registry
+            REGISTRY_URLS=(
+              "https://registry.freijstack.com/v2/|401,200|Docker Registry API (production)"
+              "https://registry-ui.freijstack.com/|200,301,302|Docker Registry UI (production)"
+            )
           else
             # develop → staging, BUT staging may be intentionally destroyed after prod deploy
             VAULT_FE_STAGING="https://vault-staging.freijstack.com/"
@@ -99,10 +106,32 @@ jobs:
                 VAULT_URLS=()
                 ;;
             esac
+
+            # Probe staging registry
+            registry_probe_code=$(
+              curl -s -L -o /dev/null -w "%{http_code}" \
+                --connect-timeout 6 \
+                --max-time 12 \
+                "https://registry-staging.freijstack.com/v2/" || echo "000"
+            )
+
+            case "$registry_probe_code" in
+              401|200)
+                echo "- ✅ Staging Registry detected (probe HTTP $registry_probe_code). Running staging registry checks." >> "$GITHUB_STEP_SUMMARY"
+                REGISTRY_URLS=(
+                  "https://registry-staging.freijstack.com/v2/|401,200|Docker Registry API (staging)"
+                  "https://registry-ui-staging.freijstack.com/|200,301,302|Docker Registry UI (staging)"
+                )
+                ;;
+              *)
+                echo "- ⚠️ Staging Registry seems disabled (probe HTTP $registry_probe_code). Skipping staging registry checks." >> "$GITHUB_STEP_SUMMARY"
+                REGISTRY_URLS=()
+                ;;
+            esac
           fi
 
           # Merge URL lists
-          URLS=("${BASE_URLS[@]}" "${VAULT_URLS[@]}")
+          URLS=("${BASE_URLS[@]}" "${VAULT_URLS[@]}" "${REGISTRY_URLS[@]}")
 
           for entry in "${URLS[@]}"; do
             url="${entry%%|*}"
