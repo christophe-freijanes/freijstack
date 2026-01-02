@@ -209,8 +209,16 @@ jobs:
           PROD_RESULT="${{ needs.deploy-production.result }}"
 
           echo "Staging: $STAGING_RESULT"
-          [ "$STAGING_RESULT" = "success" ] && echo "  🌐 https://${{ env.REGISTRY_DOMAIN_STAGING }}"
+          if [ "$STAGING_RESULT" = "success" ]; then
+            echo "  ✅ https://${{ env.REGISTRY_DOMAIN_STAGING }}"
+          fi
 
           echo ""
           echo "Production: $PROD_RESULT"
-          [ "$PROD_RESULT" = "success" ] && echo "  🌐 https://${{ env.REGISTRY_DOMAIN_PROD }}"
+          if [ "$PROD_RESULT" = "success" ]; then
+            echo "  ✅ https://${{ env.REGISTRY_DOMAIN_PROD }}"
+          elif [ "$PROD_RESULT" = "skipped" ]; then
+            echo "  ⏭️  Skipped (push to main only)"
+          fi
+          
+          exit 0
