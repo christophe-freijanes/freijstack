@@ -68,18 +68,22 @@ jobs:
           echo "leaks_count=${leaks_count}" >> "$GITHUB_OUTPUT"
           echo "🔢 leaks_count=${leaks_count}"
 
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "## 🔐 Gitleaks (secrets scan)" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Total findings:** $leaks_count" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo ""
+            echo "## 🔐 Gitleaks (secrets scan)"
+            echo ""
+            echo "- **Total findings:** $leaks_count"
+          } >> "$GITHUB_STEP_SUMMARY"
 
           if [ "$leaks_count" != "0" ]; then
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "### 🔎 Top 20 findings (metadata only)" >> "$GITHUB_STEP_SUMMARY"
-            jq -r '.[] | "- rule=\(.RuleID) file=\(.File):\(.StartLine) commit=\(.Commit|tostring|.[0:8])"' gitleaks-report.json \
-              | head -n 20 >> "$GITHUB_STEP_SUMMARY"
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "> ℹ️ Values are redacted. See artifact for full metadata." >> "$GITHUB_STEP_SUMMARY"
+            {
+              echo ""
+              echo "### 🔎 Top 20 findings (metadata only)"
+              jq -r '.[] | "- rule=\(.RuleID) file=\(.File):\(.StartLine) commit=\(.Commit|tostring|.[0:8])"' gitleaks-report.json \
+                | head -n 20
+              echo ""
+              echo "> ℹ️ Values are redacted. See artifact for full metadata."
+            } >> "$GITHUB_STEP_SUMMARY"
           else
             echo "- ✅ No findings detected." >> "$GITHUB_STEP_SUMMARY"
           fi
@@ -214,9 +218,11 @@ jobs:
           done
 
           if [ "$failures" -gt 0 ]; then
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "### 🧯 Grace pass (final attempt)" >> "$GITHUB_STEP_SUMMARY"
-            echo "- Retrying with stronger tolerance..." >> "$GITHUB_STEP_SUMMARY"
+            {
+              echo ""
+              echo "### 🧯 Grace pass (final attempt)"
+              echo "- Retrying with stronger tolerance..."
+            } >> "$GITHUB_STEP_SUMMARY"
 
             failures=0
             for entry in "${URLS[@]}"; do
@@ -232,13 +238,17 @@ jobs:
           fi
 
           if [ "$failures" -gt 0 ]; then
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "🚨 **Health check FAILED** (after grace pass)" >> "$GITHUB_STEP_SUMMARY"
+            {
+              echo ""
+              echo "🚨 **Health check FAILED** (after grace pass)"
+            } >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
 
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "✅ **All URLs healthy**" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo ""
+            echo "✅ **All URLs healthy**"
+          } >> "$GITHUB_STEP_SUMMARY"
 
 
       # ---------------------------
@@ -443,16 +453,20 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "## 📢 Production Health Summary" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- 🏥 Health Check: **${{ needs.health-check.result }}**" >> "$GITHUB_STEP_SUMMARY"
-          echo "- 🔧 Auto-Heal: **${{ needs.auto-heal.result }}**" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## 📢 Production Health Summary"
+            echo ""
+            echo "- 🏥 Health Check: **${{ needs.health-check.result }}**"
+            echo "- 🔧 Auto-Heal: **${{ needs.auto-heal.result }}**"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
 
           if [ "${{ needs.health-check.result }}" = "success" ]; then
-            echo "✅ Production is **HEALTHY**" >> "$GITHUB_STEP_SUMMARY"
-            echo "- 🎯 https://vault.freijstack.com/login" >> "$GITHUB_STEP_SUMMARY"
-            echo "- 🎯 https://vault-api.freijstack.com/api/health" >> "$GITHUB_STEP_SUMMARY"
+            {
+              echo "✅ Production is **HEALTHY**"
+              echo "- 🎯 https://vault.freijstack.com/login"
+              echo "- 🎯 https://vault-api.freijstack.com/api/health"
+            } >> "$GITHUB_STEP_SUMMARY"
           elif [ "${{ needs.auto-heal.result }}" = "success" ]; then
             echo "⚠️ Production had issues but **auto-heal succeeded**" >> "$GITHUB_STEP_SUMMARY"
           else

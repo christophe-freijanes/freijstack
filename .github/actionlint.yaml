@@ -16,8 +16,8 @@ paths:
       - 'SC2034'
   ".github/workflows/healthcheck-prod.yml":
     ignore:
-      - 'SC2129'
       - 'SC2034'
+  ".github/workflows/healthcheck-dev.yml": {}
   ".github/workflows/healthcheck-postdeploy.yml":
     ignore:
       - 'SC2129'
