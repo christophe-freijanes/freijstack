@@ -30,26 +30,29 @@ services:
     environment:
       SINGLE_REGISTRY: "true"
       REGISTRY_TITLE: "Freijstack Private Registry (Staging)"
-      REGISTRY_URL: "http://registry:5000"
+      NGINX_PROXY_PASS_URL: "http://registry:5000"
       DELETE_IMAGES: "true"
       SHOW_CONTENT_DIGEST: "true"
       REGISTRY_SECURED: "true"
+      REGISTRY_USERNAME: "freijac"
+      REGISTRY_PASSWORD: "W_=3KcWt9#VWH%t0#z@4"
     depends_on:
       - registry
     networks:
       - web
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      test: ["CMD-SHELL", "test -f /var/run/nginx.pid || exit 1"]
       interval: 30s
       timeout: 10s
-      retries: 5
-      start_period: 15s
+      retries: 3
+      start_period: 5s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.registry-ui.rule=Host(`registry-ui-staging.freijstack.com`)"
       - "traefik.http.routers.registry-ui.entrypoints=websecure"
       - "traefik.http.routers.registry-ui.tls.certresolver=mytlschallenge"
       - "traefik.http.services.registry-ui.loadbalancer.server.port=80"
+      - "traefik.http.routers.registry-ui.service=registry-ui"
 
 volumes:
   registry-data:
