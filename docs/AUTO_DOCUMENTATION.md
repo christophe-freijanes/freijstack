@@ -70,11 +70,11 @@ Le système scan automatiquement et bloque les patterns:
 
 | Pattern | Type | Exemple |
 |---------|------|---------|
-| `AKIA*` | AWS Access Key | `AKIAIOSFODNN7EXAMPLE` |
+| `AKIA*` | AWS Access Key | `<AWS_ACCESS_KEY_ID>` |
 | `ASIA*` | AWS STS | `ASIATEMP...` |
-| `ghp_*` | GitHub Token | `ghp_abcd...` |
+| `ghp_*` | GitHub Token | `<GITHUB_TOKEN>` |
 | `ghr_*` | GitHub Refresh | `ghr_abcd...` |
-| `xox[baprs]-` | Slack Token | `xoxb-...` |
+| `xox[baprs]-` | Slack Token | `<SLACK_TOKEN>` |
 | `discord.com/api/webhooks` | Discord Webhook | Webhook URL |
 | `sk_(live\|test)_` | Stripe API | `sk_live_...` |
 | `postgresql://.*:.*@` | DB String | Connection URL |

@@ -124,9 +124,9 @@ JWT_ISSUER=freijstack.com   # ✅ OK
 
 ```markdown
 # ❌ AVANT
-POSTGRES_PASSWORD=Tr0pic@lFruit#92$Safe!
-DB_CONNECTION_STRING=postgresql://admin:<REDACTED>@db.internal:5432/vault_db
-MONGODB_URI=mongodb+srv://user:<REDACTED>@cluster.mongodb.net/dbname
+POSTGRES_PASSWORD=<POSTGRES_PASSWORD>
+DB_CONNECTION_STRING=<DB_CONNECTION_STRING>
+MONGODB_URI=<MONGODB_URI>
 
 # ✅ APRÈS
 POSTGRES_PASSWORD=<REDACTED>
@@ -173,9 +173,9 @@ SENDGRID_SENDER_EMAIL=noreply@freijstack.com  # ✅ OK
 
 ```markdown
 # ❌ AVANT
-SLACK_WEBHOOK=https://hooks.slack.com/services/T123456/B789012/abcdefghijklmnopqrst
+SLACK_WEBHOOK=<SLACK_WEBHOOK_URL>
 GITHUB_WEBHOOK_SECRET=whsec_12345abcdefghijklmnop
-DISCORD_WEBHOOK=https://discord.com/api/webhooks/123456789012345678/abcdefghijklmnopqrstuvwxyz_1A2B3C4D5E
+DISCORD_WEBHOOK=<DISCORD_WEBHOOK_URL>
 
 # ✅ APRÈS
 SLACK_WEBHOOK=<REDACTED_SLACK_WEBHOOK>
@@ -193,8 +193,8 @@ Pour configurer Slack:
 
 ```markdown
 # ❌ AVANT
-POSTGRES_URI=postgresql://admin:SecurePass123@db.company.local:5432/production_vault
-MYSQL_CONNECTION=mysql://root:MyP@ssw0rd!@mysql.internal.local:3306/app_db
+POSTGRES_URI=<POSTGRES_URI>
+MYSQL_CONNECTION=<MYSQL_CONNECTION>
 MONGODB=mongodb+srv://app_user:encrypted_pass@mongodb-prod.internal.cloud/db?replicaSet=main
 
 # ✅ APRÈS

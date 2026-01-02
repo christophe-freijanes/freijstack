@@ -502,7 +502,7 @@ aws secretsmanager get-secret-value \
 ### Slack Notifications
 
 ```bash
-export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX"
+export SLACK_WEBHOOK_URL="<SLACK_WEBHOOK_URL>"
 
 # Le script enverra automatiquement des notifications
 ./scripts/backup-to-cloud.sh production s3

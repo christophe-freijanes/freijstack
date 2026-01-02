@@ -1,18 +1,21 @@
 # .gitleaksignore
 # 
 # Patterns à ignorer lors des scans Gitleaks
-# Format: <filepath>:<line_number>
+# 
+# Format: <filepath> ou <filepath>:<line_number>
+# Ces fichiers contiennent des EXEMPLES intentionnels de secrets pour la documentation
 
-# Documentation REDACTION_GUIDE.md - exemples de patterns
-docs/REDACTION_GUIDE.md:146
-docs/REDACTION_GUIDE.md:150
-docs/REDACTION_GUIDE.md:154
-
-# Documentation SECURITY_AUDIT.md - exemples API keys
-docs/SECURITY_AUDIT.md:131
+# Documentation files with intentional example/test secrets
+# Used for teaching users about secret patterns and redaction
+docs/REDACTION_GUIDE.md
+docs/SECURITY_AUDIT.md
+docs/AUTO_DOCUMENTATION.md
+docs/CLOUD_BACKUP.md
+docs/DOCS_CONFIG_REFERENCE.md
+docs/IMPLEMENTATION_SUMMARY.md
 
 # Code examples et documentation
-docs/EXAMPLES.md:*
+docs/EXAMPLES.md
 
 # Template files
 .env.example
