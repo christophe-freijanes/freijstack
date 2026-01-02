@@ -1,4 +1,4 @@
-name: 🔍 Lint Suite
+name: 🔍 Lint Suite • Quality Check
 
 on:
   push:
