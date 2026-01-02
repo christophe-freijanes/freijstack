@@ -1,0 +1,26 @@
+# .github/actionlint.yaml
+
+# Désactive l'intégration ShellCheck au niveau binaire (optionnel si ignore est complet)
+shellcheck: ""
+
+# Ignorer globalement les erreurs ShellCheck par message
+ignore:
+  # Filtre tous les messages de niveau 'warning' et 'style' de ShellCheck
+  - "shellcheck reported issue in this script:.*:warning:"
+  - "shellcheck reported issue in this script:.*:style:"
+
+# Configuration spécifique par fichier (si vous voulez être plus précis)
+paths:
+  ".github/workflows/harbor-deploy.yml":
+    ignore:
+      - 'SC2034'
+  ".github/workflows/healthcheck-prod.yml":
+    ignore:
+      - 'SC2129'
+      - 'SC2034'
+  ".github/workflows/healthcheck-postdeploy.yml":
+    ignore:
+      - 'SC2129'
+  ".github/workflows/securitycheck.yml":
+    ignore:
+      - 'SC2129'

@@ -20,7 +20,7 @@ on:
         required: false
         type: choice
         options:
-          - ''
+          - auto
           - s3
           - azure
           - gcs
@@ -31,7 +31,7 @@ on:
 env:
   # Default to production for scheduled runs
   TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'production' }}
-  PROVIDER: ${{ github.event_name == 'workflow_dispatch' && inputs.provider || '' }}
+  PROVIDER: ${{ github.event_name == 'workflow_dispatch' && inputs.provider || 'auto' }}
 
 jobs:
   security:

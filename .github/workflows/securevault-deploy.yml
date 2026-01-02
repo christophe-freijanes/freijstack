@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: security
     if: |
-      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) || 
+      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) ||
       github.event_name == 'workflow_dispatch'
 
     steps:
@@ -84,7 +84,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ secrets.VPS_SSH_HOST }}" >> ~/.ssh/known_hosts
 
       - name: 🔒 Mask sensitive values
         run: |
@@ -98,13 +98,13 @@ jobs:
           TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
         run: |
           echo "🔍 Checking DNS records for $TARGET_ENV..."
-          
+
           # Fonction pour vérifier un DNS
           check_dns() {
             DOMAIN=$1
             echo "Checking $DOMAIN..."
-            if dig +short $DOMAIN | grep -q '[0-9]'; then
-              IP=$(dig +short $DOMAIN | head -n1)
+            if dig +short "$DOMAIN" | grep -q '[0-9]'; then
+              IP=$(dig +short "$DOMAIN" | head -n1)
               echo "✅ $DOMAIN → $IP"
               return 0
             else
@@ -112,9 +112,9 @@ jobs:
               return 1
             fi
           }
-          
+
           FAILED=0
-          
+
           if [ "$TARGET_ENV" = "production" ]; then
             check_dns "${{ env.FRONTEND_DOMAIN_PROD }}" || FAILED=1
             check_dns "${{ env.BACKEND_DOMAIN_PROD }}" || FAILED=1
@@ -122,7 +122,7 @@ jobs:
             check_dns "${{ env.FRONTEND_DOMAIN_STAGING }}" || FAILED=1
             check_dns "${{ env.BACKEND_DOMAIN_STAGING }}" || FAILED=1
           fi
-          
+
           if [ $FAILED -eq 1 ]; then
             echo ""
             echo "⚠️ Some DNS records are missing. Please configure them:"
@@ -130,7 +130,7 @@ jobs:
             echo "   - Wait 5-10 minutes for propagation"
             exit 1
           fi
-          
+
           echo "✅ All DNS records configured correctly"
 
       - name: 🔍 Check VPS Prerequisites
@@ -143,11 +143,14 @@ jobs:
           else
             VPS_ENV_FILE="${{ env.VPS_ENV_FILE_STAGING }}"
           fi
-          
+
           # Passer les variables au script SSH via export
           export TARGET_ENV VPS_ENV_FILE
-          
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "TARGET_ENV='$TARGET_ENV' VPS_ENV_FILE='$VPS_ENV_FILE'" bash << 'VPS_CHECK'
+
+          SSH_TARGET="${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+          ENV_EXPORT="TARGET_ENV='$TARGET_ENV' VPS_ENV_FILE='$VPS_ENV_FILE'"
+
+          ssh -i ~/.ssh/deploy_key "$SSH_TARGET" "$ENV_EXPORT" bash << 'VPS_CHECK'
             echo "🔍 Checking VPS configuration..."
             echo "Environment: $TARGET_ENV"
             echo "ENV File: $VPS_ENV_FILE"
@@ -164,7 +167,7 @@ jobs:
                 fi
               done
             fi
-            
+
             # 1. Vérifier Docker
             echo "1️⃣ Checking Docker..."
             if command -v docker &> /dev/null; then
@@ -174,7 +177,7 @@ jobs:
               echo "❌ Docker not installed"
               exit 1
             fi
-            
+
             # 2. Vérifier Docker Compose
             echo ""
             echo "2️⃣ Checking Docker Compose..."
@@ -185,7 +188,7 @@ jobs:
               echo "❌ Docker Compose not installed"
               exit 1
             fi
-            
+
             # 3. Vérifier le réseau web
             echo ""
             echo "3️⃣ Checking Docker network 'web'..."
@@ -196,7 +199,7 @@ jobs:
               docker network create web
               echo "✅ Network 'web' created successfully"
             fi
-            
+
             # 4. Vérifier Traefik
             echo ""
             echo "4️⃣ Checking Traefik..."
@@ -211,13 +214,13 @@ jobs:
               echo ""
               echo "ℹ️  Continuing deployment without Traefik..."
             fi
-            
+
             # 5. Vérifier le fichier .env
             echo ""
             echo "5️⃣ Checking .env file..."
             if [ -f "$VPS_ENV_FILE" ]; then
               echo "✅ .env file exists at $VPS_ENV_FILE"
-              
+
               # Déterminer les domaines selon l'environnement
               if [ "$TARGET_ENV" = "production" ]; then
                 API_DOM="vault-api.freijstack.com"
@@ -230,35 +233,35 @@ jobs:
                 FRONTEND_U="https://vault-staging.freijstack.com"
                 PROJECT_NAME="securevault-staging"
               fi
-              
+
               # Vérifier et ajouter les variables manquantes
               UPDATED=0
-              
+
               if ! grep -q "^COMPOSE_PROJECT_NAME=" "$VPS_ENV_FILE"; then
                 echo "" >> "$VPS_ENV_FILE"
                 echo "COMPOSE_PROJECT_NAME=$PROJECT_NAME" >> "$VPS_ENV_FILE"
                 echo "⚠️ Added missing COMPOSE_PROJECT_NAME=$PROJECT_NAME"
                 UPDATED=1
               fi
-              
+
               if ! grep -q "^API_DOMAIN=" "$VPS_ENV_FILE"; then
                 echo "API_DOMAIN=$API_DOM" >> "$VPS_ENV_FILE"
                 echo "⚠️ Added missing API_DOMAIN=$API_DOM"
                 UPDATED=1
               fi
-              
+
               if ! grep -q "^FRONTEND_DOMAIN=" "$VPS_ENV_FILE"; then
                 echo "FRONTEND_DOMAIN=$FRONTEND_DOM" >> "$VPS_ENV_FILE"
                 echo "⚠️ Added missing FRONTEND_DOMAIN=$FRONTEND_DOM"
                 UPDATED=1
               fi
-              
+
               if ! grep -q "^FRONTEND_URL=" "$VPS_ENV_FILE"; then
                 echo "FRONTEND_URL=$FRONTEND_U" >> "$VPS_ENV_FILE"
                 echo "⚠️ Added missing FRONTEND_URL=$FRONTEND_U"
                 UPDATED=1
               fi
-              
+
               # Vérifier les secrets critiques
               MISSING_SECRETS=""
               for VAR in DB_PASSWORD JWT_SECRET ENCRYPTION_KEY; do
@@ -269,7 +272,7 @@ jobs:
                   echo "  ✅ Found: $VAR"
                 fi
               done
-              
+
               if [ -n "$MISSING_SECRETS" ]; then
                 echo ""
                 echo "❌ Missing critical secrets:$MISSING_SECRETS"
@@ -279,7 +282,7 @@ jobs:
                 echo "   ENCRYPTION_KEY=\$(openssl rand -hex 32)"
                 exit 1
               fi
-              
+
               if [ $UPDATED -eq 1 ]; then
                 echo "✅ .env file updated with missing domain variables"
               else
@@ -287,15 +290,15 @@ jobs:
               fi
             else
               echo "⚠️ .env file not found, creating it with generated secrets..."
-              
+
               # Créer le répertoire si nécessaire
               mkdir -p $(dirname "$VPS_ENV_FILE")
-              
+
               # Générer les secrets
               DB_PASS=$(openssl rand -hex 32)
               JWT_SEC=$(openssl rand -hex 32)
               ENC_KEY=$(openssl rand -hex 32)
-              
+
               # Déterminer les domaines selon l'environnement
               if [ "$TARGET_ENV" = "production" ]; then
                 API_DOM="vault-api.freijstack.com"
@@ -308,7 +311,7 @@ jobs:
                 FRONTEND_U="https://vault-staging.freijstack.com"
                 PROJECT_NAME="securevault-staging"
               fi
-              
+
               # Créer le fichier .env avec les secrets générés
               {
                 echo "# Auto-generated secrets for SecureVault $TARGET_ENV"
@@ -325,11 +328,11 @@ jobs:
                 echo "FRONTEND_DOMAIN=$FRONTEND_DOM"
                 echo "FRONTEND_URL=$FRONTEND_U"
               } > "$VPS_ENV_FILE"
-              
+
               chmod 600 "$VPS_ENV_FILE"
               echo "✅ .env file created at $VPS_ENV_FILE with secure permissions"
             fi
-            
+
             # 6. Vérifier les permissions
             echo ""
             echo "6️⃣ Checking .env permissions..."
@@ -340,7 +343,7 @@ jobs:
               echo "⚠️ .env permissions are $PERMS (should be 600)"
               echo "   Fix with: chmod 600 $VPS_ENV_FILE"
             fi
-            
+
             echo ""
             echo "✅ All VPS prerequisites validated for $TARGET_ENV!"
           VPS_CHECK
@@ -429,7 +432,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     if: |
-      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) || 
+      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) ||
       github.event_name == 'workflow_dispatch'
 
     steps:
@@ -443,7 +446,7 @@ jobs:
           ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
           ls -l ~/.ssh
           # Vérification permissions et format (ne pas afficher la clé en clair)
-          if [ $(stat -c %a ~/.ssh/deploy_key) != "600" ]; then
+          if [ "$(stat -c %a ~/.ssh/deploy_key)" != "600" ]; then
             echo "❌ Permissions incorrectes sur deploy_key"; exit 1; fi
           head -n 2 ~/.ssh/deploy_key
 
@@ -458,7 +461,7 @@ jobs:
           TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
         run: |
           echo "🎯 Cleanup for environment: $TARGET_ENV"
-          
+
           # Déterminer les conteneurs et réseaux selon l'environnement
           if [ "$TARGET_ENV" = "production" ]; then
             CONTAINERS="${{ env.CONTAINER_PREFIX_PROD }}-backend ${{ env.CONTAINER_PREFIX_PROD }}-frontend ${{ env.CONTAINER_PREFIX_PROD }}-postgres"
@@ -471,22 +474,29 @@ jobs:
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
             PROJECT_PATH="${{ env.PROJECT_PATH }}"
           fi
-          
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "TARGET_ENV='$TARGET_ENV' CONTAINERS='$CONTAINERS' NETWORKS='$NETWORKS' DEPLOY_DIR='$DEPLOY_DIR' PROJECT_PATH='$PROJECT_PATH'" bash << 'CLEANUP_SCRIPT'
+
+          SSH_TARGET="${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+          REMOTE_ENV="TARGET_ENV='$TARGET_ENV' \
+          CONTAINERS='$CONTAINERS' \
+          NETWORKS='$NETWORKS' \
+          DEPLOY_DIR='$DEPLOY_DIR' \
+          PROJECT_PATH='$PROJECT_PATH'"
+
+            ssh -i ~/.ssh/deploy_key "$SSH_TARGET" "$REMOTE_ENV" bash << 'CLEANUP_SCRIPT'
             set -e
             echo "🧹 Cleaning up old containers and networks..."
             echo "Environment: $TARGET_ENV"
             echo "Deploy directory: $DEPLOY_DIR"
             echo "Containers to remove: $CONTAINERS"
             echo "Networks to remove: $NETWORKS"
-            
+
             # Arrêter les conteneurs via docker compose si le dossier existe
             if [ -d "$DEPLOY_DIR/$PROJECT_PATH" ]; then
               echo "📂 Found existing deployment, stopping services..."
               cd "$DEPLOY_DIR/$PROJECT_PATH"
               docker compose down 2>/dev/null || echo "  ℹ️  No compose services running"
             fi
-            
+
             # Arrêter et supprimer les conteneurs s'ils existent
             for CONTAINER in $CONTAINERS; do
               if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER}$"; then
@@ -496,7 +506,7 @@ jobs:
                 echo "Container $CONTAINER does not exist, skipping"
               fi
             done
-            
+
             # Supprimer les réseaux avec leurs labels incorrects
             for NETWORK in $NETWORKS; do
               if docker network ls --format '{{.Name}}' | grep -q "^${NETWORK}$"; then
@@ -506,7 +516,7 @@ jobs:
                 echo "Network $NETWORK does not exist, skipping"
               fi
             done
-            
+
             echo "✅ Cleanup complete (volumes preserved for data safety)"
             echo "   Networks will be recreated with correct labels during deployment"
           CLEANUP_SCRIPT
@@ -516,7 +526,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: cleanup
     if: |
-      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) || 
+      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) ||
       github.event_name == 'workflow_dispatch'
     environment:
       name: ${{ github.ref == 'refs/heads/master' && 'production' || 'staging' }}
@@ -544,7 +554,7 @@ jobs:
           TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
         run: |
           echo "🎯 Target environment: $TARGET_ENV"
-          
+
           # Déterminer les chemins selon l'environnement
           if [ "$TARGET_ENV" = "production" ]; then
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
@@ -557,14 +567,23 @@ jobs:
             BRANCH="${{ env.BRANCH_STAGING }}"
             ENV_TEMPLATE=".env.staging"
           fi
-          
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "TARGET_ENV='$TARGET_ENV' DEPLOY_DIR='$DEPLOY_DIR' VPS_ENV_FILE='$VPS_ENV_FILE' BRANCH='$BRANCH' ENV_TEMPLATE='$ENV_TEMPLATE' PROJECT_PATH='${{ env.PROJECT_PATH }}' GITHUB_REPO='${{ github.repository }}'" bash << 'DEPLOY_SCRIPT'
+
+          SSH_TARGET="${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+          REMOTE_ENV="TARGET_ENV='$TARGET_ENV' \
+          DEPLOY_DIR='$DEPLOY_DIR' \
+          VPS_ENV_FILE='$VPS_ENV_FILE' \
+          BRANCH='$BRANCH' \
+          ENV_TEMPLATE='$ENV_TEMPLATE' \
+          PROJECT_PATH='${{ env.PROJECT_PATH }}' \
+          GITHUB_REPO='${{ github.repository }}'"
+
+          ssh -i ~/.ssh/deploy_key "$SSH_TARGET" "$REMOTE_ENV" bash << 'DEPLOY_SCRIPT'
             set -e
             echo "🚀 Starting SecureVault deployment..."
             echo "🎯 Deploying to: $TARGET_ENV"
             echo "📂 Deploy directory: $DEPLOY_DIR"
             echo "📝 VPS ENV file: $VPS_ENV_FILE"
-            
+
             # Cloner/mettre à jour le repo
             if [ -d "$DEPLOY_DIR/.git" ]; then
               echo "✅ Repository already exists, pulling latest changes..."
@@ -582,25 +601,25 @@ jobs:
               git clone -b $BRANCH https://github.com/$GITHUB_REPO.git "$DEPLOY_DIR"
               cd "$DEPLOY_DIR"
             fi
-            
+
             # Naviguer vers securevault
             cd $PROJECT_PATH
-            
+
             echo "📝 Using environment template: $ENV_TEMPLATE"
-            
+
             # Vérifier que le template existe dans le repo
             if [ ! -f "$ENV_TEMPLATE" ]; then
               echo "❌ ERREUR: Template $ENV_TEMPLATE manquant dans le repo"
               exit 1
             fi
-            
+
             # Copier le template comme base
             cp "$ENV_TEMPLATE" .env
-            
+
             # Vérifier et injecter les secrets depuis le fichier .env du VPS
             if [ -f "$VPS_ENV_FILE" ]; then
               echo "🔐 Injecting secrets from VPS .env file..."
-              
+
               # Extraire les secrets critiques du fichier VPS
               for SECRET_VAR in POSTGRES_PASSWORD JWT_SECRET ENCRYPTION_KEY; do
                 SECRET_VALUE=$(grep -E "^${SECRET_VAR}=" "$VPS_ENV_FILE" 2>/dev/null | cut -d'=' -f2- || echo "")
@@ -620,18 +639,18 @@ jobs:
               echo "⚠️ VPS .env file not found at $VPS_ENV_FILE"
               echo "   Using template defaults (INSECURE for production!)"
             fi
-            
+
             echo "🔧 Building and starting containers..."
             docker compose pull
             docker compose up -d --build --remove-orphans
-            
+
             # Attendre que les services soient prêts
             sleep 10
-            
+
             # Vérifier la santé
             echo "🏥 Checking health..."
             docker compose ps
-            
+
             echo "✅ Deployment successful!"
             echo "📊 Logs:"
             docker compose logs --tail=20
@@ -642,7 +661,7 @@ jobs:
           TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
         run: |
           echo "🗄️ Running database migrations for $TARGET_ENV..."
-          
+
           # Déterminer le répertoire selon l'environnement
           if [ "$TARGET_ENV" = "production" ]; then
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
@@ -653,21 +672,24 @@ jobs:
             PROJECT_PATH="${{ env.PROJECT_PATH }}"
             CONTAINER_PREFIX="${{ env.CONTAINER_PREFIX_STAGING }}"
           fi
-          
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "DEPLOY_DIR='$DEPLOY_DIR' PROJECT_PATH='$PROJECT_PATH' CONTAINER_PREFIX='$CONTAINER_PREFIX'" bash << 'MIGRATION_SCRIPT'
+
+          SSH_TARGET="${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+          REMOTE_ENV="DEPLOY_DIR='$DEPLOY_DIR' PROJECT_PATH='$PROJECT_PATH' CONTAINER_PREFIX='$CONTAINER_PREFIX'"
+
+          ssh -i ~/.ssh/deploy_key "$SSH_TARGET" "$REMOTE_ENV" bash << 'MIGRATION_SCRIPT'
             set -e
             cd "$DEPLOY_DIR/$PROJECT_PATH"
-            
+
             echo "📂 Current directory: $(pwd)"
             echo "🐳 PostgreSQL container: ${CONTAINER_PREFIX}-postgres"
-            
+
             # Auto-detect PostgreSQL user and database from .env
             echo ""
             echo "🔍 Detecting PostgreSQL credentials from .env..."
             if [ -f ".env" ]; then
               PGUSER=$(grep "^POSTGRES_USER=" .env | cut -d'=' -f2 | tr -d '\r' || echo "postgres")
               PGDATABASE=$(grep "^POSTGRES_DB=" .env | cut -d'=' -f2 | tr -d '\r' || echo "securevault")
-              
+
               echo "  ✓ PostgreSQL User: $PGUSER"
               echo "  ✓ Database: $PGDATABASE"
             else
@@ -675,7 +697,7 @@ jobs:
               PGUSER="postgres"
               PGDATABASE="securevault"
             fi
-            
+
             # Attendre que PostgreSQL soit prêt
             echo ""
             echo "⏳ Waiting for PostgreSQL to be ready..."
@@ -687,7 +709,7 @@ jobs:
               echo "  ⏳ Attempt $i/30..."
               sleep 2
             done
-            
+
             # Test de connexion
             echo ""
             echo "🔌 Testing database connection..."
@@ -699,35 +721,36 @@ jobs:
               docker compose exec -T postgres psql -U "$PGUSER" -l 2>&1 || echo "   Connection failed"
               exit 1
             fi
-            
+
             # Vérifier que les fichiers de migration existent
             echo ""
             echo "📋 Available migration files:"
             ls -lh backend/migrations/ || echo "⚠️ No migrations directory found"
-            
+
             # Fonction pour exécuter une migration
             run_migration() {
               local migration_file=$1
               local migration_num=$2
               local check_table=$3
-              
+
               echo ""
               echo "${migration_num} Checking ${migration_file}..."
-              
+
               if [ ! -f "backend/migrations/${migration_file}" ]; then
                 echo "  ⚠️ Migration file not found, skipping"
                 return
               fi
-              
+
               # Vérifier si déjà appliquée via table indicatrice
               if docker compose exec -T postgres psql -U "$PGUSER" -d "$PGDATABASE" -tAc \
                 "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '$check_table');" 2>/dev/null | grep -q "t"; then
                 echo "  ℹ️  Migration already applied ($check_table table exists)"
               else
                 echo "  ▶️  Applying ${migration_file}..."
-                
+
                 # Appliquer la migration
-                if docker compose exec -T postgres psql -U "$PGUSER" -d "$PGDATABASE" < "backend/migrations/${migration_file}" 2>&1 | tee /tmp/migration.log; then
+                if docker compose exec -T postgres psql -U "$PGUSER" -d "$PGDATABASE" \
+                  < "backend/migrations/${migration_file}" 2>&1 | tee /tmp/migration.log; then
                   echo "  ✅ Migration applied successfully"
                 else
                   echo "  ❌ Migration failed! Check logs above"
@@ -736,16 +759,16 @@ jobs:
                 fi
               fi
             }
-            
+
             # Exécuter les migrations dans l'ordre
             run_migration "001_add_features.sql" "1️⃣" "roles"
             run_migration "002_pro_features.sql" "2️⃣" "folders"
-            
+
             # Afficher un résumé des tables
             echo ""
             echo "📊 Database schema summary:"
             docker compose exec -T postgres psql -U "$PGUSER" -d "$PGDATABASE" -c "\dt" 2>&1 | head -30 || echo "  ⚠️ Could not list tables"
-            
+
             # Compter quelques tables importantes
             echo ""
             echo "📈 Database statistics:"
@@ -756,7 +779,7 @@ jobs:
                 echo "  • $table: $COUNT rows"
               fi
             done
-            
+
             echo ""
             echo "✅ Database migrations completed!"
           MIGRATION_SCRIPT
@@ -773,7 +796,8 @@ jobs:
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
             PROJECT_PATH="${{ env.PROJECT_PATH }}"
           fi
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "cd $DEPLOY_DIR/$PROJECT_PATH && chmod +x ./init-db.sh && ./init-db.sh $TARGET_ENV"
+          SSH_TARGET="${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+          ssh -i ~/.ssh/deploy_key "$SSH_TARGET" "cd $DEPLOY_DIR/$PROJECT_PATH && chmod +x ./init-db.sh && ./init-db.sh $TARGET_ENV"
 
       - name: 🔄 Restart Traefik
         env:
@@ -799,17 +823,17 @@ jobs:
         run: |
           echo "🔍 Vérification du déploiement sur $TARGET_ENV..."
           sleep 5
-          
+
           # Déterminer le répertoire selon l'environnement
           if [ "$TARGET_ENV" = "production" ]; then
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_PROD }}"
           else
             DEPLOY_DIR="${{ env.VPS_DEPLOY_DIR_STAGING }}"
           fi
-          
+
           # Vérifier que les conteneurs tournent sur le VPS
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} "cd $DEPLOY_DIR/${{ env.PROJECT_PATH }} && docker compose ps"
-          
+
           echo "✅ Déploiement vérifié avec succès!"
 
       - name: ✅ Notify Deployment Success
@@ -854,9 +878,9 @@ jobs:
         run: |
           echo "⏳ Waiting 15 seconds for containers to fully start..."
           sleep 15
-          
+
           echo "🔍 Checking Traefik routers in logs..."
-          
+
           # Déterminer les domaines selon l'environnement
           if [ "$TARGET_ENV" = "production" ]; then
             FRONTEND_DOM="${{ env.FRONTEND_DOMAIN_PROD }}"
@@ -865,6 +889,9 @@ jobs:
             FRONTEND_DOM="${{ env.FRONTEND_DOMAIN_STAGING }}"
             API_DOM="${{ env.BACKEND_DOMAIN_STAGING }}"
           fi
+
+          echo "Frontend domain: $FRONTEND_DOM"
+          echo "API domain: $API_DOM"
 
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'VERIFY_LOGS'
             TRAEFIK_CONTAINER=$(docker ps --format '{{.Names}}' | grep -i 'traefik' | head -n1)
@@ -923,13 +950,13 @@ jobs:
             echo "❌ Post-deployment verification failed"
             exit 1
           fi
-      
+
   notify:
     name: 📢 Notify Status
     runs-on: ubuntu-latest
     needs: [security, validate, test, deploy, post-verify]
     if: always()
-    
+
     steps:
       - name: Check overall status
         run: |
@@ -955,7 +982,11 @@ jobs:
           fi
 
       - name: ✅ Success Summary
-        if: ${{ needs.validate.result == 'success' && needs.test.result == 'success' && needs.deploy.result == 'success' && needs.post-verify.result == 'success' }}
+        if: |
+          needs.validate.result == 'success' &&
+          needs.test.result == 'success' &&
+          needs.deploy.result == 'success' &&
+          needs.post-verify.result == 'success'
         run: |
           echo "✅ All jobs completed successfully!"
           echo "📊 Validation: ✅"
@@ -964,7 +995,11 @@ jobs:
           echo "🔎 Post-verification: ✅"
 
       - name: ⚠️ Partial Success
-        if: ${{ (needs.validate.result == 'failure' || needs.test.result == 'failure' || needs.deploy.result == 'failure' || needs.post-verify.result == 'failure') }}
+        if: |
+          needs.validate.result == 'failure' ||
+          needs.test.result == 'failure' ||
+          needs.deploy.result == 'failure' ||
+          needs.post-verify.result == 'failure'
         run: |
           echo "⚠️ Some jobs failed:"
           echo "Validation: ${{ needs.validate.result }}"

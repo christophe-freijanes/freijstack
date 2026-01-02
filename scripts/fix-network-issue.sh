@@ -21,7 +21,7 @@ echo "🎯 Environment: $TARGET_ENV"
 echo "📂 Directory: $DEPLOY_DIR"
 echo "🌐 Network: $NETWORK_NAME"
 
-ssh -i ~/.ssh/deploy_key *** << FIXSCRIPT
+ssh -i ~/.ssh/deploy_key -- *** << 'FIXSCRIPT'
   set -e
   
   echo "⏹️  Stopping containers..."

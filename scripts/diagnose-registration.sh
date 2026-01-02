@@ -97,7 +97,7 @@ REGISTER_RESPONSE=$(curl -s -w "\n%{http_code}" \
     -H "Content-Type: application/json" \
     -H "Origin: $FRONTEND_URL" \
     -d "{\"username\":\"$TEST_USERNAME\",\"email\":\"$TEST_EMAIL\",\"password\":\"TestPass123!\"}" \
-    --max-time 10 2>&1 || echo "ERROR\n000")
+    --max-time 10 2>&1 || printf 'ERROR\n000')
 
 HTTP_CODE=$(echo "$REGISTER_RESPONSE" | tail -n1)
 BODY=$(echo "$REGISTER_RESPONSE" | head -n-1)
@@ -194,7 +194,7 @@ if [ -d "$DEPLOY_DIR" ]; then
     echo ""
     
     info "Checking for errors in logs..."
-    ERROR_COUNT=$(docker compose logs backend | grep -i "error" | wc -l)
+    ERROR_COUNT=$(docker compose logs backend | grep -ci "error")
     if [ "$ERROR_COUNT" -gt 0 ]; then
         warn "Found $ERROR_COUNT error(s) in backend logs"
         echo ""

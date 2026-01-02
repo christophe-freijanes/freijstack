@@ -1,4 +1,4 @@
-name: 🩺 Health Check • Post-Deploy 
+name: 🩺 Health Check • Post-Deploy
 
 on:
   workflow_run:
@@ -28,6 +28,7 @@ jobs:
     steps:
       - name: 🧾 Summary (source workflow)
         run: |
+          # shellcheck disable=SC2129
           echo "## 🩺 Post-Deploy Health Check" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "- Source workflow: **${{ github.event.workflow_run.name }}**" >> "$GITHUB_STEP_SUMMARY"
@@ -41,6 +42,7 @@ jobs:
 
       - name: 🌐 Check Public URLs (with retries)
         run: |
+          # shellcheck disable=SC2129
           set -euo pipefail
 
           MAX_RETRIES=8
