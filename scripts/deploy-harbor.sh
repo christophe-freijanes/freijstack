@@ -303,20 +303,42 @@ echo "🔧 Starting Harbor..."
 docker compose up -d
 
 echo "⏳ Waiting for services to initialize..."
-sleep 30
+sleep 15
 
 echo "🏥 Checking service status:"
 docker compose ps
 
+echo ""
+echo "🔍 Diagnostic info:"
+echo "- Checking if core is reachable from proxy..."
+docker compose exec -T proxy sh -c "nc -zv core 8080 2>&1 || wget -qO- http://core:8080/api/v2.0/health 2>&1 | head -5" || echo "❌ Cannot reach core from proxy"
+
+echo "- Checking if proxy is listening on port $HTTP_PORT..."
+docker compose exec -T proxy sh -c "netstat -tlnp 2>/dev/null | grep $HTTP_PORT || ss -tlnp | grep $HTTP_PORT" || echo "⚠️  netstat/ss not available in proxy"
+
+echo "- Testing proxy directly..."
+docker compose exec -T proxy sh -c "curl -s -o /dev/null -w 'HTTP %{http_code}\n' http://localhost:$HTTP_PORT/ 2>&1" || echo "❌ Proxy not responding"
+
+echo ""
+echo "📊 Container health summary:"
+docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
+
+echo ""
+echo "📄 Core logs (last 20 lines):"
+docker compose logs --tail=20 core 2>/dev/null || echo "Core not running"
+
+echo ""
+echo "📄 Proxy logs (last 20 lines):"
+docker compose logs --tail=20 proxy 2>/dev/null || echo "Proxy not running"
+
 # Check for unhealthy containers (with fallback if jq not available)
 UNHEALTHY=$(docker compose ps --format json 2>/dev/null | jq -r 'select(.State != "running") | .Name' 2>/dev/null || docker compose ps | grep -v "Up" | tail -n +2 || true)
 if [ -n "$UNHEALTHY" ]; then
+  echo ""
   echo "⚠️ Some containers are not running:"
   echo "$UNHEALTHY"
-  echo ""
-  echo "📄 Recent logs:"
-  docker compose logs --tail=100
 else
+  echo ""
   echo "✅ All services running"
 fi
 
@@ -325,3 +347,9 @@ echo "✅ Harbor deployment complete!"
 echo "🌐 Access Harbor at: https://$REGISTRY_DOM"
 echo "👤 Username: admin"
 echo "🔑 Password: (check $ENV_FILE)"
+echo ""
+echo "🔧 Troubleshooting commands:"
+echo "  docker compose logs -f              # View all logs"
+echo "  docker compose logs -f proxy core   # View proxy + core logs"
+echo "  docker compose ps                   # Check container status"
+echo "  docker network inspect ${CONTAINER_PREFIX}_harbor  # Check network"
