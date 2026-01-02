@@ -42,7 +42,8 @@ jobs:
             @semantic-release/release-notes-generator \
             @semantic-release/github \
             @semantic-release/git \
-            @semantic-release/changelog
+            @semantic-release/changelog \
+            conventional-changelog-conventionalcommits
 
       - name: 🔧 Configure git identity (for @semantic-release/git)
         run: |
