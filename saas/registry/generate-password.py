@@ -18,12 +18,17 @@ except ImportError:
     import bcrypt
     hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12)).decode()
 
+# Read username from environment (set by GitHub Actions)
+import os
+username = os.getenv('REGISTRY_USERNAME', 'user')
+
 # Write to .htpasswd file
 with open('.htpasswd', 'w') as f:
-    f.write(f'admin:{hashed}\n')
+    f.write(f'{username}:{hashed}\n')
 
-print('✅ Password generated and saved!')
-print('Username: admin')
+print('✅ Password generated and saved to .htpasswd')
 print(f'Password: {password}')
+print('')
+print('📝 Save this password in GitHub Secrets as REGISTRY_PASSWORD')
 print('')
 print('📝 Save this password in a secure location!')
