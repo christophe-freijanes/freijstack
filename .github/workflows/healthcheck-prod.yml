@@ -362,6 +362,7 @@ jobs:
       - name: ⏱️ Auto-Heal cooldown check (anti restart-loop)
         id: cooldown
         run: |
+          # shellcheck disable=SC2034
           set -euo pipefail
 
           SSH="ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o ConnectTimeout=10 ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"

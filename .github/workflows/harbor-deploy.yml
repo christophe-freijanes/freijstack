@@ -395,6 +395,7 @@ jobs:
         env:
           TARGET_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.ref == 'refs/heads/master' && 'production' || 'staging') }}
         run: |
+          # shellcheck disable=SC2034
           echo "🎯 Cleanup for environment: $TARGET_ENV"
 
           if [ "$TARGET_ENV" = "production" ]; then
