@@ -113,6 +113,7 @@ for env in "production" "staging"; do
     fi
     
     echo "🏥 Health Check ($env):"
+    info "Domains: API=$API_DOMAIN | FRONTEND=$FRONTEND_DOMAIN"
     HEALTH=$(curl -s "https://${API_DOMAIN}/health" --max-time 10 || echo "ERROR")
     
     if echo "$HEALTH" | grep -q "healthy"; then

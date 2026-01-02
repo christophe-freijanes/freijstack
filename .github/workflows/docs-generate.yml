@@ -50,7 +50,7 @@ jobs:
         run: |
           echo "🎨 Generating Mermaid diagrams..."
           mkdir -p docs/.generated
-          
+
           # Convert .mmd files to PNG and SVG
           for mmd_file in docs/*.mmd; do
             if [ -f "$mmd_file" ]; then
@@ -60,13 +60,13 @@ jobs:
               mmdc -i "$mmd_file" -o "docs/.generated/${filename}.svg" || true
             fi
           done
-          
+
           ls -lah docs/.generated/ || echo "No diagrams generated"
 
       - name: Validate no secrets in public docs
         run: |
           echo "🔒 Scanning for secrets in public docs..."
-          
+
           # Patterns à détecter
           PATTERNS=(
             "AKIA[0-9A-Z]{16}"
@@ -79,7 +79,7 @@ jobs:
             "sk_(live|test)_[0-9a-zA-Z]{20,}"
             "postgresql://.*:.*@"
           )
-          
+
           FOUND=0
           for pattern in "${PATTERNS[@]}"; do
             if grep -r -E "$pattern" docs/ --include="*.md" 2>/dev/null; then
@@ -87,7 +87,7 @@ jobs:
               FOUND=1
             fi
           done
-          
+
           if [ $FOUND -eq 1 ]; then
             echo "🔴 Security check FAILED - secrets detected in public docs"
             exit 1
@@ -98,42 +98,42 @@ jobs:
       - name: Generate documentation index
         run: |
           echo "📑 Generating documentation index..."
-          
+
           cat > docs/.index.json << 'EOF'
           {
             "generated_at": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')",
             "docs": [
           EOF
-          
+
           # List all markdown files
           find docs -name "*.md" -type f | sort | while read file; do
             title=$(head -n 1 "$file" | sed 's/^# //')
             size=$(wc -c < "$file")
             echo "    { \"file\": \"$file\", \"title\": \"$title\", \"size\": $size }," >> docs/.index.json
           done
-          
+
           echo "    ]" >> docs/.index.json
           echo "}" >> docs/.index.json
 
       - name: Generate docs summary
         run: |
           echo "📊 Generating documentation summary..."
-          
+
           # Count metrics
           DOC_COUNT=$(find docs -name "*.md" | wc -l)
           LINE_COUNT=$(find docs -name "*.md" -exec wc -l {} + | tail -1 | awk '{print $1}')
-          
+
           cat > docs/.summary.txt << EOF
           ===========================================
           📚 FreijStack Documentation Summary
           ===========================================
           Generated: $(date)
-          
+
           📈 Metrics:
           - Total documents: $DOC_COUNT
           - Total lines: $LINE_COUNT
           - Generated diagrams: $(ls docs/.generated/*.png 2>/dev/null | wc -l) PNG + $(ls docs/.generated/*.svg 2>/dev/null | wc -l) SVG
-          
+
           📁 Main Sections:
           - Architecture & CI/CD
           - Deployment Guides
@@ -141,15 +141,15 @@ jobs:
           - Troubleshooting & Runbooks
           - API Documentation
           - User Guides
-          
+
           🔐 Security Status:
           - ✅ No secrets detected in public docs
           - ✅ Markdown validation passed
           - ✅ All links validated
-          
+
           ===========================================
           EOF
-          
+
           cat docs/.summary.txt
 
       - name: Create documentation artifacts
@@ -174,7 +174,7 @@ jobs:
         run: |
           git config user.name "Docs Bot"
           git config user.email "docs-bot@freijstack.com"
-          
+
           # Vérifier s'il y a des changements
           if [ -n "$(git status --porcelain docs/.generated docs/.index.json docs/.summary.txt 2>/dev/null)" ]; then
             git add docs/.generated docs/.index.json docs/.summary.txt || true
@@ -238,7 +238,7 @@ jobs:
       - name: Check broken links in docs
         run: |
           echo "🔗 Checking for broken links..."
-          
+
           # Simple link validation
           while IFS= read -r link; do
             if [[ $link =~ ^\(([^)]+)\) ]]; then
@@ -250,20 +250,20 @@ jobs:
               fi
             fi
           done < <(grep -r '\[.*\](' docs/ --include="*.md" -o | grep -o '([^)]*)' || true)
-          
+
           echo "✅ Link validation complete"
 
       - name: Test documentation build
         run: |
           echo "🔨 Testing documentation structure..."
-          
+
           # Vérifier que tous les fichiers markdown ont un titre
           for file in docs/*.md; do
             if ! head -n 1 "$file" | grep -q '^#'; then
               echo "⚠️ Warning: $file missing header"
             fi
           done
-          
+
           echo "✅ Structure validation complete"
 
       - name: Post results

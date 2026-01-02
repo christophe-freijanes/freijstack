@@ -97,7 +97,7 @@ fi
 # 8. Check for hardcoded secrets (pattern matching)
 echo ""
 echo "🔍 Vérification des secrets en dur..."
-SECRETS=$(git diff --cached | grep -E "(password|secret|token|api.?key|apikey).*=" | grep -v "^\-" | grep -v ".env.example" | wc -l)
+SECRETS=$(git diff --cached | grep -E "(password|secret|token|api.?key|apikey).*=" | grep -v "^\-" | grep -v ".env.example" | grep -c ".")
 if [ "$SECRETS" -gt 0 ]; then
     echo -e "${YELLOW}⚠️  ATTENTION: Possibles secrets en dur détectés!${NC}"
     git diff --cached | grep -E "(password|secret|token|api.?key|apikey).*=" || true

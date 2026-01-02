@@ -7,7 +7,7 @@
 # Usage: ./run-migrations.sh [staging|production]
 #
 
-set -e
+set -euo pipefail
 
 # Colors
 RED='\033[0;31m'
@@ -183,14 +183,3 @@ echo ""
 
 echo "✅ All done! Your database is up to date."
 echo ""
-docker compose exec -T postgres psql -U postgres -d securevault -tAc "
-echo ""
-echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}✅ Migrations completed successfully!${NC}"
-echo -e "${GREEN}========================================${NC}"
-echo ""
-echo -e "${YELLOW}🔄 Restarting backend to apply changes...${NC}"
-docker compose restart backend
-echo ""
-echo -e "${GREEN}✅ Backend restarted${NC}"
-echo -e "${BLUE}SecureVault is ready with all professional features!${NC}"

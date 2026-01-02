@@ -65,7 +65,7 @@ jobs:
       fail_on_gitleaks: true
       upload_sarif: true
       publish_score_artifact: true
- 
+
   validate:
     name: 🔍 Validate Configuration
     runs-on: ubuntu-latest
@@ -74,7 +74,7 @@ jobs:
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
-  
+
       - name: 🐳 Validate Docker Compose syntax
         working-directory: ${{ env.PROJECT_PATH }}
         run: |
@@ -103,7 +103,7 @@ jobs:
         run: |
           echo "Testing ${{ env.SERVICE_TRAEFIK }} image..."
           docker pull ${{ env.TRAEFIK_IMAGE }}
-          
+
           echo "✅ ${{ env.SERVICE_TRAEFIK }} image validated"
 
       - name: 🧪 Validate docker-compose services

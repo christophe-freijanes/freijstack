@@ -27,7 +27,6 @@ NC='\033[0m'
 umask 077
 
 # Configuration
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_DIR="/tmp/securevault-backups"
 RETENTION_DAYS="${RETENTION_DAYS:-30}"
 
@@ -71,15 +70,21 @@ mask_if_actions() {
     SLACK_WEBHOOK_URL DISCORD_WEBHOOK_URL
   do
     local val="${!v:-}"
-    [[ -n "$val" ]] && echo "::add-mask::$val" || true
+    if [[ -n "$val" ]]; then
+      echo "::add-mask::$val"
+    fi
   done
 }
 
 cleanup_local_files() {
   # Remove backup archive if still present
-  [[ -n "${BACKUP_PATH:-}" && -f "${BACKUP_PATH:-}" ]] && rm -f "$BACKUP_PATH" || true
+  if [[ -n "${BACKUP_PATH:-}" && -f "${BACKUP_PATH:-}" ]]; then
+    rm -f "$BACKUP_PATH"
+  fi
   # Remove any leftover uncompressed dump
-  [[ -n "${BACKUP_PATH:-}" && -f "${BACKUP_PATH:-%.gz}" ]] && rm -f "${BACKUP_PATH%.gz}" || true
+  if [[ -n "${BACKUP_PATH:-}" && -f "${BACKUP_PATH:-%.gz}" ]]; then
+    rm -f "${BACKUP_PATH%.gz}"
+  fi
 }
 
 on_exit() {
@@ -415,12 +420,12 @@ main() {
   if [[ -z "$PROVIDER" ]]; then
     info "No provider specified, auto-detecting from environment variables..."
 
-    [[ -n "${AWS_S3_BUCKET:-}" ]] && upload_to_s3 || true
-    [[ -n "${AZURE_CONTAINER:-}" ]] && upload_to_azure || true
-    [[ -n "${GCS_BUCKET:-}" ]] && upload_to_gcs || true
-    [[ -n "${B2_BUCKET_NAME:-}" ]] && upload_to_b2 || true
-    [[ -n "${SPACES_BUCKET:-}" ]] && upload_to_spaces || true
-    [[ -n "${WASABI_BUCKET:-}" ]] && upload_to_wasabi || true
+    if [[ -n "${AWS_S3_BUCKET:-}" ]]; then upload_to_s3; fi
+    if [[ -n "${AZURE_CONTAINER:-}" ]]; then upload_to_azure; fi
+    if [[ -n "${GCS_BUCKET:-}" ]]; then upload_to_gcs; fi
+    if [[ -n "${B2_BUCKET_NAME:-}" ]]; then upload_to_b2; fi
+    if [[ -n "${SPACES_BUCKET:-}" ]]; then upload_to_spaces; fi
+    if [[ -n "${WASABI_BUCKET:-}" ]]; then upload_to_wasabi; fi
   else
     case "$PROVIDER" in
       s3|aws) upload_to_s3 ;;

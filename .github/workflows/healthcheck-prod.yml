@@ -111,26 +111,26 @@ jobs:
       - name: 🌐 Public URLs Health Check (strong anti false-positives)
         run: |
           set -euo pipefail
-      
+
           echo "## 🌐 Public URLs Health Check" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-      
+
           # Warm-up: laisse le temps aux DNS/CDN/TLS de se stabiliser
-          echo "⏳ Warm-up 15s..." 
+          echo "⏳ Warm-up 15s..."
           sleep 15
-      
+
           # Format: "url|allowed_codes|label"
           URLS=(
             "https://portfolio.freijstack.com/|200,301,302|Portfolio"
             "https://christophe-freijanes.github.io/freijstack/|200,301,302|GitHub Pages"
           )
-      
+
           # Fast pass + Grace pass
           FAST_RETRY=3
           FAST_DELAY=3
           GRACE_RETRY=8
           GRACE_DELAY=8
-      
+
           # Paramètres curl communs (anti faux positifs)
           # -4 : évite les soucis IPv6 (souvent la cause du HTTP 000)
           # --retry-all-errors + --retry-max-time : meilleure résilience
@@ -148,44 +148,44 @@ jobs:
             --retry-max-time 120
             --user-agent "freijstack-healthcheck/1.1"
           )
-      
+
           check_url() {
             local url="$1"
             local allowed="$2"
             local label="$3"
             local attempts="$4"
             local delay="$5"
-      
+
             echo ""
             echo "🔎 Checking $label → $url"
             echo "- **$label** ($url)" >> "$GITHUB_STEP_SUMMARY"
-      
+
             # DNS debug
             host="$(echo "$url" | sed -E 's#https?://([^/]+).*#\1#')"
             if command -v dig >/dev/null 2>&1; then
               ips="$(dig +short "$host" | tr '\n' ' ' || true)"
               [ -n "${ips:-}" ] && echo "  🌐 DNS: $ips" || echo "  🌐 DNS: (no A/AAAA from runner)"
             fi
-      
+
             for i in $(seq 1 "$attempts"); do
               echo "  ⏳ Attempt $i/$attempts..."
-      
+
               # HEAD d'abord, fallback GET si HEAD pas supporté / renvoie 405/000
               code="$(curl -I "${CURL_COMMON[@]}" "$url" 2>/tmp/curl_err || echo "000")"
-      
+
               if [ "$code" = "405" ] || [ "$code" = "000" ]; then
                 code="$(curl "${CURL_COMMON[@]}" "$url" 2>/tmp/curl_err || echo "000")"
               fi
-      
+
               if echo ",$allowed," | grep -q ",$code,"; then
                 echo "  ✅ OK (HTTP $code)"
                 echo "  - ✅ HTTP $code (attempt $i/$attempts)" >> "$GITHUB_STEP_SUMMARY"
                 return 0
               fi
-      
+
               err="$(tail -n 1 /tmp/curl_err 2>/dev/null || true)"
               echo "  ⚠️  HTTP $code (attempt $i/$attempts) $err"
-      
+
               # Si HTTP 000, on attend un peu plus (souvent DNS/TLS)
               if [ "$code" = "000" ]; then
                 sleep $((delay + 3))
@@ -193,50 +193,50 @@ jobs:
                 sleep "$delay"
               fi
             done
-      
+
             echo "  ❌ FAILED after $attempts attempts"
             echo "  - ❌ Failed after $attempts attempts (last HTTP $code)" >> "$GITHUB_STEP_SUMMARY"
             return 1
           }
-      
+
           failures=0
-      
+
           echo "### ⚡ Fast pass" >> "$GITHUB_STEP_SUMMARY"
           for entry in "${URLS[@]}"; do
             url="${entry%%|*}"
             rest="${entry#*|}"
             allowed="${rest%%|*}"
             label="${rest##*|}"
-      
+
             if ! check_url "$url" "$allowed" "$label" "$FAST_RETRY" "$FAST_DELAY"; then
               failures=$((failures + 1))
             fi
           done
-      
+
           if [ "$failures" -gt 0 ]; then
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "### 🧯 Grace pass (final attempt)" >> "$GITHUB_STEP_SUMMARY"
             echo "- Retrying with stronger tolerance..." >> "$GITHUB_STEP_SUMMARY"
-      
+
             failures=0
             for entry in "${URLS[@]}"; do
               url="${entry%%|*}"
               rest="${entry#*|}"
               allowed="${rest%%|*}"
               label="${rest##*|}"
-      
+
               if ! check_url "$url" "$allowed" "$label" "$GRACE_RETRY" "$GRACE_DELAY"; then
                 failures=$((failures + 1))
               fi
             done
           fi
-      
+
           if [ "$failures" -gt 0 ]; then
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "🚨 **Health check FAILED** (after grace pass)" >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
-      
+
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "✅ **All URLs healthy**" >> "$GITHUB_STEP_SUMMARY"
 
@@ -300,7 +300,14 @@ jobs:
           set -euo pipefail
           echo "## 🗄️ Database" >> "$GITHUB_STEP_SUMMARY"
 
-          SSH="ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o ConnectTimeout=10 -o ServerAliveInterval=5 -o ServerAliveCountMax=2 -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+          SSH="ssh -i ~/.ssh/deploy_key \
+            -o BatchMode=yes \
+            -o ConnectTimeout=10 \
+            -o ServerAliveInterval=5 \
+            -o ServerAliveCountMax=2 \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile=~/.ssh/known_hosts \
+            ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
           PROD_DIR="/srv/www/securevault/saas/securevault"
 
           echo "🗄️ Checking PostgreSQL (pg_isready)..."
@@ -435,13 +442,13 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-      
+
           echo "## 📢 Production Health Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "- 🏥 Health Check: **${{ needs.health-check.result }}**" >> "$GITHUB_STEP_SUMMARY"
           echo "- 🔧 Auto-Heal: **${{ needs.auto-heal.result }}**" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-      
+
           if [ "${{ needs.health-check.result }}" = "success" ]; then
             echo "✅ Production is **HEALTHY**" >> "$GITHUB_STEP_SUMMARY"
             echo "- 🎯 https://vault.freijstack.com/login" >> "$GITHUB_STEP_SUMMARY"

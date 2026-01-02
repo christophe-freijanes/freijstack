@@ -37,7 +37,7 @@ query-filters:
       # La validation du header Authorization est une sanitisation d'input,
       # pas une décision de sécurité. La vraie décision est faite par jwt.verify()
       # avec un secret contrôlé serveur (pattern standard en production)
-  
+
   - exclude:
       id: js/incomplete-url-substring-sanitization
       # Justification: Faux positif sur extraction de token Bearer

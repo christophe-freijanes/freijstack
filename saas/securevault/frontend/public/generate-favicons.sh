@@ -21,13 +21,13 @@ convert_svg() {
   
   # Essayer avec ImageMagick d'abord
   if command -v convert &> /dev/null; then
-    convert -background none -resize ${size}x${size} "$svg_file" "$png_file"
+    convert -background none -resize "${size}x${size}" "$svg_file" "$png_file"
   # Sinon essayer avec Inkscape
   elif command -v inkscape &> /dev/null; then
-    inkscape "$svg_file" --export-png="$png_file" --export-width=$size --export-height=$size
+    inkscape "$svg_file" --export-png="$png_file" --export-width="$size" --export-height="$size"
   # Sinon essayer avec rsvg-convert
   elif command -v rsvg-convert &> /dev/null; then
-    rsvg-convert -w $size -h $size "$svg_file" -o "$png_file"
+    rsvg-convert -w "$size" -h "$size" "$svg_file" -o "$png_file"
   else
     echo "❌ Aucun outil de conversion trouvé (ImageMagick, Inkscape, ou librsvg)"
     echo "   Installez un de ces outils:"

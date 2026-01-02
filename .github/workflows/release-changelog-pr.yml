@@ -126,13 +126,22 @@ jobs:
             exit 0
           fi
 
-          gh pr create \
-            --base master \
-            --head "$BRANCH" \
-            --title "chore(release): update CHANGELOG for v${VERSION}" \
-            --body $'📝 Cette PR met à jour `CHANGELOG.md` pour la version **v'${VERSION}$'**.\n\n✅ Générée automatiquement via `semantic-release --dry-run`.\n🔒 Compatible avec une branche `master` protégée (PR-only).\n\n> Tip: merge cette PR, puis le workflow Release créera le tag + la GitHub Release.' \
-            --label "release" \
-            --label "changelog"
+          read -r -d '' BODY <<'EOF'
+          📝 Cette PR met à jour `CHANGELOG.md` pour la version **v${VERSION}**.
+          
+          ✅ Générée automatiquement via `semantic-release --dry-run`.
+          🔒 Compatible avec une branche `master` protégée (PR-only).
+          
+          > Tip: merge cette PR, puis le workflow Release créera le tag + la GitHub Release.
+          EOF
+          
+                    gh pr create \
+                      --base master \
+                      --head "$BRANCH" \
+                      --title "chore(release): update CHANGELOG for v${VERSION}" \
+                      --body "$BODY" \
+                      --label "release" \
+                      --label "changelog"
 
       - name: ✅ Done
         run: echo "✅ Release changelog PR pipeline finished."

@@ -4,7 +4,7 @@
 # Utilitaire pour générer et valider la documentation locale
 # Usage: ./scripts/docs-generate.sh [command]
 
-set -e
+set -euo pipefail
 
 # Colors
 RED='\033[0;31m'
@@ -155,7 +155,7 @@ validate_links() {
     # Vérifier liens internes
     while IFS= read -r line; do
         # Extraire fichier from [text](file)
-        if [[ "$line" =~ \]\([^)]+\) ]]; then
+        if [[ $line =~ \]\(([^)]+)\) ]]; then
             file="${BASH_REMATCH[1]}"
             
             # Ignorer URLs externes
@@ -169,7 +169,7 @@ validate_links() {
                 fi
             fi
         fi
-    done < <(grep -r '\[.*\](' "$DOCS_DIR" --include="*.md" -o || true)
+    done < <(grep -r '\[.*\]\(' "$DOCS_DIR" --include="*.md" -o || true)
     
     if [ $broken -eq 0 ]; then
         print_success "Tous les liens valides"
