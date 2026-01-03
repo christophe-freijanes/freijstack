@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.10.7](https://github.com/christophe-freijanes/freijstack/compare/v1.10.6...v1.10.7) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* explicitly copy static assets to nginx html directory and add .dockerignore ([ffacd01](https://github.com/christophe-freijanes/freijstack/commit/ffacd01eebb13c167526cb1eabef5f2368b71f3c))
+
 ## [1.10.6](https://github.com/christophe-freijanes/freijstack/compare/v1.10.5...v1.10.6) (2026-01-03)
 
 ### 🐛 Bug Fixes
