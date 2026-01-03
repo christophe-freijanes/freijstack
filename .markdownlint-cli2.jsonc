@@ -1,0 +1,65 @@
+// Configuration markdownlint-cli2
+// Documentation: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+{
+  // Fichiers à ignorer
+  "ignores": [
+    "node_modules/**",
+    "**/node_modules/**",
+    ".git/**",
+    "CHANGELOG.md"
+  ],
+
+  // Configuration des règles
+  "config": {
+    // Activer toutes les règles par défaut
+    "default": true,
+
+    // MD013 - Longueur de ligne (désactivé pour tables et badges)
+    "MD013": {
+      "line_length": 120,
+      "heading_line_length": 120,
+      "code_block_line_length": 120,
+      "code_blocks": false,
+      "tables": false,
+      "headings": false
+    },
+
+    // MD033 - Inline HTML (autorisé pour badges et icônes)
+    "MD033": {
+      "allowed_elements": [
+        "div",
+        "br",
+        "img",
+        "details",
+        "summary",
+        "a",
+        "kbd",
+        "sub",
+        "sup"
+      ]
+    },
+
+    // MD041 - Premier élément doit être un heading (désactivé)
+    "MD041": false,
+
+    // MD024 - Plusieurs headings avec le même contenu (autorisé avec niveaux différents)
+    "MD024": {
+      "siblings_only": true
+    },
+
+    // MD046 - Style de code block (fenced par défaut)
+    "MD046": {
+      "style": "fenced"
+    },
+
+    // MD049 - Style d'emphase (asterisk)
+    "MD049": {
+      "style": "asterisk"
+    },
+
+    // MD050 - Style de strong (asterisk)
+    "MD050": {
+      "style": "asterisk"
+    }
+  }
+}

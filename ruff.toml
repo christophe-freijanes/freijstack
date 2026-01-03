@@ -1,0 +1,99 @@
+# Configuration Ruff - Python Linter
+# Documentation: https://docs.astral.sh/ruff/
+
+# Version Python cible
+target-version = "py311"
+
+# Longueur de ligne maximale
+line-length = 120
+
+# Fichiers/dossiers à exclure
+extend-exclude = [
+    "__pycache__",
+    ".venv",
+    "venv",
+    "env",
+    ".env",
+    "node_modules",
+    ".git",
+    "build",
+    "dist",
+    "*.egg-info",
+]
+
+[lint]
+# Règles à activer
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "C",    # flake8-comprehensions
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+    "N",    # pep8-naming
+    "YTT",  # flake8-2020
+    "S",    # flake8-bandit (security)
+    "FBT",  # flake8-boolean-trap
+    "A",    # flake8-builtins
+    "COM",  # flake8-commas
+    "C4",   # flake8-comprehensions
+    "DTZ",  # flake8-datetimez
+    "ISC",  # flake8-implicit-str-concat
+    "ICN",  # flake8-import-conventions
+    "G",    # flake8-logging-format
+    "PIE",  # flake8-pie
+    "T20",  # flake8-print
+    "Q",    # flake8-quotes
+    "RSE",  # flake8-raise
+    "RET",  # flake8-return
+    "SIM",  # flake8-simplify
+    "TID",  # flake8-tidy-imports
+    "ARG",  # flake8-unused-arguments
+    "PTH",  # flake8-use-pathlib
+    "PD",   # pandas-vet
+    "PL",   # pylint
+    "TRY",  # tryceratops
+    "RUF",  # ruff-specific rules
+]
+
+# Règles à ignorer
+ignore = [
+    "E501",   # Line too long (géré par formatter)
+    "S101",   # Use of assert (OK pour tests)
+    "S603",   # subprocess without shell=True (OK si intentionnel)
+    "S607",   # Starting process with partial path (OK si PATH ok)
+    "PLR0913", # Too many arguments (parfois nécessaire)
+    "TRY003", # Avoid long messages in exceptions
+]
+
+# Règles à corriger automatiquement
+fixable = ["ALL"]
+unfixable = []
+
+# Autoriser les imports inutilisés dans __init__.py
+[lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"**/tests/**" = ["S101", "PLR2004"]
+
+[lint.isort]
+# Configuration isort (tri des imports)
+known-first-party = ["freijstack"]
+force-single-line = false
+force-sort-within-sections = false
+lines-after-imports = 2
+
+[lint.mccabe]
+# Complexité cyclomatique maximale
+max-complexity = 10
+
+[lint.pydocstyle]
+# Style de docstrings
+convention = "google"
+
+[format]
+# Configuration du formatter
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
