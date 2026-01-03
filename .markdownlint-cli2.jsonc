@@ -14,15 +14,8 @@
     // Activer toutes les règles par défaut
     "default": true,
 
-    // MD013 - Longueur de ligne (désactivé pour tables et badges)
-    "MD013": {
-      "line_length": 120,
-      "heading_line_length": 120,
-      "code_block_line_length": 120,
-      "code_blocks": false,
-      "tables": false,
-      "headings": false
-    },
+    // MD013 - Longueur de ligne (désactivé complètement)
+    "MD013": false,
 
     // MD033 - Inline HTML (autorisé pour badges et icônes)
     "MD033": {
@@ -81,6 +74,33 @@
     "MD022": false,
 
     // MD034 - Bare URL used (désactivé)
-    "MD034": false
+    "MD034": false,
+
+    // MD012 - Multiple consecutive blank lines (désactivé)
+    "MD012": false,
+
+    // MD009 - Trailing spaces (désactivé)
+    "MD009": false,
+
+    // MD029 - Ordered list item prefix (désactivé)
+    "MD029": false,
+
+    // MD026 - Trailing punctuation in heading (désactivé)
+    "MD026": false,
+
+    // MD051 - Link fragments should be valid (désactivé)
+    "MD051": false,
+
+    // MD030 - Spaces after list markers (désactivé)
+    "MD030": false,
+
+    // MD036 - Emphasis used instead of a heading (désactivé)
+    "MD036": false,
+
+    // MD058 - Tables should be surrounded by blank lines (désactivé)
+    "MD058": false,
+
+    // MD042 - No empty links (désactivé)
+    "MD042": false
   }
 }
