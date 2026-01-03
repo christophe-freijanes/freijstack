@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.19.0](https://github.com/christophe-freijanes/freijstack/compare/v1.18.0...v1.19.0) (2026-01-03)
+
+### 🚀 Features
+
+* update markdownlint configuration and enhance password generation script ([9d7f45d](https://github.com/christophe-freijanes/freijstack/commit/9d7f45db8f4641399dac721d8f85f1d148a2d9b2))
+
 ## [1.18.0](https://github.com/christophe-freijanes/freijstack/compare/v1.17.0...v1.18.0) (2026-01-03)
 
 ### 🚀 Features
