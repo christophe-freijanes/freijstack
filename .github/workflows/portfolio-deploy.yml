@@ -77,7 +77,6 @@ jobs:
   # Job 2: Deploy to VPS (Production - master)
   deploy-VPS-prod:
     name: 🚀 Deploy to VPS (Production)
-    needs: [security]
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'master' && github.event.workflow_run.conclusion == 'success'
 
