@@ -72,7 +72,7 @@ jobs:
         run: |
           set -euo pipefail
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
-            'cd /srv/www/securevault/saas/portfolio && \
+            'cd /srv/www/saas/portfolio && \
              docker compose -f docker-compose.yml pull && \
              docker compose -f docker-compose.yml down || true && \
              docker compose -f docker-compose.yml up -d && \
@@ -124,7 +124,7 @@ jobs:
         run: |
           set -euo pipefail
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
-            'cd /srv/www/securevault/saas/portfolio && \
+            'cd /srv/www/saas/portfolio && \
              docker compose -f docker-compose.prod.yml ps || true && \
              echo "💾 Backup timestamp: $(date +%s)" || true'
 
@@ -132,7 +132,7 @@ jobs:
         run: |
           set -euo pipefail
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
-            'cd /srv/www/securevault/saas/portfolio && \
+            'cd /srv/www/saas/portfolio && \
              docker compose -f docker-compose.prod.yml pull && \
              docker compose -f docker-compose.prod.yml down || true && \
              docker compose -f docker-compose.prod.yml up -d && \
