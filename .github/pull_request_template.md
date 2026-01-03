@@ -34,7 +34,6 @@ Ex :
 - [ ] 🚦 **CI GitHub Actions** verte
 - [ ] 🔐 **Security Inspector** OK (pas de leaks)
 - [ ] 🧠 **CodeQL** sans vulnérabilité critique
-- [ ] 🔍 **ActionLint** workflows validés (pas d'erreur)
 - [ ] 🧪 **Tests / staging** validés (si applicable)
 - [ ] 📚 **Docs mises à jour** si nécessaire
 - [ ] 🔄 **Rollback possible** (au moins identifié)

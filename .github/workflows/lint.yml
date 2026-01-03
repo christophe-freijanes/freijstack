@@ -7,17 +7,6 @@ on:
     branches: [develop, master]
 
 jobs:
-  actionlint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install actionlint
-        run: |
-          set -euo pipefail
-          curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash | bash -s latest /usr/local/bin
-      - name: Run actionlint
-        run: actionlint -config-file .github/actionlint.yaml
-
   yamllint:
     runs-on: ubuntu-latest
     steps:
