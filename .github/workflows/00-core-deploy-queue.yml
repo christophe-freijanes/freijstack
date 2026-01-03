@@ -185,13 +185,24 @@ jobs:
             fi
 
             # Use per-app/per-env project name to avoid reusing stale volumes
-            export COMPOSE_PROJECT_NAME="${APP_NAME}-${ENVIRONMENT}"
+            # Skip for services with fixed container_name to avoid breaking existing deployments
+            if ! grep -q "container_name:" "$COMPOSE_FILE" 2>/dev/null; then
+              export COMPOSE_PROJECT_NAME="${APP_NAME}-${ENVIRONMENT}"
+              echo "📦 Using project name: $COMPOSE_PROJECT_NAME"
+            else
+              echo "⚠️ Skipping COMPOSE_PROJECT_NAME (fixed container names detected)"
+            fi
 
             # Deploy with Docker Compose
             echo "🐳 Deploying with $COMPOSE_FILE..."
             if [ -f "$COMPOSE_FILE" ]; then
               echo "🛑 Stopping previous stack (if any) to avoid name/volume conflicts..."
-              docker compose -f "$COMPOSE_FILE" down --remove-orphans || true
+              # Remove volumes only in staging to avoid data loss in production
+              if [ "$ENVIRONMENT" = "staging" ]; then
+                docker compose -f "$COMPOSE_FILE" down --remove-orphans --volumes || true
+              else
+                docker compose -f "$COMPOSE_FILE" down --remove-orphans || true
+              fi
 
               docker compose -f "$COMPOSE_FILE" pull
               docker compose -f "$COMPOSE_FILE" up -d --build --remove-orphans
