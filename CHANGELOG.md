@@ -6,6 +6,16 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.17.0](https://github.com/christophe-freijanes/freijstack/compare/v1.16.1...v1.17.0) (2026-01-03)
+
+### 🚀 Features
+
+* update documentation and workflows for version 2.0.0, adding new Docker Registry and Portfolio workflows, and enhancing existing content ([0eee724](https://github.com/christophe-freijanes/freijstack/commit/0eee7244be47d647515e6230725c611532106f5a))
+
+### 🔧 Chores
+
+* **healthcheck:** relax timeouts to reduce false 000 ([aa1f20e](https://github.com/christophe-freijanes/freijstack/commit/aa1f20e09060ef6a8715f45cdd435af17ba89cd5))
+
 ## [1.16.1](https://github.com/christophe-freijanes/freijstack/compare/v1.16.0...v1.16.1) (2026-01-03)
 
 ### 🐛 Bug Fixes
