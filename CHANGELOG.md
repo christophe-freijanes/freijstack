@@ -6,6 +6,50 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.21.0](https://github.com/christophe-freijanes/freijstack/compare/v1.20.1...v1.21.0) (2026-01-03)
+
+### 🚀 Features
+
+* extend Traefik network monitoring to all critical networks  ([#119](https://github.com/christophe-freijanes/freijstack/issues/119)) ([dffb66a](https://github.com/christophe-freijanes/freijstack/commit/dffb66afe7dec593cea4f2429cec025ed7d7c854)), closes [#75](https://github.com/christophe-freijanes/freijstack/issues/75) [#78](https://github.com/christophe-freijanes/freijstack/issues/78) [#79](https://github.com/christophe-freijanes/freijstack/issues/79) [#81](https://github.com/christophe-freijanes/freijstack/issues/81) [#82](https://github.com/christophe-freijanes/freijstack/issues/82) [#83](https://github.com/christophe-freijanes/freijstack/issues/83) [#85](https://github.com/christophe-freijanes/freijstack/issues/85) [#87](https://github.com/christophe-freijanes/freijstack/issues/87) [#89](https://github.com/christophe-freijanes/freijstack/issues/89) [#90](https://github.com/christophe-freijanes/freijstack/issues/90) [#91](https://github.com/christophe-freijanes/freijstack/issues/91) [#92](https://github.com/christophe-freijanes/freijstack/issues/92) [#93](https://github.com/christophe-freijanes/freijstack/issues/93) [#94](https://github.com/christophe-freijanes/freijstack/issues/94) [#96](https://github.com/christophe-freijanes/freijstack/issues/96) [#97](https://github.com/christophe-freijanes/freijstack/issues/97) [#98](https://github.com/christophe-freijanes/freijstack/issues/98)
+
+### 📚 Documentation
+
+* **documentation): chore(healthcheck:** relax timeouts to reduce false 000 ([#120](https://github.com/christophe-freijanes/freijstack/issues/120)) ([ccee5c8](https://github.com/christophe-freijanes/freijstack/commit/ccee5c829bdd9c298de27d3a2efb18c48458d40e)), closes [#75](https://github.com/christophe-freijanes/freijstack/issues/75) [#78](https://github.com/christophe-freijanes/freijstack/issues/78) [#79](https://github.com/christophe-freijanes/freijstack/issues/79) [#81](https://github.com/christophe-freijanes/freijstack/issues/81) [#82](https://github.com/christophe-freijanes/freijstack/issues/82) [#83](https://github.com/christophe-freijanes/freijstack/issues/83) [#85](https://github.com/christophe-freijanes/freijstack/issues/85) [#87](https://github.com/christophe-freijanes/freijstack/issues/87) [#89](https://github.com/christophe-freijanes/freijstack/issues/89) [#90](https://github.com/christophe-freijanes/freijstack/issues/90) [#91](https://github.com/christophe-freijanes/freijstack/issues/91) [#92](https://github.com/christophe-freijanes/freijstack/issues/92) [#93](https://github.com/christophe-freijanes/freijstack/issues/93) [#94](https://github.com/christophe-freijanes/freijstack/issues/94) [#96](https://github.com/christophe-freijanes/freijstack/issues/96) [#97](https://github.com/christophe-freijanes/freijstack/issues/97) [#98](https://github.com/christophe-freijanes/freijstack/issues/98)
+
+## [1.20.1](https://github.com/christophe-freijanes/freijstack/compare/v1.20.0...v1.20.1) (2026-01-03)
+
+### ♻️ Code Refactoring
+
+* clean up comments and remove noqa directives in password generation script ([2cdd46f](https://github.com/christophe-freijanes/freijstack/commit/2cdd46f4df56c5fcf401243be9bf68d0cee2ed26))
+
+## [1.20.0](https://github.com/christophe-freijanes/freijstack/compare/v1.19.0...v1.20.0) (2026-01-03)
+
+### 🚀 Features
+
+* update markdownlint configuration to disable additional rules for improved flexibility ([46b0b0f](https://github.com/christophe-freijanes/freijstack/commit/46b0b0f73c792bfd7f1065681a4e24d9e1858335))
+
+## [1.19.0](https://github.com/christophe-freijanes/freijstack/compare/v1.18.0...v1.19.0) (2026-01-03)
+
+### 🚀 Features
+
+* update markdownlint configuration and enhance password generation script ([9d7f45d](https://github.com/christophe-freijanes/freijstack/commit/9d7f45db8f4641399dac721d8f85f1d148a2d9b2))
+
+## [1.18.0](https://github.com/christophe-freijanes/freijstack/compare/v1.17.0...v1.18.0) (2026-01-03)
+
+### 🚀 Features
+
+* enhance linting configurations for multiple languages and add markdown and JSON validation ([e2b0c7f](https://github.com/christophe-freijanes/freijstack/commit/e2b0c7f575242c929b9fb0a33cbe34604fc5f20d))
+
+## [1.17.0](https://github.com/christophe-freijanes/freijstack/compare/v1.16.1...v1.17.0) (2026-01-03)
+
+### 🚀 Features
+
+* update documentation and workflows for version 2.0.0, adding new Docker Registry and Portfolio workflows, and enhancing existing content ([0eee724](https://github.com/christophe-freijanes/freijstack/commit/0eee7244be47d647515e6230725c611532106f5a))
+
+### 🔧 Chores
+
+* **healthcheck:** relax timeouts to reduce false 000 ([aa1f20e](https://github.com/christophe-freijanes/freijstack/commit/aa1f20e09060ef6a8715f45cdd435af17ba89cd5))
+
 ## [1.16.1](https://github.com/christophe-freijanes/freijstack/compare/v1.16.0...v1.16.1) (2026-01-03)
 
 ### 🐛 Bug Fixes

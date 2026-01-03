@@ -1,0 +1,84 @@
+# Configuration ansible-lint
+# Documentation: https://ansible.readthedocs.io/projects/lint/
+
+# Fichiers/dossiers à exclure
+exclude_paths:
+  - .git/
+  - .github/
+  - node_modules/
+  - venv/
+  - .venv/
+  - __pycache__/
+  - "*.retry"
+
+# Règles à ignorer (ajuster selon vos besoins)
+skip_list:
+  - experimental  # Toutes les règles expérimentales
+  - yaml[line-length]  # Longueur de ligne YAML
+  - role-name  # Nom des rôles (si convention différente)
+  - galaxy[no-changelog]  # Changelog Galaxy (optionnel)
+
+# Avertissements uniquement (ne pas échouer)
+warn_list:
+  - command-instead-of-shell  # Préférer command à shell quand possible
+  - no-changed-when  # Ajouter changed_when pour tâches command/shell
+  - risky-shell-pipe  # Pipeline shell risqué
+
+# Règles activées
+enable_list:
+  - args  # Arguments de tâche valides
+  - empty-string-compare  # Comparaison avec chaîne vide
+  - no-log-password  # no_log pour mots de passe
+  - no-same-owner  # Pas de same owner avec remote_src
+  - name[template]  # Template dans nom de tâche
+  - name[casing]  # Casse cohérente dans noms
+  - yaml  # Validation YAML
+
+# Mode strict (échouer sur warnings)
+strict: false
+
+# Afficher les règles ignorées
+display_skipped_rules: false
+
+# Format de sortie (colored, quiet, parseable)
+format: colored
+
+# Verbosité (0-3)
+verbosity: 1
+
+# Profils disponibles: min, basic, moderate, safety, shared, production
+# Documentation: https://ansible.readthedocs.io/projects/lint/profiles/
+profile: moderate
+
+# Tags à vérifier (vide = tous)
+tags: []
+
+# Tags à ignorer
+skip_tags: []
+
+# Vérifier les playbooks et rôles
+kinds:
+  - playbook
+  - role
+  - tasks
+  - handlers
+  - vars
+  - defaults
+  - meta
+  - yaml
+
+# Offline mode (ne pas télécharger règles supplémentaires)
+offline: false
+
+# Vérifier les versions compatibles
+min_ansible_version: "2.10"
+
+# Variables Mock pour tests
+mock_modules: []
+mock_roles: []
+
+# Remplacements personnalisés
+loop_var_prefix: "{role}_"
+
+# Configuration YAML
+yamllint_config_file: .yamllint

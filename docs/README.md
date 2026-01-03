@@ -7,6 +7,8 @@
 
 Index de la documentation technique du projet FreijStack.
 
+**Dernière mise à jour**: Janvier 2026
+
 ---
 
 ## 🎯 Navigation Rapide
@@ -21,7 +23,7 @@ Index de la documentation technique du projet FreijStack.
 
 ---
 
-## 📖 Documents Disponibles (16)
+## 📖 Documents Disponibles (18+)
 
 | Document | Description | Lien |
 |----------|-------------|------|
@@ -29,7 +31,7 @@ Index de la documentation technique du projet FreijStack.
 | 🏠 **README Principal** | Vue d'ensemble du projet | [../README.md](../README.md) |
 | 🔗 **Integration Guide** | Guide d'intégration infrastructure + apps | [../base-infra/BASE_INTEGRATION.md](../base-infra/BASE_INTEGRATION.md) |
 | 🏗️ **Architecture Technique** | Infrastructure, stack, CI/CD, sécurité | [ARCHITECTURE.md](ARCHITECTURE.md) |
-| 📊 **CI/CD Architecture** | 🆕 Diagramme Mermaid + 16 workflows | [CI_CD_ARCHITECTURE.md](CI_CD_ARCHITECTURE.md) |
+| 📊 **CI/CD Architecture** | 🆕 Diagramme Mermaid + 21+ workflows | [CI_CD_ARCHITECTURE.md](CI_CD_ARCHITECTURE.md) |
 | 🤖 **Automatisation Guide** | 🆕 Guide complet automation consolidé | [AUTOMATION_GUIDE.md](AUTOMATION_GUIDE.md) |
 | 📌 **Guide Déploiement** | VPS setup, Docker, Traefik, rollback | [DEPLOYMENT.md](DEPLOYMENT.md) |
 | 🐳 **Structure Docker** | Containers, volumes, réseaux, composition | [DOCKER_STRUCTURE.md](DOCKER_STRUCTURE.md) |
@@ -42,7 +44,7 @@ Index de la documentation technique du projet FreijStack.
 | 💾 **Cloud Backup** | Stratégie AWS S3 + Azure Blob, rétention | [CLOUD_BACKUP.md](CLOUD_BACKUP.md) |
 | 🏢 **PRO Deployment** | Guide PRO/Enterprise avec SLA | [PRO_DEPLOYMENT.md](PRO_DEPLOYMENT.md) |
 | 🗺️ **Features Roadmap** | Roadmap produit, features plannifiées | [FEATURES_ROADMAP.md](FEATURES_ROADMAP.md) |
-| 📋 **Documentation Audit** | 🆕 Audit + plan d'optimisation | [DOCUMENTATION_AUDIT.md](DOCUMENTATION_AUDIT.md)
+| 📋 **Documentation Audit** | 🆕 Audit + plan d'optimisation | [DOCUMENTATION_AUDIT.md](DOCUMENTATION_AUDIT.md) |
 
 ---
 
@@ -64,6 +66,9 @@ Index de la documentation technique du projet FreijStack.
 
 ### Backend & SaaS Applications
 - [SecureVault Manager](../saas/securevault/README.md) - Gestionnaire de secrets chiffrés
+- [Docker Registry](../saas/registry/README.md) - Registre Docker privé avec UI Joxit
+- [Portfolio Web](../saas/portfolio/README.md) - Portfolio multilingue responsive
+- [Applications SaaS Overview](../saas/README.md) - Vue d'ensemble toutes les apps
 - [SecureVault CI/CD Pipeline](SECUREVAULT_DEPLOYMENT.md) - Déploiement automatisé SecureVault
 - [Secret Rotation Automation](SECRET_ROTATION.md) - Rotation automatisée des secrets
 

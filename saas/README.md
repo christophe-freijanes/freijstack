@@ -10,7 +10,7 @@ Ce dossier contient les applications SaaS de démonstration du portfolio DevSecO
 saas/
 ├── portfolio/          # 🌐 Portfolio web multilingue
 ├── securevault/        # 🔐 Gestionnaire de secrets chiffrés
-├── harbor/             # 🐳 Container Registry privé
+├── registry/           # 🐳 Docker Registry privé
 └── README.md           # Ce fichier
 ```
 
@@ -87,46 +87,49 @@ docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d --build
 
 ---
 
-## 🐳 Harbor Container Registry
+## 🐳 Docker Registry
 
-**Container Registry privé** avec scan de vulnérabilités, RBAC, et interface web.
+**Registre Docker privé** pour stocker vos images conteneur avec interface web de gestion.
 
 ### Fonctionnalités
-- ✅ Scan Trivy intégré
-- ✅ RBAC granulaire
-- ✅ Signature d'images (Notary)
-- ✅ Webhooks
-- ✅ Métriques Prometheus
-- ✅ Multi-projets
+- ✅ Docker Registry v2 officiel
+- ✅ Interface web Joxit
+- ✅ Authentification htpasswd
+- ✅ Support prod/staging
+- ✅ Cleanup automatisé via CI/CD
+- ✅ HTTPS/TLS via Traefik
 
 ### Stack Technique
-- **Registry**: Harbor v2.10
-- **Scanner**: Trivy
-- **Database**: PostgreSQL 16
-- **Cache**: Redis
-- **Reverse Proxy**: Traefik (ou nginx intégré)
+- **Registry**: Docker Registry v2
+- **UI**: Joxit Docker Registry UI
+- **Auth**: htpasswd (basique)
+- **Reverse Proxy**: Traefik
 
 ### Déploiement
 
+#### Production
 ```bash
-cd saas/harbor
+cd saas/registry
 
-# Générer les secrets
-./generate-secrets.sh
-
-# Configuration initiale
-cp .env.example .env
-nano .env
+# Générer htpasswd
+./generate-htpasswd.sh admin yourpassword
 
 # Démarrer
-docker compose up -d --build
+docker compose up -d
 
 # Accès
-# https://registry.freijstack.com
-# https://registry-staging.freijstack.com (si applicable)
+# Registry API: https://registry.freijstack.com
+# Registry UI: https://registry-ui.freijstack.com
 ```
 
-**Voir**: [harbor/README.md](harbor/README.md) pour les détails complets.
+#### Staging
+```bash
+docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d
+# Registry: https://registry-staging.freijstack.com
+# UI: https://registry-ui-staging.freijstack.com
+```
+
+**Voir**: [registry/README.md](registry/README.md) pour les détails complets.
 
 ---
 
@@ -138,14 +141,14 @@ docker compose up -d --build
 │  (Gestion SSL/TLS automatique)      │
 └──────┬──────────────────────────────┘
        │
-       ├─────────────────────────┐
-       │                         │
-       ▼                         ▼
-┌──────────────────┐    ┌──────────────────┐
-│   Portfolio      │    │  SecureVault     │
-│  nginx:alpine    │    │  Node.js + React │
-│  (Statique)      │    │  + PostgreSQL    │
-└──────────────────┘    └──────────────────┘
+       ├─────────────────────┬──────────────────┐
+       │                     │                  │
+       ▼                     ▼                  ▼
+┌──────────────┐    ┌──────────────┐   ┌────────────────┐
+│  Portfolio   │    │ SecureVault  │   │ Docker Registry│
+│ nginx:alpine │    │ Node + React │   │ Registry v2 +  │
+│  (Statique)  │    │ + PostgreSQL │   │   Joxit UI     │
+└──────────────┘    └──────────────┘   └────────────────┘
 ```
 
 ---
@@ -266,8 +269,8 @@ curl https://vault-api.freijstack.com/health
 # Portfolio (code 200 OK)
 curl -I https://portfolio.freijstack.com
 
-# Harbor
-curl https://registry.freijstack.com/api/v2
+# Docker Registry
+curl https://registry.freijstack.com/v2/_catalog
 ```
 
 ---
@@ -276,7 +279,7 @@ curl https://registry.freijstack.com/api/v2
 
 - **Portfolio**: [portfolio/README.md](portfolio/README.md)
 - **SecureVault**: [securevault/README.md](securevault/README.md)
-- **Harbor**: [harbor/README.md](harbor/README.md)
+- **Docker Registry**: [registry/README.md](registry/README.md)
 - **Architecture**: [../docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md)
 - **Déploiement**: [../docs/DEPLOYMENT.md](../docs/DEPLOYMENT.md)
 - **CI/CD**: [../docs/CI_CD_ARCHITECTURE.md](../docs/CI_CD_ARCHITECTURE.md)

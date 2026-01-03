@@ -18,7 +18,7 @@
 
 **FreijStack** est une stack DevSecOps complète et production-ready pour déployer, monitorer et sécuriser des applications SaaS (Portfolio, SecureVault, Registre Docker, n8n...) sur VPS, avec :
 
-✅ **CI/CD automatisé** - GitHub Actions avec 16+ workflows  
+✅ **CI/CD automatisé** - GitHub Actions avec 21+ workflows  
 ✅ **Infrastructure Docker** - Traefik, nginx, services conteneurisés  
 ✅ **Sécurité intégrée** - AES-256-GCM, JWT, RBAC, audit logs  
 ✅ **Monitoring 24/7** - Prometheus, Grafana, Loki, alertes  
@@ -49,6 +49,9 @@ Projet maintenu par **Christophe FREIJANES** – Senior Cloud & Security Special
 - **Portfolio Staging** : https://portfolio-staging.freijstack.com/
 - **SecureVault** : https://vault.freijstack.com/
 - **API SecureVault** : https://vault-api.freijstack.com/
+- **Docker Registry** : https://registry.freijstack.com/
+- **Registry UI** : https://registry-ui.freijstack.com/
+- **n8n Automation** : https://automation.freijstack.com/
 
 ---
 
@@ -96,7 +99,7 @@ docker compose up -d --build
 | 🏗️ [Infrastructure Base](base-infra/README.md) | Docker Compose, Traefik v2, n8n, intégration |
 | 📌 [Guide Déploiement](docs/DEPLOYMENT.md) | Déploiement complet sur VPS, étape par étape |
 | 🚀 [SecureVault Pro](docs/PRO_DEPLOYMENT.md) | Déploiement avancé SecureVault production |
-| 📊 [CI/CD Architecture](docs/CI_CD_ARCHITECTURE.md) | Diagramme Mermaid, 16 workflows documentés |
+| 📊 [CI/CD Architecture](docs/CI_CD_ARCHITECTURE.md) | Diagramme Mermaid, 21+ workflows documentés |
 | 🤖 [Guide Automatisation](docs/AUTOMATION_GUIDE.md) | CI/CD, staging éphémère, health checks, rollback |
 | 🔐 [SecureVault Manager](saas/securevault/README.md) | Gestionnaire de secrets chiffrés, AES-256-GCM |
 | 🐳 [Applications SaaS](saas/README.md) | Portfolio, SecureVault, Harbor - Vue d'ensemble |
@@ -116,13 +119,18 @@ docker compose up -d --build
 ```
 freijstack/
 ├── .github/
-│   ├── workflows/                    # 16+ GitHub Actions workflows
+│   ├── workflows/                    # 21+ GitHub Actions workflows
 │   │   ├── infrastructure-deploy.yml    # Traefik + n8n + portfolio
 │   │   ├── securevault-deploy.yml      # SecureVault prod/staging
+│   │   ├── registry-deploy.yml         # Docker Registry deployment
+│   │   ├── registry-cleanup.yml        # Registry image cleanup
 │   │   ├── codeql.yml                  # SAST security scanning
-│   │   ├── gitleaks.yml                # Secret detection
-│   │   ├── trivy-scan.yml              # Vulnerability scanning
+│   │   ├── securitycheck.yml           # Gitleaks + secret detection
 │   │   ├── healthcheck-prod.yml        # 24/7 monitoring production
+│   │   ├── healthcheck-dev.yml         # Staging health checks
+│   │   ├── release-automation.yml      # Semantic versioning
+│   │   ├── backup.yml                  # Automated backups
+│   │   ├── rotate-secrets.yml          # Secret rotation
 │   │   └── ...autres workflows
 │   └── pull_request_template.md
 │
@@ -137,15 +145,22 @@ freijstack/
 │   │   ├── style.css
 │   │   ├── script.js
 │   │   ├── public/                     # Images, favicons, assets
+│   │   ├── Dockerfile                  # Multi-stage build
+│   │   ├── docker-compose.yml          # Development
+│   │   ├── docker-compose.prod.yml     # Production
 │   │   └── README.md
 │   ├── securevault/                    # 🔐 Gestionnaire secrets
 │   │   ├── backend/                    # Node.js + Express
 │   │   ├── frontend/                   # React 18
 │   │   ├── docker-compose.yml          # Production
-│   │   ├── docker-compose.staging.yml  # Staging overrides
+│   │   ├── init-db.sh                  # Database initialization
 │   │   └── README.md
-│   ├── harbor/                         # 🐳 Container Registry
-│   │   ├── docker-compose.yml
+│   ├── registry/                       # 🐳 Container Registry
+│   │   ├── docker-compose.yml          # Production
+│   │   ├── docker-compose.staging.yml  # Staging
+│   │   ├── docker-compose.prod.yml     # Production overrides
+│   │   ├── config.yml                  # Registry configuration
+│   │   ├── generate-htpasswd.sh        # Auth generation
 │   │   └── README.md
 │   └── README.md                       # Vue d'ensemble SaaS
 │
@@ -158,12 +173,14 @@ freijstack/
 │   ├── MONITORING.md                   # Prometheus/Grafana/Loki
 │   ├── TROUBLESHOOTING.md              # Diagnostic & solutions
 │   ├── PRO_DEPLOYMENT.md               # Features avancées
+│   ├── FEATURES_ROADMAP.md             # Roadmap produit
 │   └── ...autres documentations
 │
 ├── docs-private/                    # 🔒 Documentation sensible
 │   ├── SECRET_ROTATION.md              # Rotation des secrets
 │   ├── SSO_SAML_CONFIG.md              # Configuration SAML
-│   └── README_RESET_PASSWORD.md        # Reset PostgreSQL
+│   ├── REGISTRY_PROD_SETUP_SUMMARY.md  # Setup Registry production
+│   └── SECURITY_AUDIT.md               # Audits sécurité
 │
 ├── scripts/                         # 🛠️ Scripts utilitaires
 │   ├── backup-to-cloud.sh              # Backup AWS S3 + Azure
@@ -171,6 +188,9 @@ freijstack/
 │   ├── rotate-secrets.sh               # Rotation sécurisée
 │   ├── run-migrations.sh               # Migrations DB
 │   ├── security-check.sh               # Audits sécurité
+│   ├── deploy-registry.sh              # Deploy registry
+│   ├── cleanup-registry-images.sh      # Cleanup images
+│   ├── docs-generate.ps1/.sh           # Documentation generation
 │   └── ...autres scripts
 │
 ├── .gitignore
@@ -213,7 +233,16 @@ Portfolio web multilingue (FR/EN) avec:
 - **Sécurité**: Content Security Policy, WCAG AA compliance
 
 **Accès**: 
-- 📍 **Production**: https://portfolio.freijstack.com/
+- 📍 Docker Registry** — Registre Docker privé
+- 🐳 Docker Registry v2
+- 🖥️ Joxit UI pour gestion visuelle
+- 🔐 Authentification htpasswd
+- 📦 Stockage local/cloud
+- 🔄 Cleanup automatisé des anciennes images
+
+Voir [saas/registry/README.md](saas/registry/README.md).
+
+**3. **Production**: https://portfolio.freijstack.com/
 - 📍 **Staging**: https://portfolio-staging.freijstack.com/
 - 📍 **Local**: Ouvrir `saas/portfolio/index.html` dans un navigateur
 

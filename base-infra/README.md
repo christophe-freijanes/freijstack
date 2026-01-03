@@ -10,9 +10,11 @@
 
 ## 📋 Vue d'ensemble
 
-**Infrastructure centralisée** et partagée par toutes les applications SaaS (Portfolio, SecureVault, Docker Registry, etc.).
+**Infrastructure centralisée** et partagée par toutes les applications SaaS (Portfolio, SecureVault, Docker Registry, n8n, etc.).
 
 Gère le reverse proxy, l'automation, et les services web statiques avec SSL/TLS automatique, santé checks, et monitoring.
+
+**Dernière mise à jour**: Janvier 2026
 
 ---
 
@@ -35,8 +37,14 @@ Ports:
 - ✅ Routage par hostname (virtualhosts)
 - ✅ Middleware de sécurité (HSTS, CSP, etc.)
 - ✅ Health checks intégrés
-- ✅ Dashboard web
+- ✅ Dashboard web (API insecure mode)
 - ✅ Métriques Prometheus
+
+**Services intégrés**:
+- Portfolio (production + staging)
+- SecureVault (frontend + backend + API)
+- Docker Registry (registry + UI)
+- n8n (automation)
 
 **Network**: `web` (partagé avec toutes les apps)
 
@@ -70,8 +78,17 @@ Volume: n8n_data (persistant)
 
 ### 📁 Portfolio (nginx:alpine)
 
-Serveur web statique pour le portfolio avec support multi-environnement.
+Serveur web statique pportfolio/ et /srv/www/portfolio-staging/
+Build:       Multi-stage Dockerfile avec optimisation
+```
 
+**Fonctionnalités**:
+- 🌐 Site responsive HTML5/CSS3/JS vanilla
+- 🌍 Multilingue (FR/EN) avec 150+ clés
+- 🎨 Thèmes saisonniers automatiques
+- 🔒 Content Security Policy (CSP)
+- ♿ WCAG AA compliance
+- 📦 Assets optimisés (minification CSS/JS)
 ```
 Production:  portfolio.freijstack.com
 Staging:     portfolio-staging.freijstack.com
