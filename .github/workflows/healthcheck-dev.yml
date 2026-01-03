@@ -131,9 +131,9 @@ jobs:
 
           # Fast pass + Grace pass
           FAST_RETRY=3
-          FAST_DELAY=3
+          FAST_DELAY=5
           GRACE_RETRY=8
-          GRACE_DELAY=8
+          GRACE_DELAY=10
 
           # Paramètres curl communs (anti faux positifs)
           # -4 : évite les soucis IPv6 (souvent la cause du HTTP 000)
@@ -144,12 +144,12 @@ jobs:
             -L
             -o /dev/null
             -w "%{http_code}"
-            --connect-timeout 12
-            --max-time 35
+            --connect-timeout 20
+            --max-time 60
             --retry 3
             --retry-delay 2
             --retry-all-errors
-            --retry-max-time 120
+            --retry-max-time 150
             --user-agent "freijstack-healthcheck/1.1"
           )
 
@@ -174,12 +174,8 @@ jobs:
             for i in $(seq 1 "$attempts"); do
               echo "  ⏳ Attempt $i/$attempts..."
 
-              # HEAD d'abord, fallback GET si HEAD pas supporté / renvoie 405/000
-              code="$(curl -I "${CURL_COMMON[@]}" "$url" 2>/tmp/curl_err || echo "000")"
-
-              if [ "$code" = "405" ] || [ "$code" = "000" ]; then
-                code="$(curl "${CURL_COMMON[@]}" "$url" 2>/tmp/curl_err || echo "000")"
-              fi
+              # GET direct (HEAD peut être filtré sur certains proxys)
+              code="$(curl "${CURL_COMMON[@]}" "$url" 2>/tmp/curl_err || echo "000")"
 
               if echo ",$allowed," | grep -q ",$code,"; then
                 echo "  ✅ OK (HTTP $code)"
