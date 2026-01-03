@@ -131,26 +131,28 @@ jobs:
 
           # Fast pass + Grace pass
           FAST_RETRY=3
-          FAST_DELAY=5
+          FAST_DELAY=8  # +3s: plus de patience entre tentatives
           GRACE_RETRY=8
-          GRACE_DELAY=10
+          GRACE_DELAY=15  # +5s: tolère mieux le warm-up
 
           # Paramètres curl communs (anti faux positifs)
           # -4 : évite les soucis IPv6 (souvent la cause du HTTP 000)
-          # --retry-all-errors + --retry-max-time : meilleure résilience
+          # --connect-timeout : limite la connexion TCP (10s = détection rapide des vrais échecs)
+          # --max-time : timeout total requête (30s = suffisant pour services normaux)
+          # --retry : réduit à 2 car on gère nos propres retry loops
           CURL_COMMON=(
             -4
             -sS
             -L
             -o /dev/null
             -w "%{http_code}"
-            --connect-timeout 20
-            --max-time 60
-            --retry 3
-            --retry-delay 2
+            --connect-timeout 10
+            --max-time 30
+            --retry 2
+            --retry-delay 3
             --retry-all-errors
-            --retry-max-time 150
-            --user-agent "freijstack-healthcheck/1.1"
+            --retry-max-time 60
+            --user-agent "freijstack-healthcheck/1.2"
           )
 
           check_url() {
@@ -186,9 +188,10 @@ jobs:
               err="$(tail -n 1 /tmp/curl_err 2>/dev/null || true)"
               echo "  ⚠️  HTTP $code (attempt $i/$attempts) $err"
 
-              # Si HTTP 000, on attend un peu plus (souvent DNS/TLS)
-              if [ "$code" = "000" ]; then
-                sleep $((delay + 3))
+              # Si HTTP 000/502/503, service en warm-up → attente prolongée
+              if [ "$code" = "000" ] || [ "$code" = "502" ] || [ "$code" = "503" ]; then
+                echo "  🔄 Service warming up, waiting ${delay}s + grace period..."
+                sleep $((delay + 5))
               elif [ "$i" -lt "$attempts" ]; then
                 sleep "$delay"
               fi

@@ -22,9 +22,9 @@ graph TB
     HARBOR_DEPLOY["⚓ Harbor Deploy<br/>Docker Registry"]
     
     %% Post-Deploy
-    HEALTHCHECK_POST["🏥 Health Check Post-Deploy<br/>HTTP Status + Response Time"]
-    HEALTHCHECK_PROD["🏥 Health Check Prod<br/>Every 30 minutes"]
-    HEALTHCHECK_DEV["🏥 Health Check Dev<br/>Every hour"]
+    HEALTHCHECK_POST["🏥 Health Check Post-Deploy<br/>Smart Cooldown (5-90s)<br/>Master only"]
+    HEALTHCHECK_PROD["🏥 Health Check Prod<br/>Every 30min • Curl v1.2<br/>10s connect, 30s max<br/>502/503/000 warm-up detect"]
+    HEALTHCHECK_DEV["🏥 Health Check Dev<br/>Every hour • Curl v1.2<br/>10s connect, 30s max<br/>502/503/000 warm-up detect"]
     
     %% Releases
     RELEASE_PR["📝 Release Changelog PR<br/>semantic-release --dry-run"]
@@ -90,11 +90,11 @@ graph TB
     VAULT_DEPLOY -->|docker-compose + migrations| VPS_PROD
     HARBOR_DEPLOY -->|docker-compose| VPS_PROD
     
-    %% Post-Deploy Checks
-    PORTFOLIO_DEPLOY -->|workflow_run: success| HEALTHCHECK_POST
-    VAULT_DEPLOY -->|workflow_run: success| HEALTHCHECK_POST
-    HARBOR_DEPLOY -->|workflow_run: success| HEALTHCHECK_POST
-    INFRA_DEPLOY -->|workflow_run: success| HEALTHCHECK_POST
+    %% Post-Deploy Checks (master only)
+    PORTFOLIO_DEPLOY -->|workflow_run: success + master| HEALTHCHECK_POST
+    VAULT_DEPLOY -->|workflow_run: success + master| HEALTHCHECK_POST
+    HARBOR_DEPLOY -->|workflow_run: success + master| HEALTHCHECK_POST
+    INFRA_DEPLOY -->|workflow_run: success + master| HEALTHCHECK_POST
     
     %% Continuous Monitoring
     VPS_PROD -.->|cron: */30 min| HEALTHCHECK_PROD
