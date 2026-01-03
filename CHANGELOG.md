@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.21.2](https://github.com/christophe-freijanes/freijstack/compare/v1.21.1...v1.21.2) (2026-01-03)
+
+### ♻️ Code Refactoring
+
+* Remove JSON validation job from lint workflow ([3d99da7](https://github.com/christophe-freijanes/freijstack/commit/3d99da774f5ab56a857026bd38806aab766be90c))
+
 ## [1.21.1](https://github.com/christophe-freijanes/freijstack/compare/v1.21.0...v1.21.1) (2026-01-03)
 
 ### 🐛 Bug Fixes
