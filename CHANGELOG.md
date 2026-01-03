@@ -6,6 +6,13 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.11.0](https://github.com/christophe-freijanes/freijstack/compare/v1.10.14...v1.11.0) (2026-01-03)
+
+### 🚀 Features
+
+* add automatic traefik network check and fix mechanism ([393016d](https://github.com/christophe-freijanes/freijstack/commit/393016d8c04d7d6d4287b51c1b3fd14fa08515a0))
+* add automatic traefik network check and prevention mechanism ([a5d31aa](https://github.com/christophe-freijanes/freijstack/commit/a5d31aa6ba2b70eb9882ffbc6cf7968b08c3d2ef))
+
 ## [1.10.14](https://github.com/christophe-freijanes/freijstack/compare/v1.10.13...v1.10.14) (2026-01-03)
 
 ### 🐛 Bug Fixes
