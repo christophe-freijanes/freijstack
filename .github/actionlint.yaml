@@ -6,19 +6,6 @@ shellcheck: ""
 # Ignorer globalement les erreurs ShellCheck par message
 ignore:
   # Filtre tous les messages de niveau 'info', 'warning' et 'style' de ShellCheck
-  - "shellcheck reported issue in this script:.*:warning:"
-  - "shellcheck reported issue in this script:.*:style:"
-  - "shellcheck reported issue in this script:.*:info:"
-
-# Configuration spécifique par fichier (si vous voulez être plus précis)
-paths:
-  ".github/workflows/05-health-prod.yml":
-    ignore:
-      - 'SC2034'
-  ".github/workflows/05-health-dev.yml": {}
-  ".github/workflows/04-health-postdeploy.yml":
-    ignore:
-      - 'SC2129'
-  ".github/workflows/01-security-gitleaks.yml":
-    ignore:
-      - 'SC2129'
+  - "shellcheck reported issue in this script: SC[0-9]+:info:"
+  - "shellcheck reported issue in this script: SC[0-9]+:warning:"
+  - "shellcheck reported issue in this script: SC[0-9]+:style:"
