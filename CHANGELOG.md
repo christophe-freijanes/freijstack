@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.10.3](https://github.com/christophe-freijanes/freijstack/compare/v1.10.2...v1.10.3) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* remove remaining security dependency from deploy-VPS-prod job ([a73f25f](https://github.com/christophe-freijanes/freijstack/commit/a73f25ff406fdf42b020ca1b96c5c3e7f8792fb5))
+
 ## [1.10.2](https://github.com/christophe-freijanes/freijstack/compare/v1.10.1...v1.10.2) (2026-01-03)
 
 ### 🐛 Bug Fixes
