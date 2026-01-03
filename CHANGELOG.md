@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.21.3](https://github.com/christophe-freijanes/freijstack/compare/v1.21.2...v1.21.3) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* Ensure data directory exists for volume bind mounts in deployment workflow ([7122c04](https://github.com/christophe-freijanes/freijstack/commit/7122c04780655fee98811a8e8d5c56cff0d7ecd0))
+
 ## [1.21.2](https://github.com/christophe-freijanes/freijstack/compare/v1.21.1...v1.21.2) (2026-01-03)
 
 ### ♻️ Code Refactoring
