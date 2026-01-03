@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.9.7](https://github.com/christophe-freijanes/freijstack/compare/v1.9.6...v1.9.7) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* correct Traefik labels for staging (portfolio-staging.freijstack.com) and production (portfolio.freijstack.com) ([d7b50cb](https://github.com/christophe-freijanes/freijstack/commit/d7b50cba894900d435e12174862a1ea9e085a408))
+
 ## [1.9.6](https://github.com/christophe-freijanes/freijstack/compare/v1.9.5...v1.9.6) (2026-01-02)
 
 ### 🐛 Bug Fixes
