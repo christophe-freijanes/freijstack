@@ -4,10 +4,11 @@ FROM nginx:1.27-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy static portfolio files into nginx html directory
-COPY . /usr/share/nginx/html
-
-# Remove nginx default.conf to use our config
-RUN rm -f /etc/nginx/conf.d/default.conf.bak 2>/dev/null || true
+# Only copy the actual static assets
+COPY index.html /usr/share/nginx/html/
+COPY script.js /usr/share/nginx/html/
+COPY style.css /usr/share/nginx/html/
+COPY favicon.svg /usr/share/nginx/html/
 
 # Expose port 80
 EXPOSE 80
