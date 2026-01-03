@@ -15,10 +15,12 @@ services:
       - "traefik.http.routers.portfolio-prod.tls=true"
       - "traefik.http.services.portfolio-prod.loadbalancer.server.port=80"
       - "traefik.docker.network=freijstack"
+      # Priority pour éviter les conflits avec staging
+      - "traefik.http.routers.portfolio-prod.priority=100"
     networks:
       - freijstack
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      test: ["CMD", "curl", "-f", "http://localhost/"]
       interval: 30s
       timeout: 5s
       retries: 3

@@ -2,7 +2,7 @@ name: 📄 SaaS • Portfolio Deploy
 
 on:
   workflow_run:
-    workflows: ["📦 SaaS • Portfolio Build"]
+    workflows: ["🏗️ Build & Push Portfolio"]
     types: [completed]
     branches: [master, develop]
 
@@ -15,34 +15,16 @@ on:
 env:
   REGISTRY: registry.freijstack.com
   IMAGE_NAME: portfolio
-  IS_PRODUCTION: ${{ github.ref == 'refs/heads/master' }}
-  IS_STAGING: ${{ github.ref == 'refs/heads/develop' }}
 
 jobs:
-  # Job 0: Security Scanning
-  security:
-    name: 🛡️ Shield Protection
-    uses: ./.github/workflows/securitycheck.yml
-    permissions:
-      contents: read
-      actions: read
-      security-events: write
-    with:
-      scan_paths: |
-        saas/portfolio
-      fail_on_gitleaks: true
-      upload_sarif: true
-      publish_score_artifact: true
-
   # Job 1: Deploy to VPS (Staging - develop)
   deploy-VPS-staging:
     name: 🧪 Deploy to VPS (Staging)
-    needs: [security]
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'pull_request' ||
       (github.event_name == 'workflow_run' &&
-       github.ref == 'refs/heads/develop' &&
+       github.event.workflow_run.head_branch == 'develop' &&
        github.event.workflow_run.conclusion == 'success')
 
     steps:
@@ -58,7 +40,7 @@ jobs:
       - name: Verify Docker image integrity
         run: |
           echo "🔐 Verifying Docker image integrity..."
-          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-beta"
           docker run --rm --entrypoint sh $IMAGE -c 'echo "✅ Image validation successful"' || exit 1
 
       - name: Prepare SSH key
@@ -68,22 +50,36 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Ensure Traefik is connected to freijstack network
+        run: |
+          echo "🔍 Checking Traefik network connectivity..."
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            'if ! docker network inspect freijstack | grep -q "\"Name\": \"traefik\""; then
+               echo "⚠️  Traefik not on freijstack network, connecting..."
+               docker network connect freijstack traefik 2>/dev/null || echo "Already connected"
+               docker restart traefik
+               sleep 5
+               echo "✅ Traefik reconnected to freijstack network"
+             else
+               echo "✅ Traefik already connected to freijstack network"
+             fi'
+
       - name: Deploy portfolio (Docker Compose) to staging
         run: |
           set -euo pipefail
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
-            'cd /srv/www/saas/portfolio && \
+            'cd /srv/www/portfolio && \
              docker compose -f docker-compose.yml pull && \
-             docker compose -f docker-compose.yml down || true && \
-             docker compose -f docker-compose.yml up -d && \
+             docker compose -f docker-compose.yml down --remove-orphans || true && \
+             docker compose -p staging up -d && \
              echo "✅ Portfolio staging deployed successfully" && \
-             docker compose -f docker-compose.yml logs --tail=5'
+             docker compose logs --tail=5'
 
       - name: Verify staging deployment
         run: |
           set -euo pipefail
           sleep 5
-          HEALTH=$(curl -s -o /dev/null -w "%{http_code}" http://portfolio.freijstack.com/ || echo "000")
+          HEALTH=$(curl -s -o /dev/null -w "%{http_code}" http://portfolio-staging.freijstack.com/ || echo "000")
           if [ "$HEALTH" = "200" ] || [ "$HEALTH" = "301" ] || [ "$HEALTH" = "302" ]; then
             echo "✅ Staging health check passed (HTTP $HEALTH)"
           else
@@ -93,9 +89,11 @@ jobs:
   # Job 2: Deploy to VPS (Production - master)
   deploy-VPS-prod:
     name: 🚀 Deploy to VPS (Production)
-    needs: [security]
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_run' && github.ref == 'refs/heads/master' && github.event.workflow_run.conclusion == 'success'
+    if: |
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.head_branch == 'master' &&
+      github.event.workflow_run.conclusion == 'success'
 
     steps:
       - name: Checkout code
@@ -120,11 +118,25 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Ensure Traefik is connected to freijstack network
+        run: |
+          echo "🔍 Checking Traefik network connectivity..."
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            'if ! docker network inspect freijstack | grep -q "\"Name\": \"traefik\""; then
+               echo "⚠️  Traefik not on freijstack network, connecting..."
+               docker network connect freijstack traefik 2>/dev/null || echo "Already connected"
+               docker restart traefik
+               sleep 5
+               echo "✅ Traefik reconnected to freijstack network"
+             else
+               echo "✅ Traefik already connected to freijstack network"
+             fi'
+
       - name: Create production backup
         run: |
           set -euo pipefail
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
-            'cd /srv/www/saas/portfolio && \
+            'cd /srv/www/portfolio && \
              docker compose -f docker-compose.prod.yml ps || true && \
              echo "💾 Backup timestamp: $(date +%s)" || true'
 
@@ -132,10 +144,10 @@ jobs:
         run: |
           set -euo pipefail
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
-            'cd /srv/www/saas/portfolio && \
+            'cd /srv/www/portfolio && \
              docker compose -f docker-compose.prod.yml pull && \
-             docker compose -f docker-compose.prod.yml down || true && \
-             docker compose -f docker-compose.prod.yml up -d && \
+             docker compose -f docker-compose.prod.yml down --remove-orphans || true && \
+             docker compose -p production -f docker-compose.prod.yml up -d && \
              echo "✅ Portfolio production deployed successfully" && \
              docker compose -f docker-compose.prod.yml logs --tail=5'
 
@@ -153,9 +165,8 @@ jobs:
   # Job 3: Notifications
   notify:
     name: 📢 Notify Status
-    needs: [security, deploy-VPS-staging, deploy-VPS-prod]
-    runs-on: ubuntu-latest
     if: always()
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check deployment status
@@ -164,14 +175,14 @@ jobs:
             echo "🔍 Pull Request - Validation Only"
             echo "✅ Portfolio deployment template validated"
             echo "📋 No deployment on pull requests"
-          elif [ "${{ github.event_name }}" == "workflow_run" ] && [ "${{ github.ref }}" == "refs/heads/develop" ]; then
+          elif [ "${{ github.event_name }}" == "workflow_run" ] && [ "${{ github.event.workflow_run.head_branch }}" == "develop" ]; then
             echo "🧪 STAGING Environment - Docker Deployment"
             echo "✅ Portfolio image deployed to staging"
-            echo "📍 URL: https://portfolio.freijstack.com (staging)"
-          elif [ "${{ github.event_name }}" == "workflow_run" ] && [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            echo "📍 URL: https://portfolio-staging.freijstack.com"
+          elif [ "${{ github.event_name }}" == "workflow_run" ] && [ "${{ github.event.workflow_run.head_branch }}" == "master" ]; then
             echo "🚀 PRODUCTION Environment - Docker Deployment"
             echo "✅ Portfolio image deployed to production"
-            echo "🎯 URL: https://portfolio.freijstack.com (production)"
+            echo "🎯 URL: https://portfolio.freijstack.com"
           else
-            echo "ℹ️ Event: ${{ github.event_name }} on ${{ github.ref }}"
+            echo "ℹ️ Event: ${{ github.event_name }}"
           fi

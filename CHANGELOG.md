@@ -6,6 +6,133 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.12.1](https://github.com/christophe-freijanes/freijstack/compare/v1.12.0...v1.12.1) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* correct VPS portfolio path from /srv/www/securevault/saas/portfolio to /srv/www/saas/portfolio ([#116](https://github.com/christophe-freijanes/freijstack/issues/116)) ([fa16f9f](https://github.com/christophe-freijanes/freijstack/commit/fa16f9f8b008a45bd06ea3d55a270d2eb7df89ef)), closes [#64](https://github.com/christophe-freijanes/freijstack/issues/64) [#66](https://github.com/christophe-freijanes/freijstack/issues/66) [#67](https://github.com/christophe-freijanes/freijstack/issues/67) [#69](https://github.com/christophe-freijanes/freijstack/issues/69) [#73](https://github.com/christophe-freijanes/freijstack/issues/73) [#75](https://github.com/christophe-freijanes/freijstack/issues/75) [#78](https://github.com/christophe-freijanes/freijstack/issues/78) [#79](https://github.com/christophe-freijanes/freijstack/issues/79) [#81](https://github.com/christophe-freijanes/freijstack/issues/81) [#82](https://github.com/christophe-freijanes/freijstack/issues/82) [#83](https://github.com/christophe-freijanes/freijstack/issues/83) [#85](https://github.com/christophe-freijanes/freijstack/issues/85) [#87](https://github.com/christophe-freijanes/freijstack/issues/87) [#89](https://github.com/christophe-freijanes/freijstack/issues/89) [#90](https://github.com/christophe-freijanes/freijstack/issues/90) [#91](https://github.com/christophe-freijanes/freijstack/issues/91) [#92](https://github.com/christophe-freijanes/freijstack/issues/92) [#93](https://github.com/christophe-freijanes/freijstack/issues/93) [#94](https://github.com/christophe-freijanes/freijstack/issues/94) [#96](https://github.com/christophe-freijanes/freijstack/issues/96) [#97](https://github.com/christophe-freijanes/freijstack/issues/97) [#98](https://github.com/christophe-freijanes/freijstack/issues/98)
+
+## [1.12.0](https://github.com/christophe-freijanes/freijstack/compare/v1.11.0...v1.12.0) (2026-01-03)
+
+### 🚀 Features
+
+* add PowerShell scripts for portfolio destruction and redeployment ([5d3e311](https://github.com/christophe-freijanes/freijstack/commit/5d3e311ea205a7b72902ff240668688551fa175e))
+
+## [1.11.0](https://github.com/christophe-freijanes/freijstack/compare/v1.10.14...v1.11.0) (2026-01-03)
+
+### 🚀 Features
+
+* add automatic traefik network check and fix mechanism ([393016d](https://github.com/christophe-freijanes/freijstack/commit/393016d8c04d7d6d4287b51c1b3fd14fa08515a0))
+* add automatic traefik network check and prevention mechanism ([a5d31aa](https://github.com/christophe-freijanes/freijstack/commit/a5d31aa6ba2b70eb9882ffbc6cf7968b08c3d2ef))
+
+## [1.10.14](https://github.com/christophe-freijanes/freijstack/compare/v1.10.13...v1.10.14) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* remove security job dependency to unblock portfolio build ([ac7bec8](https://github.com/christophe-freijanes/freijstack/commit/ac7bec882865fa34886771c03e334c0baafa3915))
+
+## [1.10.13](https://github.com/christophe-freijanes/freijstack/compare/v1.10.12...v1.10.13) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* correct vps path from /srv/www/saas/portfolio to /srv/www/portfolio ([e352891](https://github.com/christophe-freijanes/freijstack/commit/e352891395a78f67e67adb4529640d4241bd3f66))
+
+### ✅ Tests
+
+* trigger portfolio build via github actions ([95b6abc](https://github.com/christophe-freijanes/freijstack/commit/95b6abc217bbbf0da758b7c6c646fe3349846e47))
+
+## [1.10.12](https://github.com/christophe-freijanes/freijstack/compare/v1.10.11...v1.10.12) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* connect traefik to freijstack network for portfolio routing ([9ec48f1](https://github.com/christophe-freijanes/freijstack/commit/9ec48f1e2203ac580792c08c56ea6811ff9e121d))
+
+## [1.10.11](https://github.com/christophe-freijanes/freijstack/compare/v1.10.10...v1.10.11) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* replace wget with curl in healthcheck for alpine compatibility ([ee30562](https://github.com/christophe-freijanes/freijstack/commit/ee30562c3641aa2cf37d7627bf5f3e4b86d1450b))
+
+### ✅ Tests
+
+* trigger portfolio build ([2ec10c3](https://github.com/christophe-freijanes/freijstack/commit/2ec10c32dd51e81a3570c5cd3272156f08d36c24))
+
+## [1.10.10](https://github.com/christophe-freijanes/freijstack/compare/v1.10.9...v1.10.10) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* use latest-beta tag for staging and latest for production deployments ([ddc0673](https://github.com/christophe-freijanes/freijstack/commit/ddc0673232767592cfad30fa3085c0e7a01a0185))
+
+## [1.10.9](https://github.com/christophe-freijanes/freijstack/compare/v1.10.8...v1.10.9) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* remove problematic directory slash from nginx try_files directive ([7e5fdc1](https://github.com/christophe-freijanes/freijstack/commit/7e5fdc191805f99674c404bcf4b794a29ec45614))
+
+## [1.10.8](https://github.com/christophe-freijanes/freijstack/compare/v1.10.7...v1.10.8) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* copy all files then remove docker config files - ensures static assets are included ([ccd0cdc](https://github.com/christophe-freijanes/freijstack/commit/ccd0cdc98559c43e31fafe0ff839102c3b9cd811))
+
+## [1.10.7](https://github.com/christophe-freijanes/freijstack/compare/v1.10.6...v1.10.7) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* explicitly copy static assets to nginx html directory and add .dockerignore ([ffacd01](https://github.com/christophe-freijanes/freijstack/commit/ffacd01eebb13c167526cb1eabef5f2368b71f3c))
+
+## [1.10.6](https://github.com/christophe-freijanes/freijstack/compare/v1.10.5...v1.10.6) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* add newline at end of portfolio-deploy.yml (yamllint) ([d257a95](https://github.com/christophe-freijanes/freijstack/commit/d257a959ce201cf90aab24664f3034ebcd180000))
+
+## [1.10.5](https://github.com/christophe-freijanes/freijstack/compare/v1.10.4...v1.10.5) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* remove trailing blank lines in portfolio-deploy.yml (yamllint) ([ac0698f](https://github.com/christophe-freijanes/freijstack/commit/ac0698f0c84f319856979e4aa3dc5a1ce62a82eb))
+
+## [1.10.4](https://github.com/christophe-freijanes/freijstack/compare/v1.10.3...v1.10.4) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* clean up workflow structure - remove job dependencies and cycles ([f519272](https://github.com/christophe-freijanes/freijstack/commit/f519272045b290d6764440e4e3898e8196d07e38))
+
+### 🔧 Chores
+
+* reload workflow cache ([4c50b7f](https://github.com/christophe-freijanes/freijstack/commit/4c50b7f0fd09b885aadd5aabeddf1f58f5bec936))
+
+## [1.10.3](https://github.com/christophe-freijanes/freijstack/compare/v1.10.2...v1.10.3) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* remove remaining security dependency from deploy-VPS-prod job ([a73f25f](https://github.com/christophe-freijanes/freijstack/commit/a73f25ff406fdf42b020ca1b96c5c3e7f8792fb5))
+
+## [1.10.2](https://github.com/christophe-freijanes/freijstack/compare/v1.10.1...v1.10.2) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* remove security job dependency from deploy workflow (already done in build) ([1fae1a4](https://github.com/christophe-freijanes/freijstack/commit/1fae1a40cd4c6cca5e72cf6f564ee1cfa57f13fd))
+
+## [1.10.1](https://github.com/christophe-freijanes/freijstack/compare/v1.10.0...v1.10.1) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* correct workflow_run trigger and use proper context variables for branch detection ([c65413c](https://github.com/christophe-freijanes/freijstack/commit/c65413c99b14566608d8d8fc685f75b21c83fcc5))
+
+## [1.10.0](https://github.com/christophe-freijanes/freijstack/compare/v1.9.7...v1.10.0) (2026-01-03)
+
+### 🚀 Features
+
+* add nginx configuration for proper static file serving and SPA routing ([0a3dd89](https://github.com/christophe-freijanes/freijstack/commit/0a3dd895422112c1459ac3c739d1aead82a5d4c2))
+
+## [1.9.7](https://github.com/christophe-freijanes/freijstack/compare/v1.9.6...v1.9.7) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* correct Traefik labels for staging (portfolio-staging.freijstack.com) and production (portfolio.freijstack.com) ([d7b50cb](https://github.com/christophe-freijanes/freijstack/commit/d7b50cba894900d435e12174862a1ea9e085a408))
+
 ## [1.9.6](https://github.com/christophe-freijanes/freijstack/compare/v1.9.5...v1.9.6) (2026-01-02)
 
 ### 🐛 Bug Fixes
