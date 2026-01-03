@@ -60,6 +60,27 @@
     // MD050 - Style de strong (asterisk)
     "MD050": {
       "style": "asterisk"
-    }
+    },
+
+    // MD040 - Code blocks should have a language (autorisé sans langage)
+    "MD040": false,
+
+    // MD031 - Fenced code blocks surrounded by blank lines (désactivé)
+    "MD031": false,
+
+    // MD032 - Lists surrounded by blank lines (désactivé)
+    "MD032": false,
+
+    // MD060 - Table column style (désactivé)
+    "MD060": false,
+
+    // MD037 - Spaces inside emphasis markers (désactivé)
+    "MD037": false,
+
+    // MD022 - Headings surrounded by blank lines (désactivé)
+    "MD022": false,
+
+    // MD034 - Bare URL used (désactivé)
+    "MD034": false
   }
 }
