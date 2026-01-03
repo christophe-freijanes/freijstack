@@ -15,8 +15,6 @@ on:
 env:
   REGISTRY: registry.freijstack.com
   IMAGE_NAME: portfolio
-  IS_PRODUCTION: ${{ github.ref == 'refs/heads/master' }}
-  IS_STAGING: ${{ github.ref == 'refs/heads/develop' }}
 
 jobs:
   # Job 1: Deploy to VPS (Staging - develop)
@@ -67,7 +65,7 @@ jobs:
         run: |
           set -euo pipefail
           sleep 5
-          HEALTH=$(curl -s -o /dev/null -w "%{http_code}" http://portfolio.freijstack.com/ || echo "000")
+          HEALTH=$(curl -s -o /dev/null -w "%{http_code}" http://portfolio-staging.freijstack.com/ || echo "000")
           if [ "$HEALTH" = "200" ] || [ "$HEALTH" = "301" ] || [ "$HEALTH" = "302" ]; then
             echo "✅ Staging health check passed (HTTP $HEALTH)"
           else
@@ -78,7 +76,10 @@ jobs:
   deploy-VPS-prod:
     name: 🚀 Deploy to VPS (Production)
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'master' && github.event.workflow_run.conclusion == 'success'
+    if: |
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.head_branch == 'master' &&
+      github.event.workflow_run.conclusion == 'success'
 
     steps:
       - name: Checkout code
@@ -136,9 +137,8 @@ jobs:
   # Job 3: Notifications
   notify:
     name: 📢 Notify Status
-    needs: [deploy-VPS-staging, deploy-VPS-prod]
-    runs-on: ubuntu-latest
     if: always()
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check deployment status
@@ -147,14 +147,15 @@ jobs:
             echo "🔍 Pull Request - Validation Only"
             echo "✅ Portfolio deployment template validated"
             echo "📋 No deployment on pull requests"
-          elif [ "${{ github.event_name }}" == "workflow_run" ] && [ "${{ github.ref }}" == "refs/heads/develop" ]; then
+          elif [ "${{ github.event_name }}" == "workflow_run" ] && [ "${{ github.event.workflow_run.head_branch }}" == "develop" ]; then
             echo "🧪 STAGING Environment - Docker Deployment"
             echo "✅ Portfolio image deployed to staging"
-            echo "📍 URL: https://portfolio.freijstack.com (staging)"
-          elif [ "${{ github.event_name }}" == "workflow_run" ] && [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            echo "📍 URL: https://portfolio-staging.freijstack.com"
+          elif [ "${{ github.event_name }}" == "workflow_run" ] && [ "${{ github.event.workflow_run.head_branch }}" == "master" ]; then
             echo "🚀 PRODUCTION Environment - Docker Deployment"
             echo "✅ Portfolio image deployed to production"
-            echo "🎯 URL: https://portfolio.freijstack.com (production)"
+            echo "🎯 URL: https://portfolio.freijstack.com"
           else
-            echo "ℹ️ Event: ${{ github.event_name }} on ${{ github.ref }}"
+            echo "ℹ️ Event: ${{ github.event_name }}"
           fi
+
