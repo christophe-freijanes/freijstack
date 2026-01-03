@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.10.14](https://github.com/christophe-freijanes/freijstack/compare/v1.10.13...v1.10.14) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* remove security job dependency to unblock portfolio build ([ac7bec8](https://github.com/christophe-freijanes/freijstack/commit/ac7bec882865fa34886771c03e334c0baafa3915))
+
 ## [1.10.13](https://github.com/christophe-freijanes/freijstack/compare/v1.10.12...v1.10.13) (2026-01-03)
 
 ### 🐛 Bug Fixes
