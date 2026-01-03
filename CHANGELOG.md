@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.10.0](https://github.com/christophe-freijanes/freijstack/compare/v1.9.7...v1.10.0) (2026-01-03)
+
+### 🚀 Features
+
+* add nginx configuration for proper static file serving and SPA routing ([0a3dd89](https://github.com/christophe-freijanes/freijstack/commit/0a3dd895422112c1459ac3c739d1aead82a5d4c2))
+
 ## [1.9.7](https://github.com/christophe-freijanes/freijstack/compare/v1.9.6...v1.9.7) (2026-01-03)
 
 ### 🐛 Bug Fixes
