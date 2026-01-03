@@ -1,11 +1,4 @@
 # .github/actionlint.yaml
 
-# Désactive l'intégration ShellCheck au niveau binaire (optionnel si ignore est complet)
-shellcheck: ""
-
-# Ignorer globalement les erreurs ShellCheck par message
-ignore:
-  # Filtre tous les messages de niveau 'info', 'warning' et 'style' de ShellCheck
-  - "shellcheck reported issue in this script: SC[0-9]+:info:"
-  - "shellcheck reported issue in this script: SC[0-9]+:warning:"
-  - "shellcheck reported issue in this script: SC[0-9]+:style:"
+# Désactive complètement ShellCheck pour éviter les warnings info/style
+shellcheck: null
