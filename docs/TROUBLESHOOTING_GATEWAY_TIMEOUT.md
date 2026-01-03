@@ -2,7 +2,9 @@
 
 ## Symptôme
 
-Accès à `portfolio-staging.freijstack.com` ou `portfolio.freijstack.com` retourne **Gateway Timeout** (504).
+Les URLs du portfolio retournent **Gateway Timeout** :
+- https://portfolio-staging.freijstack.com → 504 Gateway Timeout
+- https://portfolio.freijstack.com → 504 Gateway Timeout
 
 ## Cause
 
@@ -12,125 +14,113 @@ Traefik n'est pas connecté au réseau Docker `freijstack`, il ne peut donc pas 
 
 ```bash
 # Vérifier si Traefik est sur le réseau freijstack
-ssh root@VPS_HOST "docker inspect traefik -f '{{.NetworkSettings.Networks.freijstack.IPAddress}}'"
+docker network inspect freijstack | grep -A 5 traefik
 
-# Si vide ou erreur → Traefik n'est pas connecté
+# Si vide ou pas de "IPAddress", Traefik n'est pas connecté
 ```
 
-## Solution Rapide
+## Solution Automatique
 
-### Option 1: Script Automatique
+Le workflow de déploiement vérifie et corrige automatiquement ce problème à chaque déploiement.
 
-```bash
-# Sur le VPS
-curl -fsSL https://raw.githubusercontent.com/christophe-freijanes/freijstack/develop/scripts/fix-traefik-network.sh | bash
-```
-
-### Option 2: Manuelle
+Si vous voulez corriger manuellement :
 
 ```bash
-# Connecter Traefik au réseau freijstack
-ssh root@VPS_HOST "docker network connect freijstack traefik"
+# Méthode 1: Script automatique
+./scripts/check-traefik-network.sh
 
-# Si déjà connecté mais sans IP, redémarrer
-ssh root@VPS_HOST "docker restart traefik"
+# Méthode 2: Manuel
+docker network connect freijstack traefik
+docker restart traefik
+sleep 5
 
-# Attendre 5 secondes puis vérifier
-ssh root@VPS_HOST "docker inspect traefik -f '{{.NetworkSettings.Networks.freijstack.IPAddress}}'"
-# Doit afficher une IP comme: 172.25.0.4
+# Vérifier
+docker network inspect freijstack | grep traefik
 ```
 
 ## Prévention
 
-### 1. Workflow de Déploiement
+### 1. Configuration Docker Compose
 
-Le workflow `portfolio-deploy.yml` vérifie automatiquement la connexion réseau avant chaque déploiement :
-
-```yaml
-- name: Ensure Traefik network connectivity
-  run: |
-    if ! docker inspect traefik -f "{{.NetworkSettings.Networks.freijstack.IPAddress}}" | grep -q "."; then
-      docker network connect freijstack traefik || docker restart traefik
-    fi
-```
-
-### 2. Cron Job (Recommandé)
-
-Ajoutez un cron job qui vérifie toutes les heures :
-
-```bash
-# Sur le VPS
-crontab -e
-
-# Ajouter cette ligne :
-0 * * * * /srv/www/scripts/fix-traefik-network.sh >> /var/log/traefik-network-check.log 2>&1
-```
-
-### 3. Systemd Service (Alternative)
-
-Créer un service qui vérifie au démarrage du VPS :
-
-```bash
-# /etc/systemd/system/traefik-network-fix.service
-[Unit]
-Description=Ensure Traefik is connected to freijstack network
-After=docker.service
-Requires=docker.service
-
-[Service]
-Type=oneshot
-ExecStart=/srv/www/scripts/fix-traefik-network.sh
-RemainAfterExit=yes
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Activer :
-```bash
-systemctl daemon-reload
-systemctl enable traefik-network-fix.service
-```
-
-## Vérification Post-Fix
-
-```bash
-# 1. Vérifier que Traefik a une IP sur freijstack
-ssh root@VPS_HOST "docker inspect traefik -f '{{.NetworkSettings.Networks.freijstack.IPAddress}}'"
-# Output attendu: 172.25.0.X
-
-# 2. Vérifier que les conteneurs portfolio sont visibles
-ssh root@VPS_HOST "docker network inspect freijstack | grep -A 3 portfolio"
-
-# 3. Tester l'accès
-curl -I https://portfolio-staging.freijstack.com/
-# Output attendu: HTTP/2 200 ou HTTP/2 301
-```
-
-## Cause Racine
-
-Le problème survient quand :
-1. Traefik est redémarré sans la configuration réseau persistante
-2. Le VPS redémarre et Traefik démarre avant que le réseau `freijstack` soit recréé
-3. `docker-compose` recrée Traefik sans inclure le réseau `freijstack`
-
-## Solution Permanente
-
-Assurer que `base-infra/docker-compose.yml` inclut toujours :
+Le fichier `base-infra/docker-compose.yml` configure Traefik avec le réseau `freijstack` :
 
 ```yaml
 services:
   traefik:
     networks:
       - web
-      - freijstack  # ← Important!
-
-networks:
-  freijstack:
-    external: true
+      - freijstack
 ```
 
-Et redéployer avec :
+### 2. Vérification Automatique dans les Workflows
+
+Les workflows GitHub Actions incluent maintenant une étape de vérification :
+
+```yaml
+- name: Ensure Traefik is connected to freijstack network
+  run: |
+    ssh user@vps 'docker network connect freijstack traefik || true'
+```
+
+### 3. Script de Diagnostic
+
+Utilisez `scripts/check-traefik-network.sh` pour diagnostiquer et corriger automatiquement.
+
+## Pourquoi ce problème se produit ?
+
+1. **Redémarrage du VPS** : Les connexions réseau peuvent ne pas être restaurées
+2. **Mise à jour de Traefik** : Recréation du conteneur sans restaurer toutes les connexions réseau
+3. **Changement de configuration** : Modification de `docker-compose.yml` et recréation
+
+## Vérifications supplémentaires
+
+### Vérifier tous les conteneurs sur le réseau
+
 ```bash
-cd /srv/www/base-infra && docker compose up -d
+docker network inspect freijstack --format '{{range .Containers}}{{.Name}}: {{.IPv4Address}}{{println}}{{end}}'
 ```
+
+Devrait afficher :
+- `traefik: 172.25.0.x/16`
+- `portfolio-staging: 172.25.0.x/16`
+- `portfolio-prod: 172.25.0.x/16`
+
+### Vérifier les logs Traefik
+
+```bash
+docker logs traefik 2>&1 | grep -i portfolio
+```
+
+Si Traefik voit les conteneurs, vous verrez des logs comme :
+```
+Adding route for portfolio-staging.freijstack.com
+Adding route for portfolio.freijstack.com
+```
+
+### Test de connectivité depuis Traefik
+
+```bash
+# Depuis le conteneur Traefik, ping les conteneurs portfolio
+docker exec traefik ping -c 2 portfolio-staging
+docker exec traefik ping -c 2 portfolio-prod
+```
+
+## Solution Permanente
+
+Pour éviter complètement ce problème, redéployez Traefik avec la configuration mise à jour :
+
+```bash
+# Sur le VPS
+cd /srv/www/base-infra
+docker compose down
+docker compose up -d
+
+# Vérifier que Traefik démarre avec les deux réseaux
+docker inspect traefik | grep -A 30 Networks
+```
+
+## Référence
+
+- Workflow de déploiement : [`.github/workflows/portfolio-deploy.yml`](../.github/workflows/portfolio-deploy.yml)
+- Script de diagnostic : [`scripts/check-traefik-network.sh`](../scripts/check-traefik-network.sh)
+- Configuration Traefik : [`base-infra/docker-compose.yml`](../base-infra/docker-compose.yml)

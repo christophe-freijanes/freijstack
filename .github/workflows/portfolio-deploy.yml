@@ -50,17 +50,19 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Ensure Traefik network connectivity
+      - name: Ensure Traefik is connected to freijstack network
         run: |
-          set -euo pipefail
-          echo "🔍 Verifying Traefik is connected to freijstack network..."
+          echo "🔍 Checking Traefik network connectivity..."
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
-            'if ! docker inspect traefik -f "{{.NetworkSettings.Networks.freijstack.IPAddress}}" 2>/dev/null | grep -q "."; then
-               echo "🔧 Connecting Traefik to freijstack network..."
-               docker network connect freijstack traefik 2>/dev/null || docker restart traefik
+            'if ! docker network inspect freijstack | grep -q "\"Name\": \"traefik\""; then
+               echo "⚠️  Traefik not on freijstack network, connecting..."
+               docker network connect freijstack traefik 2>/dev/null || echo "Already connected"
+               docker restart traefik
                sleep 5
-             fi
-             echo "✅ Traefik network check complete"'
+               echo "✅ Traefik reconnected to freijstack network"
+             else
+               echo "✅ Traefik already connected to freijstack network"
+             fi'
 
       - name: Deploy portfolio (Docker Compose) to staging
         run: |
@@ -116,17 +118,19 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Ensure Traefik network connectivity
+      - name: Ensure Traefik is connected to freijstack network
         run: |
-          set -euo pipefail
-          echo "🔍 Verifying Traefik is connected to freijstack network..."
+          echo "🔍 Checking Traefik network connectivity..."
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
-            'if ! docker inspect traefik -f "{{.NetworkSettings.Networks.freijstack.IPAddress}}" 2>/dev/null | grep -q "."; then
-               echo "🔧 Connecting Traefik to freijstack network..."
-               docker network connect freijstack traefik 2>/dev/null || docker restart traefik
+            'if ! docker network inspect freijstack | grep -q "\"Name\": \"traefik\""; then
+               echo "⚠️  Traefik not on freijstack network, connecting..."
+               docker network connect freijstack traefik 2>/dev/null || echo "Already connected"
+               docker restart traefik
                sleep 5
-             fi
-             echo "✅ Traefik network check complete"'
+               echo "✅ Traefik reconnected to freijstack network"
+             else
+               echo "✅ Traefik already connected to freijstack network"
+             fi'
 
       - name: Create production backup
         run: |
