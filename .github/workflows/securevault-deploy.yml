@@ -3,9 +3,8 @@ name: 🔐 SaaS • SecureVault
 on:
   push:
     branches: [develop, master]  # Auto-deploy staging (develop) and production (master)
-    paths:
-      - 'saas/securevault/**'
-      - '.github/workflows/securevault-deploy.yml'
+    # Déclenche sur TOUS les pushs sur master/develop
+    # Permet le déploiement après merge develop → master
   pull_request:
     branches: [develop, master]
     paths:
