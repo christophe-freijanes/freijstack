@@ -7,18 +7,19 @@ import string
 import subprocess
 import sys
 
+
 # Generate a secure random password
 chars = string.ascii_letters + string.digits + "!@#$%^&*-+=_"
-password = "".join(secrets.choice(chars) for _ in range(20))  # noqa: S311
+password = "".join(secrets.choice(chars) for _ in range(20))
 
 # Try to use bcrypt
 try:
-    import bcrypt  # noqa: PLC0415
+    import bcrypt
     hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12)).decode()
 except ImportError:
     print("Installing bcrypt...")  # noqa: T201
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "bcrypt", "-q"])  # noqa: S603, S607
-    import bcrypt  # noqa: PLC0415
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "bcrypt", "-q"])
+    import bcrypt
     hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12)).decode()
 
 username = os.getenv("REGISTRY_USERNAME", "user")
