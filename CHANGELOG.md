@@ -6,6 +6,16 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.10.13](https://github.com/christophe-freijanes/freijstack/compare/v1.10.12...v1.10.13) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* correct vps path from /srv/www/saas/portfolio to /srv/www/portfolio ([e352891](https://github.com/christophe-freijanes/freijstack/commit/e352891395a78f67e67adb4529640d4241bd3f66))
+
+### ✅ Tests
+
+* trigger portfolio build via github actions ([95b6abc](https://github.com/christophe-freijanes/freijstack/commit/95b6abc217bbbf0da758b7c6c646fe3349846e47))
+
 ## [1.10.12](https://github.com/christophe-freijanes/freijstack/compare/v1.10.11...v1.10.12) (2026-01-03)
 
 ### 🐛 Bug Fixes
