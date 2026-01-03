@@ -2,7 +2,7 @@ name: 📄 SaaS • Portfolio Deploy
 
 on:
   workflow_run:
-    workflows: ["📦 SaaS • Portfolio Build"]
+    workflows: ["🏗️ Build & Push Portfolio"]
     types: [completed]
     branches: [master, develop]
 
@@ -42,7 +42,7 @@ jobs:
     if: |
       github.event_name == 'pull_request' ||
       (github.event_name == 'workflow_run' &&
-       github.ref == 'refs/heads/develop' &&
+       github.event.workflow_run.head_branch == 'develop' &&
        github.event.workflow_run.conclusion == 'success')
 
     steps:
@@ -95,7 +95,7 @@ jobs:
     name: 🚀 Deploy to VPS (Production)
     needs: [security]
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_run' && github.ref == 'refs/heads/master' && github.event.workflow_run.conclusion == 'success'
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'master' && github.event.workflow_run.conclusion == 'success'
 
     steps:
       - name: Checkout code
