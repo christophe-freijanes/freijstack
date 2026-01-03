@@ -21,32 +21,51 @@ if ! docker ps | grep -q traefik; then
     sleep 5
 fi
 
-# Check if freijstack network exists
-if ! docker network ls | grep -q freijstack; then
-    echo "⚠️  Network 'freijstack' not found, creating..."
-    docker network create freijstack
-fi
+# Critical networks that Traefik must be connected to
+# - web: SecureVault, Registry, n8n
+# - freijstack: Portfolio (staging + production)
+NETWORKS=("web" "freijstack")
+reconnected=false
 
-# Check if Traefik is connected to freijstack network
-if ! docker network inspect freijstack | grep -q '"Name": "traefik"'; then
-    echo "⚠️  Traefik not connected to freijstack network"
-    echo "🔧 Connecting Traefik to freijstack network..."
+for network in "${NETWORKS[@]}"; do
+    echo ""
+    echo "📡 Checking network: $network"
     
-    docker network connect freijstack traefik 2>/dev/null || {
-        echo "⚠️  Already connected or error, restarting Traefik..."
-        docker restart traefik
-        sleep 5
-    }
-    
-    # Verify connection
-    if docker network inspect freijstack | grep -q '"Name": "traefik"'; then
-        echo "✅ Traefik successfully connected to freijstack network"
-    else
-        echo "❌ Failed to connect Traefik to freijstack network"
-        exit 1
+    # Check if network exists
+    if ! docker network ls | grep -q "$network"; then
+        echo "⚠️  Network '$network' not found, creating..."
+        docker network create "$network"
     fi
-else
-    echo "✅ Traefik already connected to freijstack network"
+    
+    # Check if Traefik is connected to this network
+    if ! docker network inspect "$network" | grep -q '"Name": "traefik"'; then
+        echo "⚠️  Traefik not connected to $network network"
+        echo "🔧 Connecting Traefik to $network network..."
+        
+        docker network connect "$network" traefik 2>/dev/null || {
+            echo "⚠️  Already connected or error occurred"
+        }
+        reconnected=true
+        
+        # Verify connection
+        if docker network inspect "$network" | grep -q '"Name": "traefik"'; then
+            echo "✅ Traefik successfully connected to $network network"
+        else
+            echo "❌ Failed to connect Traefik to $network network"
+            exit 1
+        fi
+    else
+        echo "✅ Traefik already connected to $network network"
+    fi
+done
+
+# Restart Traefik if any reconnection was made
+if [ "$reconnected" = true ]; then
+    echo ""
+    echo "🔄 Restarting Traefik to activate all connections..."
+    docker restart traefik
+    sleep 5
+    echo "✅ Traefik restarted successfully"
 fi
 
 # Check Traefik IP on freijstack network

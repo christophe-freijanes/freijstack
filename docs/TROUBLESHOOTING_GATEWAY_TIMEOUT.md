@@ -2,81 +2,110 @@
 
 ## Symptôme
 
-Les URLs du portfolio retournent **Gateway Timeout** :
-- https://portfolio-staging.freijstack.com → 504 Gateway Timeout
-- https://portfolio.freijstack.com → 504 Gateway Timeout
+Les URLs de vos services retournent **Gateway Timeout** :
+- Portfolio : https://portfolio-staging.freijstack.com, https://portfolio.freijstack.com → 504
+- SecureVault : https://vault.freijstack.com, https://vault-api.freijstack.com → 504
+- Registry : https://registry.freijstack.com → 504
+- n8n : https://automation.freijstack.com → 504
 
 ## Cause
 
-Traefik n'est pas connecté au réseau Docker `freijstack`, il ne peut donc pas router le trafic vers les conteneurs portfolio.
+Traefik n'est pas connecté aux réseaux Docker critiques, il ne peut donc pas router le trafic vers les conteneurs.
+
+**Réseaux critiques** :
+- `web` : SecureVault, Docker Registry, n8n
+- `freijstack` : Portfolio (staging + production)
 
 ## Diagnostic
 
 ```bash
-# Vérifier si Traefik est sur le réseau freijstack
-docker network inspect freijstack | grep -A 5 traefik
+# Vérifier tous les réseaux critiques
+for network in web freijstack; do
+  echo "=== Network: $network ==="
+  docker network inspect $network | grep -A 5 traefik
+done
 
-# Si vide ou pas de "IPAddress", Traefik n'est pas connecté
+# Si vide ou pas d'"IPAddress", Traefik n'est pas connecté
 ```
 
 ## Solution Automatique
 
-Le workflow de déploiement vérifie et corrige automatiquement ce problème à chaque déploiement.
+Les workflows de monitoring vérifient et corrigent automatiquement ce problème :
+- **Production** : Toutes les 30 minutes
+- **Développement** : Toutes les heures
 
 Si vous voulez corriger manuellement :
 
 ```bash
-# Méthode 1: Script automatique
+# Méthode 1: Script automatique (recommandé)
 ./scripts/check-traefik-network.sh
 
 # Méthode 2: Manuel
-docker network connect freijstack traefik
+docker network connect web traefik || echo "Already connected"
+docker network connect freijstack traefik || echo "Already connected"
 docker restart traefik
 sleep 5
 
-# Vérifier
-docker network inspect freijstack | grep traefik
+# Vérifier toutes les connexions
+for network in web freijstack; do
+  echo "Network: $network"
+  docker network inspect $network | grep -q traefik && echo "✅ Connected" || echo "❌ Not connected"
+done
 ```
 
 ## Prévention
 
 ### 1. Configuration Docker Compose
 
-Le fichier `base-infra/docker-compose.yml` configure Traefik avec le réseau `freijstack` :
+Le fichier `base-infra/docker-compose.yml` configure Traefik avec tous les réseaux critiques :
 
 ```yaml
 services:
   traefik:
     networks:
-      - web
-      - freijstack
+      - web          # SecureVault, Registry, n8n
+      - freijstack   # Portfolio
 ```
 
 ### 2. Vérification Automatique dans les Workflows
 
-Les workflows GitHub Actions incluent maintenant une étape de vérification :
+Tous les workflows incluent une vérification multi-réseaux :
+
+**Workflows concernés** :
+- `.github/workflows/portfolio-deploy.yml` : Vérifie avant chaque déploiement
+- `.github/workflows/healthcheck-prod.yml` : Surveillance toutes les 30 min avec auto-heal
+- `.github/workflows/healthcheck-dev.yml` : Surveillance horaire avec auto-heal
 
 ```yaml
-- name: Ensure Traefik is connected to freijstack network
+- name: Ensure Traefik is connected to all networks
   run: |
-    ssh user@vps 'docker network connect freijstack traefik || true'
+    for network in web freijstack; do
+      docker network connect $network traefik || echo "Already connected"
+    done
+    docker restart traefik
 ```
 
 ### 3. Script de Diagnostic
 
-Utilisez `scripts/check-traefik-network.sh` pour diagnostiquer et corriger automatiquement.
+Utilisez `scripts/check-traefik-network.sh` pour diagnostiquer et corriger automatiquement tous les réseaux.
 
 ## Pourquoi ce problème se produit ?
 
 1. **Redémarrage du VPS** : Les connexions réseau peuvent ne pas être restaurées
+  automatiquement
 2. **Mise à jour de Traefik** : Recréation du conteneur sans restaurer toutes les connexions réseau
 3. **Changement de configuration** : Modification de `docker-compose.yml` et recréation
 
 ## Vérifications supplémentaires
+4. **Déconnexion inattendue** : Bug Docker ou crash système
 
-### Vérifier tous les conteneurs sur le réseau
+### Vérifier tous les conteneurs sur chaque réseau
 
 ```bash
+# Réseau web (SecureVault, Registry, n8n)
+docker network inspect web --format '{{range .Containers}}{{.Name}}: {{.IPv4Address}}{{println}}{{end}}'
+
+# Réseau freijstack (Portfolio)
 docker network inspect freijstack --format '{{range .Containers}}{{.Name}}: {{.IPv4Address}}{{println}}{{end}}'
 ```
 

@@ -308,7 +308,7 @@ jobs:
             "${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}" "echo '✅ SSH OK'"
 
       # ---------------------------
-      # 🌐 NETWORK — Traefik connectivity check
+      # 🌐 NETWORK — Traefik connectivity check (ALL critical networks)
       # ---------------------------
       - name: 🌐 Check Traefik Network Connectivity
         id: traefik_network
@@ -325,21 +325,35 @@ jobs:
             -o UserKnownHostsFile=~/.ssh/known_hosts \
             ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
 
-          echo "🔍 Checking if Traefik is connected to freijstack network..."
+          echo "🔍 Checking Traefik connectivity to all critical networks..."
 
-          network_check=$(
-            $SSH "docker network inspect freijstack 2>/dev/null | grep -q '\"Name\": \"traefik\"' && echo 'connected' || echo 'disconnected'"
-          )
+          # Critical networks: web (SecureVault, Registry, n8n) + freijstack (Portfolio)
+          NETWORKS=("web" "freijstack")
+          failed_networks=()
 
-          if [ "$network_check" = "connected" ]; then
-            echo "✅ Traefik connected to freijstack network"
-            echo "status=connected" >> "$GITHUB_OUTPUT"
-            echo "- ✅ Traefik connected to freijstack network" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "❌ Traefik NOT connected to freijstack network"
+          for network in "${NETWORKS[@]}"; do
+            echo "  📡 Checking network: $network"
+            check=$(
+              $SSH "docker network inspect $network 2>/dev/null | grep -q '\"Name\": \"traefik\"' && echo 'connected' || echo 'disconnected'"
+            )
+
+            if [ "$check" = "connected" ]; then
+              echo "  ✅ Traefik connected to $network"
+              echo "- ✅ Traefik ↔ $network: connected" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "  ❌ Traefik NOT connected to $network"
+              echo "- ❌ Traefik ↔ $network: **disconnected**" >> "$GITHUB_STEP_SUMMARY"
+              failed_networks+=("$network")
+            fi
+          done
+
+          if [ ${#failed_networks[@]} -gt 0 ]; then
             echo "status=disconnected" >> "$GITHUB_OUTPUT"
-            echo "- ❌ Traefik disconnected from freijstack network" >> "$GITHUB_STEP_SUMMARY"
+            echo "failed_networks=${failed_networks[*]}" >> "$GITHUB_OUTPUT"
             exit 1
+          else
+            echo "status=connected" >> "$GITHUB_OUTPUT"
+            echo "failed_networks=" >> "$GITHUB_OUTPUT"
           fi
 
       - name: 🗄️ Check Database Connectivity (pg_isready)
@@ -445,17 +459,30 @@ jobs:
             STAMP_FILE="/tmp/securevault_last_heal"
 
             # ---------------------------
-            # 🌐 Fix Traefik network connectivity first
+            # 🌐 Fix Traefik network connectivity first (ALL critical networks)
             # ---------------------------
             echo "🔍 Checking Traefik network connectivity..."
-            if ! docker network inspect freijstack 2>/dev/null | grep -q '"Name": "traefik"'; then
-              echo "⚠️  Traefik not connected to freijstack network, fixing..."
-              docker network connect freijstack traefik 2>/dev/null || echo "Already connected"
+            NETWORKS=("web" "freijstack")
+            reconnected=false
+
+            for network in "${NETWORKS[@]}"; do
+              echo "  📡 Checking network: $network"
+              if ! docker network inspect "$network" 2>/dev/null | grep -q '"Name": "traefik"'; then
+                echo "  ⚠️  Traefik not connected to $network, fixing..."
+                docker network connect "$network" traefik 2>/dev/null || echo "  Already connected"
+                reconnected=true
+              else
+                echo "  ✅ Traefik already connected to $network"
+              fi
+            done
+
+            if [ "$reconnected" = true ]; then
+              echo "🔄 Restarting Traefik to activate connections..."
               docker restart traefik
               sleep 10
-              echo "✅ Traefik reconnected to freijstack network"
+              echo "✅ Traefik reconnected to all networks"
             else
-              echo "✅ Traefik already connected to freijstack network"
+              echo "✅ Traefik already connected to all networks"
             fi
 
             # ---------------------------
