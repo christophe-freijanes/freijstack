@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.10.12](https://github.com/christophe-freijanes/freijstack/compare/v1.10.11...v1.10.12) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* connect traefik to freijstack network for portfolio routing ([9ec48f1](https://github.com/christophe-freijanes/freijstack/commit/9ec48f1e2203ac580792c08c56ea6811ff9e121d))
+
 ## [1.10.11](https://github.com/christophe-freijanes/freijstack/compare/v1.10.10...v1.10.11) (2026-01-03)
 
 ### 🐛 Bug Fixes
