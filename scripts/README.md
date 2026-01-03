@@ -2,6 +2,8 @@
 
 Ce dossier contient les scripts d'automation et utilitaires pour maintenir l'infrastructure FreijStack.
 
+**Dernière mise à jour**: Janvier 2026
+
 ---
 
 ## 📋 Contenu
@@ -9,7 +11,11 @@ Ce dossier contient les scripts d'automation et utilitaires pour maintenir l'inf
 ```
 scripts/
 ├── backup-to-cloud.sh              # Backup vers AWS S3 + Azure
+├── check-traefik-network.sh        # Vérifier réseau Traefik
 ├── check-vps-staging.ps1           # Vérifier santé VPS
+├── cleanup-registry-images.sh      # Cleanup images Docker Registry
+├── deploy-registry.sh              # Déployer Docker Registry
+├── destroy-portfolio.ps1           # Détruire portfolio (cleanup)
 ├── diagnose-cors.sh                # Diagnostic CORS SecureVault
 ├── diagnose-registration.ps1       # Diagnostic registration
 ├── diagnose-registration.sh        # Diagnostic registration (shell)
@@ -17,11 +23,15 @@ scripts/
 ├── docs-generate.sh                # Générer docs (Unix)
 ├── fix-network-issue.sh            # Corriger problèmes réseau
 ├── generate-secrets.ps1            # Générer secrets et clés
+├── redeploy-portfolio.ps1          # Redéployer portfolio
+├── redeploy-portfolio.sh           # Redéployer portfolio (shell)
 ├── rotate-secrets.sh               # Rotation des secrets
 ├── run-migrations.sh               # Exécuter migrations DB
 ├── security-check.sh               # Audit sécurité
+├── setup-registry-prod-secrets.sh  # Setup secrets Registry prod
 ├── setup-ssh-key.sh                # Configuration SSH
-├── validate-automation.sh           # Valider workflows CI/CD
+├── test-registry.sh                # Tester Registry
+├── validate-automation.sh          # Valider workflows CI/CD
 └── README.md                       # Ce fichier
 ```
 
@@ -412,7 +422,171 @@ chmod +x scripts/run-migrations.sh
 
 ---
 
-## 📝 Utilisation Courante
+## � Scripts Docker Registry
+
+### `deploy-registry.sh` - Déployer Docker Registry
+
+Déploie le Docker Registry sur le VPS.
+
+```bash
+chmod +x scripts/deploy-registry.sh
+
+# Déployer production
+./scripts/deploy-registry.sh --env production
+
+# Déployer staging
+./scripts/deploy-registry.sh --env staging
+```
+
+**Actions**:
+1. Crée structure de dossiers
+2. Configure htpasswd auth
+3. Lance docker-compose
+4. Vérifie health check
+5. Configure Traefik routing
+
+---
+
+### `cleanup-registry-images.sh` - Cleanup Images Registry
+
+Nettoie les anciennes images du Docker Registry.
+
+```bash
+chmod +x scripts/cleanup-registry-images.sh
+
+# Cleanup automatique
+./scripts/cleanup-registry-images.sh
+
+# Dry-run (voir ce qui serait supprimé)
+./scripts/cleanup-registry-images.sh --dry-run
+
+# Cleanup images > 60 jours
+./scripts/cleanup-registry-images.sh --days 60
+```
+
+**Supprime**:
+- Images non-taguées
+- Images plus anciennes que X jours
+- Layers orphelins
+
+**Planification**:
+```bash
+# Cleanup hebdomadaire (cron)
+0 3 * * 0 /path/to/scripts/cleanup-registry-images.sh
+```
+
+---
+
+### `test-registry.sh` - Tester Docker Registry
+
+Teste le bon fonctionnement du Docker Registry.
+
+```bash
+chmod +x scripts/test-registry.sh
+
+# Test complet
+./scripts/test-registry.sh
+
+# Test production
+./scripts/test-registry.sh --env production
+
+# Test staging
+./scripts/test-registry.sh --env staging
+```
+
+**Tests**:
+- Connexion registry API
+- Authentication (htpasswd)
+- Push/Pull test image
+- UI accessible
+- HTTPS/TLS valide
+
+---
+
+### `setup-registry-prod-secrets.sh` - Setup Secrets Registry
+
+Configure les secrets pour Docker Registry production.
+
+```bash
+chmod +x scripts/setup-registry-prod-secrets.sh
+
+# Setup production
+./scripts/setup-registry-prod-secrets.sh
+```
+
+**Configure**:
+- htpasswd credentials
+- TLS certificates
+- Storage backend
+- Auth tokens
+
+---
+
+## 📦 Scripts Portfolio
+
+### `redeploy-portfolio.ps1` / `.sh` - Redéployer Portfolio
+
+Redéploie le portfolio (staging ou production).
+
+```powershell
+# PowerShell version
+.\scripts\redeploy-portfolio.ps1 -Environment staging
+.\scripts\redeploy-portfolio.ps1 -Environment production
+
+# Shell version
+./scripts/redeploy-portfolio.sh staging
+./scripts/redeploy-portfolio.sh production
+```
+
+**Actions**:
+1. Pull latest code
+2. Build assets
+3. Sync vers VPS
+4. Reload nginx
+5. Validate deployment
+
+---
+
+### `destroy-portfolio.ps1` - Détruire Portfolio
+
+Supprime complètement le portfolio (cleanup).
+
+```powershell
+# Détruire staging
+.\scripts\destroy-portfolio.ps1 -Environment staging
+
+# Détruire production (confirmation requise)
+.\scripts\destroy-portfolio.ps1 -Environment production -Force
+```
+
+**⚠️ Attention**: Action destructive, backup avant d'exécuter.
+
+---
+
+## 🔍 Scripts Réseau
+
+### `check-traefik-network.sh` - Vérifier Réseau Traefik
+
+Vérifie la configuration réseau Docker de Traefik.
+
+```bash
+chmod +x scripts/check-traefik-network.sh
+
+# Check réseau
+./scripts/check-traefik-network.sh
+```
+
+**Vérifie**:
+- Réseau `web` existe
+- Containers connectés
+- Configuration réseau Traefik
+- Routing rules
+
+**Fix automatique**: Recrée le réseau si problème détecté.
+
+---
+
+## �📝 Utilisation Courante
 
 ### Préparation VPS Initial
 

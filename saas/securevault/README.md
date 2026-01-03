@@ -119,7 +119,7 @@ Application SaaS de démonstration pour le portfolio DevSecOps de **Christophe F
 
 - Docker 20.10+
 - Docker Compose v2+
-- Traefik configuré (voir `/docs/DEPLOYMENT.md`)
+- Traefik configuré (voir [base-infra](../../base-infra/README.md))
 - DNS configuré pour sous-domaines:
   - `vault.freijstack.com` → Frontend
   - `vault-api.freijstack.com` → Backend API
@@ -610,7 +610,6 @@ Application de démonstration pour portfolio DevSecOps.
 
 ---
 
-**Version**: 1.0.0  
-**Dernière mise à jour**: Décembre 2025  
+**Version**: 1.1.0  
+**Dernière mise à jour**: Janvier 2026  
 **Status**: ✅ Production Ready
-2025-12-29 6:11:28 PM

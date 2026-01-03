@@ -2,16 +2,36 @@
 
 Documentation complète des workflows CI/CD et automatisations du projet.
 
+**Dernière mise à jour**: Janvier 2026  
+**Version**: 2.0.0  
+**Workflows actifs**: 21+
+
 ---
 
-## 📋 Liste des Workflows
+## 📋 Liste Complète des Workflows
 
 | Workflow | Fichier | Déclencheur | Durée | Description |
 |----------|---------|-------------|-------|-------------|
-| **Infrastructure Deploy** | [infrastructure-deploy.yml](infrastructure-deploy.yml) | Push master/develop (base-infra/*), manual | ~3-5 min | Validate, test, deploy Traefik + n8n + portfolio |
-| **SecureVault Deploy** | [securevault-deploy.yml](securevault-deploy.yml) | Push develop (auto), manual (prod) | ~5-7 min | Cleanup, test, build, deploy SecureVault sur VPS |
-| **Secret Rotation** | [rotate-secrets.yml](rotate-secrets.yml) | Schedule (1er du mois), manual | ~3-5 min | Rotation automatique des secrets (DB_PASSWORD, JWT_SECRET, etc.) |
-| **PR Title Automation** | [pr-title-automation.yml](pr-title-automation.yml) | Ouverture PR | ~10s | Auto-format titre PR avec Conventional Commits |
+| **🏗️ Infrastructure Deploy** | [infrastructure-deploy.yml](infrastructure-deploy.yml) | Push master/develop (base-infra/*), manual | ~3-5 min | Validate, test, deploy Traefik + n8n + portfolio |
+| **🔐 SecureVault Deploy** | [securevault-deploy.yml](securevault-deploy.yml) | Push develop (auto), manual (prod) | ~5-7 min | Cleanup, test, build, deploy SecureVault sur VPS |
+| **🐳 Registry Deploy** | [registry-deploy.yml](registry-deploy.yml) | Push master (registry/*), manual | ~3-4 min | Deploy Docker Registry + Joxit UI |
+| **🧹 Registry Cleanup** | [registry-cleanup.yml](registry-cleanup.yml) | Schedule (weekly), manual | ~2-3 min | Cleanup anciennes images Docker Registry |
+| **🌐 Portfolio Deploy** | [portfolio-deploy.yml](portfolio-deploy.yml) | Push master/develop (portfolio/*) | ~4-6 min | Build, test, deploy portfolio production/staging |
+| **🔨 Portfolio Build** | [portfolio-build.yml](portfolio-build.yml) | PR portfolio/* | ~2-3 min | Build et test portfolio (sans deploy) |
+| **🔄 Secret Rotation** | [rotate-secrets.yml](rotate-secrets.yml) | Schedule (1er du mois), manual | ~3-5 min | Rotation automatique des secrets |
+| **💾 Backup** | [backup.yml](backup.yml) | Schedule (daily 2AM), manual | ~5-10 min | Backup databases + certificats → S3 + Azure |
+| **🔍 CodeQL Analysis** | [codeql.yml](codeql.yml) | Push, PR, schedule | ~10-15 min | SAST security scanning |
+| **🔐 Security Check** | [securitycheck.yml](securitycheck.yml) | Push, PR | ~3-5 min | Gitleaks + secret detection |
+| **📊 Security Check Schedule** | [securitycheck-schedule.yml](securitycheck-schedule.yml) | Schedule (daily) | ~3-5 min | Scan quotidien automatique |
+| **🎯 Security Score** | [security-score.yml](security-score.yml) | Schedule (weekly) | ~5 min | Calcul score sécurité global |
+| **✅ Lint** | [lint.yml](lint.yml) | Push, PR | ~1-2 min | Linting markdown, YAML, code |
+| **❤️ Healthcheck Prod** | [healthcheck-prod.yml](healthcheck-prod.yml) | Schedule (every 15min) | ~30s | Monitoring production 24/7 |
+| **💚 Healthcheck Dev** | [healthcheck-dev.yml](healthcheck-dev.yml) | Schedule (hourly) | ~30s | Monitoring staging |
+| **🩺 Healthcheck Post-Deploy** | [healthcheck-postdeploy.yml](healthcheck-postdeploy.yml) | After deploy | ~1 min | Validation post-déploiement |
+| **📝 Docs Generate** | [docs-generate.yml](docs-generate.yml) | Push docs/*, manual | ~2-3 min | Génération automatique documentation |
+| **🏷️ Release Automation** | [release-automation.yml](release-automation.yml) | Push master | ~2-3 min | Semantic versioning + changelog |
+| **📋 Release Changelog PR** | [release-changelog-pr.yml](release-changelog-pr.yml) | Manual | ~1 min | Créer PR avec changelog draft |
+| **🤖 PR Title Automation** | [pr-title-automation.yml](pr-title-automation.yml) | Ouverture PR | ~10s | Auto-format titre PR (Conventional Commits) |
 
 ---
 
@@ -533,6 +553,17 @@ jobs:
 
 ## 📝 Changelog Workflows
 
+### Version 2.0.0 (2026-01-03) 🎉
+- ✨ Ajout workflows Docker Registry (deploy + cleanup)
+- ✨ Ajout workflows Portfolio (build + deploy séparés)
+- ✨ Ajout workflows Backup automatisé (S3 + Azure)
+- ✨ Ajout Security Score workflow
+- ✨ Ajout workflows Health checks (prod + dev + post-deploy)
+- ✨ Ajout Docs Generate workflow
+- ✨ Ajout Release workflows (automation + changelog PR)
+- 📊 Documentation complète de tous les workflows (21+)
+- 🔧 Mise à jour vers Janvier 2026
+
 ### Version 1.2.0 (2025-12-28)
 - ✨ Ajout workflow PR title automation
 - 🔧 Simplification template PR (10 checks critiques)
@@ -550,5 +581,17 @@ jobs:
 ---
 
 **Auteur** : Christophe FREIJANES  
-**Dernière mise à jour** : Décembre 2025  
-**Version** : 1.2.0
+**Dernière mise à jour** : Janvier 2026  
+**Version** : 2.0.0
+
+**📊 Statistiques**:
+- 21+ workflows actifs
+- ~50 jobs au total
+- Support production + staging
+- Monitoring 24/7 activé
+- Security scanning quotidien
+
+**📚 Documentation Complète**:
+- [Architecture CI/CD](../../docs/CI_CD_ARCHITECTURE.md) - Diagramme Mermaid + détails
+- [Guide Automation](../../docs/AUTOMATION_GUIDE.md) - Guide complet automatisation
+- [Deployment Guide](../../docs/DEPLOYMENT.md) - Procédures de déploiement
