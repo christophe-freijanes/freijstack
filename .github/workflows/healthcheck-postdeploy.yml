@@ -22,7 +22,7 @@ jobs:
     name: 🩺 Run after deploy
     if: >
       github.event.workflow_run.conclusion == 'success' &&
-      (github.event.workflow_run.head_branch == 'master' || github.event.workflow_run.head_branch == 'develop')
+      github.event.workflow_run.head_branch == 'master'
     runs-on: ubuntu-latest
     timeout-minutes: 12
 
@@ -38,8 +38,76 @@ jobs:
           echo "- Run: ${{ github.event.workflow_run.html_url }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Commit: \`${{ github.event.workflow_run.head_sha }}\`" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: ⏳ Cooldown (warm-up after deploy)
-        run: sleep 75
+      - name: ⏳ Smart Cooldown (wait until service ready)
+        run: |
+          set -euo pipefail
+
+          MAX_WAIT=90
+          INTERVAL=5
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          WORKFLOW="${{ github.event.workflow_run.name }}"
+
+          # Determine which URL to probe based on deployed service
+          case "$WORKFLOW" in
+            *Portfolio*)
+              if [ "$BRANCH" = "master" ]; then
+                PROBE_URL="https://portfolio.freijstack.com"
+              else
+                PROBE_URL="https://portfolio-staging.freijstack.com"
+              fi
+              ;;
+            *SecureVault*)
+              if [ "$BRANCH" = "master" ]; then
+                PROBE_URL="https://vault.freijstack.com"
+              else
+                PROBE_URL="https://vault-staging.freijstack.com"
+              fi
+              ;;
+            *Registry*)
+              if [ "$BRANCH" = "master" ]; then
+                PROBE_URL="https://registry.freijstack.com/v2/"
+              else
+                PROBE_URL="https://registry-staging.freijstack.com/v2/"
+              fi
+              ;;
+            *Infrastructure*)
+              PROBE_URL="https://portfolio.freijstack.com"
+              ;;
+            *)
+              PROBE_URL="https://portfolio.freijstack.com"
+              ;;
+          esac
+
+          echo "🔍 Probing: $PROBE_URL"
+          echo "⏳ Max wait: ${MAX_WAIT}s (interval: ${INTERVAL}s)"
+
+          START_TIME=$(date +%s)
+
+          for _ in $(seq 1 $((MAX_WAIT / INTERVAL))); do
+            ELAPSED=$(($(date +%s) - START_TIME))
+
+            # Try to reach the service (accept any 2xx, 3xx, 401 for registry)
+            HTTP_CODE=$(curl -sf -o /dev/null -w "%{http_code}" \
+              --connect-timeout 5 \
+              --max-time 10 \
+              "$PROBE_URL" 2>/dev/null || echo "000")
+
+            case "$HTTP_CODE" in
+              2*|3*|401)
+                echo "✅ Service ready after ${ELAPSED}s (HTTP $HTTP_CODE)"
+                echo "" >> "$GITHUB_STEP_SUMMARY"
+                echo "- ⚡ Service warm-up: **${ELAPSED}s**" >> "$GITHUB_STEP_SUMMARY"
+                exit 0
+                ;;
+              *)
+                echo "⏳ Waiting... ${ELAPSED}s (HTTP $HTTP_CODE)"
+                sleep $INTERVAL
+                ;;
+            esac
+          done
+
+          echo "⚠️ Timeout after ${MAX_WAIT}s - proceeding anyway"
+          echo "- ⚠️ Service warm-up: **timeout (${MAX_WAIT}s)** - proceeding anyway" >> "$GITHUB_STEP_SUMMARY"
 
       - name: 🌐 Check Public URLs (with retries)
         run: |

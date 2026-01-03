@@ -5,9 +5,8 @@ on:
     branches:
       - master
       - develop
-    paths:
-      - 'saas/registry/**'
-      - '.github/workflows/registry-deploy.yml'
+    # Déclenche sur TOUS les pushs sur master/develop
+    # Permet le déploiement production après merge develop → master
   pull_request:
     branches:
       - master

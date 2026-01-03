@@ -374,14 +374,22 @@ Leaks > 5    → 4/10 (rouge)
 
 #### 7.3. Post-Deploy (`healthcheck-postdeploy.yml`)
 
-**Rôle**: Validation immédiate après déploiement
+**Rôle**: Validation immédiate après déploiement production
 
 **Triggers**:
-- Workflow run completed (portfolio, securevault, harbor)
+- Workflow run completed (portfolio, securevault, registry)
+- **Uniquement sur master** (production)
+- Pas de déclenchement sur develop (staging)
+
+**Smart Cooldown**:
+- Probe automatique toutes les 5s jusqu'à ce que le service soit prêt
+- Maximum 90s d'attente
+- Détection du service selon le workflow (Portfolio/SecureVault/Registry)
+- Exit immédiat quand le service répond (économise 10-25s)
 
 **Vérifications**:
-- HTTP status codes
-- Response times < 2s
+- HTTP status codes (2xx/3xx/401 = succès)
+- Response times optimisées
 - SSL certificates valides
 - Content-Type headers
 

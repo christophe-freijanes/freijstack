@@ -402,16 +402,18 @@ workflow_dispatch:  # Manuel avec option auto-heal
 ```bash
 URL: https://vault.freijstack.com
 Expected: HTTP 200
-Timeout: 5s
-Retry: 3 fois
+Timeout: 30s max (10s connect)
+Retry: 2 fois par curl + boucles 3/8 tentatives
+Warm-up detection: HTTP 502/503/000 → +5s grace period
 ```
 
 #### 2. Backend API Health
 ```bash
 URL: https://vault-api.freijstack.com/api/health
 Expected: HTTP 200 + JSON {"status": "ok"}
-Timeout: 5s
-Retry: 3 fois
+Timeout: 30s max (10s connect)
+Retry: 2 fois par curl + boucles 3/8 tentatives
+Warm-up detection: HTTP 502/503/000 → +5s grace period
 ```
 
 #### 3. Database Health
@@ -421,6 +423,13 @@ Expected: Exit code 0
 Timeout: 3s
 Retry: 3 fois
 ```
+
+**Optimisations anti-timeout** (v1.2):
+- `--connect-timeout 10s` : détection rapide des vrais échecs TCP
+- `--max-time 30s` : timeout total réduit (vs 60s)
+- Délais inter-tentatives augmentés : 8s/15s (vs 5s/10s)
+- Détection smart warm-up : 502/503/000 = service démarrant, pas échec
+- Grace period : +5s pour services en cours de démarrage
 
 **Auto-Healing** :
 
@@ -464,6 +473,10 @@ workflow_dispatch:
 - Moins fréquent (coût optimisé)
 - Auto-healing optionnel (paramètre manuel)
 - Alertes moins prioritaires
+- **Mêmes optimisations curl** que production (v1.2) :
+  - Timeouts réduits : 10s connect, 30s max
+  - Délais inter-tentatives : 8s/15s
+  - Détection warm-up : 502/503/000 + grace +5s
 
 ---
 
