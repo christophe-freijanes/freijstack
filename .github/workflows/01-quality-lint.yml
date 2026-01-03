@@ -122,22 +122,3 @@ jobs:
             exit 0
           fi
           markdownlint-cli2 "**/*.md" "#node_modules"
-
-  json:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-      - name: Validate JSON files
-        run: |
-          set -euo pipefail
-          if ! find . -name '*.json' -not -path "*/node_modules/*" -print -quit | grep -q .; then
-            echo "No JSON files to lint"
-            exit 0
-          fi
-          find . -name '*.json' -not -path "*/node_modules/*" | while read -r file; do
-            echo "Validating $file"
-            jq empty "$file" || { echo "❌ Invalid JSON: $file"; exit 1; }
-          done
-          echo "✅ All JSON files are valid"

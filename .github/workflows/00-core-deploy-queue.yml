@@ -179,7 +179,7 @@ jobs:
             fi
 
             # Create required directories for volume bind mounts (if they don't exist)
-            if [ -d "data" ] || grep -q "device: ./data" "$COMPOSE_FILE" 2>/dev/null; then
+            if grep -q "device: ./data" "$COMPOSE_FILE" 2>/dev/null; then
               echo "📁 Ensuring data directory exists..."
               mkdir -p data
             fi
