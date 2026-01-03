@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.10.10](https://github.com/christophe-freijanes/freijstack/compare/v1.10.9...v1.10.10) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* use latest-beta tag for staging and latest for production deployments ([ddc0673](https://github.com/christophe-freijanes/freijstack/commit/ddc0673232767592cfad30fa3085c0e7a01a0185))
+
 ## [1.10.9](https://github.com/christophe-freijanes/freijstack/compare/v1.10.8...v1.10.9) (2026-01-03)
 
 ### 🐛 Bug Fixes
