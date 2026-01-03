@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.15.0](https://github.com/christophe-freijanes/freijstack/compare/v1.14.0...v1.15.0) (2026-01-03)
+
+### 🚀 Features
+
+* **healthcheck-dev:** add portfolio staging monitoring and Traefik auto-healing ([bf0514c](https://github.com/christophe-freijanes/freijstack/commit/bf0514c3224f57c2657975db53a12cdda53a0b13))
+
 ## [1.14.0](https://github.com/christophe-freijanes/freijstack/compare/v1.13.0...v1.14.0) (2026-01-03)
 
 ### 🚀 Features
