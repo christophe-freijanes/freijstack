@@ -125,7 +125,8 @@ jobs:
 
           # Format: "url|allowed_codes|label"
           URLS=(
-            "https://portfolio.freijstack.com/|200,301,302|Portfolio"
+            "https://portfolio.freijstack.com/|200,301,302|Portfolio (production)"
+            "https://portfolio-staging.freijstack.com/|200,301,302|Portfolio (staging)"
             "https://christophe-freijanes.github.io/freijstack/|200,301,302|GitHub Pages"
             "https://registry.freijstack.com/v2/|401,200|Docker Registry API (production)"
             "https://registry-ui.freijstack.com/|200,301,302|Docker Registry UI (production)"
@@ -306,6 +307,41 @@ jobs:
             -o UserKnownHostsFile=~/.ssh/known_hosts \
             "${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}" "echo '✅ SSH OK'"
 
+      # ---------------------------
+      # 🌐 NETWORK — Traefik connectivity check
+      # ---------------------------
+      - name: 🌐 Check Traefik Network Connectivity
+        id: traefik_network
+        run: |
+          set -euo pipefail
+          echo "## 🌐 Traefik Network" >> "$GITHUB_STEP_SUMMARY"
+
+          SSH="ssh -i ~/.ssh/deploy_key \
+            -o BatchMode=yes \
+            -o ConnectTimeout=10 \
+            -o ServerAliveInterval=5 \
+            -o ServerAliveCountMax=2 \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile=~/.ssh/known_hosts \
+            ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+
+          echo "🔍 Checking if Traefik is connected to freijstack network..."
+
+          network_check=$(
+            $SSH "docker network inspect freijstack 2>/dev/null | grep -q '\"Name\": \"traefik\"' && echo 'connected' || echo 'disconnected'"
+          )
+
+          if [ "$network_check" = "connected" ]; then
+            echo "✅ Traefik connected to freijstack network"
+            echo "status=connected" >> "$GITHUB_OUTPUT"
+            echo "- ✅ Traefik connected to freijstack network" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "❌ Traefik NOT connected to freijstack network"
+            echo "status=disconnected" >> "$GITHUB_OUTPUT"
+            echo "- ❌ Traefik disconnected from freijstack network" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
       - name: 🗄️ Check Database Connectivity (pg_isready)
         id: database
         run: |
@@ -408,6 +444,23 @@ jobs:
             PROD_DIR="/srv/www/securevault/saas/securevault"
             STAMP_FILE="/tmp/securevault_last_heal"
 
+            # ---------------------------
+            # 🌐 Fix Traefik network connectivity first
+            # ---------------------------
+            echo "🔍 Checking Traefik network connectivity..."
+            if ! docker network inspect freijstack 2>/dev/null | grep -q '"Name": "traefik"'; then
+              echo "⚠️  Traefik not connected to freijstack network, fixing..."
+              docker network connect freijstack traefik 2>/dev/null || echo "Already connected"
+              docker restart traefik
+              sleep 10
+              echo "✅ Traefik reconnected to freijstack network"
+            else
+              echo "✅ Traefik already connected to freijstack network"
+            fi
+
+            # ---------------------------
+            # 🔄 Restart SecureVault services
+            # ---------------------------
             cd "$PROD_DIR"
 
             echo "📊 Current container status:"
