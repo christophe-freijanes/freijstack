@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.18.0](https://github.com/christophe-freijanes/freijstack/compare/v1.17.0...v1.18.0) (2026-01-03)
+
+### 🚀 Features
+
+* enhance linting configurations for multiple languages and add markdown and JSON validation ([e2b0c7f](https://github.com/christophe-freijanes/freijstack/commit/e2b0c7f575242c929b9fb0a33cbe34604fc5f20d))
+
 ## [1.17.0](https://github.com/christophe-freijanes/freijstack/compare/v1.16.1...v1.17.0) (2026-01-03)
 
 ### 🚀 Features
