@@ -6,6 +6,30 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.21.1](https://github.com/christophe-freijanes/freijstack/compare/v1.21.0...v1.21.1) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* Add SSH_OPTIONS persistence and ensure defaults in deployment workflow ([4dea164](https://github.com/christophe-freijanes/freijstack/commit/4dea164c038fd3af150ed1387121af5780f0c5d4))
+
+### 📚 Documentation
+
+* auto-generate diagrams and index [skip ci] ([8705987](https://github.com/christophe-freijanes/freijstack/commit/8705987771583c02abb63a00e85fa8baf705194f))
+* auto-generate diagrams and index [skip ci] ([7914980](https://github.com/christophe-freijanes/freijstack/commit/79149809d8159b825e336ea02067d86cb891db5f))
+* auto-generate diagrams and index [skip ci] ([e4811f4](https://github.com/christophe-freijanes/freijstack/commit/e4811f497ea95552983dd03e63afc406d83192b2))
+* auto-generate diagrams and index [skip ci] ([6c7de9c](https://github.com/christophe-freijanes/freijstack/commit/6c7de9c7bc05cb7f5682c5628c56a863957f714d))
+* auto-generate diagrams and index [skip ci] ([756bb88](https://github.com/christophe-freijanes/freijstack/commit/756bb883918cc1b55661cf998f2d9504c710ffec))
+* auto-generate diagrams and index [skip ci] ([cadebf8](https://github.com/christophe-freijanes/freijstack/commit/cadebf8061226af300ad1fd96685f9303dcf496c))
+* auto-generate diagrams and index [skip ci] ([881e638](https://github.com/christophe-freijanes/freijstack/commit/881e638286b57853c6f0439f06befd6d07289667))
+
+### 🔧 Chores
+
+* clean up comments and paths in registry deploy workflow ([5b377d7](https://github.com/christophe-freijanes/freijstack/commit/5b377d7d56862ddfef694a5545dd5087240af0ed))
+* enhance health check workflows with smart cooldown and timeout adjustments ([019d618](https://github.com/christophe-freijanes/freijstack/commit/019d61864dcb72cdf2760539e7eb6f3515a08078))
+* implement smart cooldown for post-deploy health check ([0ce0b32](https://github.com/christophe-freijanes/freijstack/commit/0ce0b3266af3393d124584d1a259bedff56143e7))
+* update healthcheck cooldown duration and enhance ops documentation ([66d20fe](https://github.com/christophe-freijanes/freijstack/commit/66d20fe96db0d7a414c20209dbf7e9d7e770a4ca))
+* update securevault deploy workflow comments for clarity ([270928c](https://github.com/christophe-freijanes/freijstack/commit/270928ce55e491395f0a512811304ebfeb6b4b78))
+
 ## [1.21.0](https://github.com/christophe-freijanes/freijstack/compare/v1.20.1...v1.21.0) (2026-01-03)
 
 ### 🚀 Features
