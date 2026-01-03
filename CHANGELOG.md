@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.12.0](https://github.com/christophe-freijanes/freijstack/compare/v1.11.0...v1.12.0) (2026-01-03)
+
+### 🚀 Features
+
+* add PowerShell scripts for portfolio destruction and redeployment ([5d3e311](https://github.com/christophe-freijanes/freijstack/commit/5d3e311ea205a7b72902ff240668688551fa175e))
+
 ## [1.11.0](https://github.com/christophe-freijanes/freijstack/compare/v1.10.14...v1.11.0) (2026-01-03)
 
 ### 🚀 Features
