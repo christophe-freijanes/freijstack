@@ -6,6 +6,16 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.21.5](https://github.com/christophe-freijanes/freijstack/compare/v1.21.4...v1.21.5) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* update docker compose file paths for staging and production deployments ([1a0d994](https://github.com/christophe-freijanes/freijstack/commit/1a0d994fa0c54bbb4aaf7a424b709e83b40f01d1))
+
+### 🔧 Chores
+
+* remove lint workflow configuration ([eee3be1](https://github.com/christophe-freijanes/freijstack/commit/eee3be125f35a46c0e356a5a3005879f667c871f))
+
 ## [1.21.4](https://github.com/christophe-freijanes/freijstack/compare/v1.21.3...v1.21.4) (2026-01-03)
 
 ### 🐛 Bug Fixes
