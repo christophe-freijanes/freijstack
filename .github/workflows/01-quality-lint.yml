@@ -16,7 +16,7 @@ jobs:
           set -euo pipefail
           curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash | bash -s latest /usr/local/bin
       - name: Run actionlint
-        run: actionlint
+        run: actionlint -config-file .github/actionlint.yaml
 
   yamllint:
     runs-on: ubuntu-latest
