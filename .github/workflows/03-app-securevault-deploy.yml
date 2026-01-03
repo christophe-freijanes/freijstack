@@ -1,0 +1,55 @@
+name: 🔐 SaaS • SecureVault
+
+on:
+  push:
+    branches: [develop, master]
+  pull_request:
+    branches: [develop, master]
+    paths:
+      - 'saas/securevault/**'
+      - '.github/workflows/03-app-securevault-deploy.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy-staging:
+    name: 🔒 Full Pipeline (Staging)
+    if: github.ref == 'refs/heads/develop' || github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/00-core-full-deploy.yml
+    with:
+      app_name: 'securevault'
+      environment: 'staging'
+      deploy_dir: '/srv/www/securevault-staging'
+      project_path: 'saas/securevault'
+      docker_compose_file: 'docker-compose.yml'
+      run_migrations: true
+      skip_security: false
+      skip_lint: false
+    secrets:
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
+      VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
+
+  deploy-production:
+    name: 🔒 Full Pipeline (Production)
+    if: github.ref == 'refs/heads/master' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    uses: ./.github/workflows/00-core-full-deploy.yml
+    with:
+      app_name: 'securevault'
+      environment: 'production'
+      deploy_dir: '/srv/www/securevault'
+      project_path: 'saas/securevault'
+      docker_compose_file: 'docker-compose.yml'
+      run_migrations: true
+    secrets:
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
+      VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}

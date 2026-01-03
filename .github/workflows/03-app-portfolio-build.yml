@@ -7,7 +7,7 @@ on:
       - develop
     paths:
       - 'saas/portfolio/**'
-      - '.github/workflows/portfolio-build.yml'
+      - '.github/workflows/03-app-portfolio-build.yml'
   workflow_dispatch:
     inputs:
       environment:
@@ -33,7 +33,7 @@ concurrency:
 jobs:
   security:
     name: 🛡️ Security Scan
-    uses: ./.github/workflows/securitycheck.yml
+    uses: ./.github/workflows/01-security-gitleaks.yml
     permissions:
       contents: read
       actions: read

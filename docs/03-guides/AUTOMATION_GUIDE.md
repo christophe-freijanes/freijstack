@@ -283,7 +283,7 @@ Backend API: https://vault-api.freijstack.com
 
 ## 🚀 Déploiements Automatiques
 
-### Workflow: `securevault-deploy.yml`
+### Workflow: `03-app-securevault-deploy.yml`
 
 **Triggers** :
 ```yaml
@@ -385,7 +385,7 @@ Duration: ~10s
 
 ## 🏥 Health Checks & Auto-Healing
 
-### Workflow: `healthcheck-prod.yml`
+### Workflow: `05-health-prod.yml`
 
 **Surveillance Production 24/7**
 
@@ -458,7 +458,7 @@ docker compose up -d
 - 📊 Log dans GitHub Actions summary
 - 📈 Métriques Prometheus (si configuré)
 
-### Workflow: `healthcheck-dev.yml`
+### Workflow: `05-health-dev.yml`
 
 **Surveillance Staging**
 
@@ -567,14 +567,14 @@ docker compose up -d
 **Option 3: Restore Backup**
 ```bash
 # Restaurer depuis backup quotidien
-# Voir workflow backup.yml
+# Voir workflow 06-maint-backup.yml
 ```
 
 ### 4. Secrets Management
 
 **Rotation Automatique** :
 
-Workflow: `rotate-secrets.yml`
+Workflow: `06-maint-rotate-secrets.yml`
 ```yaml
 schedule:
   - cron: '0 2 1 * *'  # 1er du mois à 2h
@@ -694,11 +694,11 @@ docker exec -it securevault-postgres psql -U securevault -d securevault -c "SELE
 - [MONITORING.md](./MONITORING.md) - Setup monitoring Prometheus/Grafana
 
 ### Workflows GitHub Actions
-- `.github/workflows/securevault-deploy.yml` - Déploiement SecureVault
-- `.github/workflows/healthcheck-prod.yml` - Health checks production
-- `.github/workflows/healthcheck-dev.yml` - Health checks staging
-- `.github/workflows/backup.yml` - Backups automatiques
-- `.github/workflows/rotate-secrets.yml` - Rotation secrets
+- `.github/workflows/03-app-securevault-deploy.yml` - Déploiement SecureVault
+- `.github/workflows/05-health-prod.yml` - Health checks production
+- `.github/workflows/05-health-dev.yml` - Health checks staging
+- `.github/workflows/06-maint-backup.yml` - Backups automatiques
+- `.github/workflows/06-maint-rotate-secrets.yml` - Rotation secrets
 
 ### Commandes Utiles
 

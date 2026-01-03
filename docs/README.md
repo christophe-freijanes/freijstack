@@ -47,21 +47,19 @@ Index de la documentation technique du projet FreijStack.
 | 📋 **Documentation Audit** | 🆕 Audit + plan d'optimisation | [DOCUMENTATION_AUDIT.md](DOCUMENTATION_AUDIT.md) |
 
 ---
-
 ## 🎯 Par Thématique
 
 ### Infrastructure & DevOps
 - [Integration Guide](../base-infra/BASE_INTEGRATION.md) - Guide complet d'intégration (Traefik + apps)
 - [Infrastructure Base](../base-infra/README.md) - Docker Compose, Traefik
-- [Structure Docker](DOCKER_STRUCTURE.md) - Organisation containers, volumes, réseaux
-- [Architecture Technique Complète](architecture.md) - Infrastructure, CI/CD, sécurité, monitoring
-- [Guide Déploiement VPS](DEPLOYMENT.md) - Installation complète (Ubuntu, Docker, Traefik, DNS)
-- [SecureVault CI/CD Pipeline](SECUREVAULT_DEPLOYMENT.md) - Déploiement automatisé SecureVault
-- [Automatisation Complète](AUTOMATION.md) - Zéro-intervention, staging éphémère, production 24/7
-- [Secret Rotation Automation](SECRET_ROTATION.md) - Rotation automatisée des secrets
-- [Guide Monitoring](MONITORING.md) - Prometheus, Grafana, Loki, alertes
-- [Configuration Docker Compose](architecture.md#34-docker-compose-configuration)
-- [Pipeline CI/CD](architecture.md#4-pipeline-cicd)
+- [Structure Docker](01-architecture/DOCKER_STRUCTURE.md) - Organisation containers, volumes, réseaux
+- [Architecture Technique Complète](01-architecture/architecture.md) - Infrastructure, CI/CD, sécurité, monitoring
+- [Guide Déploiement VPS](02-deployment/DEPLOYMENT.md) - Installation complète (Ubuntu, Docker, Traefik, DNS)
+- [SecureVault CI/CD Pipeline](02-deployment/SECUREVAULT_DEPLOYMENT.md) - Déploiement automatisé SecureVault
+- [Automatisation Complète](03-guides/AUTOMATION_GUIDE.md) - Zéro-intervention, staging éphémère, production 24/7
+- [Guide Monitoring](03-guides/MONITORING.md) - Prometheus, Grafana, Loki, alertes
+- [Configuration Docker Compose](01-architecture/architecture.md#34-docker-compose-configuration)
+- [Pipeline CI/CD](01-architecture/architecture.md#4-pipeline-cicd)
 - [GitHub Actions Workflows](../.github/workflows/README.md) - Documentation complète des workflows
 
 ### Backend & SaaS Applications
@@ -69,19 +67,18 @@ Index de la documentation technique du projet FreijStack.
 - [Docker Registry](../saas/registry/README.md) - Registre Docker privé avec UI Joxit
 - [Portfolio Web](../saas/portfolio/README.md) - Portfolio multilingue responsive
 - [Applications SaaS Overview](../saas/README.md) - Vue d'ensemble toutes les apps
-- [SecureVault CI/CD Pipeline](SECUREVAULT_DEPLOYMENT.md) - Déploiement automatisé SecureVault
-- [Secret Rotation Automation](SECRET_ROTATION.md) - Rotation automatisée des secrets
+- [SecureVault CI/CD Pipeline](02-deployment/SECUREVAULT_DEPLOYMENT.md) - Déploiement automatisé SecureVault
 
 ### Sécurité
-- [Mesures de Sécurité](architecture.md#5-sécurité--conformité) - Politiques et conformité
-- [Scans Automatiques](architecture.md#job-3-security-scanning-) - CodeQL, Gitleaks, Trivy
-- [Conformité RGPD/WCAG](architecture.md#52-conformité--standards) - Standards et réglementations
+- [Mesures de Sécurité](01-architecture/architecture.md#5-sécurité--conformité) - Politiques et conformité
+- [Scans Automatiques](01-architecture/architecture.md#job-3-security-scanning-) - CodeQL, Gitleaks, Trivy
+- [Conformité RGPD/WCAG](01-architecture/architecture.md#52-conformité--standards) - Standards et réglementations
 
 ### Maintenance & Support
-- [Procédures de Maintenance](architecture.md#6-maintenance--monitoring) - Maintenance régulière
-- [Guide Troubleshooting](TROUBLESHOOTING.md) - Diagnostic des problèmes
-- [Disaster Recovery](architecture.md#64-disaster-recovery) - Plan de récupération
-- [Roadmap Évolutions](architecture.md#7-évolutions-futures) - Futures améliorations
+- [Procédures de Maintenance](01-architecture/architecture.md#6-maintenance--monitoring) - Maintenance régulière
+- [Guide Troubleshooting](04-operations/TROUBLESHOOTING.md) - Diagnostic des problèmes
+- [Disaster Recovery](01-architecture/architecture.md#64-disaster-recovery) - Plan de récupération
+- [Roadmap Évolutions](01-architecture/architecture.md#7-évolutions-futures) - Futures améliorations
 
 ---
 

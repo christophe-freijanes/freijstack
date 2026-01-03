@@ -403,11 +403,11 @@ Voir **[BASE_INTEGRATION.md](./BASE_INTEGRATION.md)** pour :
 
 ## 📚 Documentation Complète
 
-- **Architecture Générale**: [../docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md)
-- **CI/CD Pipeline**: [../docs/CI_CD_ARCHITECTURE.md](../docs/CI_CD_ARCHITECTURE.md)
-- **Guide Déploiement**: [../docs/DEPLOYMENT.md](../docs/DEPLOYMENT.md)
-- **Monitoring**: [../docs/MONITORING.md](../docs/MONITORING.md)
-- **Troubleshooting**: [../docs/TROUBLESHOOTING.md](../docs/TROUBLESHOOTING.md)
+- **Architecture Générale**: [../docs/01-architecture/ARCHITECTURE.md](../docs/01-architecture/ARCHITECTURE.md)
+- **CI/CD Pipeline**: [../docs/01-architecture/CI_CD_ARCHITECTURE.md](../docs/01-architecture/CI_CD_ARCHITECTURE.md)
+- **Guide Déploiement**: [../docs/02-deployment/DEPLOYMENT.md](../docs/02-deployment/DEPLOYMENT.md)
+- **Monitoring**: [../docs/03-guides/MONITORING.md](../docs/03-guides/MONITORING.md)
+- **Troubleshooting**: [../docs/04-operations/TROUBLESHOOTING.md](../docs/04-operations/TROUBLESHOOTING.md)
 - **SaaS Apps**: [../saas/README.md](../saas/README.md)
 
 ---

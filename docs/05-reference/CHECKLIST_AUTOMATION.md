@@ -57,9 +57,9 @@ Sur votre machine locale :
 cd d:\Infra\Git\repo\freijstack
 
 # 1. Vérifier que tous les fichiers sont présents
-ls .github/workflows/securevault-deploy.yml
-ls .github/workflows/production-healthcheck.yml
-ls docs/AUTOMATION.md
+ls .github/workflows/03-app-securevault-deploy.yml
+ls .github/workflows/05-health-prod.yml
+ls docs/03-guides/AUTOMATION_GUIDE.md
 ls scripts/validate-automation.sh
 
 # 2. Exécuter le script de validation
@@ -368,10 +368,8 @@ cd /srv/www/securevault
 
 Pour plus de détails :
 
-- [docs/AUTOMATION.md](docs/AUTOMATION.md) - Guide complet
-- [docs/AUTOMATION_FLOW.md](docs/AUTOMATION_FLOW.md) - Flux visuels
-- [AUTOMATION_COMPLETE.md](AUTOMATION_COMPLETE.md) - Résumé des changements
-- [.github/workflows/README_AUTOMATION.md](.github/workflows/README_AUTOMATION.md) - Guide workflows
+- [docs/03-guides/AUTOMATION_GUIDE.md](../03-guides/AUTOMATION_GUIDE.md) - Guide complet
+- [.github/workflows/README.md](../../.github/workflows/README.md) - Guide workflows
 
 ## 🎉 C'est Terminé !
 

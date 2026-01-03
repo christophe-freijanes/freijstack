@@ -58,10 +58,10 @@ Ce guide explique le déploiement avancé de SecureVault Pro : pipeline CI/CD,
 
 ### Documentation
 
-- `docs/USER_GUIDE.md` - Guide utilisateur complet (62 KB)
-- `docs/AUDIT_SYSTEM.md` - Documentation audit
-- `docs/SSO_SAML_CONFIG.md` - Configuration SSO
-- `docs/FEATURES_ROADMAP.md` - Roadmap des features
+- `docs/00-overview/USER_GUIDE.md` - Guide utilisateur complet (62 KB)
+- `docs/05-reference/AUDIT_SYSTEM.md` - Documentation audit
+- `docs-private/SSO_SAML_CONFIG.md` - Configuration SSO
+- `docs/05-reference/FEATURES_ROADMAP.md` - Roadmap des features
 
 ---
 
@@ -84,7 +84,7 @@ Les migrations sont maintenant **exécutées automatiquement** lors de chaque d�
 
 **Comment ça marche ?**
 
-Le workflow `.github/workflows/securevault-deploy.yml` inclut l'étape **"🗄️ Run Database Migrations"** qui :
+Le workflow `.github/workflows/03-app-securevault-deploy.yml` inclut l'étape **"🗄️ Run Database Migrations"** qui :
 
 1. ⏳ Attend que PostgreSQL soit prêt (30s max)
 2. 🔍 Détecte les migrations déjà appliquées :
@@ -301,7 +301,7 @@ END $$;
 
 ### 3. Mettre à jour le workflow
 
-Éditer `.github/workflows/securevault-deploy.yml`, dans la section **"🗄️ Run Database Migrations"** :
+Éditer `.github/workflows/03-app-securevault-deploy.yml`, dans la section **"🗄️ Run Database Migrations"** :
 
 ```bash
 # Migration 003: My new feature
@@ -413,7 +413,7 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO postgres;
 **Solution** : Augmenter le timeout dans le workflow :
 
 ```bash
-# Dans .github/workflows/securevault-deploy.yml
+# Dans .github/workflows/03-app-securevault-deploy.yml
 for i in {1..60}; do  # Passer de 30 à 60 secondes
   if docker compose exec -T postgres pg_isready -U postgres; then
     echo "✅ PostgreSQL is ready!"
@@ -622,7 +622,7 @@ collection_members(user_id)
 ### Déploiement Automatique
 
 Les workflows existants fonctionnent toujours :
-- `.github/workflows/securevault-deploy.yml`
+- `.github/workflows/03-app-securevault-deploy.yml`
 - `.github/workflows/harbor-deploy.yml`
 
 **Après chaque déploiement**, les migrations doivent être exécutées manuellement :

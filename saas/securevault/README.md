@@ -538,9 +538,9 @@ Sans cette clé, **tous les secrets sont irrécupérables**.
 ## 📚 Resources
 
 - **API Documentation**: Swagger/OpenAPI (TODO)
-- **Architecture**: [/docs/architecture.md](../../docs/architecture.md)
-- **Deployment Guide**: [/docs/DEPLOYMENT.md](../../docs/DEPLOYMENT.md)
-- **Troubleshooting**: [/docs/TROUBLESHOOTING.md](../../docs/TROUBLESHOOTING.md)
+- **Architecture**: [/docs/01-architecture/architecture.md](../../docs/01-architecture/architecture.md)
+- **Deployment Guide**: [/docs/02-deployment/DEPLOYMENT.md](../../docs/02-deployment/DEPLOYMENT.md)
+- **Troubleshooting**: [/docs/04-operations/TROUBLESHOOTING.md](../../docs/04-operations/TROUBLESHOOTING.md)
 
 ---
 

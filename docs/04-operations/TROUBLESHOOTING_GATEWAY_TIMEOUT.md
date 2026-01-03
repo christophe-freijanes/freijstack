@@ -72,9 +72,9 @@ services:
 Tous les workflows incluent une vérification multi-réseaux :
 
 **Workflows concernés** :
-- `.github/workflows/portfolio-deploy.yml` : Vérifie avant chaque déploiement
-- `.github/workflows/healthcheck-prod.yml` : Surveillance toutes les 30 min avec auto-heal
-- `.github/workflows/healthcheck-dev.yml` : Surveillance horaire avec auto-heal
+- `.github/workflows/03-app-portfolio-deploy.yml` : Vérifie avant chaque déploiement
+- `.github/workflows/05-health-prod.yml` : Surveillance toutes les 30 min avec auto-heal
+- `.github/workflows/05-health-dev.yml` : Surveillance horaire avec auto-heal
 
 ```yaml
 - name: Ensure Traefik is connected to all networks
@@ -150,6 +150,6 @@ docker inspect traefik | grep -A 30 Networks
 
 ## Référence
 
-- Workflow de déploiement : [`.github/workflows/portfolio-deploy.yml`](../.github/workflows/portfolio-deploy.yml)
+- Workflow de déploiement : [`.github/workflows/03-app-portfolio-deploy.yml`](../.github/workflows/03-app-portfolio-deploy.yml)
 - Script de diagnostic : [`scripts/check-traefik-network.sh`](../scripts/check-traefik-network.sh)
 - Configuration Traefik : [`base-infra/docker-compose.yml`](../base-infra/docker-compose.yml)

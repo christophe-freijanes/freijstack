@@ -3,7 +3,7 @@
 Documentation complète du processus de release automatisé avec semantic-versioning.
 
 **Dernière mise à jour**: Janvier 2026  
-**Workflows**: 2 (release-changelog-pr.yml + release-automation.yml)  
+**Workflows**: 2 (07-release-changelog-pr.yml + 07-release-automation.yml)  
 **Branch protégée**: `master` (PR-only)
 
 ---
@@ -17,7 +17,7 @@ flowchart TB
     COMMIT["💾 Commit sur master<br/>(feat/fix/etc)"]
     
     subgraph Phase1["Phase 1: CHANGELOG PR"]
-        TRIGGER1["🔔 Trigger release-changelog-pr.yml"]
+        TRIGGER1["🔔 Trigger 07-release-changelog-pr.yml"]
         DRYRUN["🧪 semantic-release --dry-run"]
         VERSION["📊 Calcul prochaine version"]
         UPDATE["📝 Mise à jour CHANGELOG.md"]
@@ -28,7 +28,7 @@ flowchart TB
     MERGE["✅ Merge PR vers master"]
     
     subgraph Phase2["Phase 2: Release Réelle"]
-        TRIGGER2["🔔 Trigger release-automation.yml"]
+        TRIGGER2["🔔 Trigger 07-release-automation.yml"]
         REAL["🚀 semantic-release (production)"]
         TAG["🏷️ Création tag Git"]
         RELEASE["📦 Publication GitHub Release"]
@@ -61,7 +61,7 @@ flowchart TB
 
 ## 🔄 Workflow 1: Release Changelog PR
 
-**Fichier**: [.github/workflows/release-changelog-pr.yml](.github/workflows/release-changelog-pr.yml)
+**Fichier**: [.github/workflows/07-release-changelog-pr.yml](.github/workflows/07-release-changelog-pr.yml)
 
 ### Rôle
 Génère une **Pull Request** avec le CHANGELOG mis à jour **avant** de créer la release réelle.
@@ -136,7 +136,7 @@ if: >
 
 ## 🏷️ Workflow 2: Release Automation
 
-**Fichier**: [.github/workflows/release-automation.yml](.github/workflows/release-automation.yml)
+**Fichier**: [.github/workflows/07-release-automation.yml](.github/workflows/07-release-automation.yml)
 
 ### Rôle
 Publie la **release réelle** (tag + GitHub Release) après merge de la PR changelog.
@@ -288,7 +288,7 @@ git push origin feature/dark-mode
 
 ```bash
 # Trigger automatique sur push master
-# Workflow: release-changelog-pr.yml
+# Workflow: 07-release-changelog-pr.yml
 
 # Actions:
 1. semantic-release --dry-run
@@ -324,7 +324,7 @@ gh pr merge --squash
 
 ```bash
 # Trigger automatique sur merge vers master
-# Workflow: release-automation.yml
+# Workflow: 07-release-automation.yml
 
 # Actions:
 1. semantic-release (production mode)
@@ -386,10 +386,10 @@ Body:
 
 | Workflow | Étape | Durée |
 |----------|-------|-------|
-| release-changelog-pr.yml | Total | 2-3 min |
+| 07-release-changelog-pr.yml | Total | 2-3 min |
 | - Dry-run semantic-release | | 30-60 sec |
 | - Création PR | | 10-20 sec |
-| release-automation.yml | Total | 3-5 min |
+| 07-release-automation.yml | Total | 3-5 min |
 | - Vrai semantic-release | | 1-2 min |
 | - Publication GitHub Release | | 30 sec |
 
@@ -440,7 +440,7 @@ gh auth status
 cat CHANGELOG.md
 
 # Re-trigger workflow manuellement
-gh workflow run release-automation.yml
+gh workflow run 07-release-automation.yml
 ```
 
 ### Version incrémentée incorrectement
@@ -468,8 +468,8 @@ BREAKING CHANGE: removes support for old API"
 ## 🔗 Ressources
 
 ### Workflows
-- [release-changelog-pr.yml](.github/workflows/release-changelog-pr.yml) - Phase 1: PR
-- [release-automation.yml](.github/workflows/release-automation.yml) - Phase 2: Release
+- [07-release-changelog-pr.yml](.github/workflows/07-release-changelog-pr.yml) - Phase 1: PR
+- [07-release-automation.yml](.github/workflows/07-release-automation.yml) - Phase 2: Release
 
 ### Documentation
 - [Semantic Release Docs](https://semantic-release.gitbook.io/)

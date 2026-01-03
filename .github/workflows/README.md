@@ -3,35 +3,33 @@
 Documentation complète des workflows CI/CD et automatisations du projet.
 
 **Dernière mise à jour**: Janvier 2026  
-**Version**: 2.0.0  
+**Version**: 2.0.0 - DevSecOps Unified Architecture  
 **Workflows actifs**: 21+
 
 ---
 
 ## 📋 Liste Complète des Workflows
 
+> **Note**: Workflows applicatifs (Portfolio, SecureVault, Registry) utilisent maintenant `00-core-full-deploy.yml` pour une pipeline DevSecOps unifiée. Voir [docs-private/DEVOPS_PIPELINES.md](../docs-private/DEVOPS_PIPELINES.md) pour les détails techniques.
+
 | Workflow | Fichier | Déclencheur | Durée | Description |
 |----------|---------|-------------|-------|-------------|
-| **🏗️ Infrastructure Deploy** | [infrastructure-deploy.yml](infrastructure-deploy.yml) | Push master/develop (base-infra/*), manual | ~3-5 min | Validate, test, deploy Traefik + n8n + portfolio |
-| **🔐 SecureVault Deploy** | [securevault-deploy.yml](securevault-deploy.yml) | Push develop (auto), manual (prod) | ~5-7 min | Cleanup, test, build, deploy SecureVault sur VPS |
-| **🐳 Registry Deploy** | [registry-deploy.yml](registry-deploy.yml) | Push master (registry/*), manual | ~3-4 min | Deploy Docker Registry + Joxit UI |
-| **🧹 Registry Cleanup** | [registry-cleanup.yml](registry-cleanup.yml) | Schedule (weekly), manual | ~2-3 min | Cleanup anciennes images Docker Registry |
-| **🌐 Portfolio Deploy** | [portfolio-deploy.yml](portfolio-deploy.yml) | Push master/develop (portfolio/*) | ~4-6 min | Build, test, deploy portfolio production/staging |
-| **🔨 Portfolio Build** | [portfolio-build.yml](portfolio-build.yml) | PR portfolio/* | ~2-3 min | Build et test portfolio (sans deploy) |
-| **🔄 Secret Rotation** | [rotate-secrets.yml](rotate-secrets.yml) | Schedule (1er du mois), manual | ~3-5 min | Rotation automatique des secrets |
-| **💾 Backup** | [backup.yml](backup.yml) | Schedule (daily 2AM), manual | ~5-10 min | Backup databases + certificats → S3 + Azure |
-| **🔍 CodeQL Analysis** | [codeql.yml](codeql.yml) | Push, PR, schedule | ~10-15 min | SAST security scanning |
-| **🔐 Security Check** | [securitycheck.yml](securitycheck.yml) | Push, PR | ~3-5 min | Gitleaks + secret detection |
-| **📊 Security Check Schedule** | [securitycheck-schedule.yml](securitycheck-schedule.yml) | Schedule (daily) | ~3-5 min | Scan quotidien automatique |
-| **🎯 Security Score** | [security-score.yml](security-score.yml) | Schedule (weekly) | ~5 min | Calcul score sécurité global |
-| **✅ Lint** | [lint.yml](lint.yml) | Push, PR | ~1-2 min | Linting markdown, YAML, code |
-| **❤️ Healthcheck Prod** | [healthcheck-prod.yml](healthcheck-prod.yml) | Schedule (every 15min) | ~30s | Monitoring production 24/7 |
-| **💚 Healthcheck Dev** | [healthcheck-dev.yml](healthcheck-dev.yml) | Schedule (hourly) | ~30s | Monitoring staging |
-| **🩺 Healthcheck Post-Deploy** | [healthcheck-postdeploy.yml](healthcheck-postdeploy.yml) | After deploy | ~1 min | Validation post-déploiement |
-| **📝 Docs Generate** | [docs-generate.yml](docs-generate.yml) | Push docs/*, manual | ~2-3 min | Génération automatique documentation |
-| **🏷️ Release Automation** | [release-automation.yml](release-automation.yml) | Push master | ~2-3 min | Semantic versioning + changelog |
-| **📋 Release Changelog PR** | [release-changelog-pr.yml](release-changelog-pr.yml) | Manual | ~1 min | Créer PR avec changelog draft |
-| **🤖 PR Title Automation** | [pr-title-automation.yml](pr-title-automation.yml) | Ouverture PR | ~10s | Auto-format titre PR (Conventional Commits) |
+| **🏗️ Infrastructure Deploy** | [02-infra-deploy.yml](02-infra-deploy.yml) | Push master/develop (base-infra/*), manual | ~3-5 min | Validate, test, deploy Traefik + n8n + portfolio |
+| **🔐 SecureVault Deploy** | [03-app-securevault-deploy.yml](03-app-securevault-deploy.yml) | Push develop (auto), manual (prod) | ~5-7 min | Wrapper → 00-core-full-deploy.yml + migrations |
+| **🐳 Registry Deploy** | [03-app-registry-deploy.yml](03-app-registry-deploy.yml) | Push master (registry/*), manual | ~3-4 min | Wrapper → 00-core-full-deploy.yml + HAProxy |
+| **🌐 Portfolio Deploy** | [03-app-portfolio-deploy.yml](03-app-portfolio-deploy.yml) | Push master/develop (portfolio/*) | ~4-6 min | Wrapper → 00-core-full-deploy.yml + frontend build |
+| **🔄 Secret Rotation** | [06-maint-rotate-secrets.yml](06-maint-rotate-secrets.yml) | Schedule (1er du mois), manual | ~3-5 min | Rotation automatique des secrets |
+| **💾 Backup** | [06-maint-backup.yml](06-maint-backup.yml) | Schedule (daily 2AM), manual | ~5-10 min | Backup databases + certificats → S3 + Azure |
+| **🔍 CodeQL Analysis** | [01-security-codeql.yml](01-security-codeql.yml) | Push, PR, schedule | ~10-15 min | SAST security scanning |
+| **📊 Security Score** | [01-security-publish-score.yml](01-security-publish-score.yml) | After healthcheck success | ~2 min | Gitleaks + Trivy → badge publication |
+| **✅ Lint** | [01-quality-lint.yml](01-quality-lint.yml) | Push, PR | ~1-2 min | Linting markdown, YAML, code |
+| **❤️ Healthcheck Prod** | [05-health-prod.yml](05-health-prod.yml) | Schedule (every 30min) | ~30s | Monitoring production 24/7 |
+| **💚 Healthcheck Dev** | [05-health-dev.yml](05-health-dev.yml) | Schedule (hourly) | ~30s | Monitoring staging |
+| **🩺 Healthcheck Post-Deploy** | [04-health-postdeploy.yml](04-health-postdeploy.yml) | After deploy success | ~1 min | Smart cooldown validation (5-90s) |
+| **📝 Docs Generate** | [08-support-docs-generate.yml](08-support-docs-generate.yml) | Push docs/*, manual | ~2-3 min | Génération automatique documentation |
+| **🏷️ Release Automation** | [07-release-automation.yml](07-release-automation.yml) | Push master | ~2-3 min | Semantic versioning + changelog |
+| **📋 Release Changelog PR** | [07-release-changelog-pr.yml](07-release-changelog-pr.yml) | Manual | ~1 min | Créer PR avec changelog draft |
+| **🤖 PR Title Automation** | [08-support-pr-title.yml](08-support-pr-title.yml) | Ouverture PR | ~10s | Auto-format titre PR (Conventional Commits) |
 
 ---
 
@@ -284,7 +282,7 @@ on:
 | **JWT_SECRET** | Annuel | Tous les users re-login | ✅ |
 | **ENCRYPTION_KEY** | Annuel | ⚠️ Perte d'accès aux données | ✅ |
 
-Voir [SECRET_ROTATION.md](../docs/SECRET_ROTATION.md) pour le guide détaillé.
+Voir [SECRET_ROTATION.md](../docs-private/SECRET_ROTATION.md) pour le guide détaillé.
 
 ---
 
@@ -337,7 +335,7 @@ JWT_SECRET=<CHANGEZ_MOI>
 ENCRYPTION_KEY=<CHANGEZ_MOI>
 ```
 
-Voir [SECUREVAULT_DEPLOYMENT.md](../docs/SECUREVAULT_DEPLOYMENT.md) pour le guide complet.
+Voir [SECUREVAULT_DEPLOYMENT.md](../docs/02-deployment/SECUREVAULT_DEPLOYMENT.md) pour le guide complet.
 
 ---
 
@@ -438,11 +436,11 @@ Vous pouvez modifier le titre manuellement si nécessaire.
 ### Badges dans README
 
 ```markdown
-[![Portfolio Deploy](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/portfolio-deploy.yml?branch=master&label=Portfolio&style=flat-square)](https://github.com/christophe-freijanes/freijstack/actions)
+[![Portfolio Deploy](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/03-app-portfolio-deploy.yml?branch=master&label=Portfolio&style=flat-square)](https://github.com/christophe-freijanes/freijstack/actions)
 
-[![SecureVault Deploy](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/securevault-deploy.yml?branch=develop&label=SecureVault&style=flat-square)](https://github.com/christophe-freijanes/freijstack/actions)
+[![SecureVault Deploy](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/03-app-securevault-deploy.yml?branch=develop&label=SecureVault&style=flat-square)](https://github.com/christophe-freijanes/freijstack/actions)
 
-[![Secret Rotation](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/rotate-secrets.yml?label=Secret%20Rotation&style=flat-square)](https://github.com/christophe-freijanes/freijstack/actions)
+[![Secret Rotation](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/06-maint-rotate-secrets.yml?label=Secret%20Rotation&style=flat-square)](https://github.com/christophe-freijanes/freijstack/actions)
 ```
 
 ---
@@ -592,6 +590,6 @@ jobs:
 - Security scanning quotidien
 
 **📚 Documentation Complète**:
-- [Architecture CI/CD](../../docs/CI_CD_ARCHITECTURE.md) - Diagramme Mermaid + détails
-- [Guide Automation](../../docs/AUTOMATION_GUIDE.md) - Guide complet automatisation
-- [Deployment Guide](../../docs/DEPLOYMENT.md) - Procédures de déploiement
+- [Architecture CI/CD](../../docs/01-architecture/CI_CD_ARCHITECTURE.md) - Diagramme Mermaid + détails
+- [Guide Automation](../../docs/03-guides/AUTOMATION_GUIDE.md) - Guide complet automatisation
+- [Deployment Guide](../../docs/02-deployment/DEPLOYMENT.md) - Procédures de déploiement

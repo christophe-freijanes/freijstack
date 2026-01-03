@@ -304,7 +304,7 @@ crontab -e
 
 ### Méthode 2 : GitHub Actions (Automatique)
 
-Ajoutez ce workflow dans `.github/workflows/backup.yml` :
+Ajoutez ce workflow dans `.github/workflows/06-maint-backup.yml` :
 
 ```yaml
 name: 🔒 Scheduled Backup

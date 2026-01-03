@@ -105,7 +105,7 @@ brew install markdownlint ripgrep
 ```
 
 **Configuration**:
-Voir [DOCS_CONFIG_REFERENCE.md](../docs/DOCS_CONFIG_REFERENCE.md) pour:
+Voir [DOCS_CONFIG_REFERENCE.md](../docs-private/DOCS_CONFIG_REFERENCE.md) pour:
 - Patterns de secrets à détecter
 - Règles de linting Markdown
 - Plannification des générations (cron)
@@ -666,10 +666,10 @@ tail -f /var/log/freijstack/backup.log
 
 ## 📚 Documentation Complète
 
-- **Architecture**: [../docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md)
-- **Déploiement**: [../docs/DEPLOYMENT.md](../docs/DEPLOYMENT.md)
+- **Architecture**: [../docs/01-architecture/ARCHITECTURE.md](../docs/01-architecture/ARCHITECTURE.md)
+- **Déploiement**: [../docs/02-deployment/DEPLOYMENT.md](../docs/02-deployment/DEPLOYMENT.md)
 - **Sécurité**: [../SECURITY.md](../SECURITY.md)
-- **Troubleshooting**: [../docs/TROUBLESHOOTING.md](../docs/TROUBLESHOOTING.md)
+- **Troubleshooting**: [../docs/04-operations/TROUBLESHOOTING.md](../docs/04-operations/TROUBLESHOOTING.md)
 
 ---
 

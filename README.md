@@ -1,13 +1,13 @@
 
 # FreijStack 🚀
 
-[![Infrastructure](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/infrastructure-deploy.yml?branch=master&label=Infrastructure&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/infrastructure-deploy.yml)
-[![Production Health Check](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/healthcheck-prod.yml?branch=develop&label=Prod%20Health&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/healthcheck-prod.yml)
-[![Development Health Check](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/healthcheck-dev.yml?branch=develop&label=Dev%20Health&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/healthcheck-dev.yml)
-[![CodeQL](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/codeql.yml?branch=master&label=CodeQL&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/codeql.yml)
-[![Security Check](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/securitycheck-schedule.yml?branch=develop&label=Security%20Check&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/securitycheck-schedule.yml)
-[![Release Automation](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/release-automation.yml?branch=master&label=Release%20Automation&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/release-automation.yml)
-[![SecureVault](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/securevault-deploy.yml?branch=master&label=SecureVault&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/securevault-deploy.yml)
+[![Infrastructure](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/02-infra-deploy.yml?branch=master&label=Infrastructure&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/02-infra-deploy.yml)
+[![Production Health Check](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/05-health-prod.yml?branch=develop&label=Prod%20Health&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/05-health-prod.yml)
+[![Development Health Check](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/05-health-dev.yml?branch=develop&label=Dev%20Health&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/05-health-dev.yml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/01-security-codeql.yml?branch=master&label=CodeQL&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/01-security-codeql.yml)
+[![Security Check](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/01-security-gitleaks-schedule.yml?branch=develop&label=Security%20Check&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/01-security-gitleaks-schedule.yml)
+[![Release Automation](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/07-release-automation.yml?branch=master&label=Release%20Automation&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/07-release-automation.yml)
+[![SecureVault](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/03-app-securevault-deploy.yml?branch=master&label=SecureVault&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/03-app-securevault-deploy.yml)
 [![Portfolio](https://img.shields.io/website?down_color=red&down_message=offline&label=Portfolio&style=flat-square&up_color=brightgreen&up_message=online&url=https%3A%2F%2Fportfolio.freijstack.com)](https://portfolio.freijstack.com)
 [![Last Commit](https://img.shields.io/github/last-commit/christophe-freijanes/freijstack?label=Mise%20%C3%A0%20jour&style=flat-square&color=blue)](https://github.com/christophe-freijanes/freijstack/commits)
 [![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square&logo=readme)](LICENSE)
@@ -94,19 +94,19 @@ docker compose up -d --build
 
 | Document | Description |
 |----------|-------------|
-| 🗺️ [Index & Navigation](docs/INDEX.md) | Guide complet de navigation de la documentation |
-| 📘 [Architecture Technique](docs/ARCHITECTURE.md) | Vue d'ensemble infrastructure, CI/CD, déploiement |
+| 🗺️ [Index & Navigation](docs/00-overview/INDEX.md) | Guide complet de navigation de la documentation |
+| 📘 [Architecture Technique](docs/01-architecture/ARCHITECTURE.md) | Vue d'ensemble infrastructure, CI/CD, déploiement |
 | 🏗️ [Infrastructure Base](base-infra/README.md) | Docker Compose, Traefik v2, n8n, intégration |
-| 📌 [Guide Déploiement](docs/DEPLOYMENT.md) | Déploiement complet sur VPS, étape par étape |
-| 🚀 [SecureVault Pro](docs/PRO_DEPLOYMENT.md) | Déploiement avancé SecureVault production |
-| 📊 [CI/CD Architecture](docs/CI_CD_ARCHITECTURE.md) | Diagramme Mermaid, 21+ workflows documentés |
-| 🤖 [Guide Automatisation](docs/AUTOMATION_GUIDE.md) | CI/CD, staging éphémère, health checks, rollback |
+| 📌 [Guide Déploiement](docs/02-deployment/DEPLOYMENT.md) | Déploiement complet sur VPS, étape par étape |
+| 🚀 [SecureVault Pro](docs/02-deployment/PRO_DEPLOYMENT.md) | Déploiement avancé SecureVault production |
+| 📊 [CI/CD Architecture](docs/01-architecture/CI_CD_ARCHITECTURE.md) | Diagramme Mermaid, 21+ workflows documentés |
+| 🤖 [Guide Automatisation](docs/03-guides/AUTOMATION_GUIDE.md) | CI/CD, staging éphémère, health checks, rollback |
 | 🔐 [SecureVault Manager](saas/securevault/README.md) | Gestionnaire de secrets chiffrés, AES-256-GCM |
 | 🐳 [Applications SaaS](saas/README.md) | Portfolio, SecureVault, Harbor - Vue d'ensemble |
-| 📊 [Monitoring & Alertes](docs/MONITORING.md) | Prometheus, Grafana, Loki, dashboards |
-| 🔍 [Troubleshooting](docs/TROUBLESHOOTING.md) | Diagnostic, CORS, Registration, déploiement |
+| 📊 [Monitoring & Alertes](docs/03-guides/MONITORING.md) | Prometheus, Grafana, Loki, dashboards |
+| 🔍 [Troubleshooting](docs/04-operations/TROUBLESHOOTING.md) | Diagnostic, CORS, Registration, déploiement |
 | 🔐 [Sécurité](SECURITY.md) | Bonnes pratiques, secrets, chiffrement |
-| 📋 [Audit Documentaire](docs/DOCUMENTATION_AUDIT.md) | Audit complet de la documentation |
+| 📋 [Audit Documentaire](docs/05-reference/DOCUMENTATION_AUDIT.md) | Audit complet de la documentation |
 | 🔖 [Pull Request Template](.github/pull_request_template.md) | Checklist validation PR |
 
 ---
@@ -120,17 +120,17 @@ docker compose up -d --build
 freijstack/
 ├── .github/
 │   ├── workflows/                    # 21+ GitHub Actions workflows
-│   │   ├── infrastructure-deploy.yml    # Traefik + n8n + portfolio
-│   │   ├── securevault-deploy.yml      # SecureVault prod/staging
-│   │   ├── registry-deploy.yml         # Docker Registry deployment
-│   │   ├── registry-cleanup.yml        # Registry image cleanup
-│   │   ├── codeql.yml                  # SAST security scanning
-│   │   ├── securitycheck.yml           # Gitleaks + secret detection
-│   │   ├── healthcheck-prod.yml        # 24/7 monitoring production
-│   │   ├── healthcheck-dev.yml         # Staging health checks
-│   │   ├── release-automation.yml      # Semantic versioning
-│   │   ├── backup.yml                  # Automated backups
-│   │   ├── rotate-secrets.yml          # Secret rotation
+│   │   ├── 02-infra-deploy.yml    # Traefik + n8n + portfolio
+│   │   ├── 03-app-securevault-deploy.yml      # SecureVault prod/staging
+│   │   ├── 03-app-registry-deploy.yml         # Docker Registry deployment
+│   │   ├── 03-app-registry-cleanup.yml        # Registry image cleanup
+│   │   ├── 01-security-codeql.yml                  # SAST security scanning
+│   │   ├── 01-security-gitleaks.yml           # Gitleaks + secret detection
+│   │   ├── 05-health-prod.yml        # 24/7 monitoring production
+│   │   ├── 05-health-dev.yml         # Staging health checks
+│   │   ├── 07-release-automation.yml      # Semantic versioning
+│   │   ├── 06-maint-backup.yml                  # Automated backups
+│   │   ├── 06-maint-rotate-secrets.yml          # Secret rotation
 │   │   └── ...autres workflows
 │   └── pull_request_template.md
 │
@@ -363,7 +363,7 @@ Paths sur VPS:
 5. **Routing** → Traefik restart + health check
 6. **Live** → Site accessible via HTTPS
 
-**Voir**: [Architecture Détaillée](docs/architecture.md)
+**Voir**: [Architecture Détaillée](docs/01-architecture/architecture.md)
 
 ### Démarrage Rapide
 

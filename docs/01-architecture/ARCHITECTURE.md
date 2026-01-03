@@ -30,10 +30,10 @@ Le dépôt `freijstack` héberge un **portfolio professionnel moderne** avec des
 freijstack/
 ├── .github/
 │   ├── workflows/                  # CI/CD pipelines (GitHub Actions)
-│   │   ├── infrastructure-deploy.yml
-│   │   ├── securevault-deploy.yml
-│   │   ├── production-healthcheck.yml
-│   │   ├── release.yml
+│   │   ├── 02-infra-deploy.yml
+│   │   ├── 03-app-securevault-deploy.yml
+│   │   ├── 05-health-prod.yml
+│   │   ├── 07-release-automation.yml
 │   │   └── ...
 │   └── pull_request_template.md    # Checklist validation PR
 ├── base-infra/                     # 🏗️ Infrastructure centralisée (Traefik, n8n, etc.)

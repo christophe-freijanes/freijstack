@@ -11,13 +11,13 @@ ignore:
 
 # Configuration spécifique par fichier (si vous voulez être plus précis)
 paths:
-  ".github/workflows/healthcheck-prod.yml":
+  ".github/workflows/05-health-prod.yml":
     ignore:
       - 'SC2034'
-  ".github/workflows/healthcheck-dev.yml": {}
-  ".github/workflows/healthcheck-postdeploy.yml":
+  ".github/workflows/05-health-dev.yml": {}
+  ".github/workflows/04-health-postdeploy.yml":
     ignore:
       - 'SC2129'
-  ".github/workflows/securitycheck.yml":
+  ".github/workflows/01-security-gitleaks.yml":
     ignore:
       - 'SC2129'

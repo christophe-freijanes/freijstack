@@ -5,12 +5,12 @@ on:
     branches: [develop, master]
     paths:
       - 'base-infra/**'
-      - '.github/workflows/infrastructure-deploy.yml'
+      - '.github/workflows/02-infra-deploy.yml'
   pull_request:
     branches: [develop, master]
     paths:
       - 'base-infra/**'
-      - '.github/workflows/infrastructure-deploy.yml'
+      - '.github/workflows/02-infra-deploy.yml'
   workflow_dispatch:
     inputs:
       environment:
@@ -54,7 +54,7 @@ env:
 jobs:
   security:
     name: 🛡️ Shield Protection
-    uses: ./.github/workflows/securitycheck.yml
+    uses: ./.github/workflows/01-security-gitleaks.yml
     permissions:
       contents: read
       actions: read

@@ -179,10 +179,10 @@ environment:
 
 ### Cleanup automatisé via CI/CD
 
-Le workflow `registry-cleanup.yml` nettoie automatiquement les anciennes images:
+Le workflow `03-app-registry-cleanup.yml` nettoie automatiquement les anciennes images:
 
 ```yaml
-# .github/workflows/registry-cleanup.yml
+# .github/workflows/03-app-registry-cleanup.yml
 - Supprime images non-taguées
 - Supprime images > 30 jours
 - S'exécute toutes les semaines (cron)
@@ -257,9 +257,9 @@ docker compose logs -f registry-ui
 
 ## 📚 Documentation
 
-- **Architecture**: [../../docs/ARCHITECTURE.md](../../docs/ARCHITECTURE.md)
-- **CI/CD**: [../../docs/CI_CD_ARCHITECTURE.md](../../docs/CI_CD_ARCHITECTURE.md)
-- **Déploiement**: [../../docs/DEPLOYMENT.md](../../docs/DEPLOYMENT.md)
+- **Architecture**: [../../docs/01-architecture/ARCHITECTURE.md](../../docs/01-architecture/ARCHITECTURE.md)
+- **CI/CD**: [../../docs/01-architecture/CI_CD_ARCHITECTURE.md](../../docs/01-architecture/CI_CD_ARCHITECTURE.md)
+- **Déploiement**: [../../docs/02-deployment/DEPLOYMENT.md](../../docs/02-deployment/DEPLOYMENT.md)
 - **Scripts**: [../../scripts/README.md](../../scripts/README.md)
 
 ---

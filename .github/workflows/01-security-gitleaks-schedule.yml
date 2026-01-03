@@ -13,7 +13,7 @@ permissions:
 jobs:
   security:
     name: 🛡️ Security Job
-    uses: ./.github/workflows/securitycheck.yml
+    uses: ./.github/workflows/01-security-gitleaks.yml
     with:
       scan_paths: |
         .

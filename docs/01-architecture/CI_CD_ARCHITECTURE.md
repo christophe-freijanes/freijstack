@@ -197,9 +197,33 @@ graph TB
 
 ## Workflows Principaux
 
-### 1. 🏗️ Infrastructure Deploy (`infrastructure-deploy.yml`)
+### 📦 Architecture DevSecOps Unifiée
 
-**Rôle**: Déploie l'infrastructure de base (Traefik, nginx, n8n)
+**Version**: 2.0 - Orchestration par `00-core-full-deploy.yml` + `00-core-deploy-queue.yml`  
+**Détails techniques**: Voir [docs-private/DEVOPS_PIPELINES.md](../docs-private/DEVOPS_PIPELINES.md)
+
+Tous les déploiements applicatifs (Portfolio, SecureVault, Registry) suivent maintenant une **pipeline unifiée DevSecOps** :
+
+```
+1️⃣ Security    → Gitleaks + Trivy scanning
+2️⃣ Lint        → Auto-detected (ESLint/Ruff/Markdown/Shell)
+3️⃣ Test        → Build + unit tests
+4️⃣ Deploy      → Queue management + SSH resilience
+5️⃣ Summary     → Deployment report
+```
+
+**Avantages** :
+- ✅ Garanties de sécurité et qualité avant tout déploiement
+- ✅ Configuration consistante entre applications
+- ✅ Résilience SSH : 5 tentatives + staggered start
+- ✅ Concurrence gérée : pas de déploiements simultanés
+- ✅ Health checks post-déploiement automatiques
+
+---
+
+### 1. 🏗️ Infrastructure Deploy (`02-infra-deploy.yml`)
+
+**Rôle**: Déploie l'infrastructure de base (Traefik, nginx, n8n) - **INDÉPENDANT** de 00-core-full-deploy.yml
 
 **Triggers**:
 - Push sur `master` → production
@@ -219,74 +243,66 @@ graph TB
 
 ---
 
-### 2. 🌐 Portfolio Deploy (`portfolio-deploy.yml`)
+### 2. 🌐 Portfolio Deploy (`03-app-portfolio-deploy.yml`)
 
-**Rôle**: Build et déploie le portfolio multilingue
+**Rôle**: Wrapper pour déploiement Portfolio via `00-core-full-deploy.yml`
 
-**Triggers**:
-- Push sur `master` → production
-- Push sur `develop` → staging
-- Détection changements dans `saas/portfolio/**`
+**Pipeline unifiée** :
+```
+Push (develop/master) → 00-core-full-deploy.yml
+  ├─ Security: Trivy filesystem scan
+  ├─ Lint: ESLint + Markdown check
+  ├─ Test: Build + npm test
+  ├─ Deploy: 00-core-deploy-queue.yml (SSH + Docker)
+  └─ Summary: Deploy report
+```
 
-**Étapes clés**:
-1. Build assets (HTML, CSS, JS)
-2. Validation CSP headers
-3. Optimisation images et fonts
-4. Déploiement via SSH/rsync
-5. Redémarrage nginx
-6. Health check automatique
-
-**Métriques**:
-- Build time: ~2-3 min
-- Deploy time: ~1 min
-- Assets optimisés: -30% taille
+**Post-Deploy** :
+- Health check automatique (5-90s smart cooldown)
+- Security score publication (master only)
 
 ---
 
-### 3. 🔐 SecureVault Deploy (`securevault-deploy.yml`)
+### 3. 🔐 SecureVault Deploy (`03-app-securevault-deploy.yml`)
 
-**Rôle**: Déploie l'application SecureVault (backend + frontend + DB)
+**Rôle**: Wrapper pour déploiement SecureVault via `00-core-full-deploy.yml`
 
-**Triggers**:
-- Push sur `master` → production
-- Push sur `develop` → staging
-- Détection changements dans `saas/securevault/**`
+**Pipeline unifiée** :
+```
+Push (develop/master) → 00-core-full-deploy.yml
+  ├─ Security: Gitleaks + Trivy
+  ├─ Lint: ESLint + Markdown check
+  ├─ Test: npm test (backend + frontend)
+  ├─ Deploy: 00-core-deploy-queue.yml + migrations PostgreSQL
+  └─ Summary: Deploy report
+```
 
-**Étapes clés**:
-1. Build backend Node.js
-2. Build frontend React
-3. Migrations PostgreSQL
-4. Déploiement containers Docker
-5. Health check endpoints
-6. Vérification audit logs
-
-**Technologies**:
-- Backend: Node.js + Express + PostgreSQL
-- Frontend: React + Material-UI
-- Chiffrement: AES-256-GCM
+**Migrations** :
+- Détection automatique des fichiers SQL
+- Exécution avant le déploiement des containers
+- Rollback capability
 
 ---
 
-### 4. ⚓ Harbor Deploy (`harbor-deploy.yml`)
+### 4. ⚓ Harbor Deploy (`03-app-registry-deploy.yml`)
 
-**Rôle**: Déploie Harbor (registry Docker privé)
+**Rôle**: Wrapper pour déploiement Registry Docker via `00-core-full-deploy.yml`
 
-**Triggers**:
-- Push sur `develop` → staging
-- Workflow dispatch manuel
-
-**Étapes clés**:
-1. Validation configuration Harbor
-2. Déploiement containers
-3. Configuration SSL via Traefik
-4. Setup utilisateurs et projets
-5. Health check registry
+**Pipeline unifiée** :
+```
+Push (develop/master) → 00-core-full-deploy.yml
+  ├─ Security: Trivy config scan
+  ├─ Lint: YAML validation
+  ├─ Test: Registry connectivity test
+  ├─ Deploy: 00-core-deploy-queue.yml + HAProxy config
+  └─ Summary: Deploy report
+```
 
 ---
 
-### 5. 🕵️ CodeQL Analysis (`codeql.yml`)
+### 5. 🕵️ CodeQL Analysis (`01-security-codeql.yml`)
 
-**Rôle**: Analyse statique de sécurité du code
+**Rôle**: Analyse statique de sécurité du code - **INDÉPENDANT**
 
 **Triggers**:
 - Push sur `master`
@@ -299,50 +315,28 @@ graph TB
 - Python (scripts)
 - Shell scripts
 
-**Règles**:
-- `security-extended`
-- `security-and-quality`
-- Config custom: `.github/codeql/codeql-config.yml`
-
-**Filtres**:
-- Exclut: `js/user-controlled-bypass` (faux positifs JWT)
-- Exclut: `js/incomplete-url-substring-sanitization`
-
 ---
 
-### 6. 🛡️ Security Check (`securitycheck.yml` + `securitycheck-schedule.yml`)
+### 6. 🛡️ Security Scanning (`01-security-publish-score.yml`)
 
-**Rôle**: Scan sécurité avec Trivy + Gitleaks
+**Rôle**: Scan sécurité intégré après déploiement production
 
-**Triggers**:
-- Schedule: quotidien à 04:00 UTC
-- Workflow call (réutilisable)
-- Workflow dispatch manuel
+**Inclus dans pipeline DevSecOps** :
+- Gitleaks: Détection secrets exposés
+- Trivy: Scan vulnérabilités filesystem + configurations
 
-**Outils**:
-- **Trivy**: Scan filesystem (vulnérabilités, misconfigurations)
-- **Gitleaks**: Détection secrets exposés
-
-**Outputs**:
-- SARIF upload vers GitHub Security
-- Rapport JSON artifacts
-- `security-score.json` publié sur GitHub Pages
-
-**Scoring**:
-```
-Leaks = 0    → 10/10 (vert)
-Leaks ≤ 2    → 8/10 (jaune)
-Leaks ≤ 5    → 6/10 (orange)
-Leaks > 5    → 4/10 (rouge)
-```
+**Sécurité Score**:
+- Publié sur GitHub Pages après déploiement réussi
+- Badge accessible pour inclusion dans README
+- Format: JSON + SVG badge
 
 ---
 
 ### 7. 🏥 Health Checks
 
-#### 7.1. Production (`healthcheck-prod.yml`)
+#### 7.1. Production (`05-health-prod.yml`)
 
-**Rôle**: Monitoring continu production avec auto-healing
+**Rôle**: Monitoring continu production
 
 **Triggers**:
 - Schedule: toutes les 30 minutes
@@ -357,9 +351,8 @@ Leaks > 5    → 4/10 (rouge)
 **Auto-healing**:
 - Redémarrage automatique si 3 échecs consécutifs
 - Notification Discord sur incident
-- Logs détaillés dans GitHub Summary
 
-#### 7.2. Staging (`healthcheck-dev.yml`)
+#### 7.2. Staging (`05-health-dev.yml`)
 
 **Rôle**: Monitoring staging
 
@@ -367,37 +360,24 @@ Leaks > 5    → 4/10 (rouge)
 - Schedule: toutes les heures
 - Workflow dispatch manuel
 
-**Différences vs Production**:
-- Moins fréquent (coût optimisé)
-- Auto-healing optionnel
-- Alertes moins critiques
-
-#### 7.3. Post-Deploy (`healthcheck-postdeploy.yml`)
+#### 7.3. Post-Deploy (`04-health-postdeploy.yml`)
 
 **Rôle**: Validation immédiate après déploiement production
 
 **Triggers**:
-- Workflow run completed (portfolio, securevault, registry)
+- Après déploiement réussi (portfolio, securevault, registry)
 - **Uniquement sur master** (production)
-- Pas de déclenchement sur develop (staging)
 
-**Smart Cooldown**:
-- Probe automatique toutes les 5s jusqu'à ce que le service soit prêt
+**Smart Validation**:
+- Probe automatique jusqu'à service prêt
 - Maximum 90s d'attente
-- Détection du service selon le workflow (Portfolio/SecureVault/Registry)
-- Exit immédiat quand le service répond (économise 10-25s)
-
-**Vérifications**:
-- HTTP status codes (2xx/3xx/401 = succès)
-- Response times optimisées
-- SSL certificates valides
-- Content-Type headers
+- Exit immédiat quand service répond
 
 ---
 
 ### 8. 🚀 Release Automation
 
-#### 8.1. Release Changelog PR (`release-changelog-pr.yml`)
+#### 8.1. Release Changelog PR (`07-release-changelog-pr.yml`)
 
 **Rôle**: Génère PR avec changelog semantic-release
 
@@ -405,26 +385,13 @@ Leaks > 5    → 4/10 (rouge)
 - Push sur `master`
 - Workflow dispatch manuel
 
-**Étapes**:
-1. Analyse commits conventionnels
-2. Calcul nouvelle version (SemVer)
-3. Génération CHANGELOG.md
-4. Mise à jour package.json
-5. Création PR automatique
-
-#### 8.2. Release Automation (`release-automation.yml`)
+#### 8.2. Release Automation (`07-release-automation.yml`)
 
 **Rôle**: Publie release GitHub après merge PR
 
 **Triggers**:
 - Push sur `master` (après merge)
 - Workflow dispatch manuel
-
-**Étapes**:
-1. Vérification commits
-2. Création tag Git
-3. Publication GitHub Release
-4. Mise à jour documentation
 
 **Format commits**:
 ```
@@ -435,33 +402,23 @@ BREAKING CHANGE: → version major
 
 ---
 
-### 9. 💾 Backup (`backup.yml`)
+### 9. 💾 Backup (`06-maint-backup.yml`)
 
-**Rôle**: Sauvegarde automatique databases + configurations
+**Rôle**: Sauvegarde automatique databases + configurations - **INDÉPENDANT**
 
 **Triggers**:
 - Schedule: quotidien à 03:00 UTC
 - Workflow dispatch manuel
 
-**Cibles**:
-- PostgreSQL (SecureVault)
-- Configurations (.env files)
-- Certificats SSL
-
 **Destinations**:
-- AWS S3: `s3://freijstack-backups/`
-- Azure Blob Storage: `freijstack-backups`
-
-**Rétention**:
-- Daily: 7 jours
-- Weekly: 30 jours
-- Monthly: 1 an
+- AWS S3
+- Azure Blob Storage
 
 ---
 
-### 10. 🔄 Rotate Secrets (`rotate-secrets.yml`)
+### 10. 🔄 Rotate Secrets (`06-maint-rotate-secrets.yml`)
 
-**Rôle**: Rotation automatique secrets sensibles
+**Rôle**: Rotation automatique secrets sensibles - **INDÉPENDANT**
 
 **Triggers**:
 - Schedule: mensuel (1er du mois à 02:00)
@@ -471,48 +428,22 @@ BREAKING CHANGE: → version major
 - JWT secrets
 - Database passwords
 - API keys
-- Session secrets
-
-**Process**:
-1. Génération nouveaux secrets
-2. Backup anciens secrets
-3. Mise à jour .env files
-4. Redémarrage services
-5. Vérification health checks
 
 ---
 
-### 11. 📊 Security Score (`security-score.yml`)
-
-**Rôle**: Publication badge sécurité sur GitHub Pages
-
-**Triggers**:
-- Workflow run completed (securitycheck)
-- Push sur `master`
-
-**Process**:
-1. Télécharge artifact `security-score.json`
-2. Publie sur `gh-pages` branch
-3. Badge accessible: `https://christophe-freijanes.github.io/freijstack/security-score.json`
-
-**Utilisation**:
-```markdown
-[![Security Score](https://img.shields.io/endpoint?url=https://christophe-freijanes.github.io/freijstack/security-score.json)](...)
-```
-
----
-
-### 12. ✅ PR Title Automation (`pr-title-automation.yml`)
+### 11. ✅ PR Title Automation (`pr-title-automation.yml`)
 
 **Rôle**: Validation format titre PR (conventional commits)
 
 **Triggers**:
 - PR opened/edited
 
-**Validation**:
-- Format: `type(scope): description`
-- Types valides: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
-- Longueur: 10-100 caractères
+**Format valide**:
+```
+type(scope): description
+```
+
+Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
 ---
 
@@ -523,11 +454,10 @@ BREAKING CHANGE: → version major
 | Workflow | Push master | Push develop | PR | Schedule | Manual |
 |----------|-------------|--------------|-----|----------|--------|
 | Infrastructure Deploy | ✅ | ✅ | ❌ | ❌ | ✅ |
-| Portfolio Deploy | ✅ | ✅ | ❌ | ❌ | ❌ |
-| SecureVault Deploy | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Harbor Deploy | ❌ | ✅ | ❌ | ❌ | ✅ |
+| Portfolio Deploy (00-core-full-deploy.yml) | ✅ | ✅ | ❌ | ❌ | ❌ |
+| SecureVault Deploy (00-core-full-deploy.yml) | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Harbor Deploy (00-core-full-deploy.yml) | ❌ | ✅ | ❌ | ❌ | ✅ |
 | CodeQL | ✅ | ❌ | ✅ | 🕐 Weekly | ✅ |
-| Security Check | ❌ | ❌ | ❌ | 🕐 Daily | ✅ |
 | Health Prod | ❌ | ❌ | ❌ | 🕐 */30min | ✅ |
 | Health Dev | ❌ | ❌ | ❌ | 🕐 Hourly | ✅ |
 | Backup | ❌ | ❌ | ❌ | 🕐 Daily 03:00 | ✅ |
@@ -543,17 +473,17 @@ Certains workflows s'activent uniquement si certains fichiers changent:
 # Portfolio Deploy
 paths:
   - 'saas/portfolio/**'
-  - '.github/workflows/portfolio-deploy.yml'
+  - '.github/workflows/03-app-portfolio-deploy.yml'
 
 # SecureVault Deploy
 paths:
   - 'saas/securevault/**'
-  - '.github/workflows/securevault-deploy.yml'
+  - '.github/workflows/03-app-securevault-deploy.yml'
 
 # Infrastructure Deploy
 paths:
   - 'base-infra/**'
-  - '.github/workflows/infrastructure-deploy.yml'
+  - '.github/workflows/02-infra-deploy.yml'
 ```
 
 ---
