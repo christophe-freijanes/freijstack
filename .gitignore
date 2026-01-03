@@ -1,6 +1,9 @@
 # Dossier de documentation privée
 docs-private/
 
+# Workflows n8n et automation privés
+automation/
+
 ## Environment Variables & Secrets
 # Ignore actual .env files with secrets
 .env

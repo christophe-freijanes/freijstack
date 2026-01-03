@@ -39,7 +39,7 @@ jobs:
           echo "- Commit: \`${{ github.event.workflow_run.head_sha }}\`" >> "$GITHUB_STEP_SUMMARY"
 
       - name: ⏳ Cooldown (warm-up after deploy)
-        run: sleep 75
+        run: sleep 30
 
       - name: 🌐 Check Public URLs (with retries)
         run: |
