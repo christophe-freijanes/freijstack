@@ -13,7 +13,7 @@ config-variables: false
 shellcheck:
   # Pass severity level to shellcheck (only show errors, not warnings/info)
   severity: error
-  
+
   # Exclude specific rules
   exclude-ids:
     - SC2086  # Double quote to prevent globbing (info level)
