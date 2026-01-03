@@ -168,6 +168,9 @@ jobs:
               cd "$PROJECT_PATH"
             fi
 
+            # Use per-app/per-env project name to avoid reusing stale volumes
+            export COMPOSE_PROJECT_NAME="${APP_NAME}-${ENVIRONMENT}"
+
             # Deploy with Docker Compose
             echo "🐳 Deploying with $COMPOSE_FILE..."
             if [ -f "$COMPOSE_FILE" ]; then
