@@ -6,6 +6,30 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.16.1](https://github.com/christophe-freijanes/freijstack/compare/v1.16.0...v1.16.1) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* correct formatting of architecture documentation entry in index ([#118](https://github.com/christophe-freijanes/freijstack/issues/118)) ([cbee499](https://github.com/christophe-freijanes/freijstack/commit/cbee499f87411ca28eb74a4140ea941745bf8b96)), closes [#69](https://github.com/christophe-freijanes/freijstack/issues/69) [#73](https://github.com/christophe-freijanes/freijstack/issues/73) [#75](https://github.com/christophe-freijanes/freijstack/issues/75) [#78](https://github.com/christophe-freijanes/freijstack/issues/78) [#79](https://github.com/christophe-freijanes/freijstack/issues/79) [#81](https://github.com/christophe-freijanes/freijstack/issues/81) [#82](https://github.com/christophe-freijanes/freijstack/issues/82) [#83](https://github.com/christophe-freijanes/freijstack/issues/83) [#85](https://github.com/christophe-freijanes/freijstack/issues/85) [#87](https://github.com/christophe-freijanes/freijstack/issues/87) [#89](https://github.com/christophe-freijanes/freijstack/issues/89) [#90](https://github.com/christophe-freijanes/freijstack/issues/90) [#91](https://github.com/christophe-freijanes/freijstack/issues/91) [#92](https://github.com/christophe-freijanes/freijstack/issues/92) [#93](https://github.com/christophe-freijanes/freijstack/issues/93) [#94](https://github.com/christophe-freijanes/freijstack/issues/94) [#96](https://github.com/christophe-freijanes/freijstack/issues/96) [#97](https://github.com/christophe-freijanes/freijstack/issues/97) [#98](https://github.com/christophe-freijanes/freijstack/issues/98)
+
+## [1.16.0](https://github.com/christophe-freijanes/freijstack/compare/v1.15.0...v1.16.0) (2026-01-03)
+
+### 🚀 Features
+
+* extend Traefik network monitoring to all critical networks ([b0fa1a0](https://github.com/christophe-freijanes/freijstack/commit/b0fa1a0f558d244f9661dd3b992120ad0e6938d5))
+
+## [1.15.0](https://github.com/christophe-freijanes/freijstack/compare/v1.14.0...v1.15.0) (2026-01-03)
+
+### 🚀 Features
+
+* **healthcheck-dev:** add portfolio staging monitoring and Traefik auto-healing ([bf0514c](https://github.com/christophe-freijanes/freijstack/commit/bf0514c3224f57c2657975db53a12cdda53a0b13))
+
+## [1.14.0](https://github.com/christophe-freijanes/freijstack/compare/v1.13.0...v1.14.0) (2026-01-03)
+
+### 🚀 Features
+
+* **healthcheck:** add portfolio URLs and Traefik network auto-healing ([24cb545](https://github.com/christophe-freijanes/freijstack/commit/24cb545a9e3784368773e304a4058a811501d134))
+
 ## [1.13.0](https://github.com/christophe-freijanes/freijstack/compare/v1.12.2...v1.13.0) (2026-01-03)
 
 ### 🚀 Features

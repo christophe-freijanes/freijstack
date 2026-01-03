@@ -125,7 +125,8 @@ jobs:
 
           # Format: "url|allowed_codes|label"
           URLS=(
-            "https://portfolio.freijstack.com/|200,301,302|Portfolio"
+            "https://portfolio.freijstack.com/|200,301,302|Portfolio (production)"
+            "https://portfolio-staging.freijstack.com/|200,301,302|Portfolio (staging)"
             "https://christophe-freijanes.github.io/freijstack/|200,301,302|GitHub Pages"
             "https://registry.freijstack.com/v2/|401,200|Docker Registry API (production)"
             "https://registry-ui.freijstack.com/|200,301,302|Docker Registry UI (production)"
@@ -306,6 +307,55 @@ jobs:
             -o UserKnownHostsFile=~/.ssh/known_hosts \
             "${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}" "echo '✅ SSH OK'"
 
+      # ---------------------------
+      # 🌐 NETWORK — Traefik connectivity check (ALL critical networks)
+      # ---------------------------
+      - name: 🌐 Check Traefik Network Connectivity
+        id: traefik_network
+        run: |
+          set -euo pipefail
+          echo "## 🌐 Traefik Network" >> "$GITHUB_STEP_SUMMARY"
+
+          SSH="ssh -i ~/.ssh/deploy_key \
+            -o BatchMode=yes \
+            -o ConnectTimeout=10 \
+            -o ServerAliveInterval=5 \
+            -o ServerAliveCountMax=2 \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile=~/.ssh/known_hosts \
+            ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+
+          echo "🔍 Checking Traefik connectivity to all critical networks..."
+
+          # Critical networks: web (SecureVault, Registry, n8n) + freijstack (Portfolio)
+          NETWORKS=("web" "freijstack")
+          failed_networks=()
+
+          for network in "${NETWORKS[@]}"; do
+            echo "  📡 Checking network: $network"
+            check=$(
+              $SSH "docker network inspect $network 2>/dev/null | grep -q '\"Name\": \"traefik\"' && echo 'connected' || echo 'disconnected'"
+            )
+
+            if [ "$check" = "connected" ]; then
+              echo "  ✅ Traefik connected to $network"
+              echo "- ✅ Traefik ↔ $network: connected" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "  ❌ Traefik NOT connected to $network"
+              echo "- ❌ Traefik ↔ $network: **disconnected**" >> "$GITHUB_STEP_SUMMARY"
+              failed_networks+=("$network")
+            fi
+          done
+
+          if [ ${#failed_networks[@]} -gt 0 ]; then
+            echo "status=disconnected" >> "$GITHUB_OUTPUT"
+            echo "failed_networks=${failed_networks[*]}" >> "$GITHUB_OUTPUT"
+            exit 1
+          else
+            echo "status=connected" >> "$GITHUB_OUTPUT"
+            echo "failed_networks=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: 🗄️ Check Database Connectivity (pg_isready)
         id: database
         run: |
@@ -408,6 +458,36 @@ jobs:
             PROD_DIR="/srv/www/securevault/saas/securevault"
             STAMP_FILE="/tmp/securevault_last_heal"
 
+            # ---------------------------
+            # 🌐 Fix Traefik network connectivity first (ALL critical networks)
+            # ---------------------------
+            echo "🔍 Checking Traefik network connectivity..."
+            NETWORKS=("web" "freijstack")
+            reconnected=false
+
+            for network in "${NETWORKS[@]}"; do
+              echo "  📡 Checking network: $network"
+              if ! docker network inspect "$network" 2>/dev/null | grep -q '"Name": "traefik"'; then
+                echo "  ⚠️  Traefik not connected to $network, fixing..."
+                docker network connect "$network" traefik 2>/dev/null || echo "  Already connected"
+                reconnected=true
+              else
+                echo "  ✅ Traefik already connected to $network"
+              fi
+            done
+
+            if [ "$reconnected" = true ]; then
+              echo "🔄 Restarting Traefik to activate connections..."
+              docker restart traefik
+              sleep 10
+              echo "✅ Traefik reconnected to all networks"
+            else
+              echo "✅ Traefik already connected to all networks"
+            fi
+
+            # ---------------------------
+            # 🔄 Restart SecureVault services
+            # ---------------------------
             cd "$PROD_DIR"
 
             echo "📊 Current container status:"

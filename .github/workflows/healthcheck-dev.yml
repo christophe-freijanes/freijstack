@@ -121,7 +121,8 @@ jobs:
 
           # Format: "url|allowed_codes|label"
           URLS=(
-            "https://portfolio.freijstack.com/|200,301,302|Portfolio"
+            "https://portfolio-staging.freijstack.com/|200,301,302|Portfolio (staging)"
+            "https://portfolio.freijstack.com/|200,301,302|Portfolio (production)"
             "https://christophe-freijanes.github.io/freijstack/|200,301,302|GitHub Pages"
             "https://vault.freijstack.com/login|200,301,302,404|SecureVault Frontend (shared)"
             "https://registry.freijstack.com/v2/|401,200|Docker Registry API (production)"
@@ -280,6 +281,78 @@ jobs:
             exit 1
           fi
 
+      # ---------------------------
+      # 🔐 SSH — Setup for network check
+      # ---------------------------
+      - name: 🔐 Setup SSH (for network check)
+        id: ssh
+        run: |
+          set -euo pipefail
+
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          ssh-keyscan -H "${{ secrets.VPS_SSH_HOST }}" >> ~/.ssh/known_hosts
+
+          ssh -i ~/.ssh/deploy_key \
+            -o BatchMode=yes \
+            -o ConnectTimeout=10 \
+            -o ServerAliveInterval=5 \
+            -o ServerAliveCountMax=2 \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile=~/.ssh/known_hosts \
+            "${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}" "echo '✅ SSH OK'"
+
+      # ---------------------------
+      # 🌐 NETWORK — Traefik connectivity check (ALL critical networks)
+      # ---------------------------
+      - name: 🌐 Check Traefik Network Connectivity
+        id: traefik_network
+        run: |
+          set -euo pipefail
+          echo "## 🌐 Traefik Network" >> "$GITHUB_STEP_SUMMARY"
+
+          SSH="ssh -i ~/.ssh/deploy_key \
+            -o BatchMode=yes \
+            -o ConnectTimeout=10 \
+            -o ServerAliveInterval=5 \
+            -o ServerAliveCountMax=2 \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile=~/.ssh/known_hosts \
+            ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+
+          echo "🔍 Checking Traefik connectivity to all critical networks..."
+
+          # Critical networks: web (SecureVault, Registry, n8n) + freijstack (Portfolio)
+          NETWORKS=("web" "freijstack")
+          failed_networks=()
+
+          for network in "${NETWORKS[@]}"; do
+            echo "  📡 Checking network: $network"
+            check=$(
+              $SSH "docker network inspect $network 2>/dev/null | grep -q '\"Name\": \"traefik\"' && echo 'connected' || echo 'disconnected'"
+            )
+
+            if [ "$check" = "connected" ]; then
+              echo "  ✅ Traefik connected to $network"
+              echo "- ✅ Traefik ↔ $network: connected" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "  ❌ Traefik NOT connected to $network"
+              echo "- ❌ Traefik ↔ $network: **disconnected**" >> "$GITHUB_STEP_SUMMARY"
+              failed_networks+=("$network")
+            fi
+          done
+
+          if [ ${#failed_networks[@]} -gt 0 ]; then
+            echo "status=disconnected" >> "$GITHUB_OUTPUT"
+            echo "failed_networks=${failed_networks[*]}" >> "$GITHUB_OUTPUT"
+            exit 1
+          else
+            echo "status=connected" >> "$GITHUB_OUTPUT"
+            echo "failed_networks=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: 🧹 Cleanup SSH key
         if: always()
         run: |
@@ -291,12 +364,14 @@ jobs:
     timeout-minutes: 10
     needs: health-check
 
-    # ✅ DEV: auto-heal UNIQUEMENT manuel (sinon ça masque les régressions)
+    # ✅ DEV: auto-heal automatique via schedule + manuel
     if: >
       always() &&
       needs.health-check.result == 'failure' &&
-      github.event_name == 'workflow_dispatch' &&
-      inputs.auto_heal == true
+      (
+        github.event_name == 'schedule' ||
+        (github.event_name == 'workflow_dispatch' && inputs.auto_heal == true)
+      )
 
     steps:
       - name: 🔐 Setup SSH
@@ -307,10 +382,100 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "${{ secrets.VPS_SSH_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: 🔧 Restart services (DEV/shared) — example
+      - name: ⏱️ Auto-Heal cooldown check (anti restart-loop)
+        id: cooldown
         run: |
-          echo "🧯 Manual auto-heal triggered (DEV/shared)."
-          echo "➡️ Ici tu mets tes commandes SSH si tu as un environnement DEV."
+          set -euo pipefail
+
+          SSH="ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o ConnectTimeout=10 ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+          COOLDOWN_SECONDS=1800  # 30 minutes
+          STAMP_FILE="/tmp/portfolio_staging_last_heal"
+
+          echo "⏱️ Checking cooldown..."
+
+          now=$($SSH "date +%s")
+          last=$($SSH "test -f '$STAMP_FILE' && cat '$STAMP_FILE' || echo 0")
+          diff=$((now - last))
+
+          if [ "$diff" -lt "$COOLDOWN_SECONDS" ]; then
+            echo "🛑 Cooldown active: last heal was $diff seconds ago (< $COOLDOWN_SECONDS)."
+            echo "can_heal=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          else
+            echo "✅ Cooldown passed. Auto-heal allowed."
+            echo "can_heal=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 🔧 Restart Development Services (Staging)
+        if: ${{ steps.cooldown.outputs.can_heal == 'true' }}
+        run: |
+          set -euo pipefail
+
+          SSH="ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o ConnectTimeout=10 ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+
+          $SSH << 'HEAL_SCRIPT'
+            set -euo pipefail
+
+            STAGING_DIR="/srv/www/portfolio"
+            STAMP_FILE="/tmp/portfolio_staging_last_heal"
+
+            # ---------------------------
+            # 🌐 Fix Traefik network connectivity first (ALL critical networks)
+            # ---------------------------
+            echo "🔍 Checking Traefik network connectivity..."
+            NETWORKS=("web" "freijstack")
+            reconnected=false
+
+            for network in "${NETWORKS[@]}"; do
+              echo "  📡 Checking network: $network"
+              if ! docker network inspect "$network" 2>/dev/null | grep -q '"Name": "traefik"'; then
+                echo "  ⚠️  Traefik not connected to $network, fixing..."
+                docker network connect "$network" traefik 2>/dev/null || echo "  Already connected"
+                reconnected=true
+              else
+                echo "  ✅ Traefik already connected to $network"
+              fi
+            done
+
+            if [ "$reconnected" = true ]; then
+              echo "🔄 Restarting Traefik to activate connections..."
+              docker restart traefik
+              sleep 10
+              echo "✅ Traefik reconnected to all networks"
+            else
+              echo "✅ Traefik already connected to all networks"
+            fi
+
+            # ---------------------------
+            # 🔄 Restart Portfolio Staging
+            # ---------------------------
+            cd "$STAGING_DIR"
+
+            echo "📊 Current portfolio staging status:"
+            docker compose -p staging ps || true
+            echo ""
+
+            echo "🔄 Restarting portfolio staging..."
+            docker compose -p staging restart
+
+            echo "⏳ Waiting for services to stabilize..."
+            sleep 15
+
+            echo "📊 New portfolio staging status:"
+            docker compose -p staging ps || true
+            echo ""
+
+            echo "🔎 Checking portfolio staging health..."
+            staging_health=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 || echo "000")
+
+            if [ "$staging_health" = "200" ]; then
+              echo "✅ Auto-heal successful!"
+              date +%s > "$STAMP_FILE"
+            else
+              echo "⚠️ Restart done but health still failing (HTTP $staging_health)"
+              exit 1
+            fi
+          HEAL_SCRIPT
 
       - name: 🧹 Cleanup SSH key
         if: always()
