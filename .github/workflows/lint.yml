@@ -122,4 +122,3 @@ jobs:
             exit 0
           fi
           markdownlint-cli2 "**/*.md" "#node_modules"
-
