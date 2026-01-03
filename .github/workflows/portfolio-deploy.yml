@@ -40,7 +40,7 @@ jobs:
       - name: Verify Docker image integrity
         run: |
           echo "🔐 Verifying Docker image integrity..."
-          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-beta"
           docker run --rm --entrypoint sh $IMAGE -c 'echo "✅ Image validation successful"' || exit 1
 
       - name: Prepare SSH key
