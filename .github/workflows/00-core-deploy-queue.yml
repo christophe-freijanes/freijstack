@@ -152,6 +152,11 @@ jobs:
               git reset --hard "origin/${GITHUB_REF##*/}"
               git clean -fd
             else
+              # Clean directory if it exists but is not a git repo
+              if [ "$(ls -A .)" ]; then
+                echo "⚠️ Directory exists but is not a git repository, cleaning..."
+                rm -rf ..?* .[!.]* *
+              fi
               echo "📥 Cloning repository..."
               BRANCH="${GITHUB_REF##*/}"
               git clone -b "${BRANCH}" "https://github.com/${GITHUB_REPO}.git" .
