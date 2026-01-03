@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.16.0](https://github.com/christophe-freijanes/freijstack/compare/v1.15.0...v1.16.0) (2026-01-03)
+
+### 🚀 Features
+
+* extend Traefik network monitoring to all critical networks ([b0fa1a0](https://github.com/christophe-freijanes/freijstack/commit/b0fa1a0f558d244f9661dd3b992120ad0e6938d5))
+
 ## [1.15.0](https://github.com/christophe-freijanes/freijstack/compare/v1.14.0...v1.15.0) (2026-01-03)
 
 ### 🚀 Features
