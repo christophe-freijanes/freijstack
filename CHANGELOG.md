@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.10.9](https://github.com/christophe-freijanes/freijstack/compare/v1.10.8...v1.10.9) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* remove problematic directory slash from nginx try_files directive ([7e5fdc1](https://github.com/christophe-freijanes/freijstack/commit/7e5fdc191805f99674c404bcf4b794a29ec45614))
+
 ## [1.10.8](https://github.com/christophe-freijanes/freijstack/compare/v1.10.7...v1.10.8) (2026-01-03)
 
 ### 🐛 Bug Fixes
