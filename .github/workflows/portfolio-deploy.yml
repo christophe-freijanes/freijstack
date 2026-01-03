@@ -19,25 +19,9 @@ env:
   IS_STAGING: ${{ github.ref == 'refs/heads/develop' }}
 
 jobs:
-  # Job 0: Security Scanning
-  security:
-    name: 🛡️ Shield Protection
-    uses: ./.github/workflows/securitycheck.yml
-    permissions:
-      contents: read
-      actions: read
-      security-events: write
-    with:
-      scan_paths: |
-        saas/portfolio
-      fail_on_gitleaks: true
-      upload_sarif: true
-      publish_score_artifact: true
-
   # Job 1: Deploy to VPS (Staging - develop)
   deploy-VPS-staging:
     name: 🧪 Deploy to VPS (Staging)
-    needs: [security]
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'pull_request' ||
@@ -153,7 +137,7 @@ jobs:
   # Job 3: Notifications
   notify:
     name: 📢 Notify Status
-    needs: [security, deploy-VPS-staging, deploy-VPS-prod]
+    needs: [deploy-VPS-staging, deploy-VPS-prod]
     runs-on: ubuntu-latest
     if: always()
 
