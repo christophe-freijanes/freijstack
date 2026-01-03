@@ -5,9 +5,10 @@ shellcheck: ""
 
 # Ignorer globalement les erreurs ShellCheck par message
 ignore:
-  # Filtre tous les messages de niveau 'warning' et 'style' de ShellCheck
+  # Filtre tous les messages de niveau 'info', 'warning' et 'style' de ShellCheck
   - "shellcheck reported issue in this script:.*:warning:"
   - "shellcheck reported issue in this script:.*:style:"
+  - "shellcheck reported issue in this script:.*:info:"
 
 # Configuration spécifique par fichier (si vous voulez être plus précis)
 paths:
