@@ -20,6 +20,6 @@
     { "file": "docs/TROUBLESHOOTING.md", "title": "🔧 Guide de Dépannage - FreijStack", "size": 21861 },
     { "file": "docs/TROUBLESHOOTING_GATEWAY_TIMEOUT.md", "title": "Troubleshooting: Gateway Timeout", "size": 4669 },
     { "file": "docs/USER_GUIDE.md", "title": "🔐 SecureVault Professional - Guide Utilisateur", "size": 12266 },
-    { "file": "docs/architecture.md", "title": "Architecture Technique - FreijStack", "size": 21410 },
-    ]
+    { "file": "docs/architecture.md", "title": "Architecture Technique - FreijStack", "size": 21410 }
+  ]
 }
