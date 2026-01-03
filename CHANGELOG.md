@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.20.0](https://github.com/christophe-freijanes/freijstack/compare/v1.19.0...v1.20.0) (2026-01-03)
+
+### 🚀 Features
+
+* update markdownlint configuration to disable additional rules for improved flexibility ([46b0b0f](https://github.com/christophe-freijanes/freijstack/commit/46b0b0f73c792bfd7f1065681a4e24d9e1858335))
+
 ## [1.19.0](https://github.com/christophe-freijanes/freijstack/compare/v1.18.0...v1.19.0) (2026-01-03)
 
 ### 🚀 Features
