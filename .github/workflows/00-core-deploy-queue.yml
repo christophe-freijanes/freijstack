@@ -74,7 +74,7 @@ jobs:
       - name: 🔐 Setup SSH
         run: |
           set -euo pipefail
-          
+
           # Validate secrets
           if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then
             echo "❌ VPS_SSH_KEY secret is not set"
@@ -84,12 +84,12 @@ jobs:
             echo "❌ VPS_SSH_HOST secret is not set"
             exit 1
           fi
-          
+
           # Setup SSH key
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          
+
           # Scan SSH host keys with retry (5 attempts for GitHub runner stability)
           echo "🔍 Scanning SSH host keys for ${{ secrets.VPS_SSH_HOST }}..."
           for i in {1..5}; do
@@ -116,12 +116,12 @@ jobs:
       - name: 🚀 Deploy ${{ inputs.app_name }}
         run: |
           set -euo pipefail
-          
+
           echo "📦 Deploying ${{ inputs.app_name }} to ${{ inputs.environment }}..."
           echo "📂 Deploy directory: ${{ inputs.deploy_dir }}"
-          
+
           SSH_TARGET="${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
-          
+
           # Export variables for remote script
           REMOTE_ENV="APP_NAME='${{ inputs.app_name }}' \
           ENVIRONMENT='${{ inputs.environment }}' \
@@ -130,7 +130,7 @@ jobs:
           COMPOSE_FILE='${{ inputs.docker_compose_file }}' \
           GITHUB_REPO='${{ github.repository }}' \
           GITHUB_REF='${{ github.ref }}'"
-          
+
           if [ -n "${{ inputs.custom_script }}" ]; then
             # Use custom deployment script if provided
             echo "🔧 Using custom deployment script..."
@@ -140,11 +140,11 @@ jobs:
             ssh -i ~/.ssh/deploy_key "${SSH_TARGET}" "${REMOTE_ENV}" bash <<'DEPLOY_SCRIPT'
             set -e
             echo "🚀 Starting deployment for $APP_NAME ($ENVIRONMENT)..."
-            
+
             # Create deploy directory
             mkdir -p "$DEPLOY_DIR"
             cd "$DEPLOY_DIR"
-            
+
             # Clone or update repository
             if [ -d ".git" ]; then
               echo "✅ Repository exists, pulling latest changes..."
@@ -156,32 +156,32 @@ jobs:
               BRANCH="${GITHUB_REF##*/}"
               git clone -b "${BRANCH}" "https://github.com/${GITHUB_REPO}.git" .
             fi
-            
+
             # Navigate to project subdirectory if specified
             if [ -n "$PROJECT_PATH" ]; then
               echo "📂 Entering project directory: $PROJECT_PATH"
               cd "$PROJECT_PATH"
             fi
-            
+
             # Deploy with Docker Compose
             echo "🐳 Deploying with $COMPOSE_FILE..."
             if [ -f "$COMPOSE_FILE" ]; then
               docker compose -f "$COMPOSE_FILE" pull
               docker compose -f "$COMPOSE_FILE" up -d --build --remove-orphans
-              
+
               echo "⏳ Waiting 10s for services to start..."
               sleep 10
-              
+
               echo "📊 Container status:"
               docker compose -f "$COMPOSE_FILE" ps
-              
+
               echo "📜 Recent logs:"
               docker compose -f "$COMPOSE_FILE" logs --tail=20
             else
               echo "❌ Docker Compose file not found: $COMPOSE_FILE"
               exit 1
             fi
-            
+
             echo "✅ Deployment completed for $APP_NAME!"
           DEPLOY_SCRIPT
           fi

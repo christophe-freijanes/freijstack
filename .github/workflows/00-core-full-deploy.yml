@@ -24,7 +24,7 @@ on:
         required: false
         type: string
         default: ''
-      
+
       # Docker configuration
       docker_compose_file:
         description: 'Docker Compose file to use'
@@ -36,7 +36,7 @@ on:
         required: false
         type: boolean
         default: false
-      
+
       # Security & Quality configuration
       scan_paths:
         description: 'Paths to scan for security issues (multi-line)'
@@ -58,7 +58,7 @@ on:
         required: false
         type: boolean
         default: false
-      
+
       # Testing configuration
       test_command:
         description: 'Command to run tests (e.g., npm test)'
@@ -70,14 +70,14 @@ on:
         required: false
         type: boolean
         default: false
-      
+
       # Custom deployment script
       custom_script:
         description: 'Custom deployment script (bash)'
         required: false
         type: string
         default: ''
-    
+
     secrets:
       VPS_SSH_KEY:
         required: true
@@ -120,59 +120,59 @@ jobs:
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
-      
+
       - name: 🔍 Auto-detect and run linters
         run: |
           set -euo pipefail
           echo "🔍 Detecting linters for ${{ inputs.project_path || '.' }}..."
-          
+
           PROJECT_DIR="${{ inputs.project_path }}"
           if [ -n "$PROJECT_DIR" ] && [ -d "$PROJECT_DIR" ]; then
             cd "$PROJECT_DIR"
           fi
-          
+
           FAILED=0
-          
+
           # JavaScript/TypeScript: ESLint
           if [ -f "package.json" ] && grep -q "eslint" package.json 2>/dev/null; then
             echo "📦 Running ESLint..."
             npm install --silent
             npm run lint --if-present || FAILED=1
           fi
-          
+
           # Python: Ruff
           if find . -name "*.py" -type f | head -n 1 | grep -q .; then
             echo "🐍 Running Ruff..."
             pip install -q ruff
             ruff check . || FAILED=1
           fi
-          
+
           # Markdown: markdownlint
           if [ -f ".markdownlint-cli2.jsonc" ]; then
             echo "📝 Running markdownlint..."
             npm install -g markdownlint-cli2 --silent
             markdownlint-cli2 "**/*.md" || FAILED=1
           fi
-          
+
           # Shell: ShellCheck
           if find . -name "*.sh" -type f | head -n 1 | grep -q .; then
             echo "🐚 Running ShellCheck..."
             sudo apt-get install -qq shellcheck
             find . -name "*.sh" -type f -exec shellcheck {} + || FAILED=1
           fi
-          
+
           # YAML: yamllint
           if find . -name "*.yml" -o -name "*.yaml" | head -n 1 | grep -q .; then
             echo "📋 Running yamllint..."
             pip install -q yamllint
             yamllint . || FAILED=1
           fi
-          
+
           if [ $FAILED -eq 1 ]; then
             echo "❌ Linting failed"
             exit 1
           fi
-          
+
           echo "✅ All linters passed"
 
   # ═══════════════════════════════════════════════════════════
@@ -186,7 +186,7 @@ jobs:
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
-      
+
       - name: 🧪 Run tests
         if: inputs.test_command != ''
         run: |
@@ -194,17 +194,17 @@ jobs:
           if [ -n "$PROJECT_DIR" ] && [ -d "$PROJECT_DIR" ]; then
             cd "$PROJECT_DIR"
           fi
-          
+
           echo "🧪 Running tests: ${{ inputs.test_command }}"
           ${{ inputs.test_command }}
-      
+
       - name: 🐳 Build Docker images (validation)
         run: |
           PROJECT_DIR="${{ inputs.project_path }}"
           if [ -n "$PROJECT_DIR" ] && [ -d "$PROJECT_DIR" ]; then
             cd "$PROJECT_DIR"
           fi
-          
+
           if [ -f "${{ inputs.docker_compose_file }}" ]; then
             echo "🐳 Building Docker images for validation..."
             docker compose -f "${{ inputs.docker_compose_file }}" build
@@ -255,7 +255,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Pipeline Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Security
           if [ "${{ needs.security.result }}" = "success" ]; then
             echo "- 🛡️ Security: ✅ Passed" >> $GITHUB_STEP_SUMMARY
@@ -264,7 +264,7 @@ jobs:
           else
             echo "- 🛡️ Security: ❌ Failed" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           # Lint
           if [ "${{ needs.lint.result }}" = "success" ]; then
             echo "- 🧹 Lint: ✅ Passed" >> $GITHUB_STEP_SUMMARY
@@ -273,7 +273,7 @@ jobs:
           else
             echo "- 🧹 Lint: ❌ Failed" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           # Test
           if [ "${{ needs.test.result }}" = "success" ]; then
             echo "- 🧪 Test: ✅ Passed" >> $GITHUB_STEP_SUMMARY
@@ -282,7 +282,7 @@ jobs:
           else
             echo "- 🧪 Test: ❌ Failed" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           # Deploy
           if [ "${{ needs.deploy.result }}" = "success" ]; then
             echo "- 🚀 Deploy: ✅ Success" >> $GITHUB_STEP_SUMMARY
@@ -291,9 +291,9 @@ jobs:
           else
             echo "- 🚀 Deploy: ❌ Failed" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Overall status
           if [ "${{ needs.deploy.result }}" = "success" ]; then
             echo "### ✅ Pipeline Successful" >> $GITHUB_STEP_SUMMARY

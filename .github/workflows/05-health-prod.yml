@@ -290,7 +290,7 @@ jobs:
         id: ssh
         run: |
           set -euo pipefail
-          
+
           # Validate secrets
           if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then
             echo "❌ VPS_SSH_KEY secret is not set"
@@ -300,12 +300,12 @@ jobs:
             echo "❌ VPS_SSH_HOST secret is not set"
             exit 1
           fi
-          
+
           # Setup SSH key
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          
+
           # Scan SSH host keys with retry (5 attempts for GitHub runner stability)
           echo "🔍 Scanning SSH host keys for ${{ secrets.VPS_SSH_HOST }}..."
           for i in {1..5}; do
@@ -323,7 +323,7 @@ jobs:
               sleep 3
             fi
           done
-          
+
           ssh -i ~/.ssh/deploy_key \
             -o BatchMode=yes \
             -o ConnectTimeout=10 \
@@ -441,7 +441,7 @@ jobs:
       - name: 🔐 Setup SSH
         run: |
           set -euo pipefail
-          
+
           # Validate secrets
           if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then
             echo "❌ VPS_SSH_KEY secret is not set"
@@ -451,12 +451,12 @@ jobs:
             echo "❌ VPS_SSH_HOST secret is not set"
             exit 1
           fi
-          
+
           # Setup SSH key
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          
+
           # Scan SSH host keys with retry (5 attempts for GitHub runner stability)
           echo "🔍 Scanning SSH host keys for ${{ secrets.VPS_SSH_HOST }}..."
           for i in {1..5}; do
