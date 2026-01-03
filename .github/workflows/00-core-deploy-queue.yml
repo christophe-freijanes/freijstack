@@ -112,6 +112,9 @@ jobs:
             SSH_OPTIONS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
           fi
 
+          # Persist for subsequent steps
+          echo "SSH_OPTIONS=$SSH_OPTIONS" >> "$GITHUB_ENV"
+
       - name: 🔒 Mask sensitive values
         run: |
           echo "::add-mask::${{ secrets.VPS_SSH_USER }}"
@@ -120,6 +123,9 @@ jobs:
       - name: 🚀 Deploy ${{ inputs.app_name }}
         run: |
           set -euo pipefail
+
+          # Ensure SSH options are defined even if previous step failed to export
+          SSH_OPTIONS="${SSH_OPTIONS:--o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null}"
 
           echo "📦 Deploying ${{ inputs.app_name }} to ${{ inputs.environment }}..."
           echo "📂 Deploy directory: ${{ inputs.deploy_dir }}"
