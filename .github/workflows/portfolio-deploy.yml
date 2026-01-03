@@ -50,6 +50,18 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Ensure Traefik network connectivity
+        run: |
+          set -euo pipefail
+          echo "🔍 Verifying Traefik is connected to freijstack network..."
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            'if ! docker inspect traefik -f "{{.NetworkSettings.Networks.freijstack.IPAddress}}" 2>/dev/null | grep -q "."; then
+               echo "🔧 Connecting Traefik to freijstack network..."
+               docker network connect freijstack traefik 2>/dev/null || docker restart traefik
+               sleep 5
+             fi
+             echo "✅ Traefik network check complete"'
+
       - name: Deploy portfolio (Docker Compose) to staging
         run: |
           set -euo pipefail
@@ -103,6 +115,18 @@ jobs:
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Ensure Traefik network connectivity
+        run: |
+          set -euo pipefail
+          echo "🔍 Verifying Traefik is connected to freijstack network..."
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            'if ! docker inspect traefik -f "{{.NetworkSettings.Networks.freijstack.IPAddress}}" 2>/dev/null | grep -q "."; then
+               echo "🔧 Connecting Traefik to freijstack network..."
+               docker network connect freijstack traefik 2>/dev/null || docker restart traefik
+               sleep 5
+             fi
+             echo "✅ Traefik network check complete"'
 
       - name: Create production backup
         run: |
