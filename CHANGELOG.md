@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.10.6](https://github.com/christophe-freijanes/freijstack/compare/v1.10.5...v1.10.6) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* add newline at end of portfolio-deploy.yml (yamllint) ([d257a95](https://github.com/christophe-freijanes/freijstack/commit/d257a959ce201cf90aab24664f3034ebcd180000))
+
 ## [1.10.5](https://github.com/christophe-freijanes/freijstack/compare/v1.10.4...v1.10.5) (2026-01-03)
 
 ### 🐛 Bug Fixes
