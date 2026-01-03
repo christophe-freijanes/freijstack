@@ -1,0 +1,21 @@
+# actionlint configuration
+# https://github.com/rhysd/actionlint/blob/main/docs/config.md
+
+# Shellcheck configuration
+self-hosted-runner:
+  # Labels of self-hosted runner
+  labels: []
+
+config-variables: false
+
+# Disable shellcheck SC2086 and SC2129 warnings (info/style level)
+# These are acceptable in CI/CD contexts with controlled variable expansion
+shellcheck:
+  # Pass severity level to shellcheck (only show errors, not warnings/info)
+  severity: error
+  
+  # Exclude specific rules
+  exclude-ids:
+    - SC2086  # Double quote to prevent globbing (info level)
+    - SC2129  # Consider using { cmd1; cmd2; } >> file (style)
+    - SC2006  # Use $(...) instead of backticks (style)
