@@ -6,6 +6,16 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.10.11](https://github.com/christophe-freijanes/freijstack/compare/v1.10.10...v1.10.11) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* replace wget with curl in healthcheck for alpine compatibility ([ee30562](https://github.com/christophe-freijanes/freijstack/commit/ee30562c3641aa2cf37d7627bf5f3e4b86d1450b))
+
+### ✅ Tests
+
+* trigger portfolio build ([2ec10c3](https://github.com/christophe-freijanes/freijstack/commit/2ec10c32dd51e81a3570c5cd3272156f08d36c24))
+
 ## [1.10.10](https://github.com/christophe-freijanes/freijstack/compare/v1.10.9...v1.10.10) (2026-01-03)
 
 ### 🐛 Bug Fixes
