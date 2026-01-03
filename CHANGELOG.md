@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.21.4](https://github.com/christophe-freijanes/freijstack/compare/v1.21.3...v1.21.4) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* Remove unnecessary newline in markdown lint job ([592657d](https://github.com/christophe-freijanes/freijstack/commit/592657d8c1498960fd2f045d195f88da60e5f275))
+
 ## [1.21.3](https://github.com/christophe-freijanes/freijstack/compare/v1.21.2...v1.21.3) (2026-01-03)
 
 ### 🐛 Bug Fixes
