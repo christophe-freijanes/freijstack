@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.20.1](https://github.com/christophe-freijanes/freijstack/compare/v1.20.0...v1.20.1) (2026-01-03)
+
+### ♻️ Code Refactoring
+
+* clean up comments and remove noqa directives in password generation script ([2cdd46f](https://github.com/christophe-freijanes/freijstack/commit/2cdd46f4df56c5fcf401243be9bf68d0cee2ed26))
+
 ## [1.20.0](https://github.com/christophe-freijanes/freijstack/compare/v1.19.0...v1.20.0) (2026-01-03)
 
 ### 🚀 Features
