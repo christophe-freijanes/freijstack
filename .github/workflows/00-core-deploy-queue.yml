@@ -178,6 +178,12 @@ jobs:
               cd "$PROJECT_PATH"
             fi
 
+            # Create required directories for volume bind mounts (if they don't exist)
+            if [ -d "data" ] || grep -q "device: ./data" "$COMPOSE_FILE" 2>/dev/null; then
+              echo "📁 Ensuring data directory exists..."
+              mkdir -p data
+            fi
+
             # Use per-app/per-env project name to avoid reusing stale volumes
             export COMPOSE_PROJECT_NAME="${APP_NAME}-${ENVIRONMENT}"
 
