@@ -6,6 +6,16 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.10.4](https://github.com/christophe-freijanes/freijstack/compare/v1.10.3...v1.10.4) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* clean up workflow structure - remove job dependencies and cycles ([f519272](https://github.com/christophe-freijanes/freijstack/commit/f519272045b290d6764440e4e3898e8196d07e38))
+
+### 🔧 Chores
+
+* reload workflow cache ([4c50b7f](https://github.com/christophe-freijanes/freijstack/commit/4c50b7f0fd09b885aadd5aabeddf1f58f5bec936))
+
 ## [1.10.3](https://github.com/christophe-freijanes/freijstack/compare/v1.10.2...v1.10.3) (2026-01-03)
 
 ### 🐛 Bug Fixes
