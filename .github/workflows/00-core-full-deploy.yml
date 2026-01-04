@@ -61,9 +61,9 @@ on:
       REGISTRY_PASSWORD_STAGING:
         required: false
       REGISTRY_USER_PROD:
-        required: false
+        required: true
       REGISTRY_PASSWORD_PROD:
-        required: false
+        required: true
 
 concurrency:
   group: vps-ssh-deploy
@@ -116,10 +116,11 @@ jobs:
           GH_REPO='${{ github.repository }}' \
           GH_BRANCH='${BRANCH}' \
           GH_SHA='${{ github.sha }}' \
-          REGISTRY_USER_STAGING='${{ secrets.REGISTRY_USER_STAGING }}' \
-          REGISTRY_PASSWORD_STAGING='${{ secrets.REGISTRY_PASSWORD_STAGING }}' \
+          REGISTRY_HOST='registry.freijstack.com' \
           REGISTRY_USER_PROD='${{ secrets.REGISTRY_USER_PROD }}' \
-          REGISTRY_PASSWORD_PROD='${{ secrets.REGISTRY_PASSWORD_PROD }}'"
+          REGISTRY_PASSWORD_PROD='${{ secrets.REGISTRY_PASSWORD_PROD }}' \
+          REGISTRY_USER_STAGING='${{ secrets.REGISTRY_USER_STAGING }}' \
+          REGISTRY_PASSWORD_STAGING='${{ secrets.REGISTRY_PASSWORD_STAGING }}'"
 
           ssh $SSH_OPTIONS -i ~/.ssh/deploy_key "$SSH_TARGET" "$REMOTE_ENV" bash <<'DEPLOY_SCRIPT'
           set -euo pipefail
@@ -132,6 +133,22 @@ jobs:
           : "${GH_REPO:?}"
           : "${GH_BRANCH:?}"
           : "${GH_SHA:?}"
+          : "${REGISTRY_HOST:?}"
+          : "${REGISTRY_USER_PROD:?}"
+          : "${REGISTRY_PASSWORD_PROD:?}"
+
+          if ! docker compose version >/dev/null 2>&1; then
+            echo "❌ Docker Compose not available on VPS"
+            exit 1
+          fi
+
+          echo "🔒 Volume protection: enabled (never run docker compose down -v)"
+          echo "🚀 Deploying ${APP_NAME} → ${ENVIRONMENT}"
+          echo "📁 DEPLOY_DIR=${DEPLOY_DIR}"
+          echo "📄 COMPOSE_FILE=${COMPOSE_FILE}"
+          echo "🔀 BRANCH=${GH_BRANCH}"
+          echo "🧾 SHA=${GH_SHA}"
+          echo "📦 Registry host=${REGISTRY_HOST} (single registry strategy)"
 
           if ! docker compose version >/dev/null 2>&1; then
             echo "❌ Docker Compose not available on VPS"
@@ -183,12 +200,15 @@ jobs:
           # Registry app: generate htpasswd (requires env creds)
           # ==========================================================
           if [ "$APP_NAME" = "registry" ]; then
+            # If you keep a staging registry someday:
+            # - production uses PROD creds
+            # - staging uses STAGING creds if present, otherwise PROD creds
             if [ "$ENVIRONMENT" = "production" ]; then
-              USER="${REGISTRY_USER_PROD:-}"
-              PASS="${REGISTRY_PASSWORD_PROD:-}"
+              USER="${REGISTRY_USER_PROD}"
+              PASS="${REGISTRY_PASSWORD_PROD}"
             else
-              USER="${REGISTRY_USER_STAGING:-}"
-              PASS="${REGISTRY_PASSWORD_STAGING:-}"
+              USER="${REGISTRY_USER_STAGING:-$REGISTRY_USER_PROD}"
+              PASS="${REGISTRY_PASSWORD_STAGING:-$REGISTRY_PASSWORD_PROD}"
             fi
 
             if [ -z "${USER}" ] || [ -z "${PASS}" ]; then

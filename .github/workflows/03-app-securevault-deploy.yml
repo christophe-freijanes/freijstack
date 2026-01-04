@@ -11,9 +11,7 @@ on:
         required: true
         default: "staging"
         type: choice
-        options:
-          - staging
-          - production
+        options: [staging, production]
 
 jobs:
   deploy-staging:
@@ -55,6 +53,8 @@ jobs:
       project_path: "saas/securevault"
       docker_compose_file: "docker-compose.prod.yml"
       run_migrations: true
+      migrate_service: 'backend'
+      healthcheck_url: 'https://api.vault.freijstack.com/healthz'
     secrets:
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
       VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}

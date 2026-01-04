@@ -1,6 +1,7 @@
 name: 🐳 Infra • Registry Deploy
 
 on:
+  # PROD: auto uniquement sur master quand le code registry change
   push:
     branches: [master]
     paths:
