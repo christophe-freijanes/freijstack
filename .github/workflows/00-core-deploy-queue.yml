@@ -51,7 +51,6 @@ on:
       REGISTRY_PASSWORD_PROD:
         required: false
 
-# Global concurrency: only one deployment at a time across ALL apps
 concurrency:
   group: vps-ssh-deploy
   cancel-in-progress: false
@@ -69,11 +68,9 @@ jobs:
       name: ${{ inputs.environment }}
 
     steps:
-      - name: ⏱️ Staggered Start (avoid SSH collisions)
+      - name: ⏱️ Staggered Start
         run: |
-          # Random delay between 5-20s to stagger parallel deployments
           DELAY=$((5 + RANDOM % 16))
-          echo "🕒 Waiting ${DELAY}s to avoid SSH collision..."
           sleep $DELAY
 
       - name: 📥 Checkout code
@@ -82,266 +79,96 @@ jobs:
       - name: 🔐 Setup SSH
         run: |
           set -euo pipefail
-
-          # Validate secrets
-          if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then
-            echo "❌ VPS_SSH_KEY secret is not set"
-            exit 1
-          fi
-          if [ -z "${{ secrets.VPS_SSH_HOST }}" ]; then
-            echo "❌ VPS_SSH_HOST secret is not set"
-            exit 1
-          fi
-
-          # Setup SSH key
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-
-          # Scan SSH host keys with retry (5 attempts); if all fail, proceed with relaxed host-key checking
-          SSH_SCAN_FAILED=1
-          echo "🔍 Scanning SSH host keys for ${{ secrets.VPS_SSH_HOST }}..."
-          for i in {1..5}; do
-            if ssh-keyscan -H "${{ secrets.VPS_SSH_HOST }}" >> ~/.ssh/known_hosts 2>/tmp/ssh-scan-err; then
-              echo "✅ SSH host keys retrieved (attempt $i/5)"
-              SSH_SCAN_FAILED=0
-              break
-            else
-              echo "⚠️ Attempt $i/5 failed:"
-              cat /tmp/ssh-scan-err || true
-              sleep 3
-            fi
-          done
-
-          SSH_OPTIONS="-o StrictHostKeyChecking=yes"
-          if [ $SSH_SCAN_FAILED -eq 1 ]; then
-            echo "⚠️ Proceeding without host key verification (scan failed after 5 attempts)"
-            echo "   Check: VPS firewall, SSH port 22, VPS_SSH_HOST secret"
-            SSH_OPTIONS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-          fi
-
-          # Persist for subsequent steps
-          echo "SSH_OPTIONS=$SSH_OPTIONS" >> "$GITHUB_ENV"
-
-      - name: 🔒 Mask sensitive values
-        run: |
-          echo "::add-mask::${{ secrets.VPS_SSH_USER }}"
-          echo "::add-mask::${{ secrets.VPS_SSH_HOST }}"
+          ssh-keyscan -H "${{ secrets.VPS_SSH_HOST }}" >> ~/.ssh/known_hosts || true
+          echo "SSH_OPTIONS=-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" >> $GITHUB_ENV
 
       - name: 🚀 Deploy ${{ inputs.app_name }}
         run: |
           set -euo pipefail
-
-          # Ensure SSH options are defined even if previous step failed to export
-          SSH_OPTIONS="${SSH_OPTIONS:--o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null}"
-
-          echo "📦 Deploying ${{ inputs.app_name }} to ${{ inputs.environment }}..."
-          echo "📂 Deploy directory: ${{ inputs.deploy_dir }}"
-
           SSH_TARGET="${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
 
-          # Export variables for remote script
-          REMOTE_ENV="APP_NAME='${{ inputs.app_name }}' \
-          ENVIRONMENT='${{ inputs.environment }}' \
-          DEPLOY_DIR='${{ inputs.deploy_dir }}' \
-          PROJECT_PATH='${{ inputs.project_path }}' \
-          COMPOSE_FILE='${{ inputs.docker_compose_file }}' \
-          GITHUB_REPO='${{ github.repository }}' \
-          GITHUB_REF='${{ github.ref }}' \
-          REGISTRY_USER_STAGING='${{ secrets.REGISTRY_USER_STAGING }}' \
-          REGISTRY_PASSWORD_STAGING='${{ secrets.REGISTRY_PASSWORD_STAGING }}' \
-          REGISTRY_USER_PROD='${{ secrets.REGISTRY_USER_PROD }}' \
-          REGISTRY_PASSWORD_PROD='${{ secrets.REGISTRY_PASSWORD_PROD }}'"
+          ssh $SSH_OPTIONS -i ~/.ssh/deploy_key "$SSH_TARGET" bash <<'DEPLOY'
+          set -euo pipefail
 
-          if [ -n "${{ inputs.custom_script }}" ]; then
-            # Use custom deployment script if provided
-            echo "🔧 Using custom deployment script..."
-            echo "${{ inputs.custom_script }}" | ssh ${SSH_OPTIONS} -i ~/.ssh/deploy_key "${SSH_TARGET}" "${REMOTE_ENV}" bash
+          APP_NAME="${{ inputs.app_name }}"
+          ENVIRONMENT="${{ inputs.environment }}"
+          DEPLOY_DIR="${{ inputs.deploy_dir }}"
+          PROJECT_PATH="${{ inputs.project_path }}"
+          COMPOSE_FILE="${{ inputs.docker_compose_file }}"
+
+          REGISTRY_USER_PROD="${{ secrets.REGISTRY_USER_PROD }}"
+          REGISTRY_PASSWORD_PROD="${{ secrets.REGISTRY_PASSWORD_PROD }}"
+          REGISTRY_USER_STAGING="${{ secrets.REGISTRY_USER_STAGING }}"
+          REGISTRY_PASSWORD_STAGING="${{ secrets.REGISTRY_PASSWORD_STAGING }}"
+
+          echo "🚀 Deploy $APP_NAME ($ENVIRONMENT)"
+
+          mkdir -p "$DEPLOY_DIR"
+          cd "$DEPLOY_DIR"
+
+          if [ -d ".git" ]; then
+            git fetch origin
+            git reset --hard origin/${GITHUB_REF##*/}
+            git clean -fd
           else
-            # Generic deployment script
-            ssh ${SSH_OPTIONS} -i ~/.ssh/deploy_key "${SSH_TARGET}" "${REMOTE_ENV}" bash <<'DEPLOY_SCRIPT'
-            set -e
-            echo "🚀 Starting deployment for $APP_NAME ($ENVIRONMENT)..."
-
-            # Create deploy directory
-            mkdir -p "$DEPLOY_DIR"
-            cd "$DEPLOY_DIR"
-
-            # Clone or update repository
-            if [ -d ".git" ]; then
-              echo "✅ Repository exists, pulling latest changes..."
-              git fetch origin
-              git reset --hard "origin/${GITHUB_REF##*/}"
-              git clean -fd
-            else
-              # Clean directory if it exists but is not a git repo
-              if [ "$(ls -A .)" ]; then
-                echo "⚠️ Directory exists but is not a git repository, cleaning..."
-                rm -rf ..?* .[!.]* *
-              fi
-              echo "📥 Cloning repository..."
-              BRANCH="${GITHUB_REF##*/}"
-              git clone -b "${BRANCH}" "https://github.com/${GITHUB_REPO}.git" .
-            fi
-
-            # Navigate to project subdirectory if specified
-            if [ -n "$PROJECT_PATH" ]; then
-              echo "📂 Entering project directory: $PROJECT_PATH"
-              cd "$PROJECT_PATH"
-            fi
-
-            # Create required directories for volume bind mounts (if they don't exist)
-            if grep -q "device: ./data" "$COMPOSE_FILE" 2>/dev/null; then
-              echo "📁 Ensuring data directory exists..."
-              mkdir -p data
-            fi
-
-            # Use per-app/per-env project name to avoid reusing stale volumes
-            # Skip for services with fixed container_name to avoid breaking existing deployments
-            if ! grep -q "container_name:" "$COMPOSE_FILE" 2>/dev/null; then
-              export COMPOSE_PROJECT_NAME="${APP_NAME}-${ENVIRONMENT}"
-              echo "📦 Using project name: $COMPOSE_PROJECT_NAME"
-            else
-              echo "⚠️ Skipping COMPOSE_PROJECT_NAME (fixed container names detected)"
-            fi
-
-            # Generate .htpasswd for registry if needed
-            if [ "$APP_NAME" = "registry" ]; then
-              if [ "$ENVIRONMENT" = "staging" ]; then
-                if [ -z "$REGISTRY_USER_STAGING" ] || [ -z "$REGISTRY_PASSWORD_STAGING" ]; then
-                  echo "❌ Error: REGISTRY_USER_STAGING and REGISTRY_PASSWORD_STAGING are required for staging registry deployment"
-                  exit 1
-                fi
-                REGISTRY_USERNAME="$REGISTRY_USER_STAGING"
-                REGISTRY_PASSWORD="$REGISTRY_PASSWORD_STAGING"
-                echo "👤 Using staging user: $REGISTRY_USERNAME"
-              elif [ "$ENVIRONMENT" = "production" ]; then
-                if [ -z "$REGISTRY_USER_PROD" ] || [ -z "$REGISTRY_PASSWORD_PROD" ]; then
-                  echo "❌ Error: REGISTRY_USER_PROD and REGISTRY_PASSWORD_PROD are required for production registry deployment"
-                  exit 1
-                fi
-                REGISTRY_USERNAME="$REGISTRY_USER_PROD"
-                REGISTRY_PASSWORD="$REGISTRY_PASSWORD_PROD"
-                echo "👤 Using production user: $REGISTRY_USERNAME"
-              else
-                echo "❌ Error: Unknown environment $ENVIRONMENT"
-                exit 1
-              fi
-
-              echo "🔐 Generating .htpasswd for registry authentication..."
-              mkdir -p data
-              docker run --rm \
-                --entrypoint htpasswd \
-                httpd:2 \
-                -Bbn "$REGISTRY_USERNAME" "$REGISTRY_PASSWORD" > .htpasswd
-              echo "✅ .htpasswd generated successfully"
-              ls -lh .htpasswd
-
-              # Create .env file for docker-compose to use
-              echo "📝 Creating .env file for docker-compose..."
-              echo "REGISTRY_USER_PROD=$REGISTRY_USER_PROD" > .env
-              echo "REGISTRY_PASSWORD_PROD=$REGISTRY_PASSWORD_PROD" >> .env
-              echo "REGISTRY_USER_STAGING=$REGISTRY_USER_STAGING" >> .env
-              echo "REGISTRY_PASSWORD_STAGING=$REGISTRY_PASSWORD_STAGING" >> .env
-              echo "✅ .env file created successfully"
-            fi
-
-            # Deploy with Docker Compose
-            echo "🐳 Deploying with $COMPOSE_FILE..."
-            if [ -f "$COMPOSE_FILE" ]; then
-              # Always stop the other registry environment before starting this one (shared volume scenario)
-              if [ "$APP_NAME" = "registry" ]; then
-                if [ "$ENVIRONMENT" = "production" ]; then
-                  echo "🛑 Stopping staging registry before starting production registry..."
-                  docker compose -f docker-compose.staging.yml down || true
-                elif [ "$ENVIRONMENT" = "staging" ]; then
-                  echo "🛑 Stopping production registry before starting staging registry..."
-                  docker compose -f docker-compose.prod.yml down || true
-                fi
-              fi
-
-              if [ "$ENVIRONMENT" = "production" ]; then
-                echo "🔄 Production deployment: updating containers without touching volumes..."
-                # Pull latest images
-                docker compose -f "$COMPOSE_FILE" pull
-                # Recreate containers without stopping them (zero-downtime if possible)
-                docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
-
-                # Attendre que le registry prod soit UP avant login (max 30s)
-                for i in {1..30}; do
-                  if curl -sf http://localhost:5000/v2/ > /dev/null; then
-                    echo '✅ Registry prod UP'
-                    break
-                  fi
-                  echo '⏳ Attente du démarrage du registry prod...'
-                  sleep 1
-                done
-
-                # Docker login après démarrage effectif
-                if [ -n "$REGISTRY_USER_PROD" ] && [ -n "$REGISTRY_PASSWORD_PROD" ]; then
-                  echo "$REGISTRY_PASSWORD_PROD" | docker login registry.freijstack.com -u "$REGISTRY_USER_PROD" --password-stdin
-                else
-                  echo "⚠️ REGISTRY_USER_PROD ou REGISTRY_PASSWORD_PROD non défini, pull sans login."
-                fi
-              else
-                echo "🛑 Staging deployment: cleaning containers but preserving data volumes..."
-                docker compose -f "$COMPOSE_FILE" down --remove-orphans || true
-
-                # Force remove any lingering containers with names matching the app
-                docker ps -aq --filter "name=${APP_NAME}" | xargs -r docker rm -f 2>/dev/null || true
-
-                docker compose -f "$COMPOSE_FILE" pull
-                docker compose -f "$COMPOSE_FILE" up -d --build --remove-orphans
-              fi
-
-              echo "⏳ Waiting 10s for services to start..."
-              sleep 10
-
-              echo "📊 Container status:"
-              docker compose -f "$COMPOSE_FILE" ps
-
-              echo "📜 Recent logs:"
-              docker compose -f "$COMPOSE_FILE" logs --tail=20
-            else
-              echo "❌ Docker Compose file not found: $COMPOSE_FILE"
-              exit 1
-            fi
-
-            echo "✅ Deployment completed for $APP_NAME!"
-          DEPLOY_SCRIPT
+            git clone -b "${GITHUB_REF##*/}" "https://github.com/${GITHUB_REPOSITORY}.git" .
           fi
+
+          [ -n "$PROJECT_PATH" ] && cd "$PROJECT_PATH"
+
+          if [ "$APP_NAME" = "registry" ]; then
+            echo "🔐 Generating .htpasswd"
+            if [ "$ENVIRONMENT" = "production" ]; then
+              USER="$REGISTRY_USER_PROD"
+              PASS="$REGISTRY_PASSWORD_PROD"
+            else
+              USER="$REGISTRY_USER_STAGING"
+              PASS="$REGISTRY_PASSWORD_STAGING"
+            fi
+
+            docker run --rm httpd:2 \
+              htpasswd -Bbn "$USER" "$PASS" > .htpasswd
+          fi
+
+          if [ "$ENVIRONMENT" = "production" ]; then
+            echo "⏳ Waiting registry public endpoint"
+            for i in {1..60}; do
+              CODE=$(curl -s -o /dev/null -w "%{http_code}" https://registry.freijstack.com/v2/ || true)
+              [ "$CODE" = "200" ] || [ "$CODE" = "401" ] && break
+              sleep 1
+            done
+
+            if [ -n "$REGISTRY_USER_PROD" ]; then
+              echo "$REGISTRY_PASSWORD_PROD" | docker login registry.freijstack.com \
+                -u "$REGISTRY_USER_PROD" --password-stdin
+            fi
+
+            docker compose -f "$COMPOSE_FILE" pull
+            docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+          else
+            docker compose -f "$COMPOSE_FILE" down --remove-orphans || true
+            docker compose -f "$COMPOSE_FILE" pull
+            docker compose -f "$COMPOSE_FILE" up -d --build --remove-orphans
+          fi
+
+          docker compose -f "$COMPOSE_FILE" ps
+          DEPLOY
 
       - name: 🗄️ Run Migrations
         if: inputs.run_migrations
         run: |
-          echo "🗄️ Running database migrations..."
-          ssh ${SSH_OPTIONS} -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
-            "cd ${{ inputs.deploy_dir }}/${{ inputs.project_path }} && \
-            docker compose exec -T backend npm run migrate 2>/dev/null || \
-            docker compose exec -T app npm run migrate 2>/dev/null || \
-            echo '⚠️ No migration script found or failed'"
+          ssh $SSH_OPTIONS -i ~/.ssh/deploy_key \
+          ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+          "cd ${{ inputs.deploy_dir }}/${{ inputs.project_path }} && docker compose exec -T app npm run migrate || true"
 
       - name: ✅ Deployment Summary
         if: success()
         run: |
           echo "## ✅ Deployment Successful" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Application**: ${{ inputs.app_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Environment**: ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Deploy Directory**: \`${{ inputs.deploy_dir }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Compose File**: \`${{ inputs.docker_compose_file }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Migrations**: ${{ inputs.run_migrations && '✅ Executed' || '⏭️ Skipped' }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "🎯 Deployed by: \`${{ github.actor }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "📝 Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-
-      - name: ❌ Deployment Failed
-        if: failure()
-        run: |
-          echo "## ❌ Deployment Failed" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Application**: ${{ inputs.app_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Environment**: ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Check logs above for details." >> $GITHUB_STEP_SUMMARY
-          exit 1
+          echo "- App: ${{ inputs.app_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Env: ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Deployed at: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
