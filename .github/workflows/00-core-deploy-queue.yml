@@ -196,19 +196,24 @@ jobs:
             # Deploy with Docker Compose
             echo "🐳 Deploying with $COMPOSE_FILE..."
             if [ -f "$COMPOSE_FILE" ]; then
-              echo "🛑 Stopping previous stack (if any) to avoid name/volume conflicts..."
-              # Remove volumes only in staging to avoid data loss in production
-              if [ "$ENVIRONMENT" = "staging" ]; then
-                docker compose -f "$COMPOSE_FILE" down --remove-orphans --volumes || true
+              # In production: NEVER use 'down' to preserve data volumes
+              # In staging: Clean everything for fresh deployment
+              if [ "$ENVIRONMENT" = "production" ]; then
+                echo "🔄 Production deployment: updating containers without touching volumes..."
+                # Pull latest images
+                docker compose -f "$COMPOSE_FILE" pull
+                # Recreate containers without stopping them (zero-downtime if possible)
+                docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
               else
-                docker compose -f "$COMPOSE_FILE" down --remove-orphans || true
+                echo "🛑 Staging deployment: cleaning previous stack..."
+                docker compose -f "$COMPOSE_FILE" down --remove-orphans --volumes || true
+
+                # Force remove any lingering containers with names matching the app
+                docker ps -aq --filter "name=${APP_NAME}" | xargs -r docker rm -f 2>/dev/null || true
+
+                docker compose -f "$COMPOSE_FILE" pull
+                docker compose -f "$COMPOSE_FILE" up -d --build --remove-orphans
               fi
-
-              # Force remove any lingering containers with names matching the app
-              docker ps -aq --filter "name=${APP_NAME}" | xargs -r docker rm -f 2>/dev/null || true
-
-              docker compose -f "$COMPOSE_FILE" pull
-              docker compose -f "$COMPOSE_FILE" up -d --build --remove-orphans
 
               echo "⏳ Waiting 10s for services to start..."
               sleep 10
