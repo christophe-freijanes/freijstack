@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.25.16](https://github.com/christophe-freijanes/freijstack/compare/v1.25.15...v1.25.16) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* ensure line-length rule is set to warning level in yamllint configuration ([80a581b](https://github.com/christophe-freijanes/freijstack/commit/80a581b1db6cf11598081aef9b94d4b8db8fb5f7))
+
 ## [1.25.15](https://github.com/christophe-freijanes/freijstack/compare/v1.25.14...v1.25.15) (2026-01-04)
 
 ### ♻️ Code Refactoring
