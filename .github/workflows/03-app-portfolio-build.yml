@@ -54,8 +54,8 @@ jobs:
 
     env:
       REGISTRY_HOST: registry-staging.freijstack.com
-      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USER_STAGING }}
+      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD_STAGING }}
 
     steps:
       - name: 📥 Checkout
@@ -118,7 +118,7 @@ jobs:
 
     env:
       REGISTRY_HOST: registry.freijstack.com
-      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME_PROD }}
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USER_PROD }}
       REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
 
     steps:

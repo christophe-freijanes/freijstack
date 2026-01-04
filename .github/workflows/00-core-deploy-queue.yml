@@ -42,11 +42,13 @@ on:
         required: true
       VPS_SSH_USER:
         required: true
-      REGISTRY_PASSWORD:
+      REGISTRY_PASSWORD_STAGING:
         required: false
       REGISTRY_USER_STAGING:
         required: false
       REGISTRY_USER_PROD:
+        required: false
+      REGISTRY_PASSWORD_PROD:
         required: false
 
 # Global concurrency: only one deployment at a time across ALL apps
@@ -146,9 +148,10 @@ jobs:
           COMPOSE_FILE='${{ inputs.docker_compose_file }}' \
           GITHUB_REPO='${{ github.repository }}' \
           GITHUB_REF='${{ github.ref }}' \
-          REGISTRY_PASSWORD='${{ secrets.REGISTRY_PASSWORD }}' \
           REGISTRY_USER_STAGING='${{ secrets.REGISTRY_USER_STAGING }}' \
-          REGISTRY_USER_PROD='${{ secrets.REGISTRY_USER_PROD }}'"
+          REGISTRY_PASSWORD_STAGING='${{ secrets.REGISTRY_PASSWORD_STAGING }}' \
+          REGISTRY_USER_PROD='${{ secrets.REGISTRY_USER_PROD }}' \
+          REGISTRY_PASSWORD_PROD='${{ secrets.REGISTRY_PASSWORD_PROD }}'"
 
           if [ -n "${{ inputs.custom_script }}" ]; then
             # Use custom deployment script if provided
@@ -204,24 +207,24 @@ jobs:
 
             # Generate .htpasswd for registry if needed
             if [ "$APP_NAME" = "registry" ]; then
-              if [ -z "$REGISTRY_PASSWORD" ]; then
-                echo "❌ Error: REGISTRY_PASSWORD is required for registry deployment"
-                exit 1
-              fi
-
-              # Load registry username based on environment
-              echo "🔐 Loading registry username..."
-
               if [ "$ENVIRONMENT" = "staging" ]; then
-                REGISTRY_USERNAME="${REGISTRY_USER_STAGING}"
+                if [ -z "$REGISTRY_USER_STAGING" ] || [ -z "$REGISTRY_PASSWORD_STAGING" ]; then
+                  echo "❌ Error: REGISTRY_USER_STAGING and REGISTRY_PASSWORD_STAGING are required for staging registry deployment"
+                  exit 1
+                fi
+                REGISTRY_USERNAME="$REGISTRY_USER_STAGING"
+                REGISTRY_PASSWORD="$REGISTRY_PASSWORD_STAGING"
                 echo "👤 Using staging user: $REGISTRY_USERNAME"
               elif [ "$ENVIRONMENT" = "production" ]; then
-                REGISTRY_USERNAME="${REGISTRY_USER_PROD}"
+                if [ -z "$REGISTRY_USER_PROD" ] || [ -z "$REGISTRY_PASSWORD_PROD" ]; then
+                  echo "❌ Error: REGISTRY_USER_PROD and REGISTRY_PASSWORD_PROD are required for production registry deployment"
+                  exit 1
+                fi
+                REGISTRY_USERNAME="$REGISTRY_USER_PROD"
+                REGISTRY_PASSWORD="$REGISTRY_PASSWORD_PROD"
                 echo "👤 Using production user: $REGISTRY_USERNAME"
-              fi
-
-              if [ -z "$REGISTRY_USERNAME" ]; then
-                echo "❌ Error: REGISTRY_USERNAME not set for $ENVIRONMENT environment"
+              else
+                echo "❌ Error: Unknown environment $ENVIRONMENT"
                 exit 1
               fi
 
@@ -236,8 +239,10 @@ jobs:
 
               # Create .env file for docker-compose to use
               echo "📝 Creating .env file for docker-compose..."
-              echo "REGISTRY_USERNAME=$REGISTRY_USERNAME" > .env
-              echo "REGISTRY_PASSWORD=$REGISTRY_PASSWORD" >> .env
+              echo "REGISTRY_USER_PROD=$REGISTRY_USER_PROD" > .env
+              echo "REGISTRY_PASSWORD_PROD=$REGISTRY_PASSWORD_PROD" >> .env
+              echo "REGISTRY_USER_STAGING=$REGISTRY_USER_STAGING" >> .env
+              echo "REGISTRY_PASSWORD_STAGING=$REGISTRY_PASSWORD_STAGING" >> .env
               echo "✅ .env file created successfully"
             fi
 

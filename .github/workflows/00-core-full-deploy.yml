@@ -85,11 +85,13 @@ on:
         required: true
       VPS_SSH_USER:
         required: true
-      REGISTRY_PASSWORD:
+      REGISTRY_PASSWORD_STAGING:
         required: false
       REGISTRY_USER_STAGING:
         required: false
       REGISTRY_USER_PROD:
+        required: false
+      REGISTRY_PASSWORD_PROD:
         required: false
 
 permissions:
@@ -242,9 +244,10 @@ jobs:
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
       VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
       VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
-      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+      REGISTRY_PASSWORD_STAGING: ${{ secrets.REGISTRY_PASSWORD_STAGING }}
       REGISTRY_USER_STAGING: ${{ secrets.REGISTRY_USER_STAGING }}
       REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
+      REGISTRY_PASSWORD_PROD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
 
   # ═══════════════════════════════════════════════════════════
   # 5️⃣ SUMMARY & NOTIFICATION
