@@ -208,10 +208,10 @@ jobs:
                 echo "❌ Error: REGISTRY_PASSWORD is required for registry deployment"
                 exit 1
               fi
-              
+
               # Load registry username based on environment
               echo "🔐 Loading registry username..."
-              
+
               if [ "$ENVIRONMENT" = "staging" ]; then
                 REGISTRY_USERNAME="${REGISTRY_USER_STAGING}"
                 echo "👤 Using staging user: $REGISTRY_USERNAME"
@@ -219,12 +219,12 @@ jobs:
                 REGISTRY_USERNAME="${REGISTRY_USER_PROD}"
                 echo "👤 Using production user: $REGISTRY_USERNAME"
               fi
-              
+
               if [ -z "$REGISTRY_USERNAME" ]; then
                 echo "❌ Error: REGISTRY_USERNAME not set for $ENVIRONMENT environment"
                 exit 1
               fi
-              
+
               echo "🔐 Generating .htpasswd for registry authentication..."
               mkdir -p data
               docker run --rm \
@@ -233,7 +233,7 @@ jobs:
                 -Bbn "$REGISTRY_USERNAME" "$REGISTRY_PASSWORD" > data/.htpasswd
               echo "✅ .htpasswd generated successfully"
               ls -lh data/.htpasswd
-              
+
               # Create .env file for docker-compose to use
               echo "📝 Creating .env file for docker-compose..."
               echo "REGISTRY_USERNAME=$REGISTRY_USERNAME" > .env
