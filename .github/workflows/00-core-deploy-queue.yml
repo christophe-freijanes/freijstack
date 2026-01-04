@@ -63,7 +63,7 @@ jobs:
   deploy:
     name: 🚀 Deploy ${{ inputs.app_name }} to ${{ inputs.environment }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     environment:
       name: ${{ inputs.environment }}
 
@@ -119,10 +119,11 @@ jobs:
           : "${GH_BRANCH:?}"
           : "${GH_SHA:?}"
 
-          echo "🐳 Docker Compose check..."
           docker compose version >/dev/null 2>&1 || { echo "❌ Docker Compose not available"; exit 1; }
 
           echo "🔒 Volume protection ENABLED (no down -v used)"
+          echo "🚀 Deploying ${APP_NAME} → ${ENVIRONMENT}"
+          echo "🔎 Git: repo=${GH_REPO} branch=${GH_BRANCH} sha=${GH_SHA}"
 
           mkdir -p "$DEPLOY_DIR"
           cd "$DEPLOY_DIR"
@@ -141,90 +142,126 @@ jobs:
 
           [ -f "$COMPOSE_FILE" ] || { echo "❌ Compose not found: $COMPOSE_FILE"; exit 1; }
 
+          # ==========================================================
+          # STACK ISOLATION (staging + prod in parallel)
+          # - Avoids collisions in networks, container names (when not forced),
+          #   and compose resources.
+          # ==========================================================
+          export COMPOSE_PROJECT_NAME="${APP_NAME}-${ENVIRONMENT}"
+          echo "📦 COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}"
+
+          # ==========================================================
+          # Registry auth generation (safe)
+          # ==========================================================
           if [ "$APP_NAME" = "registry" ]; then
             echo "🔐 Generating .htpasswd"
             if [ "$ENVIRONMENT" = "production" ]; then
-              : "${REGISTRY_USER_PROD:?}"
-              : "${REGISTRY_PASSWORD_PROD:?}"
+              : "${REGISTRY_USER_PROD:?REGISTRY_USER_PROD required}"
+              : "${REGISTRY_PASSWORD_PROD:?REGISTRY_PASSWORD_PROD required}"
               USER="$REGISTRY_USER_PROD"
               PASS="$REGISTRY_PASSWORD_PROD"
             else
-              : "${REGISTRY_USER_STAGING:?}"
-              : "${REGISTRY_PASSWORD_STAGING:?}"
+              : "${REGISTRY_USER_STAGING:?REGISTRY_USER_STAGING required}"
+              : "${REGISTRY_PASSWORD_STAGING:?REGISTRY_PASSWORD_STAGING required}"
               USER="$REGISTRY_USER_STAGING"
               PASS="$REGISTRY_PASSWORD_STAGING"
             fi
             docker run --rm httpd:2 htpasswd -Bbn "$USER" "$PASS" > .htpasswd
           fi
 
+          # ==========================================================
+          # Deploy (no volume destruction)
+          # ==========================================================
           if [ "$ENVIRONMENT" = "production" ]; then
             echo "🟢 PRODUCTION DEPLOY (no down)"
-
-            # 1) Start/refresh containers first
             docker compose -f "$COMPOSE_FILE" pull
             docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
-
-            # 2) If deploying registry, validate locally first (bypasses Traefik)
-            if [ "$APP_NAME" = "registry" ]; then
-              echo "⏳ Waiting LOCAL registry (http://localhost:5000/v2/) expect 200/401"
-              LAST_LOCAL=""
-              for i in {1..60}; do
-                LAST_LOCAL=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000/v2/ || true)
-                echo "  local attempt ${i}/60 -> HTTP ${LAST_LOCAL}"
-                if [ "$LAST_LOCAL" = "200" ] || [ "$LAST_LOCAL" = "401" ]; then
-                  echo "✅ Local registry OK (HTTP ${LAST_LOCAL})"
-                  break
-                fi
-                sleep 1
-              done
-
-              if [ "$LAST_LOCAL" != "200" ] && [ "$LAST_LOCAL" != "401" ]; then
-                echo "❌ Local registry not ready. Got HTTP ${LAST_LOCAL}"
-                docker compose -f "$COMPOSE_FILE" ps || true
-                docker compose -f "$COMPOSE_FILE" logs --tail=120 registry || true
-                exit 1
-              fi
-
-              echo "⏳ Waiting PUBLIC registry (https://registry.freijstack.com/v2/) expect 200/401"
-              LAST_PUB=""
-              for i in {1..60}; do
-                LAST_PUB=$(curl -s -o /dev/null -w "%{http_code}" https://registry.freijstack.com/v2/ || true)
-                echo "  pub attempt ${i}/60 -> HTTP ${LAST_PUB}"
-                if [ "$LAST_PUB" = "200" ] || [ "$LAST_PUB" = "401" ]; then
-                  echo "✅ Public registry OK (HTTP ${LAST_PUB})"
-                  break
-                fi
-                sleep 1
-              done
-
-              if [ "$LAST_PUB" != "200" ] && [ "$LAST_PUB" != "401" ]; then
-                echo "❌ Public registry still not routed (HTTP ${LAST_PUB}). This is a Traefik/DNS/TLS routing issue."
-                echo "🔎 Headers:"
-                curl -s -I https://registry.freijstack.com/v2/ || true
-                echo "🔎 Traefik container status:"
-                docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}' | sed -n '1,40p' || true
-                exit 1
-              fi
-
-              # IMPORTANT: no docker login required to deploy the registry itself
-              echo "ℹ️ Skipping docker login (deploying the registry itself)."
-            else
-              # For other apps, login may be required to pull private images
-              if [ -n "${REGISTRY_USER_PROD:-}" ] && [ -n "${REGISTRY_PASSWORD_PROD:-}" ]; then
-                echo "🔐 docker login registry.freijstack.com"
-                echo "$REGISTRY_PASSWORD_PROD" | docker login registry.freijstack.com \
-                  -u "$REGISTRY_USER_PROD" --password-stdin
-              fi
-            fi
           else
-            echo "🟡 STAGING DEPLOY (containers only, volumes preserved)"
+            echo "🟡 STAGING DEPLOY (down without -v)"
             docker compose -f "$COMPOSE_FILE" down --remove-orphans || true
             docker compose -f "$COMPOSE_FILE" pull
             docker compose -f "$COMPOSE_FILE" up -d --build --remove-orphans
           fi
 
+          # ==========================================================
+          # Registry health checks (local then public) using dynamic port
+          # ==========================================================
+          if [ "$APP_NAME" = "registry" ]; then
+            echo "🔎 Detecting local published port for registry:5000"
+            LOCAL_BIND="$(docker compose -f "$COMPOSE_FILE" port registry 5000 2>/dev/null || true)"
+            if [ -z "$LOCAL_BIND" ]; then
+              echo "❌ Could not detect published port for service 'registry' (port 5000)."
+              docker compose -f "$COMPOSE_FILE" ps || true
+              docker compose -f "$COMPOSE_FILE" logs --tail=120 registry || true
+              exit 1
+            fi
+
+            LOCAL_PORT="${LOCAL_BIND##*:}"
+            echo "✅ Local registry is published on 127.0.0.1:${LOCAL_PORT}"
+
+            echo "⏳ Waiting LOCAL registry (http://127.0.0.1:${LOCAL_PORT}/v2/) expect 200/401"
+            LAST_LOCAL=""
+            for i in {1..60}; do
+              LAST_LOCAL=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${LOCAL_PORT}/v2/" || true)
+              echo "  local attempt ${i}/60 -> HTTP ${LAST_LOCAL}"
+              if [ "$LAST_LOCAL" = "200" ] || [ "$LAST_LOCAL" = "401" ]; then
+                echo "✅ Local registry OK (HTTP ${LAST_LOCAL})"
+                break
+              fi
+              sleep 1
+            done
+
+            if [ "$LAST_LOCAL" != "200" ] && [ "$LAST_LOCAL" != "401" ]; then
+              echo "❌ Local registry not ready. Got HTTP ${LAST_LOCAL}"
+              docker compose -f "$COMPOSE_FILE" ps || true
+              docker compose -f "$COMPOSE_FILE" logs --tail=200 registry || true
+              exit 1
+            fi
+
+            if [ "$ENVIRONMENT" = "production" ]; then
+              PUBLIC_HOST="registry.freijstack.com"
+            else
+              PUBLIC_HOST="registry-staging.freijstack.com"
+            fi
+
+            echo "⏳ Waiting PUBLIC registry (https://${PUBLIC_HOST}/v2/) expect 200/401"
+            LAST_PUB=""
+            for i in {1..60}; do
+              LAST_PUB=$(curl -s -o /dev/null -w "%{http_code}" "https://${PUBLIC_HOST}/v2/" || true)
+              echo "  pub attempt ${i}/60 -> HTTP ${LAST_PUB}"
+              if [ "$LAST_PUB" = "200" ] || [ "$LAST_PUB" = "401" ]; then
+                echo "✅ Public registry OK (HTTP ${LAST_PUB})"
+                break
+              fi
+              sleep 1
+            done
+
+            if [ "$LAST_PUB" != "200" ] && [ "$LAST_PUB" != "401" ]; then
+              echo "❌ Public registry not routed (HTTP ${LAST_PUB}). Likely Traefik router/host mismatch."
+              echo "🔎 Headers:"
+              curl -s -I "https://${PUBLIC_HOST}/v2/" || true
+              exit 1
+            fi
+
+            # IMPORTANT: no docker login needed to deploy the registry itself
+            echo "ℹ️ Skipping docker login (deploying registry stack)."
+          else
+            # For other apps, you may need to login to pull private images.
+            # Keep non-blocking if registry is down (avoid breaking all deploys).
+            if [ -n "${REGISTRY_USER_PROD:-}" ] && [ -n "${REGISTRY_PASSWORD_PROD:-}" ]; then
+              echo "🔐 docker login registry.freijstack.com (non-blocking)"
+              echo "$REGISTRY_PASSWORD_PROD" | docker login registry.freijstack.com \
+                -u "$REGISTRY_USER_PROD" --password-stdin || true
+            fi
+          fi
+
+          echo "📊 Containers:"
           docker compose -f "$COMPOSE_FILE" ps
+
+          echo "📦 Volumes present:"
           docker volume ls
+
+          echo "✅ Deployment finished safely"
           DEPLOY_SCRIPT
 
       - name: 🗄️ Run Migrations
