@@ -6,6 +6,20 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.24.2](https://github.com/christophe-freijanes/freijstack/compare/v1.24.1...v1.24.2) (2026-01-04)
+
+### ♻️ Code Refactoring
+
+* pass registry usernames as GitHub Secrets instead of .env files ([9eb88ad](https://github.com/christophe-freijanes/freijstack/commit/9eb88adb6672305d4a52f7c107f7b1295093cb2d))
+
+### 🔧 Chores
+
+* add .env files to gitignore ([a885535](https://github.com/christophe-freijanes/freijstack/commit/a885535c30105f8020f998d422fb7a535d10252e))
+* add example registry usernames to .env.example ([c7c344c](https://github.com/christophe-freijanes/freijstack/commit/c7c344c6a8460fcbc08492b5202c2397de5ba8d9))
+* remove credentials from .env.example ([cc34821](https://github.com/christophe-freijanes/freijstack/commit/cc3482122c7b59539be58515b8a3529a953836d2))
+* remove sensitive usernames from .env.example ([f40ceb2](https://github.com/christophe-freijanes/freijstack/commit/f40ceb2503ed78bd6b980594676c32eb5874c36d))
+* rename .env to .env.example and add to gitignore ([3a200ae](https://github.com/christophe-freijanes/freijstack/commit/3a200ae1fe20d2672f3cf7e09a06413c77c3ad38))
+
 ## [1.24.1](https://github.com/christophe-freijanes/freijstack/compare/v1.24.0...v1.24.1) (2026-01-04)
 
 ### ♻️ Code Refactoring
