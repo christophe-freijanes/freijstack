@@ -31,5 +31,5 @@ networks:
     external: true
 
 # Production usage:
-# docker compose -f docker-compose.prod.yml up -d
-# docker compose -f docker-compose.prod.yml logs -f
+# docker compose -f saas/portfolio/ddocker-compose.prod.yml up -d
+# docker compose -f saas/portfolio/ddocker-compose.prod.yml logs -f

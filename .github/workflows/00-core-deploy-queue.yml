@@ -248,6 +248,12 @@ jobs:
               # In staging: Clean containers but PRESERVE volumes for persistent data (images, cache)
               if [ "$ENVIRONMENT" = "production" ]; then
                 echo "🔄 Production deployment: updating containers without touching volumes..."
+                # Docker login avant pull
+                if [ -n "$REGISTRY_USER_PROD" ] && [ -n "$REGISTRY_PASSWORD_PROD" ]; then
+                  echo "$REGISTRY_PASSWORD_PROD" | docker login registry.freijstack.com -u "$REGISTRY_USER_PROD" --password-stdin
+                else
+                  echo "⚠️ REGISTRY_USER_PROD ou REGISTRY_PASSWORD_PROD non défini, pull sans login."
+                fi
                 # Pull latest images
                 docker compose -f "$COMPOSE_FILE" pull
                 # Recreate containers without stopping them (zero-downtime if possible)
