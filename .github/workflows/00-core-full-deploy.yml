@@ -87,6 +87,10 @@ on:
         required: true
       REGISTRY_PASSWORD:
         required: false
+      REGISTRY_USER_STAGING:
+        required: false
+      REGISTRY_USER_PROD:
+        required: false
 
 permissions:
   contents: read
@@ -239,6 +243,8 @@ jobs:
       VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
       VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
       REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+      REGISTRY_USER_STAGING: ${{ secrets.REGISTRY_USER_STAGING }}
+      REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
 
   # ═══════════════════════════════════════════════════════════
   # 5️⃣ SUMMARY & NOTIFICATION
