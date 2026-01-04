@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.25.22](https://github.com/christophe-freijanes/freijstack/compare/v1.25.21...v1.25.22) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* update Docker Compose configuration for registry and registry-ui with Traefik routing enhancements ([3203a43](https://github.com/christophe-freijanes/freijstack/commit/3203a43bd2ce9f5258a8795e2bea47757c63eba5))
+
 ## [1.25.21](https://github.com/christophe-freijanes/freijstack/compare/v1.25.20...v1.25.21) (2026-01-04)
 
 ### 🐛 Bug Fixes
