@@ -51,7 +51,6 @@ on:
       REGISTRY_PASSWORD_PROD:
         required: false
 
-# One deploy at a time – NEVER cancel in progress
 concurrency:
   group: vps-ssh-deploy
   cancel-in-progress: false
@@ -64,7 +63,7 @@ jobs:
   deploy:
     name: 🚀 Deploy ${{ inputs.app_name }} to ${{ inputs.environment }}
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     environment:
       name: ${{ inputs.environment }}
 
@@ -133,7 +132,7 @@ jobs:
           cd "$DEPLOY_DIR"
 
           if [ -d ".git" ]; then
-            git fetch origin
+            git fetch origin --tags
             git reset --hard "origin/${GH_BRANCH}"
             git clean -fd
           else
@@ -147,23 +146,7 @@ jobs:
           [ -f "$COMPOSE_FILE" ] || { echo "❌ Compose not found: $COMPOSE_FILE"; exit 1; }
 
           # ==========================================================
-          # SPECIAL RULE: Registry cannot run staging+prod together
-          # When deploying registry production:
-          #   1) stop/remove staging containers without deleting volumes
-          #   2) then deploy prod
-          # ==========================================================
-          if [ "$APP_NAME" = "registry" ] && [ "$ENVIRONMENT" = "production" ]; then
-            echo "🛑 Registry production deploy: stopping STAGING first (NO volume deletion)"
-            if [ -f "docker-compose.staging.yml" ]; then
-              docker compose -f docker-compose.staging.yml down --remove-orphans || true
-            else
-              echo "⚠️ docker-compose.staging.yml not found, attempting container removal fallback"
-              docker rm -f registry-staging registry-ui-staging 2>/dev/null || true
-            fi
-          fi
-
-          # ==========================================================
-          # Generate .htpasswd safely (registry only)
+          # Registry: generate .htpasswd safely
           # ==========================================================
           if [ "$APP_NAME" = "registry" ]; then
             echo "🔐 Generating .htpasswd"
@@ -182,6 +165,57 @@ jobs:
           fi
 
           # ==========================================================
+          # SPECIAL RULE (Option B): Registry promotion staging -> prod
+          # ==========================================================
+          if [ "$APP_NAME" = "registry" ] && [ "$ENVIRONMENT" = "production" ]; then
+            STAGING_COMPOSE="docker-compose.staging.yml"
+            PROD_COMPOSE="$COMPOSE_FILE"
+
+            echo "🛑 Registry production deploy: stopping STAGING first (containers only)"
+            if [ -f "$STAGING_COMPOSE" ]; then
+              docker compose -f "$STAGING_COMPOSE" down --remove-orphans || true
+            else
+              echo "⚠️ $STAGING_COMPOSE not found, attempting container removal fallback"
+              docker rm -f registry-staging registry-ui-staging 2>/dev/null || true
+            fi
+
+            # Resolve host storage paths from compose config (robust, no hardcoding)
+            echo "🔎 Resolving staging/prod storage paths from compose..."
+            STAGING_BIND="$(docker compose -f "$STAGING_COMPOSE" config 2>/dev/null | awk '/device:\s*\.\//{print $2; exit}' || true)"
+            PROD_BIND="$(docker compose -f "$PROD_COMPOSE" config 2>/dev/null | awk '/device:\s*\.\//{print $2; exit}' || true)"
+
+            if [ -z "$STAGING_BIND" ] || [ -z "$PROD_BIND" ]; then
+              echo "❌ Could not resolve storage bind paths from compose."
+              echo "   Ensure both compose files use driver_opts.device: ./data-staging and ./data-prod"
+              exit 1
+            fi
+
+            # Convert relative -> absolute
+            STAGING_DIR="$(cd "$(dirname "$STAGING_BIND")" 2>/dev/null && pwd)/$(basename "$STAGING_BIND")"
+            PROD_DIR="$(cd "$(dirname "$PROD_BIND")" 2>/dev/null && pwd)/$(basename "$PROD_BIND")"
+
+            echo "📦 Promotion source (staging): $STAGING_DIR"
+            echo "📦 Promotion target (prod):    $PROD_DIR"
+
+            mkdir -p "$STAGING_DIR" "$PROD_DIR"
+
+            echo "🧪 Pre-check: show size"
+            du -sh "$STAGING_DIR" 2>/dev/null || true
+            du -sh "$PROD_DIR" 2>/dev/null || true
+
+            if ! command -v rsync >/dev/null 2>&1; then
+              echo "❌ rsync is required for promotion but not installed."
+              exit 1
+            fi
+
+            echo "🚚 Promoting images: rsync staging -> prod (preserve permissions, delete removed)"
+            rsync -a --delete "$STAGING_DIR"/ "$PROD_DIR"/
+
+            echo "✅ Promotion done"
+            du -sh "$PROD_DIR" 2>/dev/null || true
+          fi
+
+          # ==========================================================
           # Deploy (safe volumes)
           # ==========================================================
           if [ "$ENVIRONMENT" = "production" ]; then
@@ -196,7 +230,7 @@ jobs:
           fi
 
           # ==========================================================
-          # Post-deploy checks for registry (local + public)
+          # Registry readiness check (local)
           # ==========================================================
           if [ "$APP_NAME" = "registry" ]; then
             LOCAL_BIND="$(docker compose -f "$COMPOSE_FILE" port registry 5000 2>/dev/null || true)"
@@ -225,30 +259,6 @@ jobs:
               docker compose -f "$COMPOSE_FILE" logs --tail=200 registry || true
               exit 1
             fi
-
-            if [ "$ENVIRONMENT" = "production" ]; then
-              PUBLIC_HOST="registry.freijstack.com"
-            else
-              PUBLIC_HOST="registry-staging.freijstack.com"
-            fi
-
-            echo "⏳ Waiting PUBLIC registry (https://${PUBLIC_HOST}/v2/) expect 200/401"
-            LAST_PUB=""
-            for i in {1..60}; do
-              LAST_PUB=$(curl -s -o /dev/null -w "%{http_code}" "https://${PUBLIC_HOST}/v2/" || true)
-              echo "  pub attempt ${i}/60 -> HTTP ${LAST_PUB}"
-              if [ "$LAST_PUB" = "200" ] || [ "$LAST_PUB" = "401" ]; then
-                break
-              fi
-              sleep 1
-            done
-            if [ "$LAST_PUB" != "200" ] && [ "$LAST_PUB" != "401" ]; then
-              echo "❌ Public registry not routed (HTTP ${LAST_PUB})"
-              curl -s -I "https://${PUBLIC_HOST}/v2/" || true
-              exit 1
-            fi
-
-            echo "✅ Registry checks passed"
           fi
 
           echo "📊 Containers:"

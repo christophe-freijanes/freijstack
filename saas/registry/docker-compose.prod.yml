@@ -59,7 +59,7 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ./data
+      device: ./data-prod
 
 networks:
   web:
