@@ -29,8 +29,6 @@ jobs:
       project_path: 'saas/registry'
       docker_compose_file: 'docker-compose.staging.yml'
       run_migrations: false
-      skip_security: false
-      skip_lint: false
     secrets:
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
       VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
