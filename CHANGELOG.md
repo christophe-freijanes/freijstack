@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.25.24](https://github.com/christophe-freijanes/freijstack/compare/v1.25.23...v1.25.24) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* enhance Traefik configuration with logging and network settings; update n8n timezone ([5f30e40](https://github.com/christophe-freijanes/freijstack/commit/5f30e40fea1597b316ffb301cd6e866d9a7fcc7f))
+
 ## [1.25.23](https://github.com/christophe-freijanes/freijstack/compare/v1.25.22...v1.25.23) (2026-01-04)
 
 ### 🐛 Bug Fixes
