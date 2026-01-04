@@ -92,10 +92,8 @@ jobs:
 
           SSH_TARGET="${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
 
-          # Extract branch name from ref (refs/heads/<branch>)
           BRANCH="${GITHUB_REF##*/}"
 
-          # Export variables for remote script (explicitly, to avoid unbound variables)
           REMOTE_ENV="APP_NAME='${{ inputs.app_name }}' \
           ENVIRONMENT='${{ inputs.environment }}' \
           DEPLOY_DIR='${{ inputs.deploy_dir }}' \
@@ -113,140 +111,69 @@ jobs:
           ssh $SSH_OPTIONS -i ~/.ssh/deploy_key "$SSH_TARGET" "$REMOTE_ENV" bash <<'DEPLOY_SCRIPT'
           set -euo pipefail
 
-          # ==========================================================
-          # 🔒 GLOBAL SAFETY GUARDS — VOLUMES MUST NEVER BE TOUCHED
-          # ==========================================================
           export DOCKER_CLI_HINTS=false
 
-          if docker compose version >/dev/null 2>&1; then
-            echo "🐳 Docker Compose detected"
-          else
-            echo "❌ Docker Compose not available"
-            exit 1
-          fi
+          : "${APP_NAME:?}"
+          : "${ENVIRONMENT:?}"
+          : "${DEPLOY_DIR:?}"
+          : "${COMPOSE_FILE:?}"
+          : "${GH_REPO:?}"
+          : "${GH_BRANCH:?}"
+          : "${GH_SHA:?}"
 
-          echo "🔒 Volume protection ENABLED"
-          echo "❌ docker compose down -v is FORBIDDEN"
-
-          # ==========================================================
-          # REQUIRED ENV VALIDATION (prevents 'unbound variable')
-          # ==========================================================
-          : "${APP_NAME:?APP_NAME is required}"
-          : "${ENVIRONMENT:?ENVIRONMENT is required}"
-          : "${DEPLOY_DIR:?DEPLOY_DIR is required}"
-          : "${COMPOSE_FILE:?COMPOSE_FILE is required}"
-          : "${GH_REPO:?GH_REPO is required}"
-          : "${GH_REF:?GH_REF is required}"
-          : "${GH_BRANCH:?GH_BRANCH is required}"
-          : "${GH_SHA:?GH_SHA is required}"
-
-          echo "🚀 Deploying ${APP_NAME} → ${ENVIRONMENT}"
-          echo "🔎 Git: repo=${GH_REPO} ref=${GH_REF} branch=${GH_BRANCH} sha=${GH_SHA}"
-
-          # ==========================================================
-          # CODE SYNC
-          # ==========================================================
           mkdir -p "$DEPLOY_DIR"
           cd "$DEPLOY_DIR"
 
           if [ -d ".git" ]; then
-            echo "✅ Repo exists, updating…"
             git fetch origin
             git reset --hard "origin/${GH_BRANCH}"
             git clean -fd
           else
-            echo "📥 Cloning repository…"
             git clone -b "${GH_BRANCH}" "https://github.com/${GH_REPO}.git" .
           fi
 
           if [ -n "${PROJECT_PATH:-}" ]; then
-            echo "📂 Entering project directory: ${PROJECT_PATH}"
             cd "$PROJECT_PATH"
           fi
 
-          # ==========================================================
-          # REGISTRY AUTH FILE (SAFE)
-          # ==========================================================
           if [ "$APP_NAME" = "registry" ]; then
-            echo "🔐 Generating .htpasswd (NO volume impact)"
-            mkdir -p data
-
             if [ "$ENVIRONMENT" = "production" ]; then
-              : "${REGISTRY_USER_PROD:?REGISTRY_USER_PROD required for prod registry}"
-              : "${REGISTRY_PASSWORD_PROD:?REGISTRY_PASSWORD_PROD required for prod registry}"
               USER="$REGISTRY_USER_PROD"
               PASS="$REGISTRY_PASSWORD_PROD"
             else
-              : "${REGISTRY_USER_STAGING:?REGISTRY_USER_STAGING required for staging registry}"
-              : "${REGISTRY_PASSWORD_STAGING:?REGISTRY_PASSWORD_STAGING required for staging registry}"
               USER="$REGISTRY_USER_STAGING"
               PASS="$REGISTRY_PASSWORD_STAGING"
             fi
 
             docker run --rm httpd:2 htpasswd -Bbn "$USER" "$PASS" > .htpasswd
-
-            # Optional: write .env for compose usage
-          cat > .env <<EOF
-          REGISTRY_USER_PROD=${REGISTRY_USER_PROD:-}
-          REGISTRY_PASSWORD_PROD=${REGISTRY_PASSWORD_PROD:-}
-          REGISTRY_USER_STAGING=${REGISTRY_USER_STAGING:-}
-          REGISTRY_PASSWORD_STAGING=${REGISTRY_PASSWORD_STAGING:-}
-          EOF
-          fi
-
-          # ==========================================================
-          # DEPLOY LOGIC — SAFE VOLUMES
-          # ==========================================================
-          if [ ! -f "$COMPOSE_FILE" ]; then
-            echo "❌ Docker Compose file not found: $COMPOSE_FILE"
-            exit 1
           fi
 
           if [ "$ENVIRONMENT" = "production" ]; then
-            echo "🟢 PRODUCTION DEPLOY (NO DOWN, NO VOLUMES)"
+            if [ "$APP_NAME" = "registry" ]; then
+              for i in {1..60}; do
+                CODE=$(curl -s -o /dev/null -w "%{http_code}" https://registry.freijstack.com/v2/ || true)
+                if [ "$CODE" = "200" ] || [ "$CODE" = "401" ]; then
+                  break
+                fi
+                sleep 1
+              done
+            fi
 
-            # If this deploy pulls from private registry, login BEFORE pull.
-            if [ -n "${REGISTRY_USER_PROD:-}" ] && [ -n "${REGISTRY_PASSWORD_PROD:-}" ]; then
-              # Wait for the public endpoint only when deploying the registry app itself
-              if [ "$APP_NAME" = "registry" ]; then
-                echo "⏳ Waiting registry public endpoint"
-                for i in {1..60}; do
-                  CODE=$(curl -s -o /dev/null -w "%{http_code}" https://registry.freijstack.com/v2/ || true)
-                  if [ "$CODE" = "200" ] || [ "$CODE" = "401" ]; then
-                    echo "✅ Registry ready (HTTP $CODE)"
-                    break
-                  fi
-                  sleep 1
-                done
-              fi
-
-              echo "🔐 docker login registry.freijstack.com"
+            if [ -n "${REGISTRY_USER_PROD:-}" ]; then
               echo "$REGISTRY_PASSWORD_PROD" | docker login registry.freijstack.com \
                 -u "$REGISTRY_USER_PROD" --password-stdin
             fi
 
             docker compose -f "$COMPOSE_FILE" pull
             docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
-
           else
-            echo "🟡 STAGING DEPLOY (containers only, volumes preserved)"
-
-            # down WITHOUT -v => volumes preserved
             docker compose -f "$COMPOSE_FILE" down --remove-orphans || true
             docker compose -f "$COMPOSE_FILE" pull
             docker compose -f "$COMPOSE_FILE" up -d --build --remove-orphans
           fi
 
-          # ==========================================================
-          # POST-DEPLOY CHECK
-          # ==========================================================
-          echo "📊 Containers:"
           docker compose -f "$COMPOSE_FILE" ps
-
-          echo "📦 Volumes present:"
           docker volume ls
-
-          echo "✅ Deployment finished safely"
           DEPLOY_SCRIPT
 
       - name: 🗄️ Run Migrations
@@ -259,7 +186,8 @@ jobs:
       - name: ✅ Deployment Summary
         if: success()
         run: |
-          echo "## ✅ Deployment Successful" >> $GITHUB_STEP_SUMMARY
-          echo "- App: ${{ inputs.app_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Env: ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ Deployment Successful" >> "$GITHUB_STEP_SUMMARY"
+          echo "- App: ${{ inputs.app_name }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Env: ${{ inputs.environment }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Commit: ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
+

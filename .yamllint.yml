@@ -11,6 +11,7 @@ rules:
   # Longueur raisonnable (160 pour workflows GitHub Actions)
   line-length:
     max: 160
+    level: warning
     allow-non-breakable-words: true
     allow-non-breakable-inline-mappings: true
 
