@@ -35,6 +35,16 @@ on:
         required: false
         type: string
         default: ''
+      skip_security:
+        description: 'Compatibility flag (not used here)'
+        required: false
+        type: boolean
+        default: false
+      skip_lint:
+        description: 'Compatibility flag (not used here)'
+        required: false
+        type: boolean
+        default: false
     secrets:
       VPS_SSH_KEY:
         required: true
@@ -70,6 +80,7 @@ jobs:
     steps:
       - name: ⏱️ Staggered Start (avoid SSH collisions)
         run: |
+          set -euo pipefail
           DELAY=$((5 + RANDOM % 16))
           echo "⏳ Waiting ${DELAY}s"
           sleep "$DELAY"
@@ -91,7 +102,6 @@ jobs:
           set -euo pipefail
 
           SSH_TARGET="${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
-
           BRANCH="${GITHUB_REF##*/}"
 
           REMOTE_ENV="APP_NAME='${{ inputs.app_name }}' \
@@ -100,7 +110,6 @@ jobs:
           PROJECT_PATH='${{ inputs.project_path }}' \
           COMPOSE_FILE='${{ inputs.docker_compose_file }}' \
           GH_REPO='${{ github.repository }}' \
-          GH_REF='${{ github.ref }}' \
           GH_BRANCH='${BRANCH}' \
           GH_SHA='${{ github.sha }}' \
           REGISTRY_USER_STAGING='${{ secrets.REGISTRY_USER_STAGING }}' \
@@ -110,7 +119,6 @@ jobs:
 
           ssh $SSH_OPTIONS -i ~/.ssh/deploy_key "$SSH_TARGET" "$REMOTE_ENV" bash <<'DEPLOY_SCRIPT'
           set -euo pipefail
-
           export DOCKER_CLI_HINTS=false
 
           : "${APP_NAME:?}"
@@ -121,11 +129,23 @@ jobs:
           : "${GH_BRANCH:?}"
           : "${GH_SHA:?}"
 
+          if ! docker compose version >/dev/null 2>&1; then
+            echo "❌ Docker Compose not available on VPS"
+            exit 1
+          fi
+
+          echo "🔒 Volume protection: enabled (never run docker compose down -v)"
+          echo "🚀 Deploying ${APP_NAME} → ${ENVIRONMENT}"
+          echo "📁 DEPLOY_DIR=${DEPLOY_DIR}"
+          echo "📄 COMPOSE_FILE=${COMPOSE_FILE}"
+          echo "🔀 BRANCH=${GH_BRANCH}"
+          echo "🧾 SHA=${GH_SHA}"
+
           mkdir -p "$DEPLOY_DIR"
           cd "$DEPLOY_DIR"
 
           if [ -d ".git" ]; then
-            git fetch origin
+            git fetch origin --tags
             git reset --hard "origin/${GH_BRANCH}"
             git clean -fd
           else
@@ -136,49 +156,79 @@ jobs:
             cd "$PROJECT_PATH"
           fi
 
-          if [ "$APP_NAME" = "registry" ]; then
-            if [ "$ENVIRONMENT" = "production" ]; then
-              USER="$REGISTRY_USER_PROD"
-              PASS="$REGISTRY_PASSWORD_PROD"
-            else
-              USER="$REGISTRY_USER_STAGING"
-              PASS="$REGISTRY_PASSWORD_STAGING"
-            fi
-
-            docker run --rm httpd:2 htpasswd -Bbn "$USER" "$PASS" > .htpasswd
+          if [ ! -f "$COMPOSE_FILE" ]; then
+            echo "❌ Compose file not found: $COMPOSE_FILE (cwd=$(pwd))"
+            ls -lah
+            exit 1
           fi
 
+          # ==========================================================
+          # Registry: generate htpasswd (safe)
+          # ==========================================================
+          if [ "$APP_NAME" = "registry" ]; then
+            if [ "$ENVIRONMENT" = "production" ]; then
+              USER="${REGISTRY_USER_PROD:-}"
+              PASS="${REGISTRY_PASSWORD_PROD:-}"
+            else
+              USER="${REGISTRY_USER_STAGING:-}"
+              PASS="${REGISTRY_PASSWORD_STAGING:-}"
+            fi
+
+            if [ -z "${USER}" ] || [ -z "${PASS}" ]; then
+              echo "❌ Registry deploy requires registry credentials for ${ENVIRONMENT}"
+              exit 1
+            fi
+
+            echo "🔐 Generating .htpasswd for registry (${ENVIRONMENT})"
+            docker run --rm httpd:2 htpasswd -Bbn "$USER" "$PASS" > .htpasswd
+            ls -lah .htpasswd
+          fi
+
+          # ==========================================================
+          # Login registry for pulling private images (all apps except registry itself)
+          # ==========================================================
+          if [ "$APP_NAME" != "registry" ]; then
+            if [ "$ENVIRONMENT" = "production" ]; then
+              LOGIN_USER="${REGISTRY_USER_PROD:-}"
+              LOGIN_PASS="${REGISTRY_PASSWORD_PROD:-}"
+            else
+              LOGIN_USER="${REGISTRY_USER_STAGING:-}"
+              LOGIN_PASS="${REGISTRY_PASSWORD_STAGING:-}"
+            fi
+
+            if [ -n "${LOGIN_USER}" ] && [ -n "${LOGIN_PASS}" ]; then
+              echo "🔐 docker login registry.freijstack.com (env=${ENVIRONMENT})"
+              echo "${LOGIN_PASS}" | docker login registry.freijstack.com -u "${LOGIN_USER}" --password-stdin
+            else
+              echo "⚠️ Registry credentials missing for env=${ENVIRONMENT}; compose pull may fail if images are private."
+            fi
+          fi
+
+          # ==========================================================
+          # Deploy logic (no volume deletion)
+          # ==========================================================
           if [ "$ENVIRONMENT" = "production" ]; then
-            if [ "$APP_NAME" = "registry" ]; then
-              for i in {1..60}; do
-                CODE=$(curl -s -o /dev/null -w "%{http_code}" https://registry.freijstack.com/v2/ || true)
-                if [ "$CODE" = "200" ] || [ "$CODE" = "401" ]; then
-                  break
-                fi
-                sleep 1
-              done
-            fi
-
-            if [ -n "${REGISTRY_USER_PROD:-}" ]; then
-              echo "$REGISTRY_PASSWORD_PROD" | docker login registry.freijstack.com \
-                -u "$REGISTRY_USER_PROD" --password-stdin
-            fi
-
+            echo "🟢 Production deploy: pull + up (no down)"
             docker compose -f "$COMPOSE_FILE" pull
             docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
           else
+            echo "🟡 Staging deploy: down (no -v) + pull + up"
             docker compose -f "$COMPOSE_FILE" down --remove-orphans || true
             docker compose -f "$COMPOSE_FILE" pull
             docker compose -f "$COMPOSE_FILE" up -d --build --remove-orphans
           fi
 
+          echo "📊 Containers:"
           docker compose -f "$COMPOSE_FILE" ps
+
+          echo "📦 Volumes:"
           docker volume ls
           DEPLOY_SCRIPT
 
       - name: 🗄️ Run Migrations
         if: inputs.run_migrations
         run: |
+          set -euo pipefail
           ssh $SSH_OPTIONS -i ~/.ssh/deploy_key \
             ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
             "cd ${{ inputs.deploy_dir }}/${{ inputs.project_path }} && docker compose exec -T app npm run migrate || true"
@@ -186,6 +236,7 @@ jobs:
       - name: ✅ Deployment Summary
         if: success()
         run: |
+          set -euo pipefail
           echo "## ✅ Deployment Successful" >> "$GITHUB_STEP_SUMMARY"
           echo "- App: ${{ inputs.app_name }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Env: ${{ inputs.environment }}" >> "$GITHUB_STEP_SUMMARY"

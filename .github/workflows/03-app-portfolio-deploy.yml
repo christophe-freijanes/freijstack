@@ -23,7 +23,6 @@ jobs:
       (github.event_name == 'workflow_run' &&
        github.event.workflow_run.head_branch == 'develop' &&
        github.event.workflow_run.conclusion == 'success') ||
-      (github.event_name == 'pull_request') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
     uses: ./.github/workflows/00-core-full-deploy.yml
     with:
@@ -33,14 +32,16 @@ jobs:
       project_path: 'saas/portfolio'
       docker_compose_file: 'docker-compose.staging.yml'
       run_migrations: false
-      skip_security: false
-      skip_lint: false
     secrets:
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
       VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
       VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
+
+      # Registry creds (consistent)
       REGISTRY_USER_STAGING: ${{ secrets.REGISTRY_USER_STAGING }}
-      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+      REGISTRY_PASSWORD_STAGING: ${{ secrets.REGISTRY_PASSWORD_STAGING }}
+      REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
+      REGISTRY_PASSWORD_PROD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
 
   deploy-production:
     name: 🔒 Full Pipeline (Production)
@@ -61,5 +62,9 @@ jobs:
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
       VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
       VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
+
+      # Registry creds (consistent)
+      REGISTRY_USER_STAGING: ${{ secrets.REGISTRY_USER_STAGING }}
+      REGISTRY_PASSWORD_STAGING: ${{ secrets.REGISTRY_PASSWORD_STAGING }}
       REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
-      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+      REGISTRY_PASSWORD_PROD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
