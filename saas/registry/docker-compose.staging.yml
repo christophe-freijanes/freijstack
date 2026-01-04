@@ -8,19 +8,19 @@ services:
       REGISTRY_HTTP_RELATIVEURLS: "true"
       REGISTRY_STORAGE_DELETE_ENABLED: "true"
     ports:
-      - "5000:5000"
+      - "5001:5000"
     volumes:
-      - registry-data:/var/lib/registry
+      - registry-data:/var/lib/registry  # Volume partagé avec la prod
       - ./config.yml:/etc/docker/registry/config.yml:ro
       - ./.htpasswd:/etc/docker/registry/auth/htpasswd:ro
     networks:
       - web
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.registry.rule=Host(`registry-staging.freijstack.com`)"
-      - "traefik.http.routers.registry.entrypoints=websecure"
-      - "traefik.http.routers.registry.tls.certresolver=mytlschallenge"
-      - "traefik.http.services.registry.loadbalancer.server.port=5000"
+      - "traefik.http.routers.registry-staging.rule=Host(`registry-staging.freijstack.com`)"
+      - "traefik.http.routers.registry-staging.entrypoints=websecure"
+      - "traefik.http.routers.registry-staging.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.registry-staging.loadbalancer.server.port=5000"
 
   # UI web pour visualiser et gérer les images du registre
   registry-ui:
@@ -48,11 +48,11 @@ services:
       start_period: 5s
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.registry-ui.rule=Host(`registry-ui-staging.freijstack.com`)"
-      - "traefik.http.routers.registry-ui.entrypoints=websecure"
-      - "traefik.http.routers.registry-ui.tls.certresolver=mytlschallenge"
-      - "traefik.http.services.registry-ui.loadbalancer.server.port=80"
-      - "traefik.http.routers.registry-ui.service=registry-ui"
+      - "traefik.http.routers.registry-ui-staging.rule=Host(`registry-ui-staging.freijstack.com`)"
+      - "traefik.http.routers.registry-ui-staging.entrypoints=websecure"
+      - "traefik.http.routers.registry-ui-staging.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.registry-ui-staging.loadbalancer.server.port=80"
+      - "traefik.http.routers.registry-ui-staging.service=registry-ui-staging"
 
 volumes:
   registry-data:
