@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.29.0](https://github.com/christophe-freijanes/freijstack/compare/v1.28.0...v1.29.0) (2026-01-04)
+
+### 🚀 Features
+
+* add compatibility flags for security and lint skipping in deployment workflow ([87726ed](https://github.com/christophe-freijanes/freijstack/commit/87726ed1393c087b0e7a124ce2936433ee250c8f))
+
 ## [1.28.0](https://github.com/christophe-freijanes/freijstack/compare/v1.27.0...v1.28.0) (2026-01-04)
 
 ### 🚀 Features
