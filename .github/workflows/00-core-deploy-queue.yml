@@ -237,6 +237,14 @@ jobs:
                 -Bbn "$REGISTRY_USERNAME" "$REGISTRY_PASSWORD" > data/.htpasswd
               echo "✅ .htpasswd generated successfully"
               ls -lh data/.htpasswd
+              
+              # Create .env file for docker-compose to use
+              echo "📝 Creating .env file for docker-compose..."
+              cat > .env <<EOF
+REGISTRY_USERNAME=$REGISTRY_USERNAME
+REGISTRY_PASSWORD=$REGISTRY_PASSWORD
+EOF
+              echo "✅ .env file created successfully"
             fi
 
             # Deploy with Docker Compose
