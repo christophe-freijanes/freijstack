@@ -197,7 +197,7 @@ jobs:
             echo "🐳 Deploying with $COMPOSE_FILE..."
             if [ -f "$COMPOSE_FILE" ]; then
               # In production: NEVER use 'down' to preserve data volumes
-              # In staging: Clean everything for fresh deployment
+              # In staging: Clean containers but PRESERVE volumes for persistent data (images, cache)
               if [ "$ENVIRONMENT" = "production" ]; then
                 echo "🔄 Production deployment: updating containers without touching volumes..."
                 # Pull latest images
@@ -205,8 +205,8 @@ jobs:
                 # Recreate containers without stopping them (zero-downtime if possible)
                 docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
               else
-                echo "🛑 Staging deployment: cleaning previous stack..."
-                docker compose -f "$COMPOSE_FILE" down --remove-orphans --volumes || true
+                echo "🛑 Staging deployment: cleaning containers but preserving data volumes..."
+                docker compose -f "$COMPOSE_FILE" down --remove-orphans || true
 
                 # Force remove any lingering containers with names matching the app
                 docker ps -aq --filter "name=${APP_NAME}" | xargs -r docker rm -f 2>/dev/null || true
