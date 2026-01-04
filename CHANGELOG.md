@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.24.1](https://github.com/christophe-freijanes/freijstack/compare/v1.24.0...v1.24.1) (2026-01-04)
+
+### ♻️ Code Refactoring
+
+* use .env for registry usernames instead of secrets ([2879b9e](https://github.com/christophe-freijanes/freijstack/commit/2879b9e3ea8a631f3b4d3fc837ab9089b81c8f5c))
+
 ## [1.24.0](https://github.com/christophe-freijanes/freijstack/compare/v1.23.4...v1.24.0) (2026-01-04)
 
 ### 🚀 Features
