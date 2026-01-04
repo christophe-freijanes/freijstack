@@ -42,8 +42,6 @@ on:
         required: true
       VPS_SSH_USER:
         required: true
-      REGISTRY_USERNAME:
-        required: false
       REGISTRY_PASSWORD:
         required: false
 
@@ -144,7 +142,6 @@ jobs:
           COMPOSE_FILE='${{ inputs.docker_compose_file }}' \
           GITHUB_REPO='${{ github.repository }}' \
           GITHUB_REF='${{ github.ref }}' \
-          REGISTRY_USERNAME='${{ secrets.REGISTRY_USERNAME }}' \
           REGISTRY_PASSWORD='${{ secrets.REGISTRY_PASSWORD }}'"
 
           if [ -n "${{ inputs.custom_script }}" ]; then
@@ -201,10 +198,34 @@ jobs:
 
             # Generate .htpasswd for registry if needed
             if [ "$APP_NAME" = "registry" ]; then
-              if [ -z "$REGISTRY_USERNAME" ] || [ -z "$REGISTRY_PASSWORD" ]; then
-                echo "❌ Error: REGISTRY_USERNAME and REGISTRY_PASSWORD are required for registry deployment"
+              if [ -z "$REGISTRY_PASSWORD" ]; then
+                echo "❌ Error: REGISTRY_PASSWORD is required for registry deployment"
                 exit 1
               fi
+              
+              # Load registry username from .env based on environment
+              echo "🔐 Loading registry username from .env..."
+              if [ -f ".env" ]; then
+                # Source the .env file to get REGISTRY_USER_STAGING or REGISTRY_USER_PROD
+                export $(grep -E "REGISTRY_USER_" .env | xargs)
+                
+                if [ "$ENVIRONMENT" = "staging" ]; then
+                  REGISTRY_USERNAME="${REGISTRY_USER_STAGING}"
+                  echo "👤 Using staging user: $REGISTRY_USERNAME"
+                elif [ "$ENVIRONMENT" = "production" ]; then
+                  REGISTRY_USERNAME="${REGISTRY_USER_PROD}"
+                  echo "👤 Using production user: $REGISTRY_USERNAME"
+                fi
+              else
+                echo "⚠️ .env file not found, using default username"
+                REGISTRY_USERNAME="freijac"
+              fi
+              
+              if [ -z "$REGISTRY_USERNAME" ]; then
+                echo "❌ Error: REGISTRY_USERNAME could not be determined from .env"
+                exit 1
+              fi
+              
               echo "🔐 Generating .htpasswd for registry authentication..."
               mkdir -p data
               docker run --rm \

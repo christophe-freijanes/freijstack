@@ -85,8 +85,6 @@ on:
         required: true
       VPS_SSH_USER:
         required: true
-      REGISTRY_USERNAME:
-        required: false
       REGISTRY_PASSWORD:
         required: false
 
@@ -240,7 +238,6 @@ jobs:
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
       VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
       VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
-      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
       REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
 
   # ═══════════════════════════════════════════════════════════
