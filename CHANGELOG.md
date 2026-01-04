@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.24.6](https://github.com/christophe-freijanes/freijstack/compare/v1.24.5...v1.24.6) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* remove trailing spaces ([5507e60](https://github.com/christophe-freijanes/freijstack/commit/5507e60e988f81447b4f78a867c847cecff6368f))
+
 ## [1.24.5](https://github.com/christophe-freijanes/freijstack/compare/v1.24.4...v1.24.5) (2026-01-04)
 
 ### 🐛 Bug Fixes
