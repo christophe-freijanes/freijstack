@@ -25,6 +25,8 @@ on:
 
 env:
   IMAGE_NAME: portfolio
+  REGISTRY_STAGING: registry-staging.freijstack.com
+  REGISTRY_PROD: registry.freijstack.com
 
 concurrency:
   group: portfolio-build-${{ github.ref }}
@@ -53,7 +55,7 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.environment == 'staging')
 
     env:
-      REGISTRY_HOST: registry-staging.freijstack.com
+      REGISTRY_HOST: ${{ env.REGISTRY_STAGING }}
       REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
       REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
 
@@ -99,7 +101,7 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.environment == 'production')
 
     env:
-      REGISTRY_HOST: registry.freijstack.com
+      REGISTRY_HOST: ${{ env.REGISTRY_PROD }}
       REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME_PROD }}
       REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
 
