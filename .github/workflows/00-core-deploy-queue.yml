@@ -35,6 +35,16 @@ on:
         required: false
         type: string
         default: ''
+      skip_security:
+        description: 'Compatibility flag (not used here)'
+        required: false
+        type: boolean
+        default: false
+      skip_lint:
+        description: 'Compatibility flag (not used here)'
+        required: false
+        type: boolean
+        default: false
     secrets:
       VPS_SSH_KEY:
         required: true
@@ -42,14 +52,16 @@ on:
         required: true
       VPS_SSH_USER:
         required: true
+      # Keep staging secrets optional (not used anymore for login)
       REGISTRY_PASSWORD_STAGING:
         required: false
       REGISTRY_USER_STAGING:
         required: false
+      # PROD registry creds are the single source of truth
       REGISTRY_USER_PROD:
-        required: false
+        required: true
       REGISTRY_PASSWORD_PROD:
-        required: false
+        required: true
 
 concurrency:
   group: vps-ssh-deploy
@@ -63,7 +75,7 @@ jobs:
   deploy:
     name: 🚀 Deploy ${{ inputs.app_name }} to ${{ inputs.environment }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     environment:
       name: ${{ inputs.environment }}
 
@@ -102,10 +114,9 @@ jobs:
           GH_REPO='${{ github.repository }}' \
           GH_BRANCH='${BRANCH}' \
           GH_SHA='${{ github.sha }}' \
-          REGISTRY_USER_PROD='${{ secrets.REGISTRY_USER_PROD }}' \
-          REGISTRY_PASSWORD_PROD='${{ secrets.REGISTRY_PASSWORD_PROD }}' \
-          REGISTRY_USER_STAGING='${{ secrets.REGISTRY_USER_STAGING }}' \
-          REGISTRY_PASSWORD_STAGING='${{ secrets.REGISTRY_PASSWORD_STAGING }}'"
+          REGISTRY_HOST='registry.freijstack.com' \
+          REGISTRY_USER='${{ secrets.REGISTRY_USER_PROD }}' \
+          REGISTRY_PASSWORD='${{ secrets.REGISTRY_PASSWORD_PROD }}'"
 
           ssh $SSH_OPTIONS -i ~/.ssh/deploy_key "$SSH_TARGET" "$REMOTE_ENV" bash <<'DEPLOY_SCRIPT'
           set -euo pipefail
@@ -118,12 +129,22 @@ jobs:
           : "${GH_REPO:?}"
           : "${GH_BRANCH:?}"
           : "${GH_SHA:?}"
+          : "${REGISTRY_HOST:?}"
+          : "${REGISTRY_USER:?}"
+          : "${REGISTRY_PASSWORD:?}"
 
-          docker compose version >/dev/null 2>&1 || { echo "❌ Docker Compose not available"; exit 1; }
+          if ! docker compose version >/dev/null 2>&1; then
+            echo "❌ Docker Compose not available on VPS"
+            exit 1
+          fi
 
-          echo "🔒 Volume protection ENABLED"
-          echo "❌ docker compose down -v is FORBIDDEN"
+          echo "🔒 Volume protection: enabled (never run docker compose down -v)"
           echo "🚀 Deploying ${APP_NAME} → ${ENVIRONMENT}"
+          echo "📁 DEPLOY_DIR=${DEPLOY_DIR}"
+          echo "📄 COMPOSE_FILE=${COMPOSE_FILE}"
+          echo "🔀 BRANCH=${GH_BRANCH}"
+          echo "🧾 SHA=${GH_SHA}"
+          echo "📦 Registry host=${REGISTRY_HOST} (single registry for staging+prod)"
 
           mkdir -p "$DEPLOY_DIR"
           cd "$DEPLOY_DIR"
@@ -140,143 +161,58 @@ jobs:
             cd "$PROJECT_PATH"
           fi
 
-          [ -f "$COMPOSE_FILE" ] || { echo "❌ Compose not found: $COMPOSE_FILE"; exit 1; }
+          if [ ! -f "$COMPOSE_FILE" ]; then
+            echo "❌ Compose file not found: $COMPOSE_FILE (cwd=$(pwd))"
+            ls -lah
+            exit 1
+          fi
 
-          # ==========================================================
-          # Registry safety & folders preparation (Option B)
-          # ==========================================================
+          # If deploying the registry app itself, generate htpasswd with the same prod creds
           if [ "$APP_NAME" = "registry" ]; then
-            # Always ensure folders exist (idempotent)
-            mkdir -p "$(pwd)/data-staging" "$(pwd)/data-prod"
-
-            # Fail fast if compose files do not reference expected paths
-            # (prevents copying to wrong location)
-            if [ "$ENVIRONMENT" = "production" ]; then
-              grep -qE 'device:\s*\./data-prod' "$COMPOSE_FILE" || {
-                echo "❌ Expected production compose to bind ./data-prod (driver_opts.device)."
-                echo "   File: $COMPOSE_FILE"
-                echo "   Fix: set volumes.*.driver_opts.device: ./data-prod"
-                exit 1
-              }
-              if [ -f "docker-compose.staging.yml" ]; then
-                grep -qE 'device:\s*\./data-staging' "docker-compose.staging.yml" || {
-                  echo "❌ Expected staging compose to bind ./data-staging (driver_opts.device)."
-                  echo "   File: docker-compose.staging.yml"
-                  echo "   Fix: set volumes.*.driver_opts.device: ./data-staging"
-                  exit 1
-                }
-              fi
-            else
-              grep -qE 'device:\s*\./data-staging' "$COMPOSE_FILE" || {
-                echo "❌ Expected staging compose to bind ./data-staging (driver_opts.device)."
-                echo "   File: $COMPOSE_FILE"
-                echo "   Fix: set volumes.*.driver_opts.device: ./data-staging"
-                exit 1
-              }
-            fi
+            echo "🔐 Generating .htpasswd for registry (using PROD creds)"
+            docker run --rm httpd:2 htpasswd -Bbn "$REGISTRY_USER" "$REGISTRY_PASSWORD" > .htpasswd
+            ls -lah .htpasswd
           fi
 
-          # ==========================================================
-          # Registry: generate .htpasswd safely
-          # ==========================================================
-          if [ "$APP_NAME" = "registry" ]; then
-            echo "🔐 Generating .htpasswd"
-            if [ "$ENVIRONMENT" = "production" ]; then
-              : "${REGISTRY_USER_PROD:?REGISTRY_USER_PROD required}"
-              : "${REGISTRY_PASSWORD_PROD:?REGISTRY_PASSWORD_PROD required}"
-              USER="$REGISTRY_USER_PROD"
-              PASS="$REGISTRY_PASSWORD_PROD"
-            else
-              : "${REGISTRY_USER_STAGING:?REGISTRY_USER_STAGING required}"
-              : "${REGISTRY_PASSWORD_STAGING:?REGISTRY_PASSWORD_STAGING required}"
-              USER="$REGISTRY_USER_STAGING"
-              PASS="$REGISTRY_PASSWORD_STAGING"
-            fi
-            docker run --rm httpd:2 htpasswd -Bbn "$USER" "$PASS" > .htpasswd
+          # Login is required for pulling private images (for all apps except when registry is being deployed)
+          if [ "$APP_NAME" != "registry" ]; then
+            echo "🔐 docker login ${REGISTRY_HOST} (env=${ENVIRONMENT})"
+            echo "${REGISTRY_PASSWORD}" | docker login "${REGISTRY_HOST}" -u "${REGISTRY_USER}" --password-stdin
+          else
+            echo "ℹ️ Skipping docker login (registry app deploy)"
           fi
 
-          # ==========================================================
-          # Registry Option B: promote staging -> prod (host folders)
-          # ==========================================================
-          if [ "$APP_NAME" = "registry" ] && [ "$ENVIRONMENT" = "production" ]; then
-            STAGING_COMPOSE="docker-compose.staging.yml"
-
-            echo "🛑 Registry production deploy: stopping STAGING first (containers only)"
-            if [ -f "$STAGING_COMPOSE" ]; then
-              docker compose -f "$STAGING_COMPOSE" down --remove-orphans || true
-            else
-              docker rm -f registry-staging registry-ui-staging 2>/dev/null || true
-            fi
-
-            STAGING_DIR="$(pwd)/data-staging"
-            PROD_DIR="$(pwd)/data-prod"
-
-            if ! command -v rsync >/dev/null 2>&1; then
-              echo "❌ rsync is required for promotion but not installed."
-              exit 1
-            fi
-
-            echo "🚚 Promoting images: rsync staging -> prod (strict mirror)"
-            echo "   from: $STAGING_DIR"
-            echo "     to: $PROD_DIR"
-            rsync -a "$STAGING_DIR"/ "$PROD_DIR"/
-
-            echo "✅ Promotion done"
-            du -sh "$PROD_DIR" 2>/dev/null || true
-          fi
-
-          # ==========================================================
-          # Deploy (safe volumes)
-          # ==========================================================
           if [ "$ENVIRONMENT" = "production" ]; then
-            echo "🟢 PRODUCTION DEPLOY (no down)"
+            echo "🟢 Production deploy: pull + up (no down)"
             docker compose -f "$COMPOSE_FILE" pull
             docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
           else
-            echo "🟡 STAGING DEPLOY (down without -v)"
+            echo "🟡 Staging deploy: down (no -v) + pull + up"
             docker compose -f "$COMPOSE_FILE" down --remove-orphans || true
             docker compose -f "$COMPOSE_FILE" pull
             docker compose -f "$COMPOSE_FILE" up -d --build --remove-orphans
           fi
 
-          # ==========================================================
-          # Basic readiness (registry local)
-          # ==========================================================
-          if [ "$APP_NAME" = "registry" ]; then
-            LOCAL_BIND="$(docker compose -f "$COMPOSE_FILE" port registry 5000 2>/dev/null || true)"
-            [ -n "$LOCAL_BIND" ] || { echo "❌ Could not detect published port"; exit 1; }
-            LOCAL_PORT="${LOCAL_BIND##*:}"
-            echo "✅ Local registry published on 127.0.0.1:${LOCAL_PORT}"
-
-            LAST=""
-            for i in {1..60}; do
-              LAST=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${LOCAL_PORT}/v2/" || true)
-              echo "  local attempt ${i}/60 -> HTTP ${LAST}"
-              if [ "$LAST" = "200" ] || [ "$LAST" = "401" ]; then
-                break
-              fi
-              sleep 1
-            done
-
-            if [ "$LAST" != "200" ] && [ "$LAST" != "401" ]; then
-              echo "❌ Registry not ready (HTTP ${LAST})"
-              docker compose -f "$COMPOSE_FILE" ps || true
-              docker compose -f "$COMPOSE_FILE" logs --tail=200 registry || true
-              exit 1
-            fi
-          fi
-
           echo "📊 Containers:"
-          docker compose -f "$COMPOSE_FILE" ps || true
+          docker compose -f "$COMPOSE_FILE" ps
 
-          echo "✅ Deployment finished safely"
+          echo "📦 Volumes:"
+          docker volume ls
           DEPLOY_SCRIPT
+
+      - name: 🗄️ Run Migrations
+        if: inputs.run_migrations
+        run: |
+          set -euo pipefail
+          ssh $SSH_OPTIONS -i ~/.ssh/deploy_key \
+            ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            "cd ${{ inputs.deploy_dir }}/${{ inputs.project_path }} && docker compose exec -T app npm run migrate || true"
 
       - name: ✅ Deployment Summary
         if: success()
         run: |
+          set -euo pipefail
           echo "## ✅ Deployment Successful" >> "$GITHUB_STEP_SUMMARY"
           echo "- App: ${{ inputs.app_name }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Env: ${{ inputs.environment }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Commit: ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Deployed at: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> "$GITHUB_STEP_SUMMARY"
