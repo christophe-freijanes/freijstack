@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.25.0](https://github.com/christophe-freijanes/freijstack/compare/v1.24.14...v1.25.0) (2026-01-04)
+
+### 🚀 Features
+
+* add REGISTRY_PASSWORD_PROD input for deployment workflows ([dcbba5f](https://github.com/christophe-freijanes/freijstack/commit/dcbba5f010dc7364ac1fba3d3f237bf854069aba))
+
 ## [1.24.14](https://github.com/christophe-freijanes/freijstack/compare/v1.24.13...v1.24.14) (2026-01-04)
 
 ### 🐛 Bug Fixes
