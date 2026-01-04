@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.30.0](https://github.com/christophe-freijanes/freijstack/compare/v1.29.1...v1.30.0) (2026-01-04)
+
+### 🚀 Features
+
+* update registry link in portfolio, remove .env.example, and enhance .env configurations ([19a073d](https://github.com/christophe-freijanes/freijstack/commit/19a073d4663ff85910d965af7bd6fa6d57c7b1de))
+
 ## [1.29.1](https://github.com/christophe-freijanes/freijstack/compare/v1.29.0...v1.29.1) (2026-01-04)
 
 ### 🐛 Bug Fixes
