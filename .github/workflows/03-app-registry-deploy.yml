@@ -3,6 +3,9 @@ name: 🐳 SaaS • Docker Registry
 on:
   push:
     branches: [develop, master]
+    paths:
+      - 'saas/registry/**'
+      - '.github/workflows/03-app-registry-deploy.yml'
   pull_request:
     branches: [develop, master]
     paths:
