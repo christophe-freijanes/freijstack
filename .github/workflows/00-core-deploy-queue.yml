@@ -44,6 +44,10 @@ on:
         required: true
       REGISTRY_PASSWORD:
         required: false
+      REGISTRY_USER_STAGING:
+        required: false
+      REGISTRY_USER_PROD:
+        required: false
 
 # Global concurrency: only one deployment at a time across ALL apps
 concurrency:
@@ -142,7 +146,9 @@ jobs:
           COMPOSE_FILE='${{ inputs.docker_compose_file }}' \
           GITHUB_REPO='${{ github.repository }}' \
           GITHUB_REF='${{ github.ref }}' \
-          REGISTRY_PASSWORD='${{ secrets.REGISTRY_PASSWORD }}'"
+          REGISTRY_PASSWORD='${{ secrets.REGISTRY_PASSWORD }}' \
+          REGISTRY_USER_STAGING='${{ secrets.REGISTRY_USER_STAGING }}' \
+          REGISTRY_USER_PROD='${{ secrets.REGISTRY_USER_PROD }}'"
 
           if [ -n "${{ inputs.custom_script }}" ]; then
             # Use custom deployment script if provided
@@ -203,29 +209,19 @@ jobs:
                 exit 1
               fi
               
-              # Load registry username from .env based on environment
-              echo "🔐 Loading registry username from .env..."
+              # Load registry username based on environment
+              echo "🔐 Loading registry username..."
               
-              # Create .env from .env.example if it doesn't exist
-              if [ ! -f ".env" ] && [ -f ".env.example" ]; then
-                echo "📋 Creating .env from .env.example..."
-                cp .env.example .env
+              if [ "$ENVIRONMENT" = "staging" ]; then
+                REGISTRY_USERNAME="${REGISTRY_USER_STAGING}"
+                echo "👤 Using staging user: $REGISTRY_USERNAME"
+              elif [ "$ENVIRONMENT" = "production" ]; then
+                REGISTRY_USERNAME="${REGISTRY_USER_PROD}"
+                echo "👤 Using production user: $REGISTRY_USERNAME"
               fi
               
-              if [ -f ".env" ]; then
-                # Source the .env file to get REGISTRY_USER_STAGING or REGISTRY_USER_PROD
-                export $(grep -E "REGISTRY_USER_" .env | xargs)
-                
-                if [ "$ENVIRONMENT" = "staging" ]; then
-                  REGISTRY_USERNAME="${REGISTRY_USER_STAGING}"
-                  echo "👤 Using staging user: $REGISTRY_USERNAME"
-                elif [ "$ENVIRONMENT" = "production" ]; then
-                  REGISTRY_USERNAME="${REGISTRY_USER_PROD}"
-                  echo "👤 Using production user: $REGISTRY_USERNAME"
-                fi
-              else
-                echo "⚠️ .env file not found, using default username"
-                REGISTRY_USERNAME="freijac"
+              if [ -z "$REGISTRY_USERNAME" ]; then
+                echo "⚠️ Warning: REGISTRY_USERNAME not set, .htpasswd may not be created correctly"
               fi
               
               if [ -z "$REGISTRY_USERNAME" ]; then

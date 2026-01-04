@@ -36,6 +36,8 @@ jobs:
       VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
       VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
       REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+      REGISTRY_USER_STAGING: ${{ secrets.REGISTRY_USER_STAGING }}
+      REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
 
   deploy-production:
     name: 🔒 Full Pipeline (Production)
@@ -53,3 +55,5 @@ jobs:
       VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
       VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
       REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
+      REGISTRY_USER_STAGING: ${{ secrets.REGISTRY_USER_STAGING }}
+      REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
