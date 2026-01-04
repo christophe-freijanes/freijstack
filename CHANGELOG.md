@@ -6,6 +6,17 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.24.3](https://github.com/christophe-freijanes/freijstack/compare/v1.24.2...v1.24.3) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* create .env file during registry deployment for docker-compose ([8170056](https://github.com/christophe-freijanes/freijstack/commit/81700561af79b785720c1412ad8ebffa6466e856))
+
+### 🔧 Chores
+
+* remove .env.example (usernames now in GitHub Secrets) ([932bf69](https://github.com/christophe-freijanes/freijstack/commit/932bf69632c16834c46cba6a03f00241c4608b70))
+* remove unused .env.example file ([94ce785](https://github.com/christophe-freijanes/freijstack/commit/94ce7852fc788449caf82b04d7cdca066755a9ef))
+
 ## [1.24.2](https://github.com/christophe-freijanes/freijstack/compare/v1.24.1...v1.24.2) (2026-01-04)
 
 ### ♻️ Code Refactoring
