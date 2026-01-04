@@ -42,6 +42,10 @@ on:
         required: true
       VPS_SSH_USER:
         required: true
+      REGISTRY_USERNAME:
+        required: false
+      REGISTRY_PASSWORD:
+        required: false
 
 # Global concurrency: only one deployment at a time across ALL apps
 concurrency:
@@ -139,7 +143,9 @@ jobs:
           PROJECT_PATH='${{ inputs.project_path }}' \
           COMPOSE_FILE='${{ inputs.docker_compose_file }}' \
           GITHUB_REPO='${{ github.repository }}' \
-          GITHUB_REF='${{ github.ref }}'"
+          GITHUB_REF='${{ github.ref }}' \
+          REGISTRY_USERNAME='${{ secrets.REGISTRY_USERNAME }}' \
+          REGISTRY_PASSWORD='${{ secrets.REGISTRY_PASSWORD }}'"
 
           if [ -n "${{ inputs.custom_script }}" ]; then
             # Use custom deployment script if provided
@@ -191,6 +197,22 @@ jobs:
               echo "📦 Using project name: $COMPOSE_PROJECT_NAME"
             else
               echo "⚠️ Skipping COMPOSE_PROJECT_NAME (fixed container names detected)"
+            fi
+
+            # Generate .htpasswd for registry if needed
+            if [ "$APP_NAME" = "registry" ]; then
+              if [ -z "$REGISTRY_USERNAME" ] || [ -z "$REGISTRY_PASSWORD" ]; then
+                echo "❌ Error: REGISTRY_USERNAME and REGISTRY_PASSWORD are required for registry deployment"
+                exit 1
+              fi
+              echo "🔐 Generating .htpasswd for registry authentication..."
+              mkdir -p data
+              docker run --rm \
+                --entrypoint htpasswd \
+                httpd:2 \
+                -Bbn "$REGISTRY_USERNAME" "$REGISTRY_PASSWORD" > data/.htpasswd
+              echo "✅ .htpasswd generated successfully"
+              ls -lh data/.htpasswd
             fi
 
             # Deploy with Docker Compose
