@@ -1,55 +1,27 @@
-name: 📄 SaaS • Portfolio Deploy
+name: 🚀 SaaS • Portfolio Deploy (Production)
 
 on:
+  # 🔁 Auto-deploy after successful build on master
   workflow_run:
     workflows: ["🏗️ Build & Push Portfolio"]
     types: [completed]
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: "Target environment"
-        required: true
-        default: "production"
-        type: choice
-        options:
-          - staging
-          - production
+
+  # ▶️ Manual trigger (always prod)
+  workflow_dispatch: {}
 
 jobs:
-  deploy-staging:
-    name: 🚀 Deploy Portfolio (Staging)
-    if: |
-      (github.event_name == 'workflow_run' &&
-       github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.head_branch == 'develop') ||
-      (github.event_name == 'workflow_dispatch' &&
-       github.event.inputs.environment == 'staging')
-    uses: ./.github/workflows/00-core-full-deploy.yml
-    with:
-      app_name: "portfolio"
-      environment: "staging"
-      deploy_dir: "/srv/www/portfolio-staging"
-      project_path: "saas/portfolio"
-      docker_compose_file: "docker-compose.staging.yml"
-      run_migrations: false
-    secrets:
-      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-      VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
-      VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
-
-      # staging pulls from prod registry (ton choix actuel)
-      REGISTRY_USER_STAGING: ${{ secrets.REGISTRY_USER_PROD }}
-      REGISTRY_PASSWORD_STAGING: ${{ secrets.REGISTRY_PASSWORD_PROD }}
-
   deploy-production:
     name: 🚀 Deploy Portfolio (Production)
     if: |
-      (github.event_name == 'workflow_run' &&
-       github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.head_branch == 'master') ||
-      (github.event_name == 'workflow_dispatch' &&
-       github.event.inputs.environment == 'production')
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'master'
+      )
+
     uses: ./.github/workflows/00-core-full-deploy.yml
+
     with:
       app_name: "portfolio"
       environment: "production"
@@ -57,6 +29,7 @@ jobs:
       project_path: "saas/portfolio"
       docker_compose_file: "docker-compose.prod.yml"
       run_migrations: false
+
     secrets:
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
       VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
