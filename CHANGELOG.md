@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.23.3](https://github.com/christophe-freijanes/freijstack/compare/v1.23.2...v1.23.3) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* update paths for push events in Docker Registry and SecureVault workflows ([c9d7c61](https://github.com/christophe-freijanes/freijstack/commit/c9d7c619dccc1c172aa5e629e6ec66219784bc92))
+
 ## [1.23.2](https://github.com/christophe-freijanes/freijstack/compare/v1.23.1...v1.23.2) (2026-01-04)
 
 ### ♻️ Code Refactoring
