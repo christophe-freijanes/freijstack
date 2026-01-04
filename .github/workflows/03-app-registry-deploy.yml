@@ -1,4 +1,4 @@
-name: 🧱 Infra • Registry Deploy
+name: 🐳 Infra • Registry Deploy
 
 on:
   push:
