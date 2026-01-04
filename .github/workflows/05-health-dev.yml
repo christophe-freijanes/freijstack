@@ -122,11 +122,6 @@ jobs:
           # Format: "url|allowed_codes|label"
           URLS=(
             "https://portfolio-staging.freijstack.com/|200,301,302|Portfolio (staging)"
-            "https://portfolio.freijstack.com/|200,301,302|Portfolio (production)"
-            "https://christophe-freijanes.github.io/freijstack/|200,301,302|GitHub Pages"
-            "https://vault.freijstack.com/login|200,301,302,404|SecureVault Frontend (shared)"
-            "https://registry.freijstack.com/v2/|401,200|Docker Registry API (production)"
-            "https://registry-ui.freijstack.com/|200,301,302|Docker Registry UI (production)"
           )
 
           # Fast pass + Grace pass
