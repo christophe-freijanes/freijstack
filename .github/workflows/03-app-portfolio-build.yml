@@ -85,7 +85,7 @@ jobs:
           MAX_ATTEMPTS=15  # 15 tentatives
           ATTEMPT=1
           SLEEP_TIME=60   # 60 secondes entre les tentatives (total: ~15 minutes)
-          
+
           until curl -s -f -u "${{ env.REGISTRY_USERNAME }}:${{ env.REGISTRY_PASSWORD }}" "https://${{ env.REGISTRY_HOST }}/v2/" > /dev/null 2>&1; do
             if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
               echo "❌ Registry non disponible après $((MAX_ATTEMPTS * SLEEP_TIME / 60)) minutes"
@@ -149,7 +149,7 @@ jobs:
           MAX_ATTEMPTS=15  # 15 tentatives
           ATTEMPT=1
           SLEEP_TIME=60   # 60 secondes entre les tentatives (total: ~15 minutes)
-          
+
           until curl -s -f -u "${{ env.REGISTRY_USERNAME }}:${{ env.REGISTRY_PASSWORD }}" "https://${{ env.REGISTRY_HOST }}/v2/" > /dev/null 2>&1; do
             if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
               echo "❌ Registry non disponible après $((MAX_ATTEMPTS * SLEEP_TIME / 60)) minutes"
