@@ -109,7 +109,6 @@ jobs:
 
           ssh $SSH_OPTIONS -i ~/.ssh/deploy_key "$SSH_TARGET" "$REMOTE_ENV" bash <<'DEPLOY_SCRIPT'
           set -euo pipefail
-
           export DOCKER_CLI_HINTS=false
 
           : "${APP_NAME:?}"
@@ -124,9 +123,7 @@ jobs:
 
           echo "🔒 Volume protection ENABLED"
           echo "❌ docker compose down -v is FORBIDDEN"
-
           echo "🚀 Deploying ${APP_NAME} → ${ENVIRONMENT}"
-          echo "🔎 Git: repo=${GH_REPO} branch=${GH_BRANCH} sha=${GH_SHA}"
 
           mkdir -p "$DEPLOY_DIR"
           cd "$DEPLOY_DIR"
@@ -144,6 +141,40 @@ jobs:
           fi
 
           [ -f "$COMPOSE_FILE" ] || { echo "❌ Compose not found: $COMPOSE_FILE"; exit 1; }
+
+          # ==========================================================
+          # Registry safety & folders preparation (Option B)
+          # ==========================================================
+          if [ "$APP_NAME" = "registry" ]; then
+            # Always ensure folders exist (idempotent)
+            mkdir -p "$(pwd)/data-staging" "$(pwd)/data-prod"
+
+            # Fail fast if compose files do not reference expected paths
+            # (prevents copying to wrong location)
+            if [ "$ENVIRONMENT" = "production" ]; then
+              grep -qE 'device:\s*\./data-prod' "$COMPOSE_FILE" || {
+                echo "❌ Expected production compose to bind ./data-prod (driver_opts.device)."
+                echo "   File: $COMPOSE_FILE"
+                echo "   Fix: set volumes.*.driver_opts.device: ./data-prod"
+                exit 1
+              }
+              if [ -f "docker-compose.staging.yml" ]; then
+                grep -qE 'device:\s*\./data-staging' "docker-compose.staging.yml" || {
+                  echo "❌ Expected staging compose to bind ./data-staging (driver_opts.device)."
+                  echo "   File: docker-compose.staging.yml"
+                  echo "   Fix: set volumes.*.driver_opts.device: ./data-staging"
+                  exit 1
+                }
+              fi
+            else
+              grep -qE 'device:\s*\./data-staging' "$COMPOSE_FILE" || {
+                echo "❌ Expected staging compose to bind ./data-staging (driver_opts.device)."
+                echo "   File: $COMPOSE_FILE"
+                echo "   Fix: set volumes.*.driver_opts.device: ./data-staging"
+                exit 1
+              }
+            fi
+          fi
 
           # ==========================================================
           # Registry: generate .htpasswd safely
@@ -165,51 +196,30 @@ jobs:
           fi
 
           # ==========================================================
-          # SPECIAL RULE (Option B): Registry promotion staging -> prod
+          # Registry Option B: promote staging -> prod (host folders)
           # ==========================================================
           if [ "$APP_NAME" = "registry" ] && [ "$ENVIRONMENT" = "production" ]; then
             STAGING_COMPOSE="docker-compose.staging.yml"
-            PROD_COMPOSE="$COMPOSE_FILE"
 
             echo "🛑 Registry production deploy: stopping STAGING first (containers only)"
             if [ -f "$STAGING_COMPOSE" ]; then
               docker compose -f "$STAGING_COMPOSE" down --remove-orphans || true
             else
-              echo "⚠️ $STAGING_COMPOSE not found, attempting container removal fallback"
               docker rm -f registry-staging registry-ui-staging 2>/dev/null || true
             fi
 
-            # Resolve host storage paths from compose config (robust, no hardcoding)
-            echo "🔎 Resolving staging/prod storage paths from compose..."
-            STAGING_BIND="$(docker compose -f "$STAGING_COMPOSE" config 2>/dev/null | awk '/device:\s*\.\//{print $2; exit}' || true)"
-            PROD_BIND="$(docker compose -f "$PROD_COMPOSE" config 2>/dev/null | awk '/device:\s*\.\//{print $2; exit}' || true)"
-
-            if [ -z "$STAGING_BIND" ] || [ -z "$PROD_BIND" ]; then
-              echo "❌ Could not resolve storage bind paths from compose."
-              echo "   Ensure both compose files use driver_opts.device: ./data-staging and ./data-prod"
-              exit 1
-            fi
-
-            # Convert relative -> absolute
-            STAGING_DIR="$(cd "$(dirname "$STAGING_BIND")" 2>/dev/null && pwd)/$(basename "$STAGING_BIND")"
-            PROD_DIR="$(cd "$(dirname "$PROD_BIND")" 2>/dev/null && pwd)/$(basename "$PROD_BIND")"
-
-            echo "📦 Promotion source (staging): $STAGING_DIR"
-            echo "📦 Promotion target (prod):    $PROD_DIR"
-
-            mkdir -p "$STAGING_DIR" "$PROD_DIR"
-
-            echo "🧪 Pre-check: show size"
-            du -sh "$STAGING_DIR" 2>/dev/null || true
-            du -sh "$PROD_DIR" 2>/dev/null || true
+            STAGING_DIR="$(pwd)/data-staging"
+            PROD_DIR="$(pwd)/data-prod"
 
             if ! command -v rsync >/dev/null 2>&1; then
               echo "❌ rsync is required for promotion but not installed."
               exit 1
             fi
 
-            echo "🚚 Promoting images: rsync staging -> prod (preserve permissions, delete removed)"
-            rsync -a --delete "$STAGING_DIR"/ "$PROD_DIR"/
+            echo "🚚 Promoting images: rsync staging -> prod (strict mirror)"
+            echo "   from: $STAGING_DIR"
+            echo "     to: $PROD_DIR"
+            rsync -a "$STAGING_DIR"/ "$PROD_DIR"/
 
             echo "✅ Promotion done"
             du -sh "$PROD_DIR" 2>/dev/null || true
@@ -230,31 +240,26 @@ jobs:
           fi
 
           # ==========================================================
-          # Registry readiness check (local)
+          # Basic readiness (registry local)
           # ==========================================================
           if [ "$APP_NAME" = "registry" ]; then
             LOCAL_BIND="$(docker compose -f "$COMPOSE_FILE" port registry 5000 2>/dev/null || true)"
-            if [ -z "$LOCAL_BIND" ]; then
-              echo "❌ Could not detect published port for registry:5000"
-              docker compose -f "$COMPOSE_FILE" ps || true
-              docker compose -f "$COMPOSE_FILE" logs --tail=200 registry || true
-              exit 1
-            fi
+            [ -n "$LOCAL_BIND" ] || { echo "❌ Could not detect published port"; exit 1; }
             LOCAL_PORT="${LOCAL_BIND##*:}"
             echo "✅ Local registry published on 127.0.0.1:${LOCAL_PORT}"
 
-            echo "⏳ Waiting LOCAL registry (http://127.0.0.1:${LOCAL_PORT}/v2/) expect 200/401"
-            LAST_LOCAL=""
+            LAST=""
             for i in {1..60}; do
-              LAST_LOCAL=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${LOCAL_PORT}/v2/" || true)
-              echo "  local attempt ${i}/60 -> HTTP ${LAST_LOCAL}"
-              if [ "$LAST_LOCAL" = "200" ] || [ "$LAST_LOCAL" = "401" ]; then
+              LAST=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${LOCAL_PORT}/v2/" || true)
+              echo "  local attempt ${i}/60 -> HTTP ${LAST}"
+              if [ "$LAST" = "200" ] || [ "$LAST" = "401" ]; then
                 break
               fi
               sleep 1
             done
-            if [ "$LAST_LOCAL" != "200" ] && [ "$LAST_LOCAL" != "401" ]; then
-              echo "❌ Local registry not ready (HTTP ${LAST_LOCAL})"
+
+            if [ "$LAST" != "200" ] && [ "$LAST" != "401" ]; then
+              echo "❌ Registry not ready (HTTP ${LAST})"
               docker compose -f "$COMPOSE_FILE" ps || true
               docker compose -f "$COMPOSE_FILE" logs --tail=200 registry || true
               exit 1
@@ -264,18 +269,8 @@ jobs:
           echo "📊 Containers:"
           docker compose -f "$COMPOSE_FILE" ps || true
 
-          echo "📦 Volumes present:"
-          docker volume ls || true
-
           echo "✅ Deployment finished safely"
           DEPLOY_SCRIPT
-
-      - name: 🗄️ Run Migrations
-        if: inputs.run_migrations
-        run: |
-          ssh $SSH_OPTIONS -i ~/.ssh/deploy_key \
-            ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
-            "cd ${{ inputs.deploy_dir }}/${{ inputs.project_path }} && docker compose exec -T app npm run migrate || true"
 
       - name: ✅ Deployment Summary
         if: success()
@@ -285,12 +280,3 @@ jobs:
           echo "- Env: ${{ inputs.environment }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Commit: ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Deployed at: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> "$GITHUB_STEP_SUMMARY"
-
-      - name: ❌ Deployment Failed
-        if: failure()
-        run: |
-          echo "## ❌ Deployment Failed" >> "$GITHUB_STEP_SUMMARY"
-          echo "- App: ${{ inputs.app_name }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Env: ${{ inputs.environment }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Commit: ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Attempted at: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> "$GITHUB_STEP_SUMMARY"
