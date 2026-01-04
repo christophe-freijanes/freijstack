@@ -62,14 +62,16 @@ on:
         required: true
       VPS_SSH_USER:
         required: true
+      # Keep staging secrets optional (not used anymore for login)
       REGISTRY_PASSWORD_STAGING:
         required: false
       REGISTRY_USER_STAGING:
         required: false
+      # PROD registry creds are the single source of truth
       REGISTRY_USER_PROD:
-        required: false
+        required: true
       REGISTRY_PASSWORD_PROD:
-        required: false
+        required: true
 
 concurrency:
   group: vps-ssh-deploy

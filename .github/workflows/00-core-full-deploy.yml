@@ -148,6 +148,18 @@ jobs:
           echo "🧾 SHA=${GH_SHA}"
           echo "📦 Registry host=${REGISTRY_HOST} (single registry strategy)"
 
+          if ! docker compose version >/dev/null 2>&1; then
+            echo "❌ Docker Compose not available on VPS"
+            exit 1
+          fi
+
+          echo "🔒 Volume protection: enabled (never run docker compose down -v)"
+          echo "🚀 Deploying ${APP_NAME} → ${ENVIRONMENT}"
+          echo "📁 DEPLOY_DIR=${DEPLOY_DIR}"
+          echo "📄 COMPOSE_FILE=${COMPOSE_FILE}"
+          echo "🔀 BRANCH=${GH_BRANCH}"
+          echo "🧾 SHA=${GH_SHA}"
+
           mkdir -p "$DEPLOY_DIR"
           cd "$DEPLOY_DIR"
 
