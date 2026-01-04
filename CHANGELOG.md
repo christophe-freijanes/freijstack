@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.26.1](https://github.com/christophe-freijanes/freijstack/compare/v1.26.0...v1.26.1) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* update volume device paths for production and staging registry configurations ([facb09f](https://github.com/christophe-freijanes/freijstack/commit/facb09f0a7a3de3d350504284936800d1c8ebf65))
+
 ## [1.26.0](https://github.com/christophe-freijanes/freijstack/compare/v1.25.24...v1.26.0) (2026-01-04)
 
 ### 🚀 Features
