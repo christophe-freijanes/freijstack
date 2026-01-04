@@ -6,6 +6,60 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.29.1](https://github.com/christophe-freijanes/freijstack/compare/v1.29.0...v1.29.1) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* enhance deployment script with improved environment variable handling and error checks ([#134](https://github.com/christophe-freijanes/freijstack/issues/134)) ([e0b37fc](https://github.com/christophe-freijanes/freijstack/commit/e0b37fc810fb7558ed0de6c5e8cd9a081f52d45c))
+
+## [1.29.0](https://github.com/christophe-freijanes/freijstack/compare/v1.28.0...v1.29.0) (2026-01-04)
+
+### 🚀 Features
+
+* add compatibility flags for security and lint skipping in deployment workflow ([87726ed](https://github.com/christophe-freijanes/freijstack/commit/87726ed1393c087b0e7a124ce2936433ee250c8f))
+
+## [1.28.0](https://github.com/christophe-freijanes/freijstack/compare/v1.27.0...v1.28.0) (2026-01-04)
+
+### 🚀 Features
+
+* enhance deployment workflows with improved error handling and registry configurations ([8c50e60](https://github.com/christophe-freijanes/freijstack/commit/8c50e60ff631ee3fadd0b3a2c0f751f8d8456b11))
+
+## [1.27.0](https://github.com/christophe-freijanes/freijstack/compare/v1.26.1...v1.27.0) (2026-01-04)
+
+### 🚀 Features
+
+* enhance registry deployment script with safety checks and improved folder management ([ae4814b](https://github.com/christophe-freijanes/freijstack/commit/ae4814bc4786f0046ce81f9d2c5148bc83d8c28c))
+
+## [1.26.1](https://github.com/christophe-freijanes/freijstack/compare/v1.26.0...v1.26.1) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* update volume device paths for production and staging registry configurations ([facb09f](https://github.com/christophe-freijanes/freijstack/commit/facb09f0a7a3de3d350504284936800d1c8ebf65))
+
+## [1.26.0](https://github.com/christophe-freijanes/freijstack/compare/v1.25.24...v1.26.0) (2026-01-04)
+
+### 🚀 Features
+
+* enhance registry deployment workflow with preflight checks and improved environment handling ([6d8f0f5](https://github.com/christophe-freijanes/freijstack/commit/6d8f0f51024bae462444101f34faf6867418ba89))
+
+## [1.25.24](https://github.com/christophe-freijanes/freijstack/compare/v1.25.23...v1.25.24) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* enhance Traefik configuration with logging and network settings; update n8n timezone ([5f30e40](https://github.com/christophe-freijanes/freijstack/commit/5f30e40fea1597b316ffb301cd6e866d9a7fcc7f))
+
+## [1.25.23](https://github.com/christophe-freijanes/freijstack/compare/v1.25.22...v1.25.23) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* update Docker Compose configurations for production and staging environments with new Traefik routing rules ([8e3d7f1](https://github.com/christophe-freijanes/freijstack/commit/8e3d7f1e74b3319e8d2c8356765fcb58c3db0c05))
+
+## [1.25.22](https://github.com/christophe-freijanes/freijstack/compare/v1.25.21...v1.25.22) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* update Docker Compose configuration for registry and registry-ui with Traefik routing enhancements ([3203a43](https://github.com/christophe-freijanes/freijstack/commit/3203a43bd2ce9f5258a8795e2bea47757c63eba5))
+
 ## [1.25.21](https://github.com/christophe-freijanes/freijstack/compare/v1.25.20...v1.25.21) (2026-01-04)
 
 ### 🐛 Bug Fixes

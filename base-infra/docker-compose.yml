@@ -7,11 +7,12 @@ services:
     container_name: traefik
     restart: always
     command:
+      - --log.level=INFO
       - --api=true
-      - --api.insecure=true
       - --api.dashboard=true
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=web
       - --entrypoints.web.address=:80
       - --entrypoints.web.http.redirections.entryPoint.to=websecure
       - --entrypoints.web.http.redirections.entrypoint.scheme=https
@@ -19,20 +20,27 @@ services:
       - --certificatesresolvers.mytlschallenge.acme.tlschallenge=true
       - --certificatesresolvers.mytlschallenge.acme.email=${SSL_EMAIL:-admin@freijstack.com}
       - --certificatesresolvers.mytlschallenge.acme.storage=/letsencrypt/acme.json
+
     ports:
       - "80:80"
       - "443:443"
+
     volumes:
       - traefik_data:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro
+
     networks:
       - web
       - freijstack
+
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.dashboard.rule=Host(`traefik.${DOMAIN_NAME:-freijstack.com}`)
-      - traefik.http.routers.dashboard.service=api@internal
-      - traefik.http.services.dashboard.loadbalancer.server.port=8080
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${DOMAIN_NAME:-freijstack.com}`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.dashboard.service=api@internal"
 
   # ============================================
   # n8n - Automation Platform
@@ -47,7 +55,7 @@ services:
       - N8N_PROTOCOL=https
       - NODE_ENV=production
       - WEBHOOK_URL=https://automation.freijstack.com/
-      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-Europe/Paris}
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-America/Toronto}
     ports:
       - "127.0.0.1:5678:5678"
     volumes:
@@ -55,25 +63,21 @@ services:
     networks:
       - web
     labels:
-      - traefik.enable=true
-      - traefik.http.routers.n8n.rule=Host(`automation.freijstack.com`)
-      - traefik.http.routers.n8n.entrypoints=websecure
-      - traefik.http.routers.n8n.tls=true
-      - traefik.http.routers.n8n.tls.certresolver=mytlschallenge
-      - traefik.http.services.n8n.loadbalancer.server.port=5678
-      # Security headers
-      - traefik.http.middlewares.n8n-headers.headers.SSLRedirect=true
-      - traefik.http.middlewares.n8n-headers.headers.STSSeconds=315360000
-      - traefik.http.middlewares.n8n-headers.headers.browserXSSFilter=true
-      - traefik.http.middlewares.n8n-headers.headers.contentTypeNosniff=true
-      - traefik.http.middlewares.n8n-headers.headers.forceSTSHeader=true
-      - traefik.http.middlewares.n8n-headers.headers.SSLHost=automation.freijstack.com
-      - traefik.http.middlewares.n8n-headers.headers.STSIncludeSubdomains=true
-      - traefik.http.routers.n8n.middlewares=n8n-headers@docker
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.n8n.rule=Host(`automation.freijstack.com`)"
+      - "traefik.http.routers.n8n.entrypoints=websecure"
+      - "traefik.http.routers.n8n.tls=true"
+      - "traefik.http.routers.n8n.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.n8n.loadbalancer.server.port=5678"
+      - "traefik.http.middlewares.n8n-headers.headers.SSLRedirect=true"
+      - "traefik.http.middlewares.n8n-headers.headers.STSSeconds=31536000"
+      - "traefik.http.middlewares.n8n-headers.headers.browserXSSFilter=true"
+      - "traefik.http.middlewares.n8n-headers.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.n8n-headers.headers.forceSTSHeader=true"
+      - "traefik.http.middlewares.n8n-headers.headers.STSIncludeSubdomains=true"
+      - "traefik.http.routers.n8n.middlewares=n8n-headers@docker"
 
-# ============================================
-# VOLUMES - Persistent Data
-# ============================================
 volumes:
   traefik_data:
     name: traefik_data
@@ -82,9 +86,6 @@ volumes:
     name: n8n_data
     external: true
 
-# ============================================
-# NETWORKS - Shared Infrastructure
-# ============================================
 networks:
   web:
     name: web

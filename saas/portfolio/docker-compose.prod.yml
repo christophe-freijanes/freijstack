@@ -1,22 +1,17 @@
-version: '3.8'
+version: "3.8"
 
 services:
   portfolio:
     image: registry.freijstack.com/portfolio:latest
-    container_name: portfolio-prod
-    ports:
-      - "3001:80"  # Port 3001 sur host (Traefik gère le routage)
+    container_name: portfolio
     restart: always
     labels:
-      # Traefik labels pour routage automatique
       - "traefik.enable=true"
-      - "traefik.http.routers.portfolio-prod.rule=Host(`portfolio.freijstack.com`)"
-      - "traefik.http.routers.portfolio-prod.entrypoints=web,websecure"
-      - "traefik.http.routers.portfolio-prod.tls=true"
-      - "traefik.http.services.portfolio-prod.loadbalancer.server.port=80"
       - "traefik.docker.network=freijstack"
-      # Priority pour éviter les conflits avec staging
-      - "traefik.http.routers.portfolio-prod.priority=100"
+      - "traefik.http.routers.portfolio.rule=Host(`portfolio.freijstack.com`)"
+      - "traefik.http.routers.portfolio.entrypoints=websecure"
+      - "traefik.http.routers.portfolio.tls=true"
+      - "traefik.http.services.portfolio.loadbalancer.server.port=80"
     networks:
       - freijstack
     healthcheck:
@@ -29,7 +24,3 @@ services:
 networks:
   freijstack:
     external: true
-
-# Production usage:
-# docker compose -f saas/portfolio/ddocker-compose.prod.yml up -d
-# docker compose -f saas/portfolio/ddocker-compose.prod.yml logs -f

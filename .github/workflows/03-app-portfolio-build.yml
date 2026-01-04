@@ -25,6 +25,7 @@ on:
 
 env:
   IMAGE_NAME: portfolio
+  REGISTRY_HOST: registry.freijstack.com
 
 concurrency:
   group: portfolio-build-${{ github.ref }}
@@ -45,79 +46,15 @@ jobs:
       upload_sarif: true
       publish_score_artifact: true
 
-  build-and-push-registry-staging:
-    name: 🏗️ Build & Push (registry-staging.freijstack.com)
-    runs-on: ubuntu-latest
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/develop') ||
-      (github.event_name == 'workflow_dispatch' && inputs.environment == 'staging')
-
-    env:
-      REGISTRY_HOST: registry-staging.freijstack.com
-      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USER_STAGING }}
-      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD_STAGING }}
-
-    steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@v4
-
-      - name: 🔧 Set image tags
-        run: |
-          TAG_INPUT="${{ github.event.inputs.tag }}"
-          if [ -z "$TAG_INPUT" ]; then TAG_INPUT="latest"; fi
-          SHA_TAG=$(echo "$GITHUB_SHA" | cut -c1-7)
-          echo "IMAGE_TAG=${TAG_INPUT}-beta" >> "$GITHUB_ENV"
-          echo "SHA_TAG=${SHA_TAG}-beta" >> "$GITHUB_ENV"
-
-      - name: 🐳 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: ✅ Check registry availability
-        run: |
-          echo "🔍 Vérification de la disponibilité du registry..."
-          MAX_ATTEMPTS=15  # 15 tentatives
-          ATTEMPT=1
-          SLEEP_TIME=60   # 60 secondes entre les tentatives (total: ~15 minutes)
-
-          until curl -s -w "\n%{http_code}" "https://${{ env.REGISTRY_HOST }}/v2/" 2>/dev/null | tail -n1 | grep -qE '^(200|401|403)$'; do
-            if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
-              echo "❌ Registry non disponible après $((MAX_ATTEMPTS * SLEEP_TIME / 60)) minutes"
-              exit 1
-            fi
-            echo "⏳ Tentative $ATTEMPT/$MAX_ATTEMPTS - Registry indisponible, nouvelle tentative dans ${SLEEP_TIME}s..."
-            sleep $SLEEP_TIME
-            ATTEMPT=$((ATTEMPT + 1))
-          done
-          echo "✅ Registry disponible et accessible"
-
-      - name: 🔐 Login to registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY_HOST }}
-          username: ${{ env.REGISTRY_USERNAME }}
-          password: ${{ env.REGISTRY_PASSWORD }}
-
-      - name: 🏗️ Build and push
-        uses: docker/build-push-action@v5
-        with:
-          context: ./saas/portfolio
-          file: ./saas/portfolio/Dockerfile
-          push: true
-          tags: |
-            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_NAME }}:${{ env.SHA_TAG }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  build-and-push-registry:
+  build-and-push:
     name: 🏗️ Build & Push (registry.freijstack.com)
     runs-on: ubuntu-latest
+    needs: [security]
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
-      (github.event_name == 'workflow_dispatch' && inputs.environment == 'production')
+      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) ||
+      (github.event_name == 'workflow_dispatch')
 
     env:
-      REGISTRY_HOST: registry.freijstack.com
       REGISTRY_USERNAME: ${{ secrets.REGISTRY_USER_PROD }}
       REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
 
@@ -125,34 +62,57 @@ jobs:
       - name: 📥 Checkout
         uses: actions/checkout@v4
 
-      - name: 🔧 Set image tags
+      - name: 🔧 Compute tags (master=stable, develop=beta)
+        shell: bash
         run: |
+          set -euo pipefail
+
           TAG_INPUT="${{ github.event.inputs.tag }}"
-          if [ -z "$TAG_INPUT" ]; then TAG_INPUT="latest"; fi
-          SHA_TAG=$(echo "$GITHUB_SHA" | cut -c1-7)
-          echo "IMAGE_TAG=$TAG_INPUT" >> "$GITHUB_ENV"
-          echo "SHA_TAG=$SHA_TAG" >> "$GITHUB_ENV"
+          if [ -z "${TAG_INPUT}" ] || [ "${TAG_INPUT}" = "null" ]; then
+            TAG_INPUT="latest"
+          fi
+
+          SHA_TAG="$(echo "${GITHUB_SHA}" | cut -c1-7)"
+
+          # Decide channel
+          if [ "${GITHUB_REF}" = "refs/heads/develop" ] || [ "${{ github.event.inputs.environment }}" = "staging" ]; then
+            echo "CHANNEL=beta" >> "$GITHUB_ENV"
+            echo "IMAGE_TAG=${TAG_INPUT}-beta" >> "$GITHUB_ENV"
+            echo "SHA_IMAGE_TAG=${SHA_TAG}-beta" >> "$GITHUB_ENV"
+          else
+            echo "CHANNEL=stable" >> "$GITHUB_ENV"
+            echo "IMAGE_TAG=${TAG_INPUT}" >> "$GITHUB_ENV"
+            echo "SHA_IMAGE_TAG=${SHA_TAG}" >> "$GITHUB_ENV"
+          fi
+
+          echo "✅ Channel: ${CHANNEL:-}"
+          echo "✅ IMAGE_TAG: $(grep -E '^IMAGE_TAG=' $GITHUB_ENV | tail -n1)"
+          echo "✅ SHA_IMAGE_TAG: $(grep -E '^SHA_IMAGE_TAG=' $GITHUB_ENV | tail -n1)"
 
       - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: ✅ Check registry availability
+        shell: bash
         run: |
-          echo "🔍 Vérification de la disponibilité du registry..."
-          MAX_ATTEMPTS=15  # 15 tentatives
+          set -euo pipefail
+          echo "🔍 Checking registry: https://${REGISTRY_HOST}/v2/"
+          MAX_ATTEMPTS=15
           ATTEMPT=1
-          SLEEP_TIME=60   # 60 secondes entre les tentatives (total: ~15 minutes)
+          SLEEP_TIME=10
 
-          until curl -s -w "\n%{http_code}" "https://${{ env.REGISTRY_HOST }}/v2/" 2>/dev/null | tail -n1 | grep -qE '^(200|401|403)$'; do
-            if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
-              echo "❌ Registry non disponible après $((MAX_ATTEMPTS * SLEEP_TIME / 60)) minutes"
+          until curl -s -o /dev/null -w "%{http_code}" "https://${REGISTRY_HOST}/v2/" | grep -qE '^(200|401|403)$'; do
+            if [ "$ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
+              echo "❌ Registry not ready after $MAX_ATTEMPTS attempts"
+              curl -s -I "https://${REGISTRY_HOST}/v2/" || true
               exit 1
             fi
-            echo "⏳ Tentative $ATTEMPT/$MAX_ATTEMPTS - Registry indisponible, nouvelle tentative dans ${SLEEP_TIME}s..."
-            sleep $SLEEP_TIME
+            echo "⏳ Attempt $ATTEMPT/$MAX_ATTEMPTS - registry not ready, sleeping ${SLEEP_TIME}s..."
+            sleep "$SLEEP_TIME"
             ATTEMPT=$((ATTEMPT + 1))
           done
-          echo "✅ Registry disponible et accessible"
+
+          echo "✅ Registry ready"
 
       - name: 🔐 Login to registry
         uses: docker/login-action@v3
@@ -169,6 +129,6 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_NAME }}:${{ env.SHA_TAG }}
+            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_NAME }}:${{ env.SHA_IMAGE_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

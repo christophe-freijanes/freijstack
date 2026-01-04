@@ -1,55 +1,189 @@
-name: 🐳 SaaS • Docker Registry
+name: 🐳 Registry Deploy (Staging & Production)
 
 on:
   push:
-    branches: [develop, master]
+    branches:
+      - develop
+      - master
     paths:
-      - 'saas/registry/**'
-      - '.github/workflows/03-app-registry-deploy.yml'
+      - "saas/registry/**"
+      - ".github/workflows/00-core-deploy-queue.yml"
+      - ".github/workflows/03-app-registry-deploy.yml"
+
   workflow_dispatch:
     inputs:
-      environment:
-        description: 'Target environment'
+      target_env:
+        description: "Target environment to deploy"
         required: true
-        default: 'staging'
         type: choice
         options:
           - staging
           - production
 
-jobs:
-  deploy-staging:
-    name: 🔒 Full Pipeline (Staging)
-    if: github.ref == 'refs/heads/develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
-    uses: ./.github/workflows/00-core-full-deploy.yml
-    with:
-      app_name: 'registry'
-      environment: 'staging'
-      deploy_dir: '/srv/www/registry-staging'
-      project_path: 'saas/registry'
-      docker_compose_file: 'docker-compose.staging.yml'
-      run_migrations: false
-    secrets:
-      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-      VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
-      VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
-      REGISTRY_USER_STAGING: ${{ secrets.REGISTRY_USER_STAGING }}
-      REGISTRY_PASSWORD_STAGING: ${{ secrets.REGISTRY_PASSWORD_STAGING }}
+permissions:
+  contents: read
+  actions: read
 
-  deploy-production:
-    name: 🔒 Full Pipeline (Production)
-    if: github.ref == 'refs/heads/master' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
-    uses: ./.github/workflows/00-core-full-deploy.yml
+env:
+  APP_NAME: registry
+  DEPLOY_DIR: /srv/www/registry
+  PROJECT_PATH: saas/registry
+  STAGING_COMPOSE: docker-compose.staging.yml
+  PROD_COMPOSE: docker-compose.prod.yml
+  STAGING_HOST: registry-staging.freijstack.com
+  PROD_HOST: registry.freijstack.com
+  STAGING_UI_HOST: registry-ui-staging.freijstack.com
+  PROD_UI_HOST: registry-ui.freijstack.com
+
+jobs:
+  preflight:
+    name: ✅ Preflight (resolve target)
+    runs-on: ubuntu-latest
+    outputs:
+      target_env: ${{ steps.resolve.outputs.target_env }}
+      compose_file: ${{ steps.resolve.outputs.compose_file }}
+      registry_host: ${{ steps.resolve.outputs.registry_host }}
+      registry_ui_host: ${{ steps.resolve.outputs.registry_ui_host }}
+    steps:
+      - name: Resolve target environment
+        id: resolve
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "push" ]; then
+            if [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+              TARGET_ENV="staging"
+            elif [ "${{ github.ref }}" = "refs/heads/master" ]; then
+              TARGET_ENV="production"
+            else
+              echo "Unsupported branch for this workflow: ${{ github.ref }}"
+              exit 1
+            fi
+          else
+            TARGET_ENV="${{ inputs.target_env }}"
+          fi
+
+          if [ "$TARGET_ENV" = "staging" ]; then
+            COMPOSE_FILE="${{ env.STAGING_COMPOSE }}"
+            REGISTRY_HOST="${{ env.STAGING_HOST }}"
+            REGISTRY_UI_HOST="${{ env.STAGING_UI_HOST }}"
+          else
+            COMPOSE_FILE="${{ env.PROD_COMPOSE }}"
+            REGISTRY_HOST="${{ env.PROD_HOST }}"
+            REGISTRY_UI_HOST="${{ env.PROD_UI_HOST }}"
+          fi
+
+          echo "target_env=$TARGET_ENV" >> "$GITHUB_OUTPUT"
+          echo "compose_file=$COMPOSE_FILE" >> "$GITHUB_OUTPUT"
+          echo "registry_host=$REGISTRY_HOST" >> "$GITHUB_OUTPUT"
+          echo "registry_ui_host=$REGISTRY_UI_HOST" >> "$GITHUB_OUTPUT"
+
+      - name: Job summary (preflight)
+        run: |
+          set -euo pipefail
+          {
+            echo "## 🧭 Registry Deploy — Preflight"
+            echo ""
+            echo "- **Event**: \`${{ github.event_name }}\`"
+            echo "- **Ref**: \`${{ github.ref }}\`"
+            echo "- **Commit**: \`${{ github.sha }}\`"
+            echo "- **Target Env**: \`${{ steps.resolve.outputs.target_env }}\`"
+            echo "- **Deploy Dir (VPS)**: \`${{ env.DEPLOY_DIR }}\`"
+            echo "- **Project Path**: \`${{ env.PROJECT_PATH }}\`"
+            echo "- **Compose File**: \`${{ steps.resolve.outputs.compose_file }}\`"
+            echo ""
+            echo "### 🌐 Endpoints"
+            echo "- Registry API: \`https://${{ steps.resolve.outputs.registry_host }}/v2/\`"
+            echo "- Registry UI:  \`https://${{ steps.resolve.outputs.registry_ui_host }}/\`"
+            echo ""
+            echo "### 🔒 Safety"
+            echo "- Volumes are preserved (no \`down -v\` anywhere)."
+            echo "- When deploying **production** for registry, orchestrator stops **staging** first (containers only)."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    name: 🚀 Deploy (via orchestrator)
+    needs: preflight
+    uses: ./.github/workflows/00-core-deploy-queue.yml
     with:
-      app_name: 'registry'
-      environment: 'production'
-      deploy_dir: '/srv/www/registry'
-      project_path: 'saas/registry'
-      docker_compose_file: 'docker-compose.prod.yml'
+      app_name: registry
+      environment: ${{ needs.preflight.outputs.target_env }}
+      deploy_dir: /srv/www/registry
+      project_path: saas/registry
+      docker_compose_file: ${{ needs.preflight.outputs.compose_file }}
       run_migrations: false
-    secrets:
-      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-      VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
-      VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
-      REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
-      REGISTRY_PASSWORD_PROD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
+      custom_script: ""
+    secrets: inherit
+
+  verify:
+    name: 🔎 Post-deploy verification (3 attempts)
+    needs: [preflight, deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Registry API (/v2/) — 3 attempts
+        run: |
+          set -euo pipefail
+          HOST="${{ needs.preflight.outputs.registry_host }}"
+          URL="https://${HOST}/v2/"
+          echo "Checking: $URL"
+
+          OK=0
+          for i in 1 2 3; do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || true)
+            echo "attempt ${i}/3 -> HTTP ${CODE}"
+            if [ "$CODE" = "200" ] || [ "$CODE" = "401" ]; then
+              OK=1
+              break
+            fi
+            sleep 3
+          done
+
+          if [ "$OK" -ne 1 ]; then
+            echo "❌ Registry API check failed after 3 attempts."
+            echo "Headers:"
+            curl -s -I "$URL" || true
+            exit 1
+          fi
+
+          echo "✅ Registry API OK"
+
+      - name: Verify Registry UI (/) — 3 attempts
+        run: |
+          set -euo pipefail
+          HOST="${{ needs.preflight.outputs.registry_ui_host }}"
+          URL="https://${HOST}/"
+          echo "Checking: $URL"
+
+          OK=0
+          for i in 1 2 3; do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || true)
+            echo "attempt ${i}/3 -> HTTP ${CODE}"
+            if [ "$CODE" = "200" ] || [ "$CODE" = "301" ] || [ "$CODE" = "302" ]; then
+              OK=1
+              break
+            fi
+            sleep 3
+          done
+
+          if [ "$OK" -ne 1 ]; then
+            echo "❌ Registry UI check failed after 3 attempts."
+            echo "Headers:"
+            curl -s -I "$URL" || true
+            exit 1
+          fi
+
+          echo "✅ Registry UI OK"
+
+      - name: Job summary (post-deploy)
+        run: |
+          set -euo pipefail
+          {
+            echo "## ✅ Registry Deploy — Verified"
+            echo ""
+            echo "- **Target Env**: \`${{ needs.preflight.outputs.target_env }}\`"
+            echo "- **Registry API**: ✅ \`https://${{ needs.preflight.outputs.registry_host }}/v2/\` (200/401)"
+            echo "- **Registry UI**: ✅ \`https://${{ needs.preflight.outputs.registry_ui_host }}/\` (200/30x)"
+            echo ""
+            echo "### 🧪 3-attempts mode"
+            echo "- API and UI were checked up to 3 times with short delays."
+          } >> "$GITHUB_STEP_SUMMARY"

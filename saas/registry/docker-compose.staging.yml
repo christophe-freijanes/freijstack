@@ -1,5 +1,4 @@
 services:
-  # Docker Registry v2 officiel - stockage des images
   registry:
     image: registry:2
     container_name: registry-staging
@@ -10,19 +9,22 @@ services:
     ports:
       - "5001:5000"
     volumes:
-      - registry-data:/var/lib/registry  # Volume partagé avec la prod
+      - registry-data-staging:/var/lib/registry
       - ./config.yml:/etc/docker/registry/config.yml:ro
       - ./.htpasswd:/etc/docker/registry/auth/htpasswd:ro
     networks:
       - web
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=web"
       - "traefik.http.routers.registry-staging.rule=Host(`registry-staging.freijstack.com`)"
       - "traefik.http.routers.registry-staging.entrypoints=websecure"
+      - "traefik.http.routers.registry-staging.tls=true"
       - "traefik.http.routers.registry-staging.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.registry-staging.service=registry-staging"
       - "traefik.http.services.registry-staging.loadbalancer.server.port=5000"
+      - "traefik.http.services.registry-staging.loadbalancer.server.scheme=http"
 
-  # UI web pour visualiser et gérer les images du registre
   registry-ui:
     image: joxit/docker-registry-ui:latest
     container_name: registry-ui-staging
@@ -40,27 +42,24 @@ services:
       - registry
     networks:
       - web
-    healthcheck:
-      test: ["CMD-SHELL", "test -f /var/run/nginx.pid || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 5s
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=web"
       - "traefik.http.routers.registry-ui-staging.rule=Host(`registry-ui-staging.freijstack.com`)"
       - "traefik.http.routers.registry-ui-staging.entrypoints=websecure"
+      - "traefik.http.routers.registry-ui-staging.tls=true"
       - "traefik.http.routers.registry-ui-staging.tls.certresolver=mytlschallenge"
-      - "traefik.http.services.registry-ui-staging.loadbalancer.server.port=80"
       - "traefik.http.routers.registry-ui-staging.service=registry-ui-staging"
+      - "traefik.http.services.registry-ui-staging.loadbalancer.server.port=80"
+      - "traefik.http.services.registry-ui-staging.loadbalancer.server.scheme=http"
 
 volumes:
-  registry-data:
+  registry-data-staging:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ./data
+      device: ./data-staging
 
 networks:
   web:
