@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.22.0](https://github.com/christophe-freijanes/freijstack/compare/v1.21.15...v1.22.0) (2026-01-04)
+
+### 🚀 Features
+
+* add registry authentication inputs and dynamic htpasswd generation script ([a7375b5](https://github.com/christophe-freijanes/freijstack/commit/a7375b5c02937188000fe0619405cbfc1ff69d22))
+
 ## [1.21.15](https://github.com/christophe-freijanes/freijstack/compare/v1.21.14...v1.21.15) (2026-01-04)
 
 ### 🐛 Bug Fixes
