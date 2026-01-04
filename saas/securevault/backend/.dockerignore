@@ -1,7 +1,10 @@
 node_modules
 npm-debug.log
+yarn.lock
+.pnpm-store
 .env
-.DS_Store
-*.log
-coverage/
-.nyc_output/
+.env.*
+Dockerfile
+.dockerignore
+.git
+.gitignore

@@ -2,10 +2,10 @@ name: 🏗️ Build & Push SecureVault
 
 on:
   push:
-    branches: [develop, master]
+    branches: [master, develop]
     paths:
-      - 'saas/securevault/**'
-      - '.github/workflows/03-app-securevault-build.yml'
+      - "saas/securevault/**"
+      - ".github/workflows/03-app-securevault-build.yml"
   workflow_dispatch:
     inputs:
       environment:
@@ -15,12 +15,11 @@ on:
         type: choice
         options: [staging, production]
       tag:
-        description: "Image tag to publish (default: latest)"
+        description: "Image tag (default: latest)"
         required: false
         default: "latest"
 
 env:
-  REGISTRY_PROD: registry.freijstack.com
   IMAGE_BACKEND: securevault-backend
   IMAGE_FRONTEND: securevault-frontend
 
@@ -29,107 +28,95 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-staging:
-    name: 🏗️ Build & Push (staging tags on prod registry)
+  build-and-push:
+    name: 🏗️ Build & Push images
     runs-on: ubuntu-latest
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/develop') ||
-      (github.event_name == 'workflow_dispatch' && inputs.environment == 'staging')
+
+    env:
+      # For now, both branches push to the PROD registry domain.
+      # If you still want -beta tags on develop, we handle it below.
+      REGISTRY_HOST: registry.freijstack.com
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USER_PROD }}
+      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
+
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
 
-      - name: 🔧 Tags
+      - name: 🔧 Compute tags
         run: |
-          TAG_INPUT="${{ github.event.inputs.tag }}"
-          if [ -z "$TAG_INPUT" ]; then TAG_INPUT="latest"; fi
-          SHA_TAG=$(echo "$GITHUB_SHA" | cut -c1-7)
-          echo "TAG_APP=${TAG_INPUT}-beta" >> "$GITHUB_ENV"
-          echo "TAG_SHA=${SHA_TAG}-beta" >> "$GITHUB_ENV"
+          set -euo pipefail
 
-      - name: 🐳 Setup Buildx
+          TAG_INPUT="${{ github.event.inputs.tag }}"
+          if [ -z "${TAG_INPUT}" ]; then
+            TAG_INPUT="latest"
+          fi
+
+          SHA_TAG="$(echo "${GITHUB_SHA}" | cut -c1-7)"
+
+          # develop -> "-beta" tags, master -> normal tags
+          if [ "${GITHUB_REF}" = "refs/heads/develop" ] || [ "${{ inputs.environment }}" = "staging" ]; then
+            echo "TAG_SUFFIX=-beta" >> "$GITHUB_ENV"
+          else
+            echo "TAG_SUFFIX=" >> "$GITHUB_ENV"
+          fi
+
+          echo "IMAGE_TAG=${TAG_INPUT}" >> "$GITHUB_ENV"
+          echo "SHA_TAG=${SHA_TAG}" >> "$GITHUB_ENV"
+
+      - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: 🔐 Login registry (prod)
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY_PROD }}
-          username: ${{ secrets.REGISTRY_USER_PROD }}
-          password: ${{ secrets.REGISTRY_PASSWORD_PROD }}
-
-      - name: 🏗️ Build & Push backend
-        uses: docker/build-push-action@v5
-        with:
-          context: ./saas/securevault/backend
-          file: ./saas/securevault/backend/Dockerfile
-          push: true
-          tags: |
-            ${{ env.REGISTRY_PROD }}/${{ env.IMAGE_BACKEND }}:${{ env.TAG_APP }}
-            ${{ env.REGISTRY_PROD }}/${{ env.IMAGE_BACKEND }}:${{ env.TAG_SHA }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: 🏗️ Build & Push frontend
-        uses: docker/build-push-action@v5
-        with:
-          context: ./saas/securevault/frontend
-          file: ./saas/securevault/frontend/Dockerfile
-          push: true
-          build-args: |
-            REACT_APP_API_URL=https://api-staging.vault.freijstack.com
-            VITE_API_URL=https://api-staging.vault.freijstack.com
-          tags: |
-            ${{ env.REGISTRY_PROD }}/${{ env.IMAGE_FRONTEND }}:${{ env.TAG_APP }}
-            ${{ env.REGISTRY_PROD }}/${{ env.IMAGE_FRONTEND }}:${{ env.TAG_SHA }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  build-production:
-    name: 🏗️ Build & Push (production)
-    runs-on: ubuntu-latest
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
-      (github.event_name == 'workflow_dispatch' && inputs.environment == 'production')
-    steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@v4
-
-      - name: 🔧 Tags
+      - name: ✅ Check registry availability
         run: |
-          TAG_INPUT="${{ github.event.inputs.tag }}"
-          if [ -z "$TAG_INPUT" ]; then TAG_INPUT="latest"; fi
-          SHA_TAG=$(echo "$GITHUB_SHA" | cut -c1-7)
-          echo "TAG_APP=${TAG_INPUT}" >> "$GITHUB_ENV"
-          echo "TAG_SHA=${SHA_TAG}" >> "$GITHUB_ENV"
-
-      - name: 🐳 Setup Buildx
-        uses: docker/setup-buildx-action@v3
+          set -euo pipefail
+          echo "Checking https://${REGISTRY_HOST}/v2/ ..."
+          for i in {1..30}; do
+            code="$(curl -s -o /dev/null -w "%{http_code}" "https://${REGISTRY_HOST}/v2/" || true)"
+            echo "attempt ${i}/30 -> HTTP ${code}"
+            if [ "${code}" = "200" ] || [ "${code}" = "401" ] || [ "${code}" = "403" ]; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Registry not reachable"
+          exit 1
 
       - name: 🔐 Login to registry
         uses: docker/login-action@v3
         with:
-          registry: registry.freijstack.com
-          username: ${{ secrets.REGISTRY_USER_PROD }}
-          password: ${{ secrets.REGISTRY_PASSWORD_PROD }}
-      
-      - name: 🏗️ Build & Push backend
+          registry: ${{ env.REGISTRY_HOST }}
+          username: ${{ env.REGISTRY_USERNAME }}
+          password: ${{ env.REGISTRY_PASSWORD }}
+
+      # -------------------------
+      # BACKEND IMAGE
+      # -------------------------
+      - name: 🏗️ Build & push backend
         uses: docker/build-push-action@v5
         with:
           context: ./saas/securevault/backend
           file: ./saas/securevault/backend/Dockerfile
           push: true
           tags: |
-            registry.freijstack.com/securevault-backend:latest
-            registry.freijstack.com/securevault-backend:${{ github.sha }}
-      
-      - name: 🏗️ Build & Push frontend
+            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_BACKEND }}:${{ env.IMAGE_TAG }}${{ env.TAG_SUFFIX }}
+            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_BACKEND }}:${{ env.SHA_TAG }}${{ env.TAG_SUFFIX }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # -------------------------
+      # FRONTEND IMAGE
+      # -------------------------
+      - name: 🏗️ Build & push frontend
         uses: docker/build-push-action@v5
         with:
           context: ./saas/securevault/frontend
           file: ./saas/securevault/frontend/Dockerfile
           push: true
           build-args: |
-            REACT_APP_API_URL=https://api.vault.freijstack.com
+            REACT_APP_API_URL=${{ vars.SECUREVAULT_API_URL }}
           tags: |
-            registry.freijstack.com/securevault-frontend:latest
-            registry.freijstack.com/securevault-frontend:${{ github.sha }}
+            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_FRONTEND }}:${{ env.IMAGE_TAG }}${{ env.TAG_SUFFIX }}
+            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_FRONTEND }}:${{ env.SHA_TAG }}${{ env.TAG_SUFFIX }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
