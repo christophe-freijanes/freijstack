@@ -42,9 +42,11 @@ on:
         required: true
       VPS_SSH_USER:
         required: true
-      REGISTRY_USERNAME:
-        required: false
       REGISTRY_PASSWORD:
+        required: false
+      REGISTRY_USER_STAGING:
+        required: false
+      REGISTRY_USER_PROD:
         required: false
 
 # Global concurrency: only one deployment at a time across ALL apps
@@ -144,8 +146,9 @@ jobs:
           COMPOSE_FILE='${{ inputs.docker_compose_file }}' \
           GITHUB_REPO='${{ github.repository }}' \
           GITHUB_REF='${{ github.ref }}' \
-          REGISTRY_USERNAME='${{ secrets.REGISTRY_USERNAME }}' \
-          REGISTRY_PASSWORD='${{ secrets.REGISTRY_PASSWORD }}'"
+          REGISTRY_PASSWORD='${{ secrets.REGISTRY_PASSWORD }}' \
+          REGISTRY_USER_STAGING='${{ secrets.REGISTRY_USER_STAGING }}' \
+          REGISTRY_USER_PROD='${{ secrets.REGISTRY_USER_PROD }}'"
 
           if [ -n "${{ inputs.custom_script }}" ]; then
             # Use custom deployment script if provided
@@ -201,18 +204,41 @@ jobs:
 
             # Generate .htpasswd for registry if needed
             if [ "$APP_NAME" = "registry" ]; then
-              if [ -z "$REGISTRY_USERNAME" ] || [ -z "$REGISTRY_PASSWORD" ]; then
-                echo "❌ Error: REGISTRY_USERNAME and REGISTRY_PASSWORD are required for registry deployment"
+              if [ -z "$REGISTRY_PASSWORD" ]; then
+                echo "❌ Error: REGISTRY_PASSWORD is required for registry deployment"
                 exit 1
               fi
+
+              # Load registry username based on environment
+              echo "🔐 Loading registry username..."
+
+              if [ "$ENVIRONMENT" = "staging" ]; then
+                REGISTRY_USERNAME="${REGISTRY_USER_STAGING}"
+                echo "👤 Using staging user: $REGISTRY_USERNAME"
+              elif [ "$ENVIRONMENT" = "production" ]; then
+                REGISTRY_USERNAME="${REGISTRY_USER_PROD}"
+                echo "👤 Using production user: $REGISTRY_USERNAME"
+              fi
+
+              if [ -z "$REGISTRY_USERNAME" ]; then
+                echo "❌ Error: REGISTRY_USERNAME not set for $ENVIRONMENT environment"
+                exit 1
+              fi
+
               echo "🔐 Generating .htpasswd for registry authentication..."
               mkdir -p data
               docker run --rm \
                 --entrypoint htpasswd \
                 httpd:2 \
-                -Bbn "$REGISTRY_USERNAME" "$REGISTRY_PASSWORD" > data/.htpasswd
+                -Bbn "$REGISTRY_USERNAME" "$REGISTRY_PASSWORD" > .htpasswd
               echo "✅ .htpasswd generated successfully"
-              ls -lh data/.htpasswd
+              ls -lh .htpasswd
+
+              # Create .env file for docker-compose to use
+              echo "📝 Creating .env file for docker-compose..."
+              echo "REGISTRY_USERNAME=$REGISTRY_USERNAME" > .env
+              echo "REGISTRY_PASSWORD=$REGISTRY_PASSWORD" >> .env
+              echo "✅ .env file created successfully"
             fi
 
             # Deploy with Docker Compose

@@ -6,6 +6,67 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.24.8](https://github.com/christophe-freijanes/freijstack/compare/v1.24.7...v1.24.8) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* update path for .htpasswd generation in deploy workflow ([01753e9](https://github.com/christophe-freijanes/freijstack/commit/01753e90761dc1d9c57fd6b1a6fd7a6d0d12179e))
+
+## [1.24.7](https://github.com/christophe-freijanes/freijstack/compare/v1.24.6...v1.24.7) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* add REGISTRY_USER_STAGING and REGISTRY_USER_PROD secrets to core-full-deploy ([d4dc05b](https://github.com/christophe-freijanes/freijstack/commit/d4dc05b97cb45f3cbcba41fd33d37997531b90c1))
+
+## [1.24.6](https://github.com/christophe-freijanes/freijstack/compare/v1.24.5...v1.24.6) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* remove trailing spaces ([5507e60](https://github.com/christophe-freijanes/freijstack/commit/5507e60e988f81447b4f78a867c847cecff6368f))
+
+## [1.24.5](https://github.com/christophe-freijanes/freijstack/compare/v1.24.4...v1.24.5) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* replace heredoc with echo to fix YAML syntax error ([40a8cbb](https://github.com/christophe-freijanes/freijstack/commit/40a8cbba24f5b0e174b5366cd106f13b234394ed))
+
+## [1.24.4](https://github.com/christophe-freijanes/freijstack/compare/v1.24.3...v1.24.4) (2026-01-04)
+
+### ♻️ Code Refactoring
+
+* remove redundant REGISTRY_USERNAME check ([7607dba](https://github.com/christophe-freijanes/freijstack/commit/7607dba210db65e807b716103fbb15f6ca835a82))
+
+## [1.24.3](https://github.com/christophe-freijanes/freijstack/compare/v1.24.2...v1.24.3) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* create .env file during registry deployment for docker-compose ([8170056](https://github.com/christophe-freijanes/freijstack/commit/81700561af79b785720c1412ad8ebffa6466e856))
+
+### 🔧 Chores
+
+* remove .env.example (usernames now in GitHub Secrets) ([932bf69](https://github.com/christophe-freijanes/freijstack/commit/932bf69632c16834c46cba6a03f00241c4608b70))
+* remove unused .env.example file ([94ce785](https://github.com/christophe-freijanes/freijstack/commit/94ce7852fc788449caf82b04d7cdca066755a9ef))
+
+## [1.24.2](https://github.com/christophe-freijanes/freijstack/compare/v1.24.1...v1.24.2) (2026-01-04)
+
+### ♻️ Code Refactoring
+
+* pass registry usernames as GitHub Secrets instead of .env files ([9eb88ad](https://github.com/christophe-freijanes/freijstack/commit/9eb88adb6672305d4a52f7c107f7b1295093cb2d))
+
+### 🔧 Chores
+
+* add .env files to gitignore ([a885535](https://github.com/christophe-freijanes/freijstack/commit/a885535c30105f8020f998d422fb7a535d10252e))
+* add example registry usernames to .env.example ([c7c344c](https://github.com/christophe-freijanes/freijstack/commit/c7c344c6a8460fcbc08492b5202c2397de5ba8d9))
+* remove credentials from .env.example ([cc34821](https://github.com/christophe-freijanes/freijstack/commit/cc3482122c7b59539be58515b8a3529a953836d2))
+* remove sensitive usernames from .env.example ([f40ceb2](https://github.com/christophe-freijanes/freijstack/commit/f40ceb2503ed78bd6b980594676c32eb5874c36d))
+* rename .env to .env.example and add to gitignore ([3a200ae](https://github.com/christophe-freijanes/freijstack/commit/3a200ae1fe20d2672f3cf7e09a06413c77c3ad38))
+
+## [1.24.1](https://github.com/christophe-freijanes/freijstack/compare/v1.24.0...v1.24.1) (2026-01-04)
+
+### ♻️ Code Refactoring
+
+* use .env for registry usernames instead of secrets ([2879b9e](https://github.com/christophe-freijanes/freijstack/commit/2879b9e3ea8a631f3b4d3fc837ab9089b81c8f5c))
+
 ## [1.24.0](https://github.com/christophe-freijanes/freijstack/compare/v1.23.4...v1.24.0) (2026-01-04)
 
 ### 🚀 Features
