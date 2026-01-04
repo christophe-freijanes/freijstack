@@ -6,6 +6,17 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.32.6](https://github.com/christophe-freijanes/freijstack/compare/v1.32.5...v1.32.6) (2026-01-04)
+
+### ♻️ Code Refactoring
+
+* simplify portfolio deployment workflow by removing staging job and inputs ([aaa70c8](https://github.com/christophe-freijanes/freijstack/commit/aaa70c8fcbab99df6a4d54032a20cc9f2739cf68))
+
+### 🔧 Chores
+
+* **securevault:** align package-lock with node 20 for CI build ([ef85684](https://github.com/christophe-freijanes/freijstack/commit/ef856846bdf19731a7ecf6da329249eeb9c92fa6))
+* **securevault:** regenerate package-lock for docker build ([c05b096](https://github.com/christophe-freijanes/freijstack/commit/c05b0963ab38c1cc2a22bff128a4d008bb0850d9))
+
 ## [1.32.5](https://github.com/christophe-freijanes/freijstack/compare/v1.32.4...v1.32.5) (2026-01-04)
 
 ### ♻️ Code Refactoring
