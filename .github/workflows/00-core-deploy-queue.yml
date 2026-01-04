@@ -51,6 +51,7 @@ on:
       REGISTRY_PASSWORD_PROD:
         required: false
 
+# One deploy at a time – NEVER cancel in progress
 concurrency:
   group: vps-ssh-deploy
   cancel-in-progress: false
@@ -70,6 +71,7 @@ jobs:
     steps:
       - name: ⏱️ Staggered Start (avoid SSH collisions)
         run: |
+          set -euo pipefail
           DELAY=$((5 + RANDOM % 16))
           echo "⏳ Waiting ${DELAY}s"
           sleep "$DELAY"
@@ -121,7 +123,9 @@ jobs:
 
           docker compose version >/dev/null 2>&1 || { echo "❌ Docker Compose not available"; exit 1; }
 
-          echo "🔒 Volume protection ENABLED (no down -v used)"
+          echo "🔒 Volume protection ENABLED"
+          echo "❌ docker compose down -v is FORBIDDEN"
+
           echo "🚀 Deploying ${APP_NAME} → ${ENVIRONMENT}"
           echo "🔎 Git: repo=${GH_REPO} branch=${GH_BRANCH} sha=${GH_SHA}"
 
@@ -143,15 +147,23 @@ jobs:
           [ -f "$COMPOSE_FILE" ] || { echo "❌ Compose not found: $COMPOSE_FILE"; exit 1; }
 
           # ==========================================================
-          # STACK ISOLATION (staging + prod in parallel)
-          # - Avoids collisions in networks, container names (when not forced),
-          #   and compose resources.
+          # SPECIAL RULE: Registry cannot run staging+prod together
+          # When deploying registry production:
+          #   1) stop/remove staging containers without deleting volumes
+          #   2) then deploy prod
           # ==========================================================
-          export COMPOSE_PROJECT_NAME="${APP_NAME}-${ENVIRONMENT}"
-          echo "📦 COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}"
+          if [ "$APP_NAME" = "registry" ] && [ "$ENVIRONMENT" = "production" ]; then
+            echo "🛑 Registry production deploy: stopping STAGING first (NO volume deletion)"
+            if [ -f "docker-compose.staging.yml" ]; then
+              docker compose -f docker-compose.staging.yml down --remove-orphans || true
+            else
+              echo "⚠️ docker-compose.staging.yml not found, attempting container removal fallback"
+              docker rm -f registry-staging registry-ui-staging 2>/dev/null || true
+            fi
+          fi
 
           # ==========================================================
-          # Registry auth generation (safe)
+          # Generate .htpasswd safely (registry only)
           # ==========================================================
           if [ "$APP_NAME" = "registry" ]; then
             echo "🔐 Generating .htpasswd"
@@ -170,7 +182,7 @@ jobs:
           fi
 
           # ==========================================================
-          # Deploy (no volume destruction)
+          # Deploy (safe volumes)
           # ==========================================================
           if [ "$ENVIRONMENT" = "production" ]; then
             echo "🟢 PRODUCTION DEPLOY (no down)"
@@ -184,20 +196,18 @@ jobs:
           fi
 
           # ==========================================================
-          # Registry health checks (local then public) using dynamic port
+          # Post-deploy checks for registry (local + public)
           # ==========================================================
           if [ "$APP_NAME" = "registry" ]; then
-            echo "🔎 Detecting local published port for registry:5000"
             LOCAL_BIND="$(docker compose -f "$COMPOSE_FILE" port registry 5000 2>/dev/null || true)"
             if [ -z "$LOCAL_BIND" ]; then
-              echo "❌ Could not detect published port for service 'registry' (port 5000)."
+              echo "❌ Could not detect published port for registry:5000"
               docker compose -f "$COMPOSE_FILE" ps || true
-              docker compose -f "$COMPOSE_FILE" logs --tail=120 registry || true
+              docker compose -f "$COMPOSE_FILE" logs --tail=200 registry || true
               exit 1
             fi
-
             LOCAL_PORT="${LOCAL_BIND##*:}"
-            echo "✅ Local registry is published on 127.0.0.1:${LOCAL_PORT}"
+            echo "✅ Local registry published on 127.0.0.1:${LOCAL_PORT}"
 
             echo "⏳ Waiting LOCAL registry (http://127.0.0.1:${LOCAL_PORT}/v2/) expect 200/401"
             LAST_LOCAL=""
@@ -205,14 +215,12 @@ jobs:
               LAST_LOCAL=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${LOCAL_PORT}/v2/" || true)
               echo "  local attempt ${i}/60 -> HTTP ${LAST_LOCAL}"
               if [ "$LAST_LOCAL" = "200" ] || [ "$LAST_LOCAL" = "401" ]; then
-                echo "✅ Local registry OK (HTTP ${LAST_LOCAL})"
                 break
               fi
               sleep 1
             done
-
             if [ "$LAST_LOCAL" != "200" ] && [ "$LAST_LOCAL" != "401" ]; then
-              echo "❌ Local registry not ready. Got HTTP ${LAST_LOCAL}"
+              echo "❌ Local registry not ready (HTTP ${LAST_LOCAL})"
               docker compose -f "$COMPOSE_FILE" ps || true
               docker compose -f "$COMPOSE_FILE" logs --tail=200 registry || true
               exit 1
@@ -230,36 +238,24 @@ jobs:
               LAST_PUB=$(curl -s -o /dev/null -w "%{http_code}" "https://${PUBLIC_HOST}/v2/" || true)
               echo "  pub attempt ${i}/60 -> HTTP ${LAST_PUB}"
               if [ "$LAST_PUB" = "200" ] || [ "$LAST_PUB" = "401" ]; then
-                echo "✅ Public registry OK (HTTP ${LAST_PUB})"
                 break
               fi
               sleep 1
             done
-
             if [ "$LAST_PUB" != "200" ] && [ "$LAST_PUB" != "401" ]; then
-              echo "❌ Public registry not routed (HTTP ${LAST_PUB}). Likely Traefik router/host mismatch."
-              echo "🔎 Headers:"
+              echo "❌ Public registry not routed (HTTP ${LAST_PUB})"
               curl -s -I "https://${PUBLIC_HOST}/v2/" || true
               exit 1
             fi
 
-            # IMPORTANT: no docker login needed to deploy the registry itself
-            echo "ℹ️ Skipping docker login (deploying registry stack)."
-          else
-            # For other apps, you may need to login to pull private images.
-            # Keep non-blocking if registry is down (avoid breaking all deploys).
-            if [ -n "${REGISTRY_USER_PROD:-}" ] && [ -n "${REGISTRY_PASSWORD_PROD:-}" ]; then
-              echo "🔐 docker login registry.freijstack.com (non-blocking)"
-              echo "$REGISTRY_PASSWORD_PROD" | docker login registry.freijstack.com \
-                -u "$REGISTRY_USER_PROD" --password-stdin || true
-            fi
+            echo "✅ Registry checks passed"
           fi
 
           echo "📊 Containers:"
-          docker compose -f "$COMPOSE_FILE" ps
+          docker compose -f "$COMPOSE_FILE" ps || true
 
           echo "📦 Volumes present:"
-          docker volume ls
+          docker volume ls || true
 
           echo "✅ Deployment finished safely"
           DEPLOY_SCRIPT
