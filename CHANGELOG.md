@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.23.1](https://github.com/christophe-freijanes/freijstack/compare/v1.23.0...v1.23.1) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* remove unnecessary blank lines in registry availability checks ([f8ccbfe](https://github.com/christophe-freijanes/freijstack/commit/f8ccbfebc85e59fbc757705f655d9c6431f2e78c))
+
 ## [1.23.0](https://github.com/christophe-freijanes/freijstack/compare/v1.22.0...v1.23.0) (2026-01-04)
 
 ### 🚀 Features
