@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.21.10](https://github.com/christophe-freijanes/freijstack/compare/v1.21.9...v1.21.10) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* update registry credentials to use environment variables in docker-compose files ([6de2cb1](https://github.com/christophe-freijanes/freijstack/commit/6de2cb114d9a64fc81eb46a67655b2ac8600894d))
+
 ## [1.21.9](https://github.com/christophe-freijanes/freijstack/compare/v1.21.8...v1.21.9) (2026-01-04)
 
 ### 🐛 Bug Fixes
