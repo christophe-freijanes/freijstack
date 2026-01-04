@@ -262,16 +262,27 @@ jobs:
 
               if [ "$ENVIRONMENT" = "production" ]; then
                 echo "🔄 Production deployment: updating containers without touching volumes..."
-                # Docker login avant pull
+                # Pull latest images
+                docker compose -f "$COMPOSE_FILE" pull
+                # Recreate containers without stopping them (zero-downtime if possible)
+                docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+
+                # Attendre que le registry prod soit UP avant login (max 30s)
+                for i in {1..30}; do
+                  if curl -sf http://localhost:5000/v2/ > /dev/null; then
+                    echo '✅ Registry prod UP'
+                    break
+                  fi
+                  echo '⏳ Attente du démarrage du registry prod...'
+                  sleep 1
+                done
+
+                # Docker login après démarrage effectif
                 if [ -n "$REGISTRY_USER_PROD" ] && [ -n "$REGISTRY_PASSWORD_PROD" ]; then
                   echo "$REGISTRY_PASSWORD_PROD" | docker login registry.freijstack.com -u "$REGISTRY_USER_PROD" --password-stdin
                 else
                   echo "⚠️ REGISTRY_USER_PROD ou REGISTRY_PASSWORD_PROD non défini, pull sans login."
                 fi
-                # Pull latest images
-                docker compose -f "$COMPOSE_FILE" pull
-                # Recreate containers without stopping them (zero-downtime if possible)
-                docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
               else
                 echo "🛑 Staging deployment: cleaning containers but preserving data volumes..."
                 docker compose -f "$COMPOSE_FILE" down --remove-orphans || true
