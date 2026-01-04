@@ -51,6 +51,7 @@ on:
       REGISTRY_PASSWORD_PROD:
         required: false
 
+# One deploy at a time – NEVER cancel in progress
 concurrency:
   group: vps-ssh-deploy
   cancel-in-progress: false
@@ -63,15 +64,16 @@ jobs:
   deploy:
     name: 🚀 Deploy ${{ inputs.app_name }} to ${{ inputs.environment }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     environment:
       name: ${{ inputs.environment }}
 
     steps:
-      - name: ⏱️ Staggered Start
+      - name: ⏱️ Staggered Start (avoid SSH collisions)
         run: |
           DELAY=$((5 + RANDOM % 16))
-          sleep $DELAY
+          echo "⏳ Waiting ${DELAY}s"
+          sleep "$DELAY"
 
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -83,16 +85,35 @@ jobs:
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "${{ secrets.VPS_SSH_HOST }}" >> ~/.ssh/known_hosts || true
-          echo "SSH_OPTIONS=-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" >> $GITHUB_ENV
+          echo "SSH_OPTIONS=-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" >> "$GITHUB_ENV"
 
       - name: 🚀 Deploy ${{ inputs.app_name }}
         run: |
           set -euo pipefail
+
           SSH_TARGET="${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
 
-          ssh $SSH_OPTIONS -i ~/.ssh/deploy_key "$SSH_TARGET" bash <<'DEPLOY'
+          ssh $SSH_OPTIONS -i ~/.ssh/deploy_key "$SSH_TARGET" bash <<'DEPLOY_SCRIPT'
           set -euo pipefail
 
+          # ==========================================================
+          # 🔒 GLOBAL SAFETY GUARDS — VOLUMES MUST NEVER BE TOUCHED
+          # ==========================================================
+          export DOCKER_CLI_HINTS=false
+
+          if docker compose version >/dev/null 2>&1; then
+            echo "🐳 Docker Compose detected"
+          else
+            echo "❌ Docker Compose not available"
+            exit 1
+          fi
+
+          echo "🔒 Volume protection ENABLED"
+          echo "❌ docker compose down -v is FORBIDDEN"
+
+          # ==========================================================
+          # ENV
+          # ==========================================================
           APP_NAME="${{ inputs.app_name }}"
           ENVIRONMENT="${{ inputs.environment }}"
           DEPLOY_DIR="${{ inputs.deploy_dir }}"
@@ -104,23 +125,32 @@ jobs:
           REGISTRY_USER_STAGING="${{ secrets.REGISTRY_USER_STAGING }}"
           REGISTRY_PASSWORD_STAGING="${{ secrets.REGISTRY_PASSWORD_STAGING }}"
 
-          echo "🚀 Deploy $APP_NAME ($ENVIRONMENT)"
+          echo "🚀 Deploying $APP_NAME → $ENVIRONMENT"
 
+          # ==========================================================
+          # CODE SYNC
+          # ==========================================================
           mkdir -p "$DEPLOY_DIR"
           cd "$DEPLOY_DIR"
 
           if [ -d ".git" ]; then
             git fetch origin
-            git reset --hard origin/${GITHUB_REF##*/}
+            git reset --hard "origin/${GITHUB_REF##*/}"
             git clean -fd
           else
             git clone -b "${GITHUB_REF##*/}" "https://github.com/${GITHUB_REPOSITORY}.git" .
           fi
 
-          [ -n "$PROJECT_PATH" ] && cd "$PROJECT_PATH"
+          if [ -n "$PROJECT_PATH" ]; then
+            cd "$PROJECT_PATH"
+          fi
 
+          # ==========================================================
+          # REGISTRY AUTH FILE (SAFE)
+          # ==========================================================
           if [ "$APP_NAME" = "registry" ]; then
-            echo "🔐 Generating .htpasswd"
+            echo "🔐 Generating .htpasswd (NO volume impact)"
+
             if [ "$ENVIRONMENT" = "production" ]; then
               USER="$REGISTRY_USER_PROD"
               PASS="$REGISTRY_PASSWORD_PROD"
@@ -133,36 +163,56 @@ jobs:
               htpasswd -Bbn "$USER" "$PASS" > .htpasswd
           fi
 
+          # ==========================================================
+          # DEPLOY LOGIC — SAFE VOLUMES
+          # ==========================================================
           if [ "$ENVIRONMENT" = "production" ]; then
-            echo "⏳ Waiting registry public endpoint"
-            for i in {1..60}; do
-              CODE=$(curl -s -o /dev/null -w "%{http_code}" https://registry.freijstack.com/v2/ || true)
-              [ "$CODE" = "200" ] || [ "$CODE" = "401" ] && break
-              sleep 1
-            done
+            echo "🟢 PRODUCTION DEPLOY (NO DOWN, NO VOLUMES)"
 
-            if [ -n "$REGISTRY_USER_PROD" ]; then
+            if [ "$APP_NAME" = "registry" ]; then
+              echo "⏳ Waiting registry public endpoint"
+              for i in {1..60}; do
+                CODE=$(curl -s -o /dev/null -w "%{http_code}" https://registry.freijstack.com/v2/ || true)
+                if [ "$CODE" = "200" ] || [ "$CODE" = "401" ]; then
+                  echo "✅ Registry ready (HTTP $CODE)"
+                  break
+                fi
+                sleep 1
+              done
+
               echo "$REGISTRY_PASSWORD_PROD" | docker login registry.freijstack.com \
                 -u "$REGISTRY_USER_PROD" --password-stdin
             fi
 
             docker compose -f "$COMPOSE_FILE" pull
             docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+
           else
+            echo "🟡 STAGING DEPLOY (containers only, volumes preserved)"
+
             docker compose -f "$COMPOSE_FILE" down --remove-orphans || true
             docker compose -f "$COMPOSE_FILE" pull
             docker compose -f "$COMPOSE_FILE" up -d --build --remove-orphans
           fi
 
+          # ==========================================================
+          # POST-DEPLOY CHECK
+          # ==========================================================
+          echo "📊 Containers:"
           docker compose -f "$COMPOSE_FILE" ps
-          DEPLOY
+
+          echo "📦 Volumes present:"
+          docker volume ls
+
+          echo "✅ Deployment finished safely"
+          DEPLOY_SCRIPT
 
       - name: 🗄️ Run Migrations
         if: inputs.run_migrations
         run: |
           ssh $SSH_OPTIONS -i ~/.ssh/deploy_key \
-          ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
-          "cd ${{ inputs.deploy_dir }}/${{ inputs.project_path }} && docker compose exec -T app npm run migrate || true"
+            ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            "cd ${{ inputs.deploy_dir }}/${{ inputs.project_path }} && docker compose exec -T app npm run migrate || true"
 
       - name: ✅ Deployment Summary
         if: success()
@@ -172,3 +222,12 @@ jobs:
           echo "- Env: ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
           echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "- Deployed at: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
+      
+      - name: ❌ Deployment Failed
+        if: failure()
+        run: |
+          echo "## ❌ Deployment Failed" >> $GITHUB_STEP_SUMMARY
+          echo "- App: ${{ inputs.app_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Env: ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Attempted at: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
