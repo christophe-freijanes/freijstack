@@ -45,8 +45,8 @@ jobs:
       upload_sarif: true
       publish_score_artifact: true
 
-  build-and-push-staging:
-    name: 🏗️ Build & Push (staging)
+  build-and-push-registry-staging:
+    name: 🏗️ Build & Push (registry-staging.freijstack.com)
     runs-on: ubuntu-latest
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/develop') ||
@@ -79,6 +79,24 @@ jobs:
           username: ${{ env.REGISTRY_USERNAME }}
           password: ${{ env.REGISTRY_PASSWORD }}
 
+      - name: ✅ Check registry availability
+        run: |
+          echo "🔍 Vérification de la disponibilité du registry..."
+          MAX_ATTEMPTS=15  # 15 tentatives
+          ATTEMPT=1
+          SLEEP_TIME=60   # 60 secondes entre les tentatives (total: ~15 minutes)
+          
+          until curl -s -f -u "${{ env.REGISTRY_USERNAME }}:${{ env.REGISTRY_PASSWORD }}" "https://${{ env.REGISTRY_HOST }}/v2/" > /dev/null 2>&1; do
+            if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+              echo "❌ Registry non disponible après $((MAX_ATTEMPTS * SLEEP_TIME / 60)) minutes"
+              exit 1
+            fi
+            echo "⏳ Tentative $ATTEMPT/$MAX_ATTEMPTS - Registry indisponible, nouvelle tentative dans ${SLEEP_TIME}s..."
+            sleep $SLEEP_TIME
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+          echo "✅ Registry disponible et accessible"
+
       - name: 🏗️ Build and push
         uses: docker/build-push-action@v5
         with:
@@ -91,8 +109,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  build-and-push-prod:
-    name: 🏗️ Build & Push (production)
+  build-and-push-registry:
+    name: 🏗️ Build & Push (registry.freijstack.com)
     runs-on: ubuntu-latest
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
@@ -124,6 +142,24 @@ jobs:
           registry: ${{ env.REGISTRY_HOST }}
           username: ${{ env.REGISTRY_USERNAME }}
           password: ${{ env.REGISTRY_PASSWORD }}
+
+      - name: ✅ Check registry availability
+        run: |
+          echo "🔍 Vérification de la disponibilité du registry..."
+          MAX_ATTEMPTS=15  # 15 tentatives
+          ATTEMPT=1
+          SLEEP_TIME=60   # 60 secondes entre les tentatives (total: ~15 minutes)
+          
+          until curl -s -f -u "${{ env.REGISTRY_USERNAME }}:${{ env.REGISTRY_PASSWORD }}" "https://${{ env.REGISTRY_HOST }}/v2/" > /dev/null 2>&1; do
+            if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+              echo "❌ Registry non disponible après $((MAX_ATTEMPTS * SLEEP_TIME / 60)) minutes"
+              exit 1
+            fi
+            echo "⏳ Tentative $ATTEMPT/$MAX_ATTEMPTS - Registry indisponible, nouvelle tentative dans ${SLEEP_TIME}s..."
+            sleep $SLEEP_TIME
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+          echo "✅ Registry disponible et accessible"
 
       - name: 🏗️ Build and push
         uses: docker/build-push-action@v5
