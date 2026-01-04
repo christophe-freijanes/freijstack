@@ -20,21 +20,6 @@ on:
           - staging
           - production
 
-permissions:
-  contents: read
-  actions: read
-
-env:
-  APP_NAME: registry
-  DEPLOY_DIR: /srv/www/registry
-  PROJECT_PATH: saas/registry
-  STAGING_COMPOSE: docker-compose.staging.yml
-  PROD_COMPOSE: docker-compose.prod.yml
-  STAGING_HOST: registry-staging.freijstack.com
-  PROD_HOST: registry.freijstack.com
-  STAGING_UI_HOST: registry-ui-staging.freijstack.com
-  PROD_UI_HOST: registry-ui.freijstack.com
-
 jobs:
   deploy-staging:
     name: 🚀 Deploy Registry (Staging)
