@@ -1,94 +1,54 @@
 name: 🏗️ Build & Push Portfolio
 
 on:
-  push:
-    branches: [master, develop]
-    paths:
-      - "saas/portfolio/**"
-      - ".github/workflows/03-app-portfolio-build.yml"
   workflow_dispatch:
     inputs:
-      tag:
-        description: "Image tag to publish (default: latest)"
-        required: false
-        default: "latest"
+      environment:
+        description: Target environment
+        required: true
+        default: production
+        type: choice
+        options:
+          - staging
+          - production
+
+  push:
+    branches:
+      - master
+      - develop
+    paths:
+      - saas/portfolio/**
 
 env:
   IMAGE_NAME: portfolio
-  REGISTRY_HOST: registry.freijstack.com
-
-concurrency:
-  group: portfolio-build-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
-  build-and-push:
-    name: 🏗️ Build & Push (${{ env.REGISTRY_HOST }})
+  build:
+    name: Build & Push Portfolio
     runs-on: ubuntu-latest
 
     env:
+      REGISTRY_HOST: registry.freijstack.com
       REGISTRY_USERNAME: ${{ secrets.REGISTRY_USER_PROD }}
       REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
 
     steps:
-      - name: 📥 Checkout
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: 🔧 Set image tags
-        run: |
-          set -euo pipefail
-          TAG_INPUT="${{ github.event.inputs.tag }}"
-          if [ -z "$TAG_INPUT" ]; then TAG_INPUT="latest"; fi
-
-          SHA_TAG="$(echo "$GITHUB_SHA" | cut -c1-7)"
-
-          if [ "$GITHUB_REF" = "refs/heads/develop" ]; then
-            echo "IMAGE_TAG=${TAG_INPUT}-beta" >> "$GITHUB_ENV"
-            echo "SHA_TAG=${SHA_TAG}-beta" >> "$GITHUB_ENV"
-          else
-            echo "IMAGE_TAG=${TAG_INPUT}" >> "$GITHUB_ENV"
-            echo "SHA_TAG=${SHA_TAG}" >> "$GITHUB_ENV"
-          fi
-
-      - name: 🐳 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: ✅ Check registry availability
-        run: |
-          set -euo pipefail
-          echo "🔍 Checking registry availability..."
-          MAX_ATTEMPTS=15
-          ATTEMPT=1
-          SLEEP_TIME=10
-
-          until curl -s -w "\n%{http_code}" "https://${{ env.REGISTRY_HOST }}/v2/" 2>/dev/null \
-            | tail -n1 | grep -qE '^(200|401|403)$'; do
-            if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
-              echo "❌ Registry not reachable"
-              exit 1
-            fi
-            echo "⏳ Attempt $ATTEMPT/$MAX_ATTEMPTS - retry in ${SLEEP_TIME}s"
-            sleep $SLEEP_TIME
-            ATTEMPT=$((ATTEMPT + 1))
-          done
-
-          echo "✅ Registry reachable"
-
-      - name: 🔐 Login to registry
+      - name: Login registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY_HOST }}
           username: ${{ env.REGISTRY_USERNAME }}
           password: ${{ env.REGISTRY_PASSWORD }}
 
-      - name: 🏗️ Build and push
+      - name: Build & Push
         uses: docker/build-push-action@v5
         with:
           context: ./saas/portfolio
           file: ./saas/portfolio/Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_NAME }}:${{ env.SHA_TAG }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+            registry.freijstack.com/portfolio:latest
+            registry.freijstack.com/portfolio:${{ github.sha }}
