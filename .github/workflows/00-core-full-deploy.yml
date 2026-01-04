@@ -91,6 +91,8 @@ on:
         required: false
       REGISTRY_USER_PROD:
         required: false
+      REGISTRY_PASSWORD_PROD:
+        required: false
 
 permissions:
   contents: read
@@ -245,6 +247,7 @@ jobs:
       REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
       REGISTRY_USER_STAGING: ${{ secrets.REGISTRY_USER_STAGING }}
       REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
+      REGISTRY_PASSWORD_PROD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
 
   # ═══════════════════════════════════════════════════════════
   # 5️⃣ SUMMARY & NOTIFICATION

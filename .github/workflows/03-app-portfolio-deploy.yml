@@ -63,3 +63,4 @@ jobs:
       VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
       REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
       REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+      REGISTRY_PASSWORD_PROD: ${{ secrets.REGISTRY_PASSWORD_PROD }}

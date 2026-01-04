@@ -48,6 +48,8 @@ on:
         required: false
       REGISTRY_USER_PROD:
         required: false
+      REGISTRY_PASSWORD_PROD:
+        required: false
 
 # Global concurrency: only one deployment at a time across ALL apps
 concurrency:
