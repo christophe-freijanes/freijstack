@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.21.13](https://github.com/christophe-freijanes/freijstack/compare/v1.21.12...v1.21.13) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* hardcode registry host URLs in portfolio build workflow ([d3ff0fd](https://github.com/christophe-freijanes/freijstack/commit/d3ff0fd0954138315908ba7a3c6d176cfdb21cc0))
+
 ## [1.21.12](https://github.com/christophe-freijanes/freijstack/compare/v1.21.11...v1.21.12) (2026-01-04)
 
 ### 🐛 Bug Fixes
