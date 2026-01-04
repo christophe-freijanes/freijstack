@@ -6,6 +6,54 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.25.19](https://github.com/christophe-freijanes/freijstack/compare/v1.25.18...v1.25.19) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* improve deployment logic for registry environments to prevent conflicts ([#132](https://github.com/christophe-freijanes/freijstack/issues/132)) ([ae1fffd](https://github.com/christophe-freijanes/freijstack/commit/ae1fffd1ac3dc9615d683fb951886473fe97cbf6))
+
+## [1.25.18](https://github.com/christophe-freijanes/freijstack/compare/v1.25.17...v1.25.18) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* remove unnecessary skip_security and skip_lint parameters from staging deployment ([6dde991](https://github.com/christophe-freijanes/freijstack/commit/6dde9913012e7632f31bc15c60d764b5398b6c5e))
+
+## [1.25.17](https://github.com/christophe-freijanes/freijstack/compare/v1.25.16...v1.25.17) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* remove unnecessary newline in deployment summary logging ([82b0cb6](https://github.com/christophe-freijanes/freijstack/commit/82b0cb605c2b79f4d8116922ade79a5fff669e7b))
+
+## [1.25.16](https://github.com/christophe-freijanes/freijstack/compare/v1.25.15...v1.25.16) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* ensure line-length rule is set to warning level in yamllint configuration ([80a581b](https://github.com/christophe-freijanes/freijstack/commit/80a581b1db6cf11598081aef9b94d4b8db8fb5f7))
+
+## [1.25.15](https://github.com/christophe-freijanes/freijstack/compare/v1.25.14...v1.25.15) (2026-01-04)
+
+### ♻️ Code Refactoring
+
+* streamline deployment workflow by removing unused inputs and enhancing logging ([053a9b8](https://github.com/christophe-freijanes/freijstack/commit/053a9b8d192a5042a5f4ea10b2da66fd2a51d3b3))
+
+## [1.25.14](https://github.com/christophe-freijanes/freijstack/compare/v1.25.13...v1.25.14) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* enhance deployment workflow with improved logging, safety checks, and concurrency management ([73652a8](https://github.com/christophe-freijanes/freijstack/commit/73652a82b0a0975ef1146d7276df5f17a897037d))
+
+## [1.25.13](https://github.com/christophe-freijanes/freijstack/compare/v1.25.12...v1.25.13) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* streamline deployment process by removing redundant SSH validation and enhancing registry handling ([c9f83bb](https://github.com/christophe-freijanes/freijstack/commit/c9f83bb9687bbee4633f6980fb16305cd458a3a0))
+
+## [1.25.12](https://github.com/christophe-freijanes/freijstack/compare/v1.25.11...v1.25.12) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* enhance production deployment process with image pulling and registry readiness check ([4574971](https://github.com/christophe-freijanes/freijstack/commit/45749716f4bd9bbd815496f854f8c8f221975961))
+
 ## [1.25.11](https://github.com/christophe-freijanes/freijstack/compare/v1.25.10...v1.25.11) (2026-01-04)
 
 ### 🐛 Bug Fixes

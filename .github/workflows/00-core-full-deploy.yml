@@ -1,14 +1,10 @@
-name: 🔒 Full Deploy (DevSecOps Pipeline)
-
-# Orchestrateur DevSecOps complet : Security → Lint → Test → Deploy
-# Wrapper réutilisable qui garantit que le déploiement respecte les standards SRE
+name: 🎯 Deploy Queue (Orchestrator)
 
 on:
   workflow_call:
     inputs:
-      # Application configuration
       app_name:
-        description: 'Application name'
+        description: 'Application name (portfolio, securevault, registry, etc.)'
         required: true
         type: string
       environment:
@@ -24,8 +20,6 @@ on:
         required: false
         type: string
         default: ''
-
-      # Docker configuration
       docker_compose_file:
         description: 'Docker Compose file to use'
         required: false
@@ -36,48 +30,11 @@ on:
         required: false
         type: boolean
         default: false
-
-      # Security & Quality configuration
-      scan_paths:
-        description: 'Paths to scan for security issues (multi-line)'
-        required: false
-        type: string
-        default: '.'
-      fail_on_gitleaks:
-        description: 'Fail pipeline if secrets detected'
-        required: false
-        type: boolean
-        default: true
-      skip_security:
-        description: 'Skip security scan (NOT RECOMMENDED)'
-        required: false
-        type: boolean
-        default: false
-      skip_lint:
-        description: 'Skip linting (NOT RECOMMENDED)'
-        required: false
-        type: boolean
-        default: false
-
-      # Testing configuration
-      test_command:
-        description: 'Command to run tests (e.g., npm test)'
-        required: false
-        type: string
-        default: ''
-      skip_tests:
-        description: 'Skip tests'
-        required: false
-        type: boolean
-        default: false
-
-      # Custom deployment script
       custom_script:
         description: 'Custom deployment script (bash)'
         required: false
         type: string
         default: ''
-
     secrets:
       VPS_SSH_KEY:
         required: true
@@ -94,224 +51,142 @@ on:
       REGISTRY_PASSWORD_PROD:
         required: false
 
+concurrency:
+  group: vps-ssh-deploy
+  cancel-in-progress: false
+
 permissions:
   contents: read
   actions: read
-  security-events: write
 
 jobs:
-  # ═══════════════════════════════════════════════════════════
-  # 1️⃣ SECURITY SCAN (Gitleaks + Trivy)
-  # ═══════════════════════════════════════════════════════════
-  security:
-    name: 🛡️ Security Scan
-    if: ${{ !inputs.skip_security }}
-    uses: ./.github/workflows/01-security-gitleaks.yml
-    permissions:
-      contents: read
-      actions: read
-      security-events: write
-    with:
-      scan_paths: ${{ inputs.scan_paths }}
-      fail_on_gitleaks: ${{ inputs.fail_on_gitleaks }}
-      upload_sarif: true
-      publish_score_artifact: true
-
-  # ═══════════════════════════════════════════════════════════
-  # 2️⃣ LINT (Code Quality)
-  # ═══════════════════════════════════════════════════════════
-  lint:
-    name: 🧹 Lint Code
-    if: ${{ !inputs.skip_lint }}
-    needs: security
+  deploy:
+    name: 🚀 Deploy ${{ inputs.app_name }} to ${{ inputs.environment }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: ${{ inputs.environment }}
+
     steps:
+      - name: ⏱️ Staggered Start (avoid SSH collisions)
+        run: |
+          DELAY=$((5 + RANDOM % 16))
+          echo "⏳ Waiting ${DELAY}s"
+          sleep "$DELAY"
+
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: 🔍 Auto-detect and run linters
+      - name: 🔐 Setup SSH
         run: |
           set -euo pipefail
-          echo "🔍 Detecting linters for ${{ inputs.project_path || '.' }}..."
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.VPS_SSH_HOST }}" >> ~/.ssh/known_hosts || true
+          echo "SSH_OPTIONS=-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" >> "$GITHUB_ENV"
 
-          PROJECT_DIR="${{ inputs.project_path }}"
-          if [ -n "$PROJECT_DIR" ] && [ -d "$PROJECT_DIR" ]; then
-            cd "$PROJECT_DIR"
-          fi
-
-          FAILED=0
-
-          # JavaScript/TypeScript: ESLint
-          if [ -f "package.json" ] && grep -q "eslint" package.json 2>/dev/null; then
-            echo "📦 Running ESLint..."
-            npm install --silent
-            npm run lint --if-present || FAILED=1
-          fi
-
-          # Python: Ruff
-          if find . -name "*.py" -type f | head -n 1 | grep -q .; then
-            echo "🐍 Running Ruff..."
-            pip install -q ruff
-            ruff check . || FAILED=1
-          fi
-
-          # Markdown: markdownlint
-          if [ -f ".markdownlint-cli2.jsonc" ]; then
-            echo "📝 Running markdownlint..."
-            npm install -g markdownlint-cli2 --silent
-            markdownlint-cli2 "**/*.md" || FAILED=1
-          fi
-
-          # Shell: ShellCheck
-          if find . -name "*.sh" -type f | head -n 1 | grep -q .; then
-            echo "🐚 Running ShellCheck..."
-            sudo apt-get install -qq shellcheck
-            find . -name "*.sh" -type f -exec shellcheck {} + || FAILED=1
-          fi
-
-          # YAML: yamllint
-          if find . -name "*.yml" -o -name "*.yaml" | head -n 1 | grep -q .; then
-            echo "📋 Running yamllint..."
-            pip install -q yamllint
-            yamllint . || FAILED=1
-          fi
-
-          if [ $FAILED -eq 1 ]; then
-            echo "❌ Linting failed"
-            exit 1
-          fi
-
-          echo "✅ All linters passed"
-
-  # ═══════════════════════════════════════════════════════════
-  # 3️⃣ TEST & BUILD
-  # ═══════════════════════════════════════════════════════════
-  test:
-    name: 🧪 Test & Build
-    if: ${{ !inputs.skip_tests }}
-    needs: [security, lint]
-    runs-on: ubuntu-latest
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 🧪 Run tests
-        if: inputs.test_command != ''
+      - name: 🚀 Deploy ${{ inputs.app_name }}
         run: |
-          PROJECT_DIR="${{ inputs.project_path }}"
-          if [ -n "$PROJECT_DIR" ] && [ -d "$PROJECT_DIR" ]; then
-            cd "$PROJECT_DIR"
+          set -euo pipefail
+
+          SSH_TARGET="${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+
+          BRANCH="${GITHUB_REF##*/}"
+
+          REMOTE_ENV="APP_NAME='${{ inputs.app_name }}' \
+          ENVIRONMENT='${{ inputs.environment }}' \
+          DEPLOY_DIR='${{ inputs.deploy_dir }}' \
+          PROJECT_PATH='${{ inputs.project_path }}' \
+          COMPOSE_FILE='${{ inputs.docker_compose_file }}' \
+          GH_REPO='${{ github.repository }}' \
+          GH_REF='${{ github.ref }}' \
+          GH_BRANCH='${BRANCH}' \
+          GH_SHA='${{ github.sha }}' \
+          REGISTRY_USER_STAGING='${{ secrets.REGISTRY_USER_STAGING }}' \
+          REGISTRY_PASSWORD_STAGING='${{ secrets.REGISTRY_PASSWORD_STAGING }}' \
+          REGISTRY_USER_PROD='${{ secrets.REGISTRY_USER_PROD }}' \
+          REGISTRY_PASSWORD_PROD='${{ secrets.REGISTRY_PASSWORD_PROD }}'"
+
+          ssh $SSH_OPTIONS -i ~/.ssh/deploy_key "$SSH_TARGET" "$REMOTE_ENV" bash <<'DEPLOY_SCRIPT'
+          set -euo pipefail
+
+          export DOCKER_CLI_HINTS=false
+
+          : "${APP_NAME:?}"
+          : "${ENVIRONMENT:?}"
+          : "${DEPLOY_DIR:?}"
+          : "${COMPOSE_FILE:?}"
+          : "${GH_REPO:?}"
+          : "${GH_BRANCH:?}"
+          : "${GH_SHA:?}"
+
+          mkdir -p "$DEPLOY_DIR"
+          cd "$DEPLOY_DIR"
+
+          if [ -d ".git" ]; then
+            git fetch origin
+            git reset --hard "origin/${GH_BRANCH}"
+            git clean -fd
+          else
+            git clone -b "${GH_BRANCH}" "https://github.com/${GH_REPO}.git" .
           fi
 
-          echo "🧪 Running tests: ${{ inputs.test_command }}"
-          ${{ inputs.test_command }}
+          if [ -n "${PROJECT_PATH:-}" ]; then
+            cd "$PROJECT_PATH"
+          fi
 
-      - name: 🐳 Build Docker images (validation)
+          if [ "$APP_NAME" = "registry" ]; then
+            if [ "$ENVIRONMENT" = "production" ]; then
+              USER="$REGISTRY_USER_PROD"
+              PASS="$REGISTRY_PASSWORD_PROD"
+            else
+              USER="$REGISTRY_USER_STAGING"
+              PASS="$REGISTRY_PASSWORD_STAGING"
+            fi
+
+            docker run --rm httpd:2 htpasswd -Bbn "$USER" "$PASS" > .htpasswd
+          fi
+
+          if [ "$ENVIRONMENT" = "production" ]; then
+            if [ "$APP_NAME" = "registry" ]; then
+              for i in {1..60}; do
+                CODE=$(curl -s -o /dev/null -w "%{http_code}" https://registry.freijstack.com/v2/ || true)
+                if [ "$CODE" = "200" ] || [ "$CODE" = "401" ]; then
+                  break
+                fi
+                sleep 1
+              done
+            fi
+
+            if [ -n "${REGISTRY_USER_PROD:-}" ]; then
+              echo "$REGISTRY_PASSWORD_PROD" | docker login registry.freijstack.com \
+                -u "$REGISTRY_USER_PROD" --password-stdin
+            fi
+
+            docker compose -f "$COMPOSE_FILE" pull
+            docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+          else
+            docker compose -f "$COMPOSE_FILE" down --remove-orphans || true
+            docker compose -f "$COMPOSE_FILE" pull
+            docker compose -f "$COMPOSE_FILE" up -d --build --remove-orphans
+          fi
+
+          docker compose -f "$COMPOSE_FILE" ps
+          docker volume ls
+          DEPLOY_SCRIPT
+
+      - name: 🗄️ Run Migrations
+        if: inputs.run_migrations
         run: |
-          PROJECT_DIR="${{ inputs.project_path }}"
-          if [ -n "$PROJECT_DIR" ] && [ -d "$PROJECT_DIR" ]; then
-            cd "$PROJECT_DIR"
-          fi
+          ssh $SSH_OPTIONS -i ~/.ssh/deploy_key \
+            ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
+            "cd ${{ inputs.deploy_dir }}/${{ inputs.project_path }} && docker compose exec -T app npm run migrate || true"
 
-          if [ -f "${{ inputs.docker_compose_file }}" ]; then
-            echo "🐳 Building Docker images for validation..."
-            docker compose -f "${{ inputs.docker_compose_file }}" build
-          else
-            echo "⚠️ No Docker Compose file found, skipping build"
-          fi
-
-  # ═══════════════════════════════════════════════════════════
-  # 4️⃣ DEPLOY (Via Centralized Queue)
-  # ═══════════════════════════════════════════════════════════
-  deploy:
-    name: 🚀 Deploy ${{ inputs.app_name }}
-    needs: [security, lint, test]
-    if: |
-      always() &&
-      (needs.security.result == 'success' || needs.security.result == 'skipped') &&
-      (needs.lint.result == 'success' || needs.lint.result == 'skipped') &&
-      (needs.test.result == 'success' || needs.test.result == 'skipped')
-    uses: ./.github/workflows/00-core-deploy-queue.yml
-    with:
-      app_name: ${{ inputs.app_name }}
-      environment: ${{ inputs.environment }}
-      deploy_dir: ${{ inputs.deploy_dir }}
-      project_path: ${{ inputs.project_path }}
-      docker_compose_file: ${{ inputs.docker_compose_file }}
-      run_migrations: ${{ inputs.run_migrations }}
-      custom_script: ${{ inputs.custom_script }}
-    secrets:
-      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-      VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
-      VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
-      REGISTRY_PASSWORD_STAGING: ${{ secrets.REGISTRY_PASSWORD_STAGING }}
-      REGISTRY_USER_STAGING: ${{ secrets.REGISTRY_USER_STAGING }}
-      REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
-      REGISTRY_PASSWORD_PROD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
-
-  # ═══════════════════════════════════════════════════════════
-  # 5️⃣ SUMMARY & NOTIFICATION
-  # ═══════════════════════════════════════════════════════════
-  summary:
-    name: 📊 Pipeline Summary
-    needs: [security, lint, test, deploy]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: 📊 Generate Summary
+      - name: ✅ Deployment Summary
+        if: success()
         run: |
-          echo "## 🔒 DevSecOps Pipeline Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Application**: ${{ inputs.app_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Environment**: ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Pipeline Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          # Security
-          if [ "${{ needs.security.result }}" = "success" ]; then
-            echo "- 🛡️ Security: ✅ Passed" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ needs.security.result }}" = "skipped" ]; then
-            echo "- 🛡️ Security: ⏭️ Skipped" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- 🛡️ Security: ❌ Failed" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          # Lint
-          if [ "${{ needs.lint.result }}" = "success" ]; then
-            echo "- 🧹 Lint: ✅ Passed" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ needs.lint.result }}" = "skipped" ]; then
-            echo "- 🧹 Lint: ⏭️ Skipped" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- 🧹 Lint: ❌ Failed" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          # Test
-          if [ "${{ needs.test.result }}" = "success" ]; then
-            echo "- 🧪 Test: ✅ Passed" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ needs.test.result }}" = "skipped" ]; then
-            echo "- 🧪 Test: ⏭️ Skipped" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- 🧪 Test: ❌ Failed" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          # Deploy
-          if [ "${{ needs.deploy.result }}" = "success" ]; then
-            echo "- 🚀 Deploy: ✅ Success" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ needs.deploy.result }}" = "skipped" ]; then
-            echo "- 🚀 Deploy: ⏭️ Skipped (previous failure)" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- 🚀 Deploy: ❌ Failed" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          # Overall status
-          if [ "${{ needs.deploy.result }}" = "success" ]; then
-            echo "### ✅ Pipeline Successful" >> $GITHUB_STEP_SUMMARY
-            echo "Application deployed successfully to ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "### ❌ Pipeline Failed" >> $GITHUB_STEP_SUMMARY
-            echo "Deployment was not executed due to previous failures" >> $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
+          echo "## ✅ Deployment Successful" >> "$GITHUB_STEP_SUMMARY"
+          echo "- App: ${{ inputs.app_name }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Env: ${{ inputs.environment }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Commit: ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
