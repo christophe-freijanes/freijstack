@@ -1,12 +1,10 @@
 name: 🚀 SaaS • Portfolio Deploy (Production)
 
 on:
-  # 🔁 Auto-deploy after successful build on master
   workflow_run:
     workflows: ["🏗️ Build & Push Portfolio"]
     types: [completed]
 
-  # ▶️ Manual trigger (always prod)
   workflow_dispatch: {}
 
 jobs:
@@ -34,6 +32,5 @@ jobs:
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
       VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
       VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
-
       REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
       REGISTRY_PASSWORD_PROD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
