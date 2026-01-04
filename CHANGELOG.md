@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.25.8](https://github.com/christophe-freijanes/freijstack/compare/v1.25.7...v1.25.8) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* update port mapping and labels for staging registry and UI services ([c240d40](https://github.com/christophe-freijanes/freijstack/commit/c240d403d63fc2e4f3b3697cf4f11f4f8361d4c7))
+
 ## [1.25.7](https://github.com/christophe-freijanes/freijstack/compare/v1.25.6...v1.25.7) (2026-01-04)
 
 ### 🐛 Bug Fixes
