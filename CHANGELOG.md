@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.29.1](https://github.com/christophe-freijanes/freijstack/compare/v1.29.0...v1.29.1) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* enhance deployment script with improved environment variable handling and error checks ([#134](https://github.com/christophe-freijanes/freijstack/issues/134)) ([e0b37fc](https://github.com/christophe-freijanes/freijstack/commit/e0b37fc810fb7558ed0de6c5e8cd9a081f52d45c))
+
 ## [1.29.0](https://github.com/christophe-freijanes/freijstack/compare/v1.28.0...v1.29.0) (2026-01-04)
 
 ### 🚀 Features
