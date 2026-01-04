@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.25.12](https://github.com/christophe-freijanes/freijstack/compare/v1.25.11...v1.25.12) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* enhance production deployment process with image pulling and registry readiness check ([4574971](https://github.com/christophe-freijanes/freijstack/commit/45749716f4bd9bbd815496f854f8c8f221975961))
+
 ## [1.25.11](https://github.com/christophe-freijanes/freijstack/compare/v1.25.10...v1.25.11) (2026-01-04)
 
 ### 🐛 Bug Fixes
