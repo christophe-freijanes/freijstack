@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.24.5](https://github.com/christophe-freijanes/freijstack/compare/v1.24.4...v1.24.5) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* replace heredoc with echo to fix YAML syntax error ([40a8cbb](https://github.com/christophe-freijanes/freijstack/commit/40a8cbba24f5b0e174b5366cd106f13b234394ed))
+
 ## [1.24.4](https://github.com/christophe-freijanes/freijstack/compare/v1.24.3...v1.24.4) (2026-01-04)
 
 ### ♻️ Code Refactoring
