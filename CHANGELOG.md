@@ -6,6 +6,16 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.32.7](https://github.com/christophe-freijanes/freijstack/compare/v1.32.6...v1.32.7) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* **frontend:** align lockfile with CRA react-scripts TS4 ([02ec6cf](https://github.com/christophe-freijanes/freijstack/commit/02ec6cf7b463dbeb4340388a6b278a5ef366382b))
+
+### ♻️ Code Refactoring
+
+* remove commented lines for cleaner workflow file ([72242a4](https://github.com/christophe-freijanes/freijstack/commit/72242a4274c35c5d2d46c5f6a242b1c4c5b595f6))
+
 ## [1.32.6](https://github.com/christophe-freijanes/freijstack/compare/v1.32.5...v1.32.6) (2026-01-04)
 
 ### ♻️ Code Refactoring
