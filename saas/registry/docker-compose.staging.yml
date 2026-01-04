@@ -34,8 +34,8 @@ services:
       DELETE_IMAGES: "true"
       SHOW_CONTENT_DIGEST: "true"
       REGISTRY_SECURED: "true"
-      REGISTRY_USERNAME: "${REGISTRY_USERNAME}"
-      REGISTRY_PASSWORD: "${REGISTRY_PASSWORD}"
+      REGISTRY_USERNAME: "${REGISTRY_USER_STAGING}"
+      REGISTRY_PASSWORD: "${REGISTRY_PASSWORD_STAGING}"
     depends_on:
       - registry
     networks:

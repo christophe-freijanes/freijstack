@@ -6,6 +6,24 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.25.7](https://github.com/christophe-freijanes/freijstack/compare/v1.25.6...v1.25.7) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* update registry password secrets for staging and production environments ([#129](https://github.com/christophe-freijanes/freijstack/issues/129)) ([39f947b](https://github.com/christophe-freijanes/freijstack/commit/39f947bf7570ea4cc1fad6086823199e542bb682))
+
+## [1.25.6](https://github.com/christophe-freijanes/freijstack/compare/v1.25.5...v1.25.6) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* update registry credentials for staging environment ([500b6c2](https://github.com/christophe-freijanes/freijstack/commit/500b6c27a6739c762cc2435f34d98ac66fce7f50))
+
+## [1.25.5](https://github.com/christophe-freijanes/freijstack/compare/v1.25.4...v1.25.5) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* refine condition for staging deployment in workflow ([3818827](https://github.com/christophe-freijanes/freijstack/commit/38188279fd4db54cca46d5486186e8ce00c84b6e))
+
 ## [1.25.4](https://github.com/christophe-freijanes/freijstack/compare/v1.25.3...v1.25.4) (2026-01-04)
 
 ### 🐛 Bug Fixes
