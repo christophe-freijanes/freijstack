@@ -4,47 +4,48 @@ on:
   workflow_call:
     inputs:
       app_name:
-        description: 'Application name (portfolio, securevault, registry, etc.)'
+        description: "Application name (portfolio, securevault, registry, etc.)"
         required: true
         type: string
       environment:
-        description: 'Target environment (staging or production)'
+        description: "Target environment (staging or production)"
         required: true
         type: string
       deploy_dir:
-        description: 'VPS deployment directory'
+        description: "VPS deployment directory"
         required: true
         type: string
       project_path:
-        description: 'Project subdirectory (e.g., saas/portfolio)'
+        description: "Project subdirectory (e.g., saas/portfolio)"
         required: false
         type: string
-        default: ''
+        default: ""
       docker_compose_file:
-        description: 'Docker Compose file to use'
+        description: "Docker Compose file to use"
         required: false
         type: string
-        default: 'docker-compose.yml'
+        default: "docker-compose.yml"
       run_migrations:
-        description: 'Run database migrations after deploy'
+        description: "Run database migrations after deploy"
         required: false
         type: boolean
         default: false
       custom_script:
-        description: 'Custom deployment script (bash)'
+        description: "Custom deployment script (bash)"
         required: false
         type: string
-        default: ''
+        default: ""
       skip_security:
-        description: 'Compatibility flag (not used here)'
+        description: "Compatibility flag (not used here)"
         required: false
         type: boolean
         default: false
       skip_lint:
-        description: 'Compatibility flag (not used here)'
+        description: "Compatibility flag (not used here)"
         required: false
         type: boolean
         default: false
+
     secrets:
       VPS_SSH_KEY:
         required: true
@@ -52,16 +53,17 @@ on:
         required: true
       VPS_SSH_USER:
         required: true
-      # Keep staging secrets optional (not used for docker login anymore)
-      REGISTRY_PASSWORD_STAGING:
-        required: false
+
+      # IMPORTANT: all registry creds are OPTIONAL here.
+      # We validate at runtime depending on the target env and app.
       REGISTRY_USER_STAGING:
         required: false
-      # PROD registry creds are the single source of truth for pulls
+      REGISTRY_PASSWORD_STAGING:
+        required: false
       REGISTRY_USER_PROD:
-        required: true
+        required: false
       REGISTRY_PASSWORD_PROD:
-        required: true
+        required: false
 
 concurrency:
   group: vps-ssh-deploy
@@ -114,11 +116,10 @@ jobs:
           GH_REPO='${{ github.repository }}' \
           GH_BRANCH='${BRANCH}' \
           GH_SHA='${{ github.sha }}' \
-          REGISTRY_HOST='registry.freijstack.com' \
-          REGISTRY_USER_PROD='${{ secrets.REGISTRY_USER_PROD }}' \
-          REGISTRY_PASSWORD_PROD='${{ secrets.REGISTRY_PASSWORD_PROD }}' \
           REGISTRY_USER_STAGING='${{ secrets.REGISTRY_USER_STAGING }}' \
-          REGISTRY_PASSWORD_STAGING='${{ secrets.REGISTRY_PASSWORD_STAGING }}'"
+          REGISTRY_PASSWORD_STAGING='${{ secrets.REGISTRY_PASSWORD_STAGING }}' \
+          REGISTRY_USER_PROD='${{ secrets.REGISTRY_USER_PROD }}' \
+          REGISTRY_PASSWORD_PROD='${{ secrets.REGISTRY_PASSWORD_PROD }}'"
 
           ssh $SSH_OPTIONS -i ~/.ssh/deploy_key "$SSH_TARGET" "$REMOTE_ENV" bash <<'DEPLOY_SCRIPT'
           set -euo pipefail
@@ -131,22 +132,6 @@ jobs:
           : "${GH_REPO:?}"
           : "${GH_BRANCH:?}"
           : "${GH_SHA:?}"
-          : "${REGISTRY_HOST:?}"
-          : "${REGISTRY_USER_PROD:?}"
-          : "${REGISTRY_PASSWORD_PROD:?}"
-
-          if ! docker compose version >/dev/null 2>&1; then
-            echo "❌ Docker Compose not available on VPS"
-            exit 1
-          fi
-
-          echo "🔒 Volume protection: enabled (never run docker compose down -v)"
-          echo "🚀 Deploying ${APP_NAME} → ${ENVIRONMENT}"
-          echo "📁 DEPLOY_DIR=${DEPLOY_DIR}"
-          echo "📄 COMPOSE_FILE=${COMPOSE_FILE}"
-          echo "🔀 BRANCH=${GH_BRANCH}"
-          echo "🧾 SHA=${GH_SHA}"
-          echo "📦 Registry host=${REGISTRY_HOST} (single registry strategy)"
 
           if ! docker compose version >/dev/null 2>&1; then
             echo "❌ Docker Compose not available on VPS"
@@ -182,22 +167,32 @@ jobs:
           fi
 
           # ==========================================================
-          # Registry app: generate htpasswd (safe)
+          # Resolve which registry host to use for pulls (apps)
+          # - production -> registry.freijstack.com
+          # - staging    -> registry-staging.freijstack.com (if you run it)
+          # If you DO NOT run staging registry anymore, keep pulls pointed to prod.
+          # ==========================================================
+          REGISTRY_HOST="registry.freijstack.com"
+          if [ "$ENVIRONMENT" = "staging" ]; then
+            # If you want staging to pull from staging registry, change this line:
+            # REGISTRY_HOST="registry-staging.freijstack.com"
+            REGISTRY_HOST="registry.freijstack.com"
+          fi
+
+          # ==========================================================
+          # Registry app: generate htpasswd (requires env creds)
           # ==========================================================
           if [ "$APP_NAME" = "registry" ]; then
-            # If you keep a staging registry someday:
-            # - production uses PROD creds
-            # - staging uses STAGING creds if present, otherwise PROD creds
             if [ "$ENVIRONMENT" = "production" ]; then
-              USER="${REGISTRY_USER_PROD}"
-              PASS="${REGISTRY_PASSWORD_PROD}"
+              USER="${REGISTRY_USER_PROD:-}"
+              PASS="${REGISTRY_PASSWORD_PROD:-}"
             else
-              USER="${REGISTRY_USER_STAGING:-$REGISTRY_USER_PROD}"
-              PASS="${REGISTRY_PASSWORD_STAGING:-$REGISTRY_PASSWORD_PROD}"
+              USER="${REGISTRY_USER_STAGING:-}"
+              PASS="${REGISTRY_PASSWORD_STAGING:-}"
             fi
 
             if [ -z "${USER}" ] || [ -z "${PASS}" ]; then
-              echo "❌ Registry deploy requires credentials"
+              echo "❌ Registry deploy requires credentials for env=${ENVIRONMENT}"
               exit 1
             fi
 
@@ -207,12 +202,24 @@ jobs:
           fi
 
           # ==========================================================
-          # Login registry for pulling private images
-          # IMPORTANT: staging ALSO uses PROD creds (single registry)
+          # Non-registry apps: docker login only if creds provided
+          # (needed only when pulling private images)
           # ==========================================================
           if [ "$APP_NAME" != "registry" ]; then
-            echo "🔐 docker login ${REGISTRY_HOST} (env=${ENVIRONMENT} uses PROD creds)"
-            echo "${REGISTRY_PASSWORD_PROD}" | docker login "${REGISTRY_HOST}" -u "${REGISTRY_USER_PROD}" --password-stdin
+            if [ "$ENVIRONMENT" = "production" ]; then
+              LOGIN_USER="${REGISTRY_USER_PROD:-}"
+              LOGIN_PASS="${REGISTRY_PASSWORD_PROD:-}"
+            else
+              LOGIN_USER="${REGISTRY_USER_STAGING:-}"
+              LOGIN_PASS="${REGISTRY_PASSWORD_STAGING:-}"
+            fi
+
+            if [ -n "${LOGIN_USER}" ] && [ -n "${LOGIN_PASS}" ]; then
+              echo "🔐 docker login ${REGISTRY_HOST} (env=${ENVIRONMENT})"
+              echo "${LOGIN_PASS}" | docker login "${REGISTRY_HOST}" -u "${LOGIN_USER}" --password-stdin
+            else
+              echo "⚠️ No registry creds for env=${ENVIRONMENT}; compose pull may fail if images are private."
+            fi
           fi
 
           # ==========================================================
