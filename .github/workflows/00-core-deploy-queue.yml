@@ -222,7 +222,7 @@ jobs:
           echo "- Env: ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
           echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "- Deployed at: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
-      
+
       - name: ❌ Deployment Failed
         if: failure()
         run: |

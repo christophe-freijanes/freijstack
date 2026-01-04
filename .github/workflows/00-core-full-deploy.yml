@@ -190,4 +190,3 @@ jobs:
           echo "- App: ${{ inputs.app_name }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Env: ${{ inputs.environment }}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Commit: ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
-
