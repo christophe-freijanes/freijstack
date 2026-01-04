@@ -85,7 +85,7 @@ on:
         required: true
       VPS_SSH_USER:
         required: true
-      REGISTRY_PASSWORD:
+      REGISTRY_PASSWORD_STAGING:
         required: false
       REGISTRY_USER_STAGING:
         required: false
