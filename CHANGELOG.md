@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.21.14](https://github.com/christophe-freijanes/freijstack/compare/v1.21.13...v1.21.14) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* refactor registry host variables and update docker-compose files for staging and production ([8d49b40](https://github.com/christophe-freijanes/freijstack/commit/8d49b405e60f090866e3b95726a4890359e47866))
+
 ## [1.21.13](https://github.com/christophe-freijanes/freijstack/compare/v1.21.12...v1.21.13) (2026-01-04)
 
 ### 🐛 Bug Fixes
