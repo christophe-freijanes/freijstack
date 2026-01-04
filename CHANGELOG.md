@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.25.21](https://github.com/christophe-freijanes/freijstack/compare/v1.25.20...v1.25.21) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* remove unnecessary skip_security and skip_lint parameters from staging deployment ([#133](https://github.com/christophe-freijanes/freijstack/issues/133)) ([4dddd4d](https://github.com/christophe-freijanes/freijstack/commit/4dddd4d922561304eeec2730b3d7fcf90d5a90ce))
+
 ## [1.25.20](https://github.com/christophe-freijanes/freijstack/compare/v1.25.19...v1.25.20) (2026-01-04)
 
 ### 🐛 Bug Fixes
