@@ -17,6 +17,7 @@ automation/
 !.env.example
 !.env.production
 !.env.staging
+!**/.env.example
 !**/.env.production
 !**/.env.staging
 

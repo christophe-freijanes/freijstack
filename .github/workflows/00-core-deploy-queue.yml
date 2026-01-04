@@ -205,6 +205,13 @@ jobs:
               
               # Load registry username from .env based on environment
               echo "🔐 Loading registry username from .env..."
+              
+              # Create .env from .env.example if it doesn't exist
+              if [ ! -f ".env" ] && [ -f ".env.example" ]; then
+                echo "📋 Creating .env from .env.example..."
+                cp .env.example .env
+              fi
+              
               if [ -f ".env" ]; then
                 # Source the .env file to get REGISTRY_USER_STAGING or REGISTRY_USER_PROD
                 export $(grep -E "REGISTRY_USER_" .env | xargs)
