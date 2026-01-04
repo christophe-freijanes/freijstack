@@ -6,6 +6,24 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.32.0](https://github.com/christophe-freijanes/freijstack/compare/v1.31.0...v1.32.0) (2026-01-04)
+
+### 🚀 Features
+
+* add compatibility flags for security and lint skipping in deployment workflow ([#135](https://github.com/christophe-freijanes/freijstack/issues/135)) ([43326b3](https://github.com/christophe-freijanes/freijstack/commit/43326b33981f908cc6b9974e0d7e1c5dedb250fa))
+
+## [1.31.0](https://github.com/christophe-freijanes/freijstack/compare/v1.30.0...v1.31.0) (2026-01-04)
+
+### 🚀 Features
+
+* simplify registry deployment workflow and enhance environment input options ([79aac09](https://github.com/christophe-freijanes/freijstack/commit/79aac09d1b3604e8f3afa5eeb9ad8681f2aab154))
+
+## [1.30.0](https://github.com/christophe-freijanes/freijstack/compare/v1.29.1...v1.30.0) (2026-01-04)
+
+### 🚀 Features
+
+* update registry link in portfolio, remove .env.example, and enhance .env configurations ([19a073d](https://github.com/christophe-freijanes/freijstack/commit/19a073d4663ff85910d965af7bd6fa6d57c7b1de))
+
 ## [1.29.1](https://github.com/christophe-freijanes/freijstack/compare/v1.29.0...v1.29.1) (2026-01-04)
 
 ### 🐛 Bug Fixes

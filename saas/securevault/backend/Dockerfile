@@ -1,33 +1,27 @@
-FROM node:18-alpine
-
-# Security: Run as non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
-
+# saas/securevault/frontend/Dockerfile
+FROM node:20-alpine AS build
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
+RUN npm ci
 
-# Install dependencies
-RUN npm install --prefer-offline --no-audit && \
-    npm cache clean --force
+COPY . .
 
-# Copy application code
-COPY src/ ./src/
+# Build-time API URL (React/Vite/CRA compatible patterns)
+ARG REACT_APP_API_URL
+ARG VITE_API_URL
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+ENV VITE_API_URL=$VITE_API_URL
 
-# Change ownership to nodejs user
-RUN chown -R nodejs:nodejs /app
+RUN npm run build
 
-# Switch to non-root user
-USER nodejs
+FROM nginx:1.27-alpine AS runner
 
-# Expose port
-EXPOSE 3001
+# SPA-friendly nginx (optional but recommended)
+RUN rm -f /etc/nginx/conf.d/default.conf
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://127.0.0.1:3001/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+COPY --from=build /app/build /usr/share/nginx/html
 
-# Start application
-CMD ["node", "src/server.js"]
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

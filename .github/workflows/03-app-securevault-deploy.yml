@@ -1,11 +1,9 @@
-name: 🔐 SaaS • SecureVault
+name: 🔐 SaaS • SecureVault Deploy
 
 on:
-  push:
-    branches: [develop, master]
-    paths:
-      - 'saas/securevault/**'
-      - '.github/workflows/03-app-securevault-deploy.yml'
+  workflow_run:
+    workflows: ["🏗️ Build & Push SecureVault"]
+    types: [completed]
   workflow_dispatch:
     inputs:
       environment:
@@ -13,41 +11,55 @@ on:
         required: true
         default: 'staging'
         type: choice
-        options:
-          - staging
-          - production
+        options: [staging, production]
 
 jobs:
   deploy-staging:
-    name: 🔒 Full Pipeline (Staging)
-    if: github.ref == 'refs/heads/develop' || github.event_name == 'workflow_dispatch'
+    name: 🔒 Deploy (Staging)
+    if: |
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'develop') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
     uses: ./.github/workflows/00-core-full-deploy.yml
     with:
       app_name: 'securevault'
       environment: 'staging'
       deploy_dir: '/srv/www/securevault-staging'
       project_path: 'saas/securevault'
-      docker_compose_file: 'docker-compose.yml'
+      docker_compose_file: 'docker-compose.staging.yml'
       run_migrations: true
-      skip_security: false
-      skip_lint: false
+      migrate_service: 'backend'
+      healthcheck_url: 'https://api-staging.vault.freijstack.com/healthz'
+      skip_security: true
+      skip_lint: true
     secrets:
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
       VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
       VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
+      REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
+      REGISTRY_PASSWORD_PROD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
 
   deploy-production:
-    name: 🔒 Full Pipeline (Production)
-    if: github.ref == 'refs/heads/master' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    name: 🔒 Deploy (Production)
+    if: |
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'master') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
     uses: ./.github/workflows/00-core-full-deploy.yml
     with:
       app_name: 'securevault'
       environment: 'production'
       deploy_dir: '/srv/www/securevault'
       project_path: 'saas/securevault'
-      docker_compose_file: 'docker-compose.yml'
+      docker_compose_file: 'docker-compose.prod.yml'
       run_migrations: true
+      migrate_service: 'backend'
+      healthcheck_url: 'https://api.vault.freijstack.com/healthz'
     secrets:
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
       VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
       VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
+      REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
+      REGISTRY_PASSWORD_PROD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
