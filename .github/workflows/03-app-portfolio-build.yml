@@ -1,134 +1,54 @@
 name: 🏗️ Build & Push Portfolio
 
 on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        default: production
+        type: choice
+        options:
+          - staging
+          - production
+
   push:
     branches:
       - master
       - develop
     paths:
-      - 'saas/portfolio/**'
-      - '.github/workflows/03-app-portfolio-build.yml'
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: "Target environment"
-        required: true
-        default: "production"
-        type: choice
-        options:
-          - staging
-          - production
-      tag:
-        description: "Image tag to publish (default: latest)"
-        required: false
-        default: "latest"
+      - saas/portfolio/**
 
 env:
   IMAGE_NAME: portfolio
-  REGISTRY_HOST: registry.freijstack.com
-
-concurrency:
-  group: portfolio-build-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
-  security:
-    name: 🛡️ Security Scan
-    uses: ./.github/workflows/01-security-gitleaks.yml
-    permissions:
-      contents: read
-      actions: read
-      security-events: write
-    with:
-      scan_paths: |
-        saas/portfolio
-      fail_on_gitleaks: true
-      upload_sarif: true
-      publish_score_artifact: true
-
-  build-and-push:
-    name: 🏗️ Build & Push (registry.freijstack.com)
+  build:
+    name: Build & Push Portfolio
     runs-on: ubuntu-latest
-    needs: [security]
-    if: |
-      (github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')) ||
-      (github.event_name == 'workflow_dispatch')
 
     env:
+      REGISTRY_HOST: registry.freijstack.com
       REGISTRY_USERNAME: ${{ secrets.REGISTRY_USER_PROD }}
       REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
 
     steps:
-      - name: 📥 Checkout
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: 🔧 Compute tags (master=stable, develop=beta)
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          TAG_INPUT="${{ github.event.inputs.tag }}"
-          if [ -z "${TAG_INPUT}" ] || [ "${TAG_INPUT}" = "null" ]; then
-            TAG_INPUT="latest"
-          fi
-
-          SHA_TAG="$(echo "${GITHUB_SHA}" | cut -c1-7)"
-
-          # Decide channel
-          if [ "${GITHUB_REF}" = "refs/heads/develop" ] || [ "${{ github.event.inputs.environment }}" = "staging" ]; then
-            echo "CHANNEL=beta" >> "$GITHUB_ENV"
-            echo "IMAGE_TAG=${TAG_INPUT}-beta" >> "$GITHUB_ENV"
-            echo "SHA_IMAGE_TAG=${SHA_TAG}-beta" >> "$GITHUB_ENV"
-          else
-            echo "CHANNEL=stable" >> "$GITHUB_ENV"
-            echo "IMAGE_TAG=${TAG_INPUT}" >> "$GITHUB_ENV"
-            echo "SHA_IMAGE_TAG=${SHA_TAG}" >> "$GITHUB_ENV"
-          fi
-
-          echo "✅ Channel: ${CHANNEL:-}"
-          echo "✅ IMAGE_TAG: $(grep -E '^IMAGE_TAG=' $GITHUB_ENV | tail -n1)"
-          echo "✅ SHA_IMAGE_TAG: $(grep -E '^SHA_IMAGE_TAG=' $GITHUB_ENV | tail -n1)"
-
-      - name: 🐳 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: ✅ Check registry availability
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "🔍 Checking registry: https://${REGISTRY_HOST}/v2/"
-          MAX_ATTEMPTS=15
-          ATTEMPT=1
-          SLEEP_TIME=10
-
-          until curl -s -o /dev/null -w "%{http_code}" "https://${REGISTRY_HOST}/v2/" | grep -qE '^(200|401|403)$'; do
-            if [ "$ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
-              echo "❌ Registry not ready after $MAX_ATTEMPTS attempts"
-              curl -s -I "https://${REGISTRY_HOST}/v2/" || true
-              exit 1
-            fi
-            echo "⏳ Attempt $ATTEMPT/$MAX_ATTEMPTS - registry not ready, sleeping ${SLEEP_TIME}s..."
-            sleep "$SLEEP_TIME"
-            ATTEMPT=$((ATTEMPT + 1))
-          done
-
-          echo "✅ Registry ready"
-
-      - name: 🔐 Login to registry
+      - name: Login registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY_HOST }}
           username: ${{ env.REGISTRY_USERNAME }}
           password: ${{ env.REGISTRY_PASSWORD }}
 
-      - name: 🏗️ Build and push
+      - name: Build & Push
         uses: docker/build-push-action@v5
         with:
           context: ./saas/portfolio
           file: ./saas/portfolio/Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_NAME }}:${{ env.SHA_IMAGE_TAG }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+            registry.freijstack.com/portfolio:latest
+            registry.freijstack.com/portfolio:${{ github.sha }}

@@ -1,4 +1,4 @@
-name: 🐳 SaaS • Registry Deploy
+name: 🐳 Infra • Registry Deploy
 
 on:
   # PROD: auto uniquement sur master quand le code registry change
@@ -7,8 +7,6 @@ on:
     paths:
       - "saas/registry/**"
       - ".github/workflows/03-app-registry-deploy.yml"
-
-  # Staging/Prod: manuel
   workflow_dispatch:
     inputs:
       environment:
@@ -20,60 +18,95 @@ on:
           - staging
           - production
 
-permissions:
-  contents: read
-  actions: read
-
-env:
-  APP_NAME: registry
-  DEPLOY_DIR: /srv/www/registry
-  PROJECT_PATH: saas/registry
-  STAGING_COMPOSE: docker-compose.staging.yml
-  PROD_COMPOSE: docker-compose.prod.yml
-  STAGING_HOST: registry-staging.freijstack.com
-  PROD_HOST: registry.freijstack.com
-  STAGING_UI_HOST: registry-ui-staging.freijstack.com
-  PROD_UI_HOST: registry-ui.freijstack.com
-
 jobs:
-  deploy-staging:
-    name: 🚀 Deploy Registry (Staging)
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging'
+  deploy:
+    name: 🚀 Deploy Registry (${{ github.event.inputs.environment || 'production' }})
     uses: ./.github/workflows/00-core-full-deploy.yml
     with:
       app_name: "registry"
-      environment: "staging"
-      deploy_dir: "/srv/www/registry-staging"
-      project_path: "saas/registry"
-      docker_compose_file: "docker-compose.staging.yml"
-      run_migrations: false
-      skip_security: true
-      skip_lint: true
-    secrets:
-      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-      VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
-      VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
-      REGISTRY_USER_STAGING: ${{ secrets.REGISTRY_USER_STAGING }}
-      REGISTRY_PASSWORD_STAGING: ${{ secrets.REGISTRY_PASSWORD_STAGING }}
-
-  deploy-production:
-    name: 🚀 Deploy Registry (Production)
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
-    uses: ./.github/workflows/00-core-full-deploy.yml
-    with:
-      app_name: "registry"
-      environment: "production"
+      environment: ${{ github.event.inputs.environment || 'production' }}
       deploy_dir: "/srv/www/registry"
       project_path: "saas/registry"
-      docker_compose_file: "docker-compose.prod.yml"
+      docker_compose_file: ${{ (github.event.inputs.environment == 'staging') && 'docker-compose.staging.yml' || 'docker-compose.prod.yml' }}
       run_migrations: false
-      skip_security: true
-      skip_lint: true
+
+      # Optional: when deploying PROD, stop staging containers first (containers only).
+      # This is useful if you don't want both envs running at the same time.
+      custom_script: |
+        set -euo pipefail
+        export DOCKER_CLI_HINTS=false
+
+        : "${APP_NAME:?}"
+        : "${ENVIRONMENT:?}"
+        : "${DEPLOY_DIR:?}"
+        : "${COMPOSE_FILE:?}"
+        : "${GH_REPO:?}"
+        : "${GH_BRANCH:?}"
+        : "${GH_SHA:?}"
+
+        mkdir -p "$DEPLOY_DIR"
+        cd "$DEPLOY_DIR"
+
+        if [ -d ".git" ]; then
+          git fetch origin --tags
+          git reset --hard "origin/${GH_BRANCH}"
+          git clean -fd
+        else
+          git clone -b "${GH_BRANCH}" "https://github.com/${GH_REPO}.git" .
+        fi
+
+        cd "saas/registry"
+
+        if [ "$ENVIRONMENT" = "production" ] && [ -f "docker-compose.staging.yml" ]; then
+          echo "🛑 Registry production deploy: stopping STAGING first (containers only)"
+          docker compose -f docker-compose.staging.yml down --remove-orphans || true
+        fi
+
+        if [ "$ENVIRONMENT" = "production" ]; then
+          COMPOSE_FILE="docker-compose.prod.yml"
+        else
+          COMPOSE_FILE="docker-compose.staging.yml"
+        fi
+
+        # Ensure bind dirs exist if you use bind mounts (recommended)
+        mkdir -p data-prod data-staging || true
+
+        # Generate htpasswd (requires env creds)
+        if [ "$ENVIRONMENT" = "production" ]; then
+          USER="${REGISTRY_USER_PROD:-}"
+          PASS="${REGISTRY_PASSWORD_PROD:-}"
+        else
+          USER="${REGISTRY_USER_STAGING:-}"
+          PASS="${REGISTRY_PASSWORD_STAGING:-}"
+        fi
+
+        if [ -z "${USER}" ] || [ -z "${PASS}" ]; then
+          echo "❌ Missing registry creds for env=${ENVIRONMENT}"
+          exit 1
+        fi
+
+        echo "🔐 Generating .htpasswd (${ENVIRONMENT})"
+        docker run --rm httpd:2 htpasswd -Bbn "$USER" "$PASS" > .htpasswd
+
+        echo "🟢 Deploy registry (${ENVIRONMENT}) without touching volumes"
+        if [ "$ENVIRONMENT" = "production" ]; then
+          docker compose -f "$COMPOSE_FILE" pull
+          docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+        else
+          docker compose -f "$COMPOSE_FILE" down --remove-orphans || true
+          docker compose -f "$COMPOSE_FILE" pull
+          docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+        fi
+
+        docker compose -f "$COMPOSE_FILE" ps
+
     secrets:
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
       VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
       VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
+
+      # Provide both; they are optional in core, but needed at runtime if you deploy that env
       REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
       REGISTRY_PASSWORD_PROD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
+      REGISTRY_USER_STAGING: ${{ secrets.REGISTRY_USER_STAGING }}
+      REGISTRY_PASSWORD_STAGING: ${{ secrets.REGISTRY_PASSWORD_STAGING }}

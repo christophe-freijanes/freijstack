@@ -6,6 +6,63 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.33.0](https://github.com/christophe-freijanes/freijstack/compare/v1.32.7...v1.33.0) (2026-01-04)
+
+### 🚀 Features
+
+* simplify registry deployment workflow and enhance environment input options ([#136](https://github.com/christophe-freijanes/freijstack/issues/136)) ([cffbc0b](https://github.com/christophe-freijanes/freijstack/commit/cffbc0b6c162ffcc57fbb820ddb84d846ff65f2e))
+
+## [1.32.7](https://github.com/christophe-freijanes/freijstack/compare/v1.32.6...v1.32.7) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* **frontend:** align lockfile with CRA react-scripts TS4 ([02ec6cf](https://github.com/christophe-freijanes/freijstack/commit/02ec6cf7b463dbeb4340388a6b278a5ef366382b))
+
+### ♻️ Code Refactoring
+
+* remove commented lines for cleaner workflow file ([72242a4](https://github.com/christophe-freijanes/freijstack/commit/72242a4274c35c5d2d46c5f6a242b1c4c5b595f6))
+
+## [1.32.6](https://github.com/christophe-freijanes/freijstack/compare/v1.32.5...v1.32.6) (2026-01-04)
+
+### ♻️ Code Refactoring
+
+* simplify portfolio deployment workflow by removing staging job and inputs ([aaa70c8](https://github.com/christophe-freijanes/freijstack/commit/aaa70c8fcbab99df6a4d54032a20cc9f2739cf68))
+
+### 🔧 Chores
+
+* **securevault:** align package-lock with node 20 for CI build ([ef85684](https://github.com/christophe-freijanes/freijstack/commit/ef856846bdf19731a7ecf6da329249eeb9c92fa6))
+* **securevault:** regenerate package-lock for docker build ([c05b096](https://github.com/christophe-freijanes/freijstack/commit/c05b0963ab38c1cc2a22bff128a4d008bb0850d9))
+
+## [1.32.5](https://github.com/christophe-freijanes/freijstack/compare/v1.32.4...v1.32.5) (2026-01-04)
+
+### ♻️ Code Refactoring
+
+* streamline portfolio and securevault build workflows, update Dockerfiles for clarity and efficiency ([dfd69cb](https://github.com/christophe-freijanes/freijstack/commit/dfd69cb9b018699ba9b0518e7b3877698e9d0ca0))
+
+## [1.32.4](https://github.com/christophe-freijanes/freijstack/compare/v1.32.3...v1.32.4) (2026-01-04)
+
+### ♻️ Code Refactoring
+
+* update workflow name for clarity ([45e8034](https://github.com/christophe-freijanes/freijstack/commit/45e8034d93a60df3b2f8cdd53bb109a8afaee67e))
+
+## [1.32.3](https://github.com/christophe-freijanes/freijstack/compare/v1.32.2...v1.32.3) (2026-01-04)
+
+### ♻️ Code Refactoring
+
+* remove unused URLs from health check workflows ([62aa19f](https://github.com/christophe-freijanes/freijstack/commit/62aa19f516e13898dc774401f912421128e7d471))
+
+## [1.32.2](https://github.com/christophe-freijanes/freijstack/compare/v1.32.1...v1.32.2) (2026-01-04)
+
+### ♻️ Code Refactoring
+
+* standardize descriptions and improve registry deployment workflows ([6b99d38](https://github.com/christophe-freijanes/freijstack/commit/6b99d38483870d1f16b8e865916141d1d753c53a))
+
+## [1.32.1](https://github.com/christophe-freijanes/freijstack/compare/v1.32.0...v1.32.1) (2026-01-04)
+
+### ♻️ Code Refactoring
+
+* remove unused permissions and environment variables from registry deploy workflow ([ff5ea8f](https://github.com/christophe-freijanes/freijstack/commit/ff5ea8fb8519eb90895c84b7b09c8bf0f2ef78fe))
+
 ## [1.32.0](https://github.com/christophe-freijanes/freijstack/compare/v1.31.0...v1.32.0) (2026-01-04)
 
 ### 🚀 Features
