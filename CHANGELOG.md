@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.25.3](https://github.com/christophe-freijanes/freijstack/compare/v1.25.2...v1.25.3) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* rename registry password secret to REGISTRY_PASSWORD_STAGING for clarity ([125ef60](https://github.com/christophe-freijanes/freijstack/commit/125ef604f1ca7be48ea4f0d7e0392324e81ce08a))
+
 ## [1.25.2](https://github.com/christophe-freijanes/freijstack/compare/v1.25.1...v1.25.2) (2026-01-04)
 
 ### 🐛 Bug Fixes
