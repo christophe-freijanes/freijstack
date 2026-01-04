@@ -1,5 +1,4 @@
 services:
-  # Docker Registry v2 officiel - stockage des images
   registry:
     image: registry:2
     container_name: registry
@@ -17,12 +16,15 @@ services:
       - web
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=web"
       - "traefik.http.routers.registry.rule=Host(`registry.freijstack.com`)"
       - "traefik.http.routers.registry.entrypoints=websecure"
+      - "traefik.http.routers.registry.tls=true"
       - "traefik.http.routers.registry.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.registry.service=registry"
       - "traefik.http.services.registry.loadbalancer.server.port=5000"
+      - "traefik.http.services.registry.loadbalancer.server.scheme=http"
 
-  # UI web pour visualiser et gérer les images du registre
   registry-ui:
     image: joxit/docker-registry-ui:latest
     container_name: registry-ui
@@ -48,10 +50,14 @@ services:
       start_period: 5s
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=web"
       - "traefik.http.routers.registry-ui.rule=Host(`registry-ui.freijstack.com`)"
       - "traefik.http.routers.registry-ui.entrypoints=websecure"
+      - "traefik.http.routers.registry-ui.tls=true"
       - "traefik.http.routers.registry-ui.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.registry-ui.service=registry-ui"
       - "traefik.http.services.registry-ui.loadbalancer.server.port=80"
+      - "traefik.http.services.registry-ui.loadbalancer.server.scheme=http"
 
 volumes:
   registry-data:
