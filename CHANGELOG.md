@@ -6,6 +6,34 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.24.12](https://github.com/christophe-freijanes/freijstack/compare/v1.24.11...v1.24.12) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* update path for .htpasswd generation in deploy workflow ([#126](https://github.com/christophe-freijanes/freijstack/issues/126)) ([f99beac](https://github.com/christophe-freijanes/freijstack/commit/f99beacd888b290cbfd21ed3b8a108c30d17dd90))
+
+## [1.24.11](https://github.com/christophe-freijanes/freijstack/compare/v1.24.10...v1.24.11) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* update registry password secret for staging deployment ([954664e](https://github.com/christophe-freijanes/freijstack/commit/954664ebbfa1ce85bb120d4bba9bf72d9fed73f2))
+
+## [1.24.10](https://github.com/christophe-freijanes/freijstack/compare/v1.24.9...v1.24.10) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* update registry password secret for staging deployment ([5c3a70f](https://github.com/christophe-freijanes/freijstack/commit/5c3a70f8d2223dc6fa0429c16773d4ff1dab70ec))
+
+## [1.24.9](https://github.com/christophe-freijanes/freijstack/compare/v1.24.8...v1.24.9) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* add Docker login step for production deployment and update secrets in portfolio deploy workflow ([4f82cd1](https://github.com/christophe-freijanes/freijstack/commit/4f82cd1e5e15f13ab41fd86718769610ab4b7ac7))
+
+### 🔧 Chores
+
+* trigger workflows ([#125](https://github.com/christophe-freijanes/freijstack/issues/125)) ([a94d369](https://github.com/christophe-freijanes/freijstack/commit/a94d369befd86b554e65ed0ffcc38d112c737f56))
+
 ## [1.24.8](https://github.com/christophe-freijanes/freijstack/compare/v1.24.7...v1.24.8) (2026-01-04)
 
 ### 🐛 Bug Fixes
