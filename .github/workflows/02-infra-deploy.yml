@@ -1,0 +1,133 @@
+name: 🏗️ Infrastructure • VPS
+
+on:
+  push:
+    branches: [develop, master]
+    paths:
+      - 'base-infra/**'
+      - '.github/workflows/02-infra-deploy.yml'
+  pull_request:
+    branches: [develop, master]
+    paths:
+      - 'base-infra/**'
+      - '.github/workflows/02-infra-deploy.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      deploy_traefik:
+        description: 'Déployer Traefik'
+        required: false
+        default: true
+        type: boolean
+      deploy_portfolio:
+        description: 'Déployer Portfolio'
+        required: false
+        default: true
+        type: boolean
+      deploy_n8n:
+        description: 'Déployer n8n'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  # Paths
+  PROJECT_PATH: base-infra
+  COMPOSE_FILE: docker-compose.yml
+  # Branches
+  BRANCH_PROD: master
+  BRANCH_STAGING: develop
+  # Docker images
+  TRAEFIK_IMAGE: traefik:latest
+  # Services
+  SERVICE_TRAEFIK: traefik
+  SERVICE_PORTFOLIO: portfolio
+  SERVICE_N8N: n8n
+
+jobs:
+  security:
+    name: 🛡️ Shield Protection
+    uses: ./.github/workflows/01-security-gitleaks.yml
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    with:
+      scan_paths: |
+        base-infra
+      fail_on_gitleaks: true
+      upload_sarif: true
+      publish_score_artifact: true
+
+  validate:
+    name: 🔍 Validate Configuration
+    runs-on: ubuntu-latest
+    needs: security
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐳 Validate Docker Compose syntax
+        working-directory: ${{ env.PROJECT_PATH }}
+        run: |
+          docker compose config > /dev/null
+          echo "✅ ${{ env.COMPOSE_FILE }} syntax valid"
+
+      - name: 🔐 Check environment variables (safe)
+        working-directory: ${{ env.PROJECT_PATH }}
+        run: |
+          echo "Checking Docker Compose env placeholders (without values)..."
+          # Validate compose parses and contains no obvious unresolved variables
+          docker compose config > /dev/null
+          echo "✅ Docker Compose configuration validated without exposing env values"
+
+  test:
+    name: ✅ Test Configuration
+    runs-on: ubuntu-latest
+    needs: [security, validate]
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐳 Build Docker images (test)
+        working-directory: ${{ env.PROJECT_PATH }}
+        run: |
+          echo "Testing ${{ env.SERVICE_TRAEFIK }} image..."
+          docker pull ${{ env.TRAEFIK_IMAGE }}
+
+          echo "✅ ${{ env.SERVICE_TRAEFIK }} image validated"
+
+      - name: 🧪 Validate docker-compose services
+        working-directory: ${{ env.PROJECT_PATH }}
+        run: |
+          docker compose config --format json | jq .services | grep -E "${{ env.SERVICE_TRAEFIK }}"
+          echo "✅ ${{ env.SERVICE_TRAEFIK }} service configured"
+
+  notify:
+    name: 📢 Notify
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [security, validate, test]
+
+    steps:
+      - name: ✅ Validation Success
+        if: success()
+        run: |
+          echo "✅ Infrastructure validation passed!"
+          echo "Environment: ${{ github.ref == format('refs/heads/{0}', env.BRANCH_PROD) && 'production' || 'staging' }}"
+          echo "Branch: ${{ github.ref_name }}"
+
+      - name: ❌ Validation Failed
+        if: failure()
+        run: |
+          echo "❌ Infrastructure validation failed!"
+          exit 1

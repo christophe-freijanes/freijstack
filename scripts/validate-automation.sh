@@ -27,10 +27,10 @@ echo "📁 Vérification de la structure..."
 echo ""
 
 files_to_check=(
-  ".github/workflows/securevault-deploy.yml"
-  ".github/workflows/production-healthcheck.yml"
-  ".github/workflows/backup.yml"
-  "docs/AUTOMATION.md"
+  ".github/workflows/03-app-securevault-deploy.yml"
+  ".github/workflows/05-health-prod.yml"
+  ".github/workflows/06-maint-backup.yml"
+  "docs/03-guides/AUTOMATION_GUIDE.md"
   "scripts/run-migrations.sh"
   "scripts/backup-to-cloud.sh"
 )
@@ -51,16 +51,16 @@ echo ""
 echo "🔄 Vérification des workflows..."
 echo ""
 
-# Vérifier securevault-deploy.yml
-if grep -q "destroy-staging:" .github/workflows/securevault-deploy.yml 2>/dev/null; then
-  echo -e "  ${GREEN}✓${NC} Job 'destroy-staging' trouvé dans securevault-deploy.yml"
+# Vérifier 03-app-securevault-deploy.yml
+if grep -q "destroy-staging:" .github/workflows/03-app-securevault-deploy.yml 2>/dev/null; then
+  echo -e "  ${GREEN}✓${NC} Job 'destroy-staging' trouvé dans 03-app-securevault-deploy.yml"
   ((SUCCESS++))
 else
-  echo -e "  ${RED}✗${NC} Job 'destroy-staging' manquant dans securevault-deploy.yml"
+  echo -e "  ${RED}✗${NC} Job 'destroy-staging' manquant dans 03-app-securevault-deploy.yml"
   ((ERRORS++))
 fi
 
-if grep -q "refs/heads/master" .github/workflows/securevault-deploy.yml 2>/dev/null; then
+if grep -q "refs/heads/master" .github/workflows/03-app-securevault-deploy.yml 2>/dev/null; then
   echo -e "  ${GREEN}✓${NC} Déploiement automatique sur master configuré"
   ((SUCCESS++))
 else
@@ -113,7 +113,7 @@ echo ""
 echo "📚 Vérification de la documentation..."
 echo ""
 
-if grep -q "Destruction Automatique du Staging" docs/AUTOMATION.md 2>/dev/null; then
+if grep -q "Destruction Automatique du Staging" docs/03-guides/AUTOMATION_GUIDE.md 2>/dev/null; then
   echo -e "  ${GREEN}✓${NC} Documentation automatisation complète"
   ((SUCCESS++))
 else
@@ -121,11 +121,11 @@ else
   ((WARNINGS++))
 fi
 
-if grep -q "AUTOMATION.md" docs/README.md 2>/dev/null; then
-  echo -e "  ${GREEN}✓${NC} Référence AUTOMATION.md dans README principal"
+if grep -q "AUTOMATION_GUIDE.md" docs/README.md 2>/dev/null; then
+  echo -e "  ${GREEN}✓${NC} Référence AUTOMATION_GUIDE.md dans README principal"
   ((SUCCESS++))
 else
-  echo -e "  ${YELLOW}⚠${NC}  Référence AUTOMATION.md manquante dans README"
+  echo -e "  ${YELLOW}⚠${NC}  Référence AUTOMATION_GUIDE.md manquante dans README"
   ((WARNINGS++))
 fi
 
@@ -177,7 +177,7 @@ else
   echo -e "${RED}❌ Automatisation incomplète - Erreurs détectées${NC}"
   echo ""
   echo "Veuillez corriger les erreurs avant de déployer."
-  echo "Consultez la documentation : docs/AUTOMATION.md"
+  echo "Consultez la documentation : docs/03-guides/AUTOMATION_GUIDE.md"
   echo ""
   exit 1
 fi

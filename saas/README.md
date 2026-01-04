@@ -280,9 +280,9 @@ curl https://registry.freijstack.com/v2/_catalog
 - **Portfolio**: [portfolio/README.md](portfolio/README.md)
 - **SecureVault**: [securevault/README.md](securevault/README.md)
 - **Docker Registry**: [registry/README.md](registry/README.md)
-- **Architecture**: [../docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md)
-- **Déploiement**: [../docs/DEPLOYMENT.md](../docs/DEPLOYMENT.md)
-- **CI/CD**: [../docs/CI_CD_ARCHITECTURE.md](../docs/CI_CD_ARCHITECTURE.md)
+- **Architecture**: [../docs/01-architecture/ARCHITECTURE.md](../docs/01-architecture/ARCHITECTURE.md)
+- **Déploiement**: [../docs/02-deployment/DEPLOYMENT.md](../docs/02-deployment/DEPLOYMENT.md)
+- **CI/CD**: [../docs/01-architecture/CI_CD_ARCHITECTURE.md](../docs/01-architecture/CI_CD_ARCHITECTURE.md)
 
 ---
 

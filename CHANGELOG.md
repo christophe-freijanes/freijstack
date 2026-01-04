@@ -6,6 +6,76 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.21.8](https://github.com/christophe-freijanes/freijstack/compare/v1.21.7...v1.21.8) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* ensure lingering containers are force removed during deployment ([8450e8c](https://github.com/christophe-freijanes/freijstack/commit/8450e8c906ef5af81d4eeae06bbaf5b1f4a75c65))
+
+## [1.21.7](https://github.com/christophe-freijanes/freijstack/compare/v1.21.6...v1.21.7) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* force remove lingering containers during deployment to prevent conflicts ([e0004ae](https://github.com/christophe-freijanes/freijstack/commit/e0004aea5a96e6b89b123b0d73d1d3725a352c69))
+
+## [1.21.6](https://github.com/christophe-freijanes/freijstack/compare/v1.21.5...v1.21.6) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* enhance deployment script to handle fixed container names and staging environment safely ([dcc8545](https://github.com/christophe-freijanes/freijstack/commit/dcc8545411a8eefdea395f5cc993b4ec4c5488c5))
+
+## [1.21.5](https://github.com/christophe-freijanes/freijstack/compare/v1.21.4...v1.21.5) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* update docker compose file paths for staging and production deployments ([1a0d994](https://github.com/christophe-freijanes/freijstack/commit/1a0d994fa0c54bbb4aaf7a424b709e83b40f01d1))
+
+### 🔧 Chores
+
+* remove lint workflow configuration ([eee3be1](https://github.com/christophe-freijanes/freijstack/commit/eee3be125f35a46c0e356a5a3005879f667c871f))
+
+## [1.21.4](https://github.com/christophe-freijanes/freijstack/compare/v1.21.3...v1.21.4) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* Remove unnecessary newline in markdown lint job ([592657d](https://github.com/christophe-freijanes/freijstack/commit/592657d8c1498960fd2f045d195f88da60e5f275))
+
+## [1.21.3](https://github.com/christophe-freijanes/freijstack/compare/v1.21.2...v1.21.3) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* Ensure data directory exists for volume bind mounts in deployment workflow ([7122c04](https://github.com/christophe-freijanes/freijstack/commit/7122c04780655fee98811a8e8d5c56cff0d7ecd0))
+
+## [1.21.2](https://github.com/christophe-freijanes/freijstack/compare/v1.21.1...v1.21.2) (2026-01-03)
+
+### ♻️ Code Refactoring
+
+* Remove JSON validation job from lint workflow ([3d99da7](https://github.com/christophe-freijanes/freijstack/commit/3d99da774f5ab56a857026bd38806aab766be90c))
+
+## [1.21.1](https://github.com/christophe-freijanes/freijstack/compare/v1.21.0...v1.21.1) (2026-01-03)
+
+### 🐛 Bug Fixes
+
+* Add SSH_OPTIONS persistence and ensure defaults in deployment workflow ([4dea164](https://github.com/christophe-freijanes/freijstack/commit/4dea164c038fd3af150ed1387121af5780f0c5d4))
+
+### 📚 Documentation
+
+* auto-generate diagrams and index [skip ci] ([8705987](https://github.com/christophe-freijanes/freijstack/commit/8705987771583c02abb63a00e85fa8baf705194f))
+* auto-generate diagrams and index [skip ci] ([7914980](https://github.com/christophe-freijanes/freijstack/commit/79149809d8159b825e336ea02067d86cb891db5f))
+* auto-generate diagrams and index [skip ci] ([e4811f4](https://github.com/christophe-freijanes/freijstack/commit/e4811f497ea95552983dd03e63afc406d83192b2))
+* auto-generate diagrams and index [skip ci] ([6c7de9c](https://github.com/christophe-freijanes/freijstack/commit/6c7de9c7bc05cb7f5682c5628c56a863957f714d))
+* auto-generate diagrams and index [skip ci] ([756bb88](https://github.com/christophe-freijanes/freijstack/commit/756bb883918cc1b55661cf998f2d9504c710ffec))
+* auto-generate diagrams and index [skip ci] ([cadebf8](https://github.com/christophe-freijanes/freijstack/commit/cadebf8061226af300ad1fd96685f9303dcf496c))
+* auto-generate diagrams and index [skip ci] ([881e638](https://github.com/christophe-freijanes/freijstack/commit/881e638286b57853c6f0439f06befd6d07289667))
+
+### 🔧 Chores
+
+* clean up comments and paths in registry deploy workflow ([5b377d7](https://github.com/christophe-freijanes/freijstack/commit/5b377d7d56862ddfef694a5545dd5087240af0ed))
+* enhance health check workflows with smart cooldown and timeout adjustments ([019d618](https://github.com/christophe-freijanes/freijstack/commit/019d61864dcb72cdf2760539e7eb6f3515a08078))
+* implement smart cooldown for post-deploy health check ([0ce0b32](https://github.com/christophe-freijanes/freijstack/commit/0ce0b3266af3393d124584d1a259bedff56143e7))
+* update healthcheck cooldown duration and enhance ops documentation ([66d20fe](https://github.com/christophe-freijanes/freijstack/commit/66d20fe96db0d7a414c20209dbf7e9d7e770a4ca))
+* update securevault deploy workflow comments for clarity ([270928c](https://github.com/christophe-freijanes/freijstack/commit/270928ce55e491395f0a512811304ebfeb6b4b78))
+
 ## [1.21.0](https://github.com/christophe-freijanes/freijstack/compare/v1.20.1...v1.21.0) (2026-01-03)
 
 ### 🚀 Features

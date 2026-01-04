@@ -271,8 +271,8 @@ git push origin master
 
 ## 📚 Documentation
 
-- **Architecture**: [../../docs/ARCHITECTURE.md](../../docs/ARCHITECTURE.md)
-- **Déploiement**: [../../docs/DEPLOYMENT.md](../../docs/DEPLOYMENT.md)
+- **Architecture**: [../../docs/01-architecture/ARCHITECTURE.md](../../docs/01-architecture/ARCHITECTURE.md)
+- **Déploiement**: [../../docs/02-deployment/DEPLOYMENT.md](../../docs/02-deployment/DEPLOYMENT.md)
 - **SaaS Apps**: [../README.md](../README.md)
 - **Infrastructure**: [../../base-infra/README.md](../../base-infra/README.md)
 

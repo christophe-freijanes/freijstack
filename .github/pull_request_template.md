@@ -1,11 +1,11 @@
 ## ✅ Status
 
-[![Infrastructure](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/infrastructure-deploy.yml?branch=master&label=Infrastructure&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/infrastructure-deploy.yml)
-[![Prod Health](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/healthcheck-prod.yml?branch=develop&label=Prod%20Health&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/healthcheck-prod.yml)
-[![Dev Health](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/healthcheck-dev.yml?branch=develop&label=Dev%20Health&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/healthcheck-dev.yml)
-[![CodeQL](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/codeql.yml?branch=master&label=CodeQL&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/codeql.yml)
-[![Security Check](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/securitycheck-schedule.yml?branch=develop&label=Security%20Check&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/securitycheck-schedule.yml)
-[![Security Score](https://img.shields.io/endpoint?cacheSeconds=60&url=https%3A%2F%2Fchristophe-freijanes.github.io%2Ffreijstack%2Fsecurity-score.json&style=flat-square)](https://christophe-freijanes.github.io/freijstack/)
+[![Infrastructure](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/02-infra-deploy.yml?branch=master&label=Infrastructure&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/02-infra-deploy.yml)
+[![Prod Health](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/05-health-prod.yml?branch=develop&label=Prod%20Health&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/05-health-prod.yml)
+[![Dev Health](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/05-health-dev.yml?branch=develop&label=Dev%20Health&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/05-health-dev.yml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/01-security-codeql.yml?branch=master&label=CodeQL&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/01-security-codeql.yml)
+[![Security Scan](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/01-security-publish-score.yml?label=Security%20Score&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/01-security-publish-score.yml)
+[![Full Deploy](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/00-core-full-deploy.yml?label=Full%20Deploy&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/00-core-full-deploy.yml)
 
 ---
 
@@ -34,7 +34,6 @@ Ex :
 - [ ] 🚦 **CI GitHub Actions** verte
 - [ ] 🔐 **Security Inspector** OK (pas de leaks)
 - [ ] 🧠 **CodeQL** sans vulnérabilité critique
-- [ ] 🔍 **ActionLint** workflows validés (pas d'erreur)
 - [ ] 🧪 **Tests / staging** validés (si applicable)
 - [ ] 📚 **Docs mises à jour** si nécessaire
 - [ ] 🔄 **Rollback possible** (au moins identifié)

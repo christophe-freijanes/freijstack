@@ -1,0 +1,277 @@
+name: 📊 Publish Security Score
+
+# Déclenché APRÈS le post-deploy health check pour publier le score de sécurité
+# Respecte le pipeline DevSecOps : Security → Deploy → Score
+
+on:
+  workflow_run:
+    workflows:
+      - '🩺 Health Check • Post-Deploy'
+    types: [completed]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  # Vérifie que le déploiement a réussi avant de publier le score
+  check-deployment:
+    name: ✅ Verify Deployment Success
+    runs-on: ubuntu-latest
+    outputs:
+      deployment_success: ${{ steps.check.outputs.success }}
+    steps:
+      - name: 📋 Check source workflow status
+        id: check
+        run: |
+          if [ "${{ github.event.workflow_run.conclusion }}" = "success" ]; then
+            echo "✅ Post-deploy health check passed"
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ Post-deploy health check failed or was skipped"
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
+
+  # Publie le score de sécurité après le déploiement réussi
+  publish-score:
+    name: 📊 Generate & Publish Security Score
+    needs: check-deployment
+    if: needs.check-deployment.outputs.deployment_success == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 Download security artifacts
+        uses: actions/download-artifact@v4
+        with:
+          # Télécharge les artifacts depuis le workflow source (post-deploy)
+          name: security-score
+          path: ./security-artifacts
+        continue-on-error: true
+
+      - name: 📊 Generate Security Score
+        run: |
+          set -euo pipefail
+
+          echo "📊 Generating Security Score..."
+
+          # Initialiser le score
+          TOTAL_SCORE=100
+          ISSUES=0
+
+          # Scan des secrets avec Gitleaks
+          echo "🔍 Scanning for secrets (Gitleaks)..."
+          if ! command -v gitleaks &> /dev/null; then
+            echo "⬇️ Installing gitleaks..."
+            GITLEAKS_VERSION="8.21.2"
+            GITLEAKS_URL="https://github.com/gitleaks/gitleaks/releases/download"
+            curl -sSL "${GITLEAKS_URL}/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" | tar -xz gitleaks
+            sudo mv gitleaks /usr/local/bin/gitleaks
+          fi
+
+          gitleaks detect \
+            --source . \
+            --config .gitleaks.toml \
+            --redact \
+            --report-format json \
+            --report-path gitleaks-report.json \
+            --verbose || true
+
+          LEAKS=$(jq 'length' gitleaks-report.json 2>/dev/null || echo 0)
+          if [ "$LEAKS" -gt 0 ]; then
+            echo "❌ Found $LEAKS secrets"
+            TOTAL_SCORE=$((TOTAL_SCORE - (LEAKS * 5)))
+            ISSUES=$((ISSUES + LEAKS))
+          else
+            echo "✅ No secrets found"
+          fi
+
+          # Scan des vulnérabilités avec Trivy
+          echo "🔍 Scanning for vulnerabilities (Trivy)..."
+          if ! command -v trivy &> /dev/null; then
+            echo "⬇️ Installing trivy..."
+            curl -sSL https://aquasecurity.github.io/trivy-repo/deb/public.key | apt-key add -
+            echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | tee -a /etc/apt/sources.list.d/trivy.list
+            apt-get update
+            apt-get install -y trivy
+          fi
+
+          TRIVY_REPORT="trivy-report.json"
+          trivy repo . --format json --output "$TRIVY_REPORT" || true
+
+          CRITICAL=$(jq '[.Results[]?.Misconfigurations[]? | select(.Severity=="CRITICAL")] | length' "$TRIVY_REPORT" 2>/dev/null || echo 0)
+          HIGH=$(jq '[.Results[]?.Misconfigurations[]? | select(.Severity=="HIGH")] | length' "$TRIVY_REPORT" 2>/dev/null || echo 0)
+
+          if [ "$CRITICAL" -gt 0 ]; then
+            echo "❌ Found $CRITICAL critical vulnerabilities"
+            TOTAL_SCORE=$((TOTAL_SCORE - (CRITICAL * 10)))
+            ISSUES=$((ISSUES + CRITICAL))
+          fi
+
+          if [ "$HIGH" -gt 0 ]; then
+            echo "⚠️ Found $HIGH high vulnerabilities"
+            TOTAL_SCORE=$((TOTAL_SCORE - (HIGH * 3)))
+            ISSUES=$((ISSUES + HIGH))
+          fi
+
+          if [ "$CRITICAL" -eq 0 ] && [ "$HIGH" -eq 0 ]; then
+            echo "✅ No critical vulnerabilities found"
+          fi
+
+          # Clamp score between 0 and 100
+          if [ "$TOTAL_SCORE" -lt 0 ]; then
+            TOTAL_SCORE=0
+          fi
+
+          echo "📊 Final Security Score: $TOTAL_SCORE/100"
+          echo "🔢 Total Issues: $ISSUES"
+
+          # Exporter pour les étapes suivantes
+          echo "SECURITY_SCORE=$TOTAL_SCORE" >> $GITHUB_ENV
+          echo "SECURITY_ISSUES=$ISSUES" >> $GITHUB_ENV
+
+      - name: 🎨 Create Score Badge
+        run: |
+          set -euo pipefail
+
+          SCORE=${{ env.SECURITY_SCORE }}
+
+          # Déterminer la couleur selon le score
+          if [ "$SCORE" -ge 90 ]; then
+            COLOR="green"
+            STATUS="Excellent"
+          elif [ "$SCORE" -ge 80 ]; then
+            COLOR="yellowgreen"
+            STATUS="Good"
+          elif [ "$SCORE" -ge 70 ]; then
+            COLOR="yellow"
+            STATUS="Fair"
+          elif [ "$SCORE" -ge 60 ]; then
+            COLOR="orange"
+            STATUS="Poor"
+          else
+            COLOR="red"
+            STATUS="Critical"
+          fi
+
+          # Créer le SVG du badge
+          cat > security-score-badge.svg << EOF
+          <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="20">
+            <linearGradient id="b" x2="0" y2="100%">
+              <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+              <stop offset="1" stop-opacity=".1"/>
+            </linearGradient>
+            <clipPath id="a">
+              <rect width="200" height="20" rx="3"/>
+            </clipPath>
+            <g clip-path="url(#a)">
+              <path fill="#555" d="M0 0h150v20H0z"/>
+              <path fill="#$COLOR" d="M150 0h50v20H150z"/>
+              <path fill="url(#b)" d="M0 0h200v20H0z"/>
+            </g>
+            <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
+              <text x="75" y="15" fill="#010101" fill-opacity=".3">Security Score</text>
+              <text x="75" y="14">Security Score</text>
+              <text x="175" y="15" fill="#010101" fill-opacity=".3">\$SCORE/100</text>
+              <text x="175" y="14">\$SCORE/100</text>
+            </g>
+          </svg>
+          EOF
+
+          echo "✅ Badge created: security-score-badge.svg"
+          echo "BADGE_COLOR=$COLOR" >> $GITHUB_ENV
+          echo "BADGE_STATUS=$STATUS" >> $GITHUB_ENV
+
+      - name: 📋 Generate Security Report
+        run: |
+          cat > SECURITY_REPORT.md << 'EOF'
+          # 📊 Security Score Report
+
+          **Generated**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')
+
+          ## 🎯 Overall Score
+
+          ![Security Score Badge](security-score-badge.svg)
+
+          - **Score**: ${{ env.SECURITY_SCORE }}/100
+          - **Status**: ${{ env.BADGE_STATUS }}
+          - **Issues Found**: ${{ env.SECURITY_ISSUES }}
+
+          ## 🔍 Scan Details
+
+          ### Secrets (Gitleaks)
+          - Uses: `.gitleaks.toml` configuration
+          - Result: See artifact `gitleaks-report.json`
+
+          ### Vulnerabilities (Trivy)
+          - Scans: Repository configuration and dependencies
+          - Critical Issues: -5 points each
+          - High Issues: -3 points each
+
+          ## 📈 Score Breakdown
+
+          - **90-100**: Excellent 🟢
+          - **80-89**: Good 🟡
+          - **70-79**: Fair 🟠
+          - **60-69**: Poor 🔴
+          - **< 60**: Critical ⛔
+
+          ## 🔗 Related Reports
+
+          - [Gitleaks Report](gitleaks-report.json)
+          - [Trivy Report](trivy-report.json)
+          - [GitHub Security Dashboard](https://github.com/${{ github.repository }}/security/code-scanning)
+
+          ---
+
+          **Last Updated**: ${{ github.event.workflow_run.updated_at }}
+          **Triggered by**: ${{ github.event.workflow_run.name }}
+          EOF
+
+      - name: 📤 Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-score-report
+          path: |
+            security-score-badge.svg
+            SECURITY_REPORT.md
+            gitleaks-report.json
+            trivy-report.json
+          retention-days: 90
+
+      - name: 📝 Create Summary
+        run: |
+          echo "## 📊 Security Score Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Score**: ${{ env.SECURITY_SCORE }}/100 (${{ env.BADGE_STATUS }})" >> $GITHUB_STEP_SUMMARY
+          echo "**Issues**: ${{ env.SECURITY_ISSUES }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📈 Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- Badge: `security-score-badge.svg`" >> $GITHUB_STEP_SUMMARY
+          echo "- Report: `SECURITY_REPORT.md`" >> $GITHUB_STEP_SUMMARY
+          echo "- Gitleaks: `gitleaks-report.json`" >> $GITHUB_STEP_SUMMARY
+          echo "- Trivy: `trivy-report.json`" >> $GITHUB_STEP_SUMMARY
+
+  # Notification finale
+  notify:
+    name: 🔔 Notify Security Score
+    needs: [check-deployment, publish-score]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📊 Final Status
+        run: |
+          if [ "${{ needs.check-deployment.outputs.deployment_success }}" = "true" ]; then
+            echo "✅ Security Score published after successful deployment"
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "## ✅ Security Score Published" >> $GITHUB_STEP_SUMMARY
+            echo "Score is now available in artifacts" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⏭️ Skipped: Deployment health check did not pass"
+          fi

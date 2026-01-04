@@ -15,12 +15,12 @@ The portfolio is a static website served by nginx in Docker containers, managed 
 
 When you push changes to the `develop` or `master` branch:
 
-1. **GitHub Actions triggers `portfolio-build.yml`**
+1. **GitHub Actions triggers `03-app-portfolio-build.yml`**
    - Builds Docker image from `saas/portfolio/Dockerfile`
    - Tags: `latest-beta` (staging) or `latest` (production)
    - Pushes to private Docker registry
    
-2. **GitHub Actions triggers `portfolio-deploy.yml`**
+2. **GitHub Actions triggers `03-app-portfolio-deploy.yml`**
    - Pulls new image from registry
    - Restarts containers on VPS
    - Verifies health checks
@@ -125,7 +125,7 @@ saas/portfolio/
 
 ## Workflows
 
-### Build Workflow (`.github/workflows/portfolio-build.yml`)
+### Build Workflow (`.github/workflows/03-app-portfolio-build.yml`)
 
 **Triggers:**
 - Push to `saas/portfolio/**` on `develop` or `master`
@@ -139,10 +139,10 @@ saas/portfolio/
 **Output:**
 - Images pushed to `registry.freijstack.com/portfolio`
 
-### Deploy Workflow (`.github/workflows/portfolio-deploy.yml`)
+### Deploy Workflow (`.github/workflows/03-app-portfolio-deploy.yml`)
 
 **Triggers:**
-- Auto-triggers when `portfolio-build.yml` completes successfully
+- Auto-triggers when `03-app-portfolio-build.yml` completes successfully
 
 **Jobs:**
 1. Deploy to staging VPS (develop branch)
@@ -239,6 +239,6 @@ ssh ${VPS_USER}@${VPS_HOST} "cd /srv/www/portfolio && \
 ## Next Steps
 
 1. **Test workflow triggers** - push a small change to `saas/portfolio/**`
-2. **Monitor GitHub Actions** - ensure `portfolio-build.yml` and `portfolio-deploy.yml` complete
+2. **Monitor GitHub Actions** - ensure `03-app-portfolio-build.yml` and `03-app-portfolio-deploy.yml` complete
 3. **Verify deployment** - access portfolio URLs and confirm changes
 4. **Enable auto-deploy** - once workflows work, deployments are fully automated

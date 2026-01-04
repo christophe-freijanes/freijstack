@@ -82,7 +82,7 @@ Triggers créés :
 
 ## 🚀 Exécution Automatique (GitHub Actions)
 
-Les migrations sont **automatiquement exécutées** à chaque déploiement via le workflow `.github/workflows/securevault-deploy.yml`.
+Les migrations sont **automatiquement exécutées** à chaque déploiement via le workflow `.github/workflows/03-app-securevault-deploy.yml`.
 
 Le workflow :
 1. ✅ Vérifie que PostgreSQL est prêt
@@ -221,7 +221,7 @@ run_migration "backend/migrations/003_feature_name.sql" "my_new_table"
 
 ### 5. Mettre à jour le workflow
 
-Le workflow détecte automatiquement les nouveaux fichiers, mais vous pouvez ajouter une vérification explicite dans `.github/workflows/securevault-deploy.yml` si besoin.
+Le workflow détecte automatiquement les nouveaux fichiers, mais vous pouvez ajouter une vérification explicite dans `.github/workflows/03-app-securevault-deploy.yml` si besoin.
 
 ---
 
