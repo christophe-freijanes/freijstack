@@ -249,8 +249,17 @@ jobs:
             # Deploy with Docker Compose
             echo "🐳 Deploying with $COMPOSE_FILE..."
             if [ -f "$COMPOSE_FILE" ]; then
-              # In production: NEVER use 'down' to preserve data volumes
-              # In staging: Clean containers but PRESERVE volumes for persistent data (images, cache)
+              # Always stop the other registry environment before starting this one (shared volume scenario)
+              if [ "$APP_NAME" = "registry" ]; then
+                if [ "$ENVIRONMENT" = "production" ]; then
+                  echo "🛑 Stopping staging registry before starting production registry..."
+                  docker compose -f docker-compose.staging.yml down || true
+                elif [ "$ENVIRONMENT" = "staging" ]; then
+                  echo "🛑 Stopping production registry before starting staging registry..."
+                  docker compose -f docker-compose.prod.yml down || true
+                fi
+              fi
+
               if [ "$ENVIRONMENT" = "production" ]; then
                 echo "🔄 Production deployment: updating containers without touching volumes..."
                 # Docker login avant pull
