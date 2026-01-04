@@ -6,6 +6,18 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.24.12](https://github.com/christophe-freijanes/freijstack/compare/v1.24.11...v1.24.12) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* update path for .htpasswd generation in deploy workflow ([#126](https://github.com/christophe-freijanes/freijstack/issues/126)) ([f99beac](https://github.com/christophe-freijanes/freijstack/commit/f99beacd888b290cbfd21ed3b8a108c30d17dd90))
+
+## [1.24.11](https://github.com/christophe-freijanes/freijstack/compare/v1.24.10...v1.24.11) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* update registry password secret for staging deployment ([954664e](https://github.com/christophe-freijanes/freijstack/commit/954664ebbfa1ce85bb120d4bba9bf72d9fed73f2))
+
 ## [1.24.10](https://github.com/christophe-freijanes/freijstack/compare/v1.24.9...v1.24.10) (2026-01-04)
 
 ### 🐛 Bug Fixes
