@@ -221,11 +221,7 @@ jobs:
               fi
               
               if [ -z "$REGISTRY_USERNAME" ]; then
-                echo "⚠️ Warning: REGISTRY_USERNAME not set, .htpasswd may not be created correctly"
-              fi
-              
-              if [ -z "$REGISTRY_USERNAME" ]; then
-                echo "❌ Error: REGISTRY_USERNAME could not be determined from .env"
+                echo "❌ Error: REGISTRY_USERNAME not set for $ENVIRONMENT environment"
                 exit 1
               fi
               
