@@ -45,17 +45,17 @@ jobs:
       upload_sarif: true
       publish_score_artifact: true
 
-  build-and-push-staging:
-    name: 🏗️ Build & Push (staging)
+  build-and-push-registry-staging:
+    name: 🏗️ Build & Push (registry-staging.freijstack.com)
     runs-on: ubuntu-latest
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/develop') ||
       (github.event_name == 'workflow_dispatch' && inputs.environment == 'staging')
 
     env:
-      REGISTRY_HOST: registry.freijstack.com
-      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME_PROD }}
-      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
+      REGISTRY_HOST: registry-staging.freijstack.com
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
 
     steps:
       - name: 📥 Checkout
@@ -71,6 +71,24 @@ jobs:
 
       - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
+      - name: ✅ Check registry availability
+        run: |
+          echo "🔍 Vérification de la disponibilité du registry..."
+          MAX_ATTEMPTS=15  # 15 tentatives
+          ATTEMPT=1
+          SLEEP_TIME=60   # 60 secondes entre les tentatives (total: ~15 minutes)
+
+          until curl -s -w "\n%{http_code}" "https://${{ env.REGISTRY_HOST }}/v2/" 2>/dev/null | tail -n1 | grep -qE '^(200|401|403)$'; do
+            if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+              echo "❌ Registry non disponible après $((MAX_ATTEMPTS * SLEEP_TIME / 60)) minutes"
+              exit 1
+            fi
+            echo "⏳ Tentative $ATTEMPT/$MAX_ATTEMPTS - Registry indisponible, nouvelle tentative dans ${SLEEP_TIME}s..."
+            sleep $SLEEP_TIME
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+          echo "✅ Registry disponible et accessible"
 
       - name: 🔐 Login to registry
         uses: docker/login-action@v3
@@ -91,8 +109,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  build-and-push-prod:
-    name: 🏗️ Build & Push (production)
+  build-and-push-registry:
+    name: 🏗️ Build & Push (registry.freijstack.com)
     runs-on: ubuntu-latest
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
@@ -117,6 +135,24 @@ jobs:
 
       - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
+      - name: ✅ Check registry availability
+        run: |
+          echo "🔍 Vérification de la disponibilité du registry..."
+          MAX_ATTEMPTS=15  # 15 tentatives
+          ATTEMPT=1
+          SLEEP_TIME=60   # 60 secondes entre les tentatives (total: ~15 minutes)
+
+          until curl -s -w "\n%{http_code}" "https://${{ env.REGISTRY_HOST }}/v2/" 2>/dev/null | tail -n1 | grep -qE '^(200|401|403)$'; do
+            if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+              echo "❌ Registry non disponible après $((MAX_ATTEMPTS * SLEEP_TIME / 60)) minutes"
+              exit 1
+            fi
+            echo "⏳ Tentative $ATTEMPT/$MAX_ATTEMPTS - Registry indisponible, nouvelle tentative dans ${SLEEP_TIME}s..."
+            sleep $SLEEP_TIME
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+          echo "✅ Registry disponible et accessible"
 
       - name: 🔐 Login to registry
         uses: docker/login-action@v3

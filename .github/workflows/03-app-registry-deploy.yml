@@ -3,6 +3,9 @@ name: 🐳 SaaS • Docker Registry
 on:
   push:
     branches: [develop, master]
+    paths:
+      - 'saas/registry/**'
+      - '.github/workflows/03-app-registry-deploy.yml'
   pull_request:
     branches: [develop, master]
     paths:
@@ -37,6 +40,8 @@ jobs:
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
       VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
       VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
 
   deploy-production:
     name: 🔒 Full Pipeline (Production)
@@ -53,3 +58,5 @@ jobs:
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
       VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
       VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME_PROD }}
+      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD_PROD }}

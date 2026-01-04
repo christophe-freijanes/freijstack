@@ -36,7 +36,7 @@ jobs:
       environment: 'staging'
       deploy_dir: '/srv/www/portfolio-staging'
       project_path: 'saas/portfolio'
-      docker_compose_file: 'docker-compose.yml'
+      docker_compose_file: 'docker-compose.staging.yml'
       run_migrations: false
       skip_security: false
       skip_lint: false
@@ -58,7 +58,7 @@ jobs:
       environment: 'production'
       deploy_dir: '/srv/www/portfolio'
       project_path: 'saas/portfolio'
-      docker_compose_file: 'docker-compose.yml'
+      docker_compose_file: 'docker-compose.prod.yml'
       run_migrations: false
     secrets:
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}

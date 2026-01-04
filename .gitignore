@@ -28,6 +28,11 @@ automation/
 *.p8
 *.p12
 *.pfx
+
+## Registry authentication
+.htpasswd
+saas/registry/.htpasswd
+saas/registry/data/.htpasswd
 *.jks
 *.pub
 id_rsa*

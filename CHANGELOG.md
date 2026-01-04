@@ -6,6 +6,84 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.23.4](https://github.com/christophe-freijanes/freijstack/compare/v1.23.3...v1.23.4) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* improve registry availability check with HTTP status code handling ([d793a6a](https://github.com/christophe-freijanes/freijstack/commit/d793a6abc2270cadc6ea22bdd2cba9ba239be466))
+
+## [1.23.3](https://github.com/christophe-freijanes/freijstack/compare/v1.23.2...v1.23.3) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* update paths for push events in Docker Registry and SecureVault workflows ([c9d7c61](https://github.com/christophe-freijanes/freijstack/commit/c9d7c619dccc1c172aa5e629e6ec66219784bc92))
+
+## [1.23.2](https://github.com/christophe-freijanes/freijstack/compare/v1.23.1...v1.23.2) (2026-01-04)
+
+### ♻️ Code Refactoring
+
+* move registry login step after availability check in build workflow ([5dcb229](https://github.com/christophe-freijanes/freijstack/commit/5dcb229a68a05991c3b44d6a8a06c43bdd5e89e7))
+
+## [1.23.1](https://github.com/christophe-freijanes/freijstack/compare/v1.23.0...v1.23.1) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* remove unnecessary blank lines in registry availability checks ([f8ccbfe](https://github.com/christophe-freijanes/freijstack/commit/f8ccbfebc85e59fbc757705f655d9c6431f2e78c))
+
+## [1.23.0](https://github.com/christophe-freijanes/freijstack/compare/v1.22.0...v1.23.0) (2026-01-04)
+
+### 🚀 Features
+
+* update registry links and add availability checks in build workflow ([8e80d3e](https://github.com/christophe-freijanes/freijstack/commit/8e80d3e5386047a4758d7effd83544169453387c))
+
+## [1.22.0](https://github.com/christophe-freijanes/freijstack/compare/v1.21.15...v1.22.0) (2026-01-04)
+
+### 🚀 Features
+
+* add registry authentication inputs and dynamic htpasswd generation script ([a7375b5](https://github.com/christophe-freijanes/freijstack/commit/a7375b5c02937188000fe0619405cbfc1ff69d22))
+
+## [1.21.15](https://github.com/christophe-freijanes/freijstack/compare/v1.21.14...v1.21.15) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* hardcode registry host URLs in portfolio build workflow ([b6c6ff9](https://github.com/christophe-freijanes/freijstack/commit/b6c6ff96639e3b4d3cfa13a7c41daba4fa5a0c4f))
+
+## [1.21.14](https://github.com/christophe-freijanes/freijstack/compare/v1.21.13...v1.21.14) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* refactor registry host variables and update docker-compose files for staging and production ([8d49b40](https://github.com/christophe-freijanes/freijstack/commit/8d49b405e60f090866e3b95726a4890359e47866))
+
+## [1.21.13](https://github.com/christophe-freijanes/freijstack/compare/v1.21.12...v1.21.13) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* hardcode registry host URLs in portfolio build workflow ([d3ff0fd](https://github.com/christophe-freijanes/freijstack/commit/d3ff0fd0954138315908ba7a3c6d176cfdb21cc0))
+
+## [1.21.12](https://github.com/christophe-freijanes/freijstack/compare/v1.21.11...v1.21.12) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* update deployment scripts to preserve data volumes in staging and refactor registry credentials ([0ade89d](https://github.com/christophe-freijanes/freijstack/commit/0ade89d8fca39e5ca46d50ca11dce48e1501b435))
+
+## [1.21.11](https://github.com/christophe-freijanes/freijstack/compare/v1.21.10...v1.21.11) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* enhance project description and update tags for Infrastructure as Code section ([7f0daec](https://github.com/christophe-freijanes/freijstack/commit/7f0daec378a28aa2e9c220cf7e30b0306171470c))
+
+## [1.21.10](https://github.com/christophe-freijanes/freijstack/compare/v1.21.9...v1.21.10) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* update registry credentials to use environment variables in docker-compose files ([6de2cb1](https://github.com/christophe-freijanes/freijstack/commit/6de2cb114d9a64fc81eb46a67655b2ac8600894d))
+
+## [1.21.9](https://github.com/christophe-freijanes/freijstack/compare/v1.21.8...v1.21.9) (2026-01-04)
+
+### 🐛 Bug Fixes
+
+* improve deployment logic for staging and production environments ([8b50cf8](https://github.com/christophe-freijanes/freijstack/commit/8b50cf8eba8374ae1067cc5a115aca037b4bb7a7))
+
 ## [1.21.8](https://github.com/christophe-freijanes/freijstack/compare/v1.21.7...v1.21.8) (2026-01-03)
 
 ### 🐛 Bug Fixes
