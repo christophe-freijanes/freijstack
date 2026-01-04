@@ -6,11 +6,6 @@ on:
     paths:
       - 'saas/securevault/**'
       - '.github/workflows/03-app-securevault-deploy.yml'
-  pull_request:
-    branches: [develop, master]
-    paths:
-      - 'saas/securevault/**'
-      - '.github/workflows/03-app-securevault-deploy.yml'
   workflow_dispatch:
     inputs:
       environment:

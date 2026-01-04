@@ -6,6 +6,22 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.24.0](https://github.com/christophe-freijanes/freijstack/compare/v1.23.4...v1.24.0) (2026-01-04)
+
+### 🚀 Features
+
+* update markdownlint configuration and enhance password generation script ([#121](https://github.com/christophe-freijanes/freijstack/issues/121)) ([523df89](https://github.com/christophe-freijanes/freijstack/commit/523df89acb2780ff710dcce427ab50dbd03e712b)), closes [#79](https://github.com/christophe-freijanes/freijstack/issues/79) [#81](https://github.com/christophe-freijanes/freijstack/issues/81) [#82](https://github.com/christophe-freijanes/freijstack/issues/82) [#83](https://github.com/christophe-freijanes/freijstack/issues/83) [#85](https://github.com/christophe-freijanes/freijstack/issues/85) [#87](https://github.com/christophe-freijanes/freijstack/issues/87) [#89](https://github.com/christophe-freijanes/freijstack/issues/89) [#90](https://github.com/christophe-freijanes/freijstack/issues/90) [#91](https://github.com/christophe-freijanes/freijstack/issues/91) [#92](https://github.com/christophe-freijanes/freijstack/issues/92) [#93](https://github.com/christophe-freijanes/freijstack/issues/93) [#94](https://github.com/christophe-freijanes/freijstack/issues/94) [#96](https://github.com/christophe-freijanes/freijstack/issues/96) [#97](https://github.com/christophe-freijanes/freijstack/issues/97) [#98](https://github.com/christophe-freijanes/freijstack/issues/98)
+
+### 🐛 Bug Fixes
+
+* improve registry availability check with HTTP status code handling ([#124](https://github.com/christophe-freijanes/freijstack/issues/124)) ([b0549ff](https://github.com/christophe-freijanes/freijstack/commit/b0549ffaae9873efdce55bc6afb2cf8fb6522e8b))
+
+### 🔧 Chores
+
+* enhance health check workflows with smart cooldown and timeout adjustments ([#122](https://github.com/christophe-freijanes/freijstack/issues/122)) ([762ef4d](https://github.com/christophe-freijanes/freijstack/commit/762ef4dd2326edd0179dd9cc84c5653fca568027)), closes [#81](https://github.com/christophe-freijanes/freijstack/issues/81) [#82](https://github.com/christophe-freijanes/freijstack/issues/82) [#83](https://github.com/christophe-freijanes/freijstack/issues/83) [#85](https://github.com/christophe-freijanes/freijstack/issues/85) [#87](https://github.com/christophe-freijanes/freijstack/issues/87) [#89](https://github.com/christophe-freijanes/freijstack/issues/89) [#90](https://github.com/christophe-freijanes/freijstack/issues/90) [#91](https://github.com/christophe-freijanes/freijstack/issues/91) [#92](https://github.com/christophe-freijanes/freijstack/issues/92) [#93](https://github.com/christophe-freijanes/freijstack/issues/93) [#94](https://github.com/christophe-freijanes/freijstack/issues/94) [#96](https://github.com/christophe-freijanes/freijstack/issues/96) [#97](https://github.com/christophe-freijanes/freijstack/issues/97) [#98](https://github.com/christophe-freijanes/freijstack/issues/98)
+* remove pull request triggers from portfolio, registry, and securevault deploy workflows ([e0ac4fa](https://github.com/christophe-freijanes/freijstack/commit/e0ac4fa36556d8e315d1fca4cd4de43199a3f280))
+* trigger workflows ([f27d336](https://github.com/christophe-freijanes/freijstack/commit/f27d3364761d1bf53973980d955b90628e4b9935))
+
 ## [1.23.4](https://github.com/christophe-freijanes/freijstack/compare/v1.23.3...v1.23.4) (2026-01-04)
 
 ### 🐛 Bug Fixes
