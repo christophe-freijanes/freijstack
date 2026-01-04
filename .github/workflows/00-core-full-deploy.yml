@@ -52,14 +52,16 @@ on:
         required: true
       VPS_SSH_USER:
         required: true
+      # Keep staging secrets optional (not used for docker login anymore)
       REGISTRY_PASSWORD_STAGING:
         required: false
       REGISTRY_USER_STAGING:
         required: false
+      # PROD registry creds are the single source of truth for pulls
       REGISTRY_USER_PROD:
-        required: false
+        required: true
       REGISTRY_PASSWORD_PROD:
-        required: false
+        required: true
 
 concurrency:
   group: vps-ssh-deploy
@@ -112,10 +114,11 @@ jobs:
           GH_REPO='${{ github.repository }}' \
           GH_BRANCH='${BRANCH}' \
           GH_SHA='${{ github.sha }}' \
-          REGISTRY_USER_STAGING='${{ secrets.REGISTRY_USER_STAGING }}' \
-          REGISTRY_PASSWORD_STAGING='${{ secrets.REGISTRY_PASSWORD_STAGING }}' \
+          REGISTRY_HOST='registry.freijstack.com' \
           REGISTRY_USER_PROD='${{ secrets.REGISTRY_USER_PROD }}' \
-          REGISTRY_PASSWORD_PROD='${{ secrets.REGISTRY_PASSWORD_PROD }}'"
+          REGISTRY_PASSWORD_PROD='${{ secrets.REGISTRY_PASSWORD_PROD }}' \
+          REGISTRY_USER_STAGING='${{ secrets.REGISTRY_USER_STAGING }}' \
+          REGISTRY_PASSWORD_STAGING='${{ secrets.REGISTRY_PASSWORD_STAGING }}'"
 
           ssh $SSH_OPTIONS -i ~/.ssh/deploy_key "$SSH_TARGET" "$REMOTE_ENV" bash <<'DEPLOY_SCRIPT'
           set -euo pipefail
@@ -128,6 +131,9 @@ jobs:
           : "${GH_REPO:?}"
           : "${GH_BRANCH:?}"
           : "${GH_SHA:?}"
+          : "${REGISTRY_HOST:?}"
+          : "${REGISTRY_USER_PROD:?}"
+          : "${REGISTRY_PASSWORD_PROD:?}"
 
           if ! docker compose version >/dev/null 2>&1; then
             echo "❌ Docker Compose not available on VPS"
@@ -140,6 +146,7 @@ jobs:
           echo "📄 COMPOSE_FILE=${COMPOSE_FILE}"
           echo "🔀 BRANCH=${GH_BRANCH}"
           echo "🧾 SHA=${GH_SHA}"
+          echo "📦 Registry host=${REGISTRY_HOST} (single registry strategy)"
 
           mkdir -p "$DEPLOY_DIR"
           cd "$DEPLOY_DIR"
@@ -163,19 +170,22 @@ jobs:
           fi
 
           # ==========================================================
-          # Registry: generate htpasswd (safe)
+          # Registry app: generate htpasswd (safe)
           # ==========================================================
           if [ "$APP_NAME" = "registry" ]; then
+            # If you keep a staging registry someday:
+            # - production uses PROD creds
+            # - staging uses STAGING creds if present, otherwise PROD creds
             if [ "$ENVIRONMENT" = "production" ]; then
-              USER="${REGISTRY_USER_PROD:-}"
-              PASS="${REGISTRY_PASSWORD_PROD:-}"
+              USER="${REGISTRY_USER_PROD}"
+              PASS="${REGISTRY_PASSWORD_PROD}"
             else
-              USER="${REGISTRY_USER_STAGING:-}"
-              PASS="${REGISTRY_PASSWORD_STAGING:-}"
+              USER="${REGISTRY_USER_STAGING:-$REGISTRY_USER_PROD}"
+              PASS="${REGISTRY_PASSWORD_STAGING:-$REGISTRY_PASSWORD_PROD}"
             fi
 
             if [ -z "${USER}" ] || [ -z "${PASS}" ]; then
-              echo "❌ Registry deploy requires registry credentials for ${ENVIRONMENT}"
+              echo "❌ Registry deploy requires credentials"
               exit 1
             fi
 
@@ -185,23 +195,12 @@ jobs:
           fi
 
           # ==========================================================
-          # Login registry for pulling private images (all apps except registry itself)
+          # Login registry for pulling private images
+          # IMPORTANT: staging ALSO uses PROD creds (single registry)
           # ==========================================================
           if [ "$APP_NAME" != "registry" ]; then
-            if [ "$ENVIRONMENT" = "production" ]; then
-              LOGIN_USER="${REGISTRY_USER_PROD:-}"
-              LOGIN_PASS="${REGISTRY_PASSWORD_PROD:-}"
-            else
-              LOGIN_USER="${REGISTRY_USER_STAGING:-}"
-              LOGIN_PASS="${REGISTRY_PASSWORD_STAGING:-}"
-            fi
-
-            if [ -n "${LOGIN_USER}" ] && [ -n "${LOGIN_PASS}" ]; then
-              echo "🔐 docker login registry.freijstack.com (env=${ENVIRONMENT})"
-              echo "${LOGIN_PASS}" | docker login registry.freijstack.com -u "${LOGIN_USER}" --password-stdin
-            else
-              echo "⚠️ Registry credentials missing for env=${ENVIRONMENT}; compose pull may fail if images are private."
-            fi
+            echo "🔐 docker login ${REGISTRY_HOST} (env=${ENVIRONMENT} uses PROD creds)"
+            echo "${REGISTRY_PASSWORD_PROD}" | docker login "${REGISTRY_HOST}" -u "${REGISTRY_USER_PROD}" --password-stdin
           fi
 
           # ==========================================================

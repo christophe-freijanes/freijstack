@@ -1,0 +1,93 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: securevault-staging-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - securevault_postgres_staging:/var/lib/postgresql/data
+    networks:
+      - securevault-staging-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  backend:
+    image: registry.freijstack.com/securevault-backend:latest-beta
+    container_name: securevault-staging-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${PORT}
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      BCRYPT_ROUNDS: ${BCRYPT_ROUNDS}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      FRONTEND_URL: ${FRONTEND_URL}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - securevault-staging-internal
+      - web
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:${PORT}/healthz >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.securevault-api-staging.rule=Host(`api-staging.vault.freijstack.com`)"
+      - "traefik.http.routers.securevault-api-staging.entrypoints=websecure"
+      - "traefik.http.routers.securevault-api-staging.tls=true"
+      - "traefik.http.routers.securevault-api-staging.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.securevault-api-staging.loadbalancer.server.port=${PORT}"
+      - "traefik.http.middlewares.securevault-api-staging-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS"
+      - "traefik.http.middlewares.securevault-api-staging-cors.headers.accesscontrolalloworiginlist=${FRONTEND_URL}"
+      - "traefik.http.middlewares.securevault-api-staging-cors.headers.accesscontrolallowcredentials=true"
+      - "traefik.http.middlewares.securevault-api-staging-cors.headers.accesscontrolallowheaders=Content-Type,Authorization"
+      - "traefik.http.routers.securevault-api-staging.middlewares=securevault-api-staging-cors@docker"
+
+  frontend:
+    image: registry.freijstack.com/securevault-frontend:latest-beta
+    container_name: securevault-staging-frontend
+    restart: unless-stopped
+    networks:
+      - web
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.securevault-ui-staging.rule=Host(`vault-staging.freijstack.com`)"
+      - "traefik.http.routers.securevault-ui-staging.entrypoints=websecure"
+      - "traefik.http.routers.securevault-ui-staging.tls=true"
+      - "traefik.http.routers.securevault-ui-staging.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.securevault-ui-staging.loadbalancer.server.port=80"
+
+volumes:
+  securevault_postgres_staging:
+    name: securevault_postgres_staging
+    driver: local
+
+networks:
+  securevault-staging-internal:
+    name: securevault-staging-internal
+    driver: bridge
+  web:
+    external: true
