@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.37.2](https://github.com/christophe-freijanes/freijstack/compare/v1.37.1...v1.37.2) (2026-01-05)
+
+### 🐛 Bug Fixes
+
+* update API health check URL in production workflow ([#142](https://github.com/christophe-freijanes/freijstack/issues/142)) ([03526dc](https://github.com/christophe-freijanes/freijstack/commit/03526dc83f3ba69ec4295e2f8969db824109b572))
+
 ## [1.37.1](https://github.com/christophe-freijanes/freijstack/compare/v1.37.0...v1.37.1) (2026-01-05)
 
 ### 🐛 Bug Fixes
