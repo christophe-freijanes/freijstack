@@ -36,7 +36,7 @@ on:
         type: string
         default: 'backend'
       healthcheck_url:
-        description: 'Public URL to wait for (e.g. https://api.vault.freijstack.com/healthz)'
+        description: 'Public URL to wait for (e.g. https://vault.freijstack.com/api/healthz)'
         required: false
         type: string
         default: ''

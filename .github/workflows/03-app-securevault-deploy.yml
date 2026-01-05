@@ -54,7 +54,7 @@ jobs:
       docker_compose_file: "docker-compose.prod.yml"
       run_migrations: true
       migrate_service: 'backend'
-      healthcheck_url: 'https://api.vault.freijstack.com/healthz'
+      healthcheck_url: 'https://vault.freijstack.com/api/healthz'
     secrets:
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
       VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
