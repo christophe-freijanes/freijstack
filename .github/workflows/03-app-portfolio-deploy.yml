@@ -1,4 +1,4 @@
-name: 🚀 SaaS • Portfolio Deploy (Production)
+name: 🚀 SaaS • Portfolio Deploy
 
 on:
   workflow_run:
