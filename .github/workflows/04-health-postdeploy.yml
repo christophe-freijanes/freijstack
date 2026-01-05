@@ -127,13 +127,12 @@ jobs:
           # Always check portfolio + pages (global)
           BASE_URLS=(
             "https://portfolio.freijstack.com|200,301,302|Portfolio"
-            "https://christophe-freijanes.github.io/freijstack/|200,301,302|GitHub Pages"
           )
 
           # Decide which SecureVault endpoints to check
           if [ "$BRANCH" = "master" ]; then
             VAULT_FE="https://vault.freijstack.com/"
-            VAULT_API="https://vault-api.freijstack.com/api/health"
+            VAULT_API="https://vault.freijstack.com/api/health"
             VAULT_URLS=(
               "${VAULT_FE}|200,301,302,304|SecureVault Frontend"
               "${VAULT_API}|200|SecureVault API"
@@ -147,7 +146,7 @@ jobs:
           else
             # develop → staging, BUT staging may be intentionally destroyed after prod deploy
             VAULT_FE_STAGING="https://vault-staging.freijstack.com/"
-            VAULT_API_STAGING="https://vault-api-staging.freijstack.com/api/health"
+            VAULT_API_STAGING="https://vault-staging.freijstack.com/api/health"
 
             echo "- SecureVault mode: **staging candidate**" >> "$GITHUB_STEP_SUMMARY"
 
