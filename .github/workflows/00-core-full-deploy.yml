@@ -61,9 +61,9 @@ on:
       REGISTRY_PASSWORD_STAGING:
         required: false
       REGISTRY_USER_PROD:
-        required: true
+        required: false
       REGISTRY_PASSWORD_PROD:
-        required: true
+        required: false
 
 concurrency:
   group: vps-ssh-deploy
