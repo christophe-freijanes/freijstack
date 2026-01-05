@@ -36,7 +36,7 @@ on:
         type: string
         default: "app"
       healthcheck_url:
-        description: "URL to check after deployment (optional)"
+        description: "URL de healthcheck HTTP(s)"
         required: false
         type: string
         default: ""
@@ -268,11 +268,14 @@ jobs:
             "cd ${{ inputs.deploy_dir }}/${{ inputs.project_path }} && docker compose exec -T ${{ inputs.migrate_service }} npm run migrate || true"
 
       - name: 🩺 Post-deploy Healthcheck
-        if: ${{ inputs.healthcheck_url != '' }}
         run: |
           set -euo pipefail
-          echo "Checking: ${{ inputs.healthcheck_url }}"
-          curl -fsS --retry 20 --retry-delay 3 --max-time 10 "${{ inputs.healthcheck_url }}"
+          if [ -n "${{ inputs.healthcheck_url }}" ]; then
+            echo "Checking: ${{ inputs.healthcheck_url }}"
+            curl -fsS --retry 20 --retry-delay 3 --max-time 10 "${{ inputs.healthcheck_url }}"
+          else
+            echo "No healthcheck_url provided; skipping."
+          fi
 
       - name: ✅ Deployment Summary
         if: success()
