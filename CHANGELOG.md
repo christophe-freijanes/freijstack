@@ -6,6 +6,24 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.35.1](https://github.com/christophe-freijanes/freijstack/compare/v1.35.0...v1.35.1) (2026-01-05)
+
+### ♻️ Code Refactoring
+
+* update registry credentials requirements for production deployment ([#140](https://github.com/christophe-freijanes/freijstack/issues/140)) ([fd3d493](https://github.com/christophe-freijanes/freijstack/commit/fd3d4937e7fb7e960e06e203d3aa2d1eeb893266))
+
+## [1.35.0](https://github.com/christophe-freijanes/freijstack/compare/v1.34.0...v1.35.0) (2026-01-05)
+
+### 🚀 Features
+
+* update deployment workflow to reorder inputs and enhance custom script support ([7f78f19](https://github.com/christophe-freijanes/freijstack/commit/7f78f19f38e563084b21193dae2c737e8ce0495a))
+
+## [1.34.0](https://github.com/christophe-freijanes/freijstack/compare/v1.33.6...v1.34.0) (2026-01-05)
+
+### 🚀 Features
+
+* add optional healthcheck URL and migrate service inputs for deployment ([fc89143](https://github.com/christophe-freijanes/freijstack/commit/fc89143d97bf62014cd481bbeb9e346a105bf46f))
+
 ## [1.33.6](https://github.com/christophe-freijanes/freijstack/compare/v1.33.5...v1.33.6) (2026-01-05)
 
 ### ♻️ Code Refactoring

@@ -30,6 +30,16 @@ on:
         required: false
         type: boolean
         default: false
+      migrate_service:
+        description: "Compose service name to run migrations in (e.g., backend)"
+        required: false
+        type: string
+        default: "app"
+      healthcheck_url:
+        description: "URL to check after deployment (optional)"
+        required: false
+        type: string
+        default: ""
       custom_script:
         description: "Custom deployment script (bash)"
         required: false
@@ -54,8 +64,8 @@ on:
       VPS_SSH_USER:
         required: true
 
-      # IMPORTANT: all registry creds are OPTIONAL here.
-      # We validate at runtime depending on the target env and app.
+      # Registry creds: optional at workflow_call level
+      # We validate at runtime depending on env + whether images are private.
       REGISTRY_USER_STAGING:
         required: false
       REGISTRY_PASSWORD_STAGING:
@@ -108,11 +118,13 @@ jobs:
           SSH_TARGET="${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
           BRANCH="${GITHUB_REF##*/}"
 
+          # Pass all env vars to the remote script (secrets may be empty)
           REMOTE_ENV="APP_NAME='${{ inputs.app_name }}' \
           ENVIRONMENT='${{ inputs.environment }}' \
           DEPLOY_DIR='${{ inputs.deploy_dir }}' \
           PROJECT_PATH='${{ inputs.project_path }}' \
           COMPOSE_FILE='${{ inputs.docker_compose_file }}' \
+          CUSTOM_SCRIPT='${{ inputs.custom_script }}' \
           GH_REPO='${{ github.repository }}' \
           GH_BRANCH='${BRANCH}' \
           GH_SHA='${{ github.sha }}' \
@@ -134,8 +146,12 @@ jobs:
           : "${GH_BRANCH:?}"
           : "${GH_SHA:?}"
           : "${REGISTRY_HOST:?}"
-          : "${REGISTRY_USER_PROD:?}"
-          : "${REGISTRY_PASSWORD_PROD:?}"
+
+          # Enforce PROD creds only for production deployments
+          if [ "$ENVIRONMENT" = "production" ]; then
+            : "${REGISTRY_USER_PROD:?}"
+            : "${REGISTRY_PASSWORD_PROD:?}"
+          fi
 
           if ! docker compose version >/dev/null 2>&1; then
             echo "❌ Docker Compose not available on VPS"
@@ -148,19 +164,7 @@ jobs:
           echo "📄 COMPOSE_FILE=${COMPOSE_FILE}"
           echo "🔀 BRANCH=${GH_BRANCH}"
           echo "🧾 SHA=${GH_SHA}"
-          echo "📦 Registry host=${REGISTRY_HOST} (single registry strategy)"
-
-          if ! docker compose version >/dev/null 2>&1; then
-            echo "❌ Docker Compose not available on VPS"
-            exit 1
-          fi
-
-          echo "🔒 Volume protection: enabled (never run docker compose down -v)"
-          echo "🚀 Deploying ${APP_NAME} → ${ENVIRONMENT}"
-          echo "📁 DEPLOY_DIR=${DEPLOY_DIR}"
-          echo "📄 COMPOSE_FILE=${COMPOSE_FILE}"
-          echo "🔀 BRANCH=${GH_BRANCH}"
-          echo "🧾 SHA=${GH_SHA}"
+          echo "📦 Registry host=${REGISTRY_HOST}"
 
           mkdir -p "$DEPLOY_DIR"
           cd "$DEPLOY_DIR"
@@ -184,35 +188,20 @@ jobs:
           fi
 
           # ==========================================================
-          # Resolve which registry host to use for pulls (apps)
-          # - production -> registry.freijstack.com
-          # - staging    -> registry-staging.freijstack.com (if you run it)
-          # If you DO NOT run staging registry anymore, keep pulls pointed to prod.
-          # ==========================================================
-          REGISTRY_HOST="registry.freijstack.com"
-          if [ "$ENVIRONMENT" = "staging" ]; then
-            # If you want staging to pull from staging registry, change this line:
-            # REGISTRY_HOST="registry-staging.freijstack.com"
-            REGISTRY_HOST="registry.freijstack.com"
-          fi
-
-          # ==========================================================
-          # Registry app: generate htpasswd (requires env creds)
+          # Registry app: generate htpasswd (requires creds)
           # ==========================================================
           if [ "$APP_NAME" = "registry" ]; then
-            # If you keep a staging registry someday:
-            # - production uses PROD creds
-            # - staging uses STAGING creds if present, otherwise PROD creds
             if [ "$ENVIRONMENT" = "production" ]; then
-              USER="${REGISTRY_USER_PROD}"
-              PASS="${REGISTRY_PASSWORD_PROD}"
+              USER="${REGISTRY_USER_PROD:-}"
+              PASS="${REGISTRY_PASSWORD_PROD:-}"
             else
-              USER="${REGISTRY_USER_STAGING:-$REGISTRY_USER_PROD}"
-              PASS="${REGISTRY_PASSWORD_STAGING:-$REGISTRY_PASSWORD_PROD}"
+              # staging: use staging creds if set, else fallback to prod
+              USER="${REGISTRY_USER_STAGING:-${REGISTRY_USER_PROD:-}}"
+              PASS="${REGISTRY_PASSWORD_STAGING:-${REGISTRY_PASSWORD_PROD:-}}"
             fi
 
-            if [ -z "${USER}" ] || [ -z "${PASS}" ]; then
-              echo "❌ Registry deploy requires credentials for env=${ENVIRONMENT}"
+            if [ -z "${USER:-}" ] || [ -z "${PASS:-}" ]; then
+              echo "❌ Registry deploy requires credentials (env=${ENVIRONMENT})"
               exit 1
             fi
 
@@ -222,8 +211,7 @@ jobs:
           fi
 
           # ==========================================================
-          # Non-registry apps: docker login only if creds provided
-          # (needed only when pulling private images)
+          # Non-registry apps: docker login if creds exist
           # ==========================================================
           if [ "$APP_NAME" != "registry" ]; then
             if [ "$ENVIRONMENT" = "production" ]; then
@@ -240,6 +228,14 @@ jobs:
             else
               echo "⚠️ No registry creds for env=${ENVIRONMENT}; compose pull may fail if images are private."
             fi
+          fi
+
+          # ==========================================================
+          # Optional custom script hook
+          # ==========================================================
+          if [ -n "${CUSTOM_SCRIPT:-}" ]; then
+            echo "🧩 Running custom script"
+            bash -lc "${CUSTOM_SCRIPT}"
           fi
 
           # ==========================================================
@@ -269,7 +265,14 @@ jobs:
           set -euo pipefail
           ssh $SSH_OPTIONS -i ~/.ssh/deploy_key \
             ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
-            "cd ${{ inputs.deploy_dir }}/${{ inputs.project_path }} && docker compose exec -T app npm run migrate || true"
+            "cd ${{ inputs.deploy_dir }}/${{ inputs.project_path }} && docker compose exec -T ${{ inputs.migrate_service }} npm run migrate || true"
+
+      - name: 🩺 Post-deploy Healthcheck
+        if: ${{ inputs.healthcheck_url != '' }}
+        run: |
+          set -euo pipefail
+          echo "Checking: ${{ inputs.healthcheck_url }}"
+          curl -fsS --retry 20 --retry-delay 3 --max-time 10 "${{ inputs.healthcheck_url }}"
 
       - name: ✅ Deployment Summary
         if: success()
