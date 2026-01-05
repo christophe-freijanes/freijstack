@@ -62,16 +62,14 @@ on:
         required: true
       VPS_SSH_USER:
         required: true
-      # Keep staging secrets optional (not used anymore for login)
       REGISTRY_PASSWORD_STAGING:
         required: false
       REGISTRY_USER_STAGING:
         required: false
-      # PROD registry creds are the single source of truth
       REGISTRY_USER_PROD:
-        required: true
+        required: false
       REGISTRY_PASSWORD_PROD:
-        required: true
+        required: false
 
 concurrency:
   group: vps-ssh-deploy
@@ -85,11 +83,23 @@ jobs:
   deploy:
     name: 🚀 Deploy ${{ inputs.app_name }} to ${{ inputs.environment }}
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
     environment:
       name: ${{ inputs.environment }}
 
     steps:
+      - name: ✅ Validate required registry secrets (production only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ inputs.environment }}" = "production" ]; then
+            if [ -z "${{ secrets.REGISTRY_USER_PROD }}" ] || [ -z "${{ secrets.REGISTRY_PASSWORD_PROD }}" ]; then
+              echo "❌ Missing required PROD registry secrets."
+              echo "   Provide REGISTRY_USER_PROD and REGISTRY_PASSWORD_PROD as repo secrets or as Environment secrets for 'production'."
+              exit 1
+            fi
+          fi
+
       - name: ⏱️ Staggered Start (avoid SSH collisions)
         run: |
           set -euo pipefail
@@ -145,6 +155,13 @@ jobs:
           : "${GH_SHA:?}"
           : "${RUN_MIGRATIONS:?}"
           : "${MIGRATE_SERVICE:?}"
+          : "${REGISTRY_HOST:?}"
+
+          # 🔐 Only require PROD registry credentials when deploying production
+          if [ "$ENVIRONMENT" = "production" ]; then
+            : "${REGISTRY_USER_PROD:?}"
+            : "${REGISTRY_PASSWORD_PROD:?}"
+          fi
 
           if ! docker compose version >/dev/null 2>&1; then
             echo "❌ Docker Compose not available on VPS"
