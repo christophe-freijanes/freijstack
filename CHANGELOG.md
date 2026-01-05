@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.36.0](https://github.com/christophe-freijanes/freijstack/compare/v1.35.1...v1.36.0) (2026-01-05)
+
+### 🚀 Features
+
+* update project descriptions and links for Docker and Infrastructure as Code ([e65d63d](https://github.com/christophe-freijanes/freijstack/commit/e65d63d59cf2ed1d58a08c31d68241982b58f98c))
+
 ## [1.35.1](https://github.com/christophe-freijanes/freijstack/compare/v1.35.0...v1.35.1) (2026-01-05)
 
 ### ♻️ Code Refactoring
