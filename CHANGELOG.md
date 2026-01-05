@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.37.10](https://github.com/christophe-freijanes/freijstack/compare/v1.37.9...v1.37.10) (2026-01-05)
+
+### ♻️ Code Refactoring
+
+* update workflow names for consistency and clarity ([956b953](https://github.com/christophe-freijanes/freijstack/commit/956b95365db3af1eb543c6641c161272721133a6))
+
 ## [1.37.9](https://github.com/christophe-freijanes/freijstack/compare/v1.37.8...v1.37.9) (2026-01-05)
 
 ### 🐛 Bug Fixes
