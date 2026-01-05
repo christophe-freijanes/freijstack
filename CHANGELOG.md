@@ -6,6 +6,13 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.37.8](https://github.com/christophe-freijanes/freijstack/compare/v1.37.7...v1.37.8) (2026-01-05)
+
+### 🐛 Bug Fixes
+
+* remove outdated Full Deploy badge from pull request template ([6174d0f](https://github.com/christophe-freijanes/freijstack/commit/6174d0fe6ed88a466c393f3a0c874e1b34c1f42f))
+* update healthcheck URL description and improve post-deploy check logic ([#145](https://github.com/christophe-freijanes/freijstack/issues/145)) ([e0800c2](https://github.com/christophe-freijanes/freijstack/commit/e0800c2b1021075ad3fcedd07bc6d18bd7830bfd))
+
 ## [1.37.7](https://github.com/christophe-freijanes/freijstack/compare/v1.37.6...v1.37.7) (2026-01-05)
 
 ### 🐛 Bug Fixes
