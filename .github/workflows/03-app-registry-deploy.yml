@@ -1,4 +1,4 @@
-name: 🐳 Infra • Registry Deploy
+name: 🐳 SaaS • Registry Deploy
 
 on:
   # PROD: auto uniquement sur master quand le code registry change

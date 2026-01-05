@@ -1,16 +1,17 @@
-name: 🩺 Health Check • Post-Deploy
+name: "🩺 Health Check • Post-Deploy"
 
 on:
   workflow_run:
     workflows:
-      - 🏗️ Infrastructure • VPS
-      - 📄 SaaS • Portfolio
-      - 🔐 SaaS • SecureVault
-      - 🐳 SaaS • Docker Registry
-    types: [completed]
+      - "🏗️ Infra • VPS Deploy"
+      - "📄 SaaS • Portfolio Deploy"
+      - "🔐 SaaS • SecureVault Deploy"
+      - "🐳 SaaS • Registry Deploy"
+    types:
+      - completed
 
 concurrency:
-  group: postdeploy-healthcheck-${{ github.event.workflow_run.head_branch }}
+  group: "postdeploy-healthcheck-${{ github.event.workflow_run.head_branch }}"
   cancel-in-progress: true
 
 permissions:
@@ -18,231 +19,79 @@ permissions:
   actions: read
 
 jobs:
-  healthcheck:
-    name: 🩺 Run after deploy
+  prepare:
+    name: "🧾 Prepare targets"
     if: >
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'master'
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+
+    outputs:
+      warmup_url: ${{ steps.compute.outputs.warmup_url }}
+      checks: ${{ steps.compute.outputs.checks }}
 
     steps:
-      - name: 🧾 Summary (source workflow)
+      - name: "🧾 Summary (source workflow)"
         run: |
-          # shellcheck disable=SC2129
-          echo "## 🩺 Post-Deploy Health Check" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Source workflow: **${{ github.event.workflow_run.name }}**" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Branch: **${{ github.event.workflow_run.head_branch }}**" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Conclusion: **${{ github.event.workflow_run.conclusion }}**" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Run: ${{ github.event.workflow_run.html_url }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Commit: \`${{ github.event.workflow_run.head_sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "## 🩺 Post-Deploy Health Check"
+            echo ""
+            echo "- Source workflow: **${{ github.event.workflow_run.name }}**"
+            echo "- Branch: **${{ github.event.workflow_run.head_branch }}**"
+            echo "- Conclusion: **${{ github.event.workflow_run.conclusion }}**"
+            echo "- Run: ${{ github.event.workflow_run.html_url }}"
+            echo "- Commit: \`${{ github.event.workflow_run.head_sha }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: ⏳ Smart Cooldown (wait until service ready)
+      - id: compute
+        name: "🎯 Compute URLs"
+        shell: bash
         run: |
           set -euo pipefail
 
-          MAX_WAIT=90
-          INTERVAL=5
           BRANCH="${{ github.event.workflow_run.head_branch }}"
           WORKFLOW="${{ github.event.workflow_run.name }}"
 
-          # Determine which URL to probe based on deployed service
+          CHECKS="https://portfolio.freijstack.com|200,301,302|Portfolio"
+          WARMUP_URL="https://portfolio.freijstack.com"
+
           case "$WORKFLOW" in
             *Portfolio*)
-              if [ "$BRANCH" = "master" ]; then
-                PROBE_URL="https://portfolio.freijstack.com"
-              else
-                PROBE_URL="https://portfolio-staging.freijstack.com"
-              fi
+              WARMUP_URL="https://portfolio.freijstack.com"
               ;;
+
             *SecureVault*)
-              if [ "$BRANCH" = "master" ]; then
-                PROBE_URL="https://vault.freijstack.com"
-              else
-                PROBE_URL="https://vault-staging.freijstack.com"
-              fi
+              WARMUP_URL="https://vault.freijstack.com"
+              CHECKS="${CHECKS}
+              https://vault.freijstack.com/|200,301,302,304|SecureVault Frontend
+              https://vault.freijstack.com/api/health|200|SecureVault API"
               ;;
+
             *Registry*)
-              if [ "$BRANCH" = "master" ]; then
-                PROBE_URL="https://registry.freijstack.com/v2/"
-              else
-                PROBE_URL="https://registry-staging.freijstack.com/v2/"
-              fi
-              ;;
-            *Infrastructure*)
-              PROBE_URL="https://portfolio.freijstack.com"
-              ;;
-            *)
-              PROBE_URL="https://portfolio.freijstack.com"
+              WARMUP_URL="https://registry.freijstack.com/v2/"
+              CHECKS="${CHECKS}
+              https://registry.freijstack.com/v2/|401,200|Docker Registry API
+              https://registry-ui.freijstack.com/|200,301,302|Docker Registry UI"
               ;;
           esac
 
-          echo "🔍 Probing: $PROBE_URL"
-          echo "⏳ Max wait: ${MAX_WAIT}s (interval: ${INTERVAL}s)"
+          echo "warmup_url=${WARMUP_URL}" >> "$GITHUB_OUTPUT"
 
-          START_TIME=$(date +%s)
+          {
+            echo "checks<<EOF"
+            echo "${CHECKS}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
-          for _ in $(seq 1 $((MAX_WAIT / INTERVAL))); do
-            ELAPSED=$(($(date +%s) - START_TIME))
-
-            # Try to reach the service (accept any 2xx, 3xx, 401 for registry)
-            HTTP_CODE=$(curl -sf -o /dev/null -w "%{http_code}" \
-              --connect-timeout 5 \
-              --max-time 10 \
-              "$PROBE_URL" 2>/dev/null || echo "000")
-
-            case "$HTTP_CODE" in
-              2*|3*|401)
-                echo "✅ Service ready after ${ELAPSED}s (HTTP $HTTP_CODE)"
-                echo "" >> "$GITHUB_STEP_SUMMARY"
-                echo "- ⚡ Service warm-up: **${ELAPSED}s**" >> "$GITHUB_STEP_SUMMARY"
-                exit 0
-                ;;
-              *)
-                echo "⏳ Waiting... ${ELAPSED}s (HTTP $HTTP_CODE)"
-                sleep $INTERVAL
-                ;;
-            esac
-          done
-
-          echo "⚠️ Timeout after ${MAX_WAIT}s - proceeding anyway"
-          echo "- ⚠️ Service warm-up: **timeout (${MAX_WAIT}s)** - proceeding anyway" >> "$GITHUB_STEP_SUMMARY"
-
-      - name: 🌐 Check Public URLs (with retries)
-        run: |
-          # shellcheck disable=SC2129
-          set -euo pipefail
-
-          MAX_RETRIES=8
-          SLEEP_BETWEEN=10
-
-          BRANCH="${{ github.event.workflow_run.head_branch }}"
-
-          echo "## 🌐 URL checks" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Branch: **$BRANCH**" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-
-          # Always check portfolio + pages (global)
-          BASE_URLS=(
-            "https://portfolio.freijstack.com|200,301,302|Portfolio"
-            "https://christophe-freijanes.github.io/freijstack/|200,301,302|GitHub Pages"
-          )
-
-          # Decide which SecureVault endpoints to check
-          if [ "$BRANCH" = "master" ]; then
-            VAULT_FE="https://vault.freijstack.com/"
-            VAULT_API="https://vault-api.freijstack.com/api/health"
-            VAULT_URLS=(
-              "${VAULT_FE}|200,301,302,304|SecureVault Frontend"
-              "${VAULT_API}|200|SecureVault API"
-            )
-
-            # Production registry
-            REGISTRY_URLS=(
-              "https://registry.freijstack.com/v2/|401,200|Docker Registry API (production)"
-              "https://registry-ui.freijstack.com/|200,301,302|Docker Registry UI (production)"
-            )
-          else
-            # develop → staging, BUT staging may be intentionally destroyed after prod deploy
-            VAULT_FE_STAGING="https://vault-staging.freijstack.com/"
-            VAULT_API_STAGING="https://vault-api-staging.freijstack.com/api/health"
-
-            echo "- SecureVault mode: **staging candidate**" >> "$GITHUB_STEP_SUMMARY"
-
-            # --- Probe staging once to decide if it exists ---
-            probe_code=$(
-              curl -s -L -o /dev/null -w "%{http_code}" \
-                --connect-timeout 6 \
-                --max-time 12 \
-                "$VAULT_FE_STAGING" || echo "000"
-            )
-
-            # If staging is destroyed, typical results: 404, 000 (DNS/timeout), 502/503 depending on infra.
-            # We treat 200/301/302/304 as "staging is up", everything else as "staging disabled" (skip).
-            case "$probe_code" in
-              200|301|302|304)
-                echo "- ✅ Staging detected (probe HTTP $probe_code). Running staging checks." >> "$GITHUB_STEP_SUMMARY"
-                VAULT_URLS=(
-                  "${VAULT_FE_STAGING}|200,301,302,304|SecureVault Frontend (staging)"
-                  "${VAULT_API_STAGING}|200|SecureVault API (staging)"
-                )
-                ;;
-              *)
-                echo "- ⚠️ Staging seems disabled (probe HTTP $probe_code). Skipping SecureVault staging checks." >> "$GITHUB_STEP_SUMMARY"
-                VAULT_URLS=()
-                ;;
-            esac
-
-            # Probe staging registry
-            registry_probe_code=$(
-              curl -s -L -o /dev/null -w "%{http_code}" \
-                --connect-timeout 6 \
-                --max-time 12 \
-                "https://registry-staging.freijstack.com/v2/" || echo "000"
-            )
-
-            case "$registry_probe_code" in
-              401|200)
-                echo "- ✅ Staging Registry detected (probe HTTP $registry_probe_code). Running staging registry checks." >> "$GITHUB_STEP_SUMMARY"
-                REGISTRY_URLS=(
-                  "https://registry-staging.freijstack.com/v2/|401,200|Docker Registry API (staging)"
-                  "https://registry-ui-staging.freijstack.com/|200,301,302|Docker Registry UI (staging)"
-                )
-                ;;
-              *)
-                echo "- ⚠️ Staging Registry seems disabled (probe HTTP $registry_probe_code). Skipping staging registry checks." >> "$GITHUB_STEP_SUMMARY"
-                REGISTRY_URLS=()
-                ;;
-            esac
-          fi
-
-          # Merge URL lists
-          URLS=("${BASE_URLS[@]}" "${VAULT_URLS[@]}" "${REGISTRY_URLS[@]}")
-
-          for entry in "${URLS[@]}"; do
-            url="${entry%%|*}"
-            rest="${entry#*|}"
-            allowed="${rest%%|*}"
-            label="${rest##*|}"
-
-            echo ""
-            echo "🔎 Checking $label → $url"
-
-            attempt=1
-            success=false
-
-            while [ "$attempt" -le "$MAX_RETRIES" ]; do
-              code=$(
-                curl -s -L -o /dev/null -w "%{http_code}" \
-                  --connect-timeout 10 \
-                  --max-time 20 \
-                  "$url" || echo "000"
-              )
-
-              if echo ",$allowed," | grep -q ",$code,"; then
-                echo "✅ OK (HTTP $code)"
-                echo "- ✅ **$label**: HTTP $code (attempt $attempt/$MAX_RETRIES)" >> "$GITHUB_STEP_SUMMARY"
-                success=true
-                break
-              fi
-
-              echo "⚠️ HTTP $code (attempt $attempt/$MAX_RETRIES)"
-              if [ "$attempt" -lt "$MAX_RETRIES" ]; then
-                sleep "$SLEEP_BETWEEN"
-              fi
-              attempt=$((attempt + 1))
-            done
-
-            if [ "$success" != "true" ]; then
-              echo "❌ $label is DOWN after $MAX_RETRIES attempts"
-              echo "- ❌ **$label**: FAILED after $MAX_RETRIES attempts (last HTTP $code)" >> "$GITHUB_STEP_SUMMARY"
-              exit 1
-            fi
-          done
-
-      - name: 🎉 Health check OK
-        run: |
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "✅ **All checks passed**" >> "$GITHUB_STEP_SUMMARY"
+  healthcheck:
+    name: "🩺 Run checks"
+    needs:
+      - prepare
+    uses: ./.github/workflows/00-core-healthcheck.yml
+    with:
+      warmup_url: ${{ needs.prepare.outputs.warmup_url }}
+      checks: ${{ needs.prepare.outputs.checks }}
+      max_wait_seconds: 90
+      warmup_interval_seconds: 5
+      max_retries: 8
+      sleep_between_retries: 10
