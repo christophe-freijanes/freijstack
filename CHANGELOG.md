@@ -6,6 +6,18 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.37.4](https://github.com/christophe-freijanes/freijstack/compare/v1.37.3...v1.37.4) (2026-01-05)
+
+### 🐛 Bug Fixes
+
+* update project links to support internationalization ([#143](https://github.com/christophe-freijanes/freijstack/issues/143)) ([92ae51b](https://github.com/christophe-freijanes/freijstack/commit/92ae51b8d2ed40ff1c4d02e56e69d1fe99e525ac))
+
+## [1.37.3](https://github.com/christophe-freijanes/freijstack/compare/v1.37.2...v1.37.3) (2026-01-05)
+
+### 🐛 Bug Fixes
+
+* update healthcheck URL for SecureVault deployment ([47e2869](https://github.com/christophe-freijanes/freijstack/commit/47e2869154474ab087c6755d15ec1ec82e9118b0))
+
 ## [1.37.2](https://github.com/christophe-freijanes/freijstack/compare/v1.37.1...v1.37.2) (2026-01-05)
 
 ### 🐛 Bug Fixes
