@@ -6,6 +6,24 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.37.0](https://github.com/christophe-freijanes/freijstack/compare/v1.36.1...v1.37.0) (2026-01-05)
+
+### 🚀 Features
+
+* update deployment workflow to reorder inputs and enhance custom script support ([#141](https://github.com/christophe-freijanes/freijstack/issues/141)) ([9551fbe](https://github.com/christophe-freijanes/freijstack/commit/9551fbef499937e024010303c8936a06dd796d87))
+
+## [1.36.1](https://github.com/christophe-freijanes/freijstack/compare/v1.36.0...v1.36.1) (2026-01-05)
+
+### 🐛 Bug Fixes
+
+* update API health check URL in production workflow ([3995f78](https://github.com/christophe-freijanes/freijstack/commit/3995f78e12807a560dc4ee10380f7c826f589089))
+
+## [1.36.0](https://github.com/christophe-freijanes/freijstack/compare/v1.35.1...v1.36.0) (2026-01-05)
+
+### 🚀 Features
+
+* update project descriptions and links for Docker and Infrastructure as Code ([e65d63d](https://github.com/christophe-freijanes/freijstack/commit/e65d63d59cf2ed1d58a08c31d68241982b58f98c))
+
 ## [1.35.1](https://github.com/christophe-freijanes/freijstack/compare/v1.35.0...v1.35.1) (2026-01-05)
 
 ### ♻️ Code Refactoring
