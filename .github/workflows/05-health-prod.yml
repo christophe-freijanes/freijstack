@@ -260,7 +260,7 @@ jobs:
           set -euo pipefail
           echo "## 🧠 Backend API" >> "$GITHUB_STEP_SUMMARY"
 
-          url="https://vault-api.freijstack.com/api/health"
+          url="https://vault.freijstack.com/api/health"
           echo "🔎 Checking $url ..."
 
           code=$(
@@ -600,7 +600,7 @@ jobs:
             {
               echo "✅ Production is **HEALTHY**"
               echo "- 🎯 https://vault.freijstack.com/login"
-              echo "- 🎯 https://vault-api.freijstack.com/api/health"
+              echo "- 🎯 https://vault.freijstack.com/api/health"
             } >> "$GITHUB_STEP_SUMMARY"
           elif [ "${{ needs.auto-heal.result }}" = "success" ]; then
             echo "⚠️ Production had issues but **auto-heal succeeded**" >> "$GITHUB_STEP_SUMMARY"
