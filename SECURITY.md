@@ -299,6 +299,13 @@ trivy image nom-image:tag
 
 ---
 
+## Cryptography Notice
+This project includes cryptographic functionality.
+Users are responsible for compliance with
+local regulations regarding encryption software.
+
+---
+
 **Créé par**: Christophe FREIJANES  
 **Date**: Janvier 2026  
 **Statut**: 🔒 Active - Mises à jour régulières
