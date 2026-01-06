@@ -40,12 +40,19 @@ Ce document décrit les mesures de sécurité et les bonnes pratiques pour prot�
 
 ## ✅ Bonnes Pratiques
 
+
 ### 1. Utiliser `.env.example`
-# ✅ BON
+**Exemple correct :**
+```bash
 cp .env.example .env
 # Remplir les valeurs réelles seulement localement
+```
 
-# ❌ MAUVAIS
+**À ne pas faire :**
+```bash
+git add .env
+```
+
 ### 2. Gérer les Secrets Correctement
 
 **Pour le développement local**:
@@ -76,8 +83,8 @@ Le dépôt utilise le **Security Score** GitHub, visible dans l’onglet "Securi
 
 **Lien direct :** [GitHub Security Dashboard](../../security)
 
-- Créer les fichiers `.env` **directement sur le VPS**
-- Ne jamais les pousser via Git
+Créer les fichiers `.env` **directement sur le VPS**
+Ne jamais les pousser via Git
 
 ### 3. Clés SSH pour GitHub Actions
 ```bash
