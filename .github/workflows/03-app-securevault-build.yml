@@ -95,7 +95,7 @@ jobs:
 
       # BACKEND IMAGE
       - name: 🏗️ Build & push backend
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./saas/securevault/backend
           file: ./saas/securevault/backend/Dockerfile
@@ -108,7 +108,7 @@ jobs:
 
       # FRONTEND IMAGE
       - name: 🏗️ Build & push frontend
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./saas/securevault/frontend
           file: ./saas/securevault/frontend/Dockerfile
