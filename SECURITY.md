@@ -41,15 +41,11 @@ Ce document décrit les mesures de sécurité et les bonnes pratiques pour prot�
 ## ✅ Bonnes Pratiques
 
 ### 1. Utiliser `.env.example`
-```bash
 # ✅ BON
 cp .env.example .env
 # Remplir les valeurs réelles seulement localement
 
 # ❌ MAUVAIS
-git add .env
-```
-
 ### 2. Gérer les Secrets Correctement
 
 **Pour le développement local**:
@@ -59,11 +55,27 @@ echo "JWT_SECRET=votre-secret-ici" >> .env
 echo ".env" >> .gitignore
 ```
 
-**Pour la production** (GitHub Actions):
-- Utiliser **GitHub Secrets** (Settings → Secrets)
-- Accès via `${{ secrets.MA_CLE }}`
 
-**Pour le VPS**:
+---
+
+## 🏆 Security Score & Tableau de bord GitHub
+
+Le dépôt utilise le **Security Score** GitHub, visible dans l’onglet "Security" du repository. Ce score agrège :
+- Détection de secrets (Gitleaks)
+- Vulnérabilités de dépendances (Dependabot)
+- Analyse de code (CodeQL)
+- Scans d’images (Trivy)
+- Bonnes pratiques de configuration
+
+**Objectif :** Maintenir un score de sécurité le plus élevé possible (idéalement 100 %).
+
+### Bonnes pratiques :
+- Corriger rapidement toutes les alertes de sécurité GitHub
+- Surveiller le tableau de bord "Security" pour : vulnérabilités, alertes, recommandations
+- Activer toutes les protections proposées (branch protection, secret scanning, etc.)
+
+**Lien direct :** [GitHub Security Dashboard](../../security)
+
 - Créer les fichiers `.env` **directement sur le VPS**
 - Ne jamais les pousser via Git
 
