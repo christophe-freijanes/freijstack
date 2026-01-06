@@ -158,6 +158,7 @@ jobs:
             --source="${{ inputs.scan_paths }}"
             --report-format sarif
             --report-path gitleaks-report.sarif
+          fail: true
         continue-on-error: true
       - name: 📤 Upload SARIF (Code Scanning)
         if: always()
