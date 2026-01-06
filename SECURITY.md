@@ -1,7 +1,5 @@
-# 🔒 Politique de Sécurité - FreijStack
-
-## Vue d'ensemble
-
+## 🔒 Politique de Sécurité - FreijStack
+# 🛡️ Structure Sécurité Centralisée (2026)
 Ce document décrit les mesures de sécurité et les bonnes pratiques pour protéger le dépôt FreijStack.
 
 ---
