@@ -46,50 +46,25 @@ Depuis janvier 2026, la sécurité CI/CD et les scripts sont harmonisés pour un
 
 **Raison**: Contient secrets, tokens, mots de passe
 
-### 2. Clés Cryptographiques
+## 🔒 Politique de Sécurité - FreijStack
 - ❌ `*.pem`, `*.key`, `*.crt`
 - ❌ Clés SSH privées (`id_rsa`, `id_ed25519`)
-- ❌ Certificats SSL/TLS
 
 **Raison**: Permettent l'accès aux systèmes
-
+## 🛡️ Structure Sécurité Centralisée (2026)
 ### 3. Credentials & Authentification
 - ❌ `credentials.json` (Google, AWS)
-- ❌ API keys
-- ❌ OAuth tokens
 - ❌ Database passwords
 
-**Raison**: Donnent accès aux services externes
-
-### 4. Données Privées
 - ❌ Bases de données (`*.db`, `*.sqlite`)
-- ❌ Backups sensibles
-- ❌ Fichiers logs contenant secrets
-
----
 
 ## ✅ Bonnes Pratiques
-
-
-### 1. Utiliser `.env.example`
-**Exemple correct :**
 ```bash
 cp .env.example .env
-# Remplir les valeurs réelles seulement localement
-```
-
 **À ne pas faire :**
 ```bash
-git add .env
-```
-
-### 2. Gérer les Secrets Correctement
 
 **Pour le développement local**:
-```bash
-# Créer un fichier .env non-tracké
-echo "JWT_SECRET=votre-secret-ici" >> .env
-echo ".env" >> .gitignore
 ```
 
 
@@ -108,19 +83,10 @@ Le dépôt utilise le **Security Score** GitHub, visible dans l’onglet "Securi
 
 ### Bonnes pratiques :
 - Corriger rapidement toutes les alertes de sécurité GitHub
-- Surveiller le tableau de bord "Security" pour : vulnérabilités, alertes, recommandations
 - Activer toutes les protections proposées (branch protection, secret scanning, etc.)
-
-**Lien direct :** [GitHub Security Dashboard](../../security)
-
-Créer les fichiers `.env` **directement sur le VPS**
-Ne jamais les pousser via Git
 
 ### 3. Clés SSH pour GitHub Actions
 ```bash
-# Générer une clé SSH dédiée
-ssh-keygen -t ed25519 -f ~/.ssh/github_actions -N ""
-
 # Copier la clé **PRIVÉE** dans GitHub Secrets
 cat ~/.ssh/github_actions
 
@@ -141,12 +107,10 @@ gitleaks detect --verbose
 
 ## 🔍 Gitleaks - Prévention Automatique
 
-Le projet inclut **Gitleaks** dans la CI/CD pour détecter les secrets accidentels.
 
 ### Configuration: `.github/workflows/main.yml`
 ```yaml
 - name: Run Gitleaks
-  uses: gitleaks/gitleaks-action@v2
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -165,17 +129,8 @@ gitleaks detect --source git --verbose
 
 ### Fichier d'ignore: `.gitleaksignore`
 ```
-# False positives (documentations, exemples)
 saas/securevault/README.md:example-key:42
 ```
-
----
-
-## 📝 Checklist de Sécurité
-
-Avant chaque commit:
-
-- [ ] ✅ Aucun `.env` non-example
 - [ ] ✅ Aucune clé SSH (`*.key`, `*.pem`)
 - [ ] ✅ Aucun `credentials.json`
 - [ ] ✅ Aucune base de données (`*.db`, `*.sqlite`)
@@ -194,10 +149,6 @@ git reset HEAD~1              # Annuler le commit
 git checkout -- .env          # Restaurer fichier local
 ```
 
-### 2. Si déjà poussé sur GitHub
-```bash
-# Rotation des secrets
-# 1. Générer une nouvelle clé/token
 # 2. Mettre à jour sur tous les systèmes (GitHub, VPS, etc.)
 # 3. Invalider l'ancienne clé
 
@@ -210,13 +161,11 @@ git push --force-with-lease
 - Alerter l'équipe immédiatement
 - Vérifier les logs d'accès
 - Changer les mots de passe associés
-
 ---
 
 ## 🔐 Secrets GitHub Actions
 
 ### Créer des Secrets
-
 **Settings → Secrets and variables → Actions → New repository secret**
 
 ```yaml
@@ -224,9 +173,7 @@ VPS_HOST       # IP/domaine du VPS
 VPS_USER       # Utilisateur SSH
 VPS_SSH_KEY    # Clé SSH PRIVÉE
 JWT_SECRET     # Secret JWT
-DB_PASSWORD    # Mot de passe base de données
 ```
-
 ### Utiliser les Secrets
 ```yaml
 - name: Deploy
@@ -236,13 +183,9 @@ DB_PASSWORD    # Mot de passe base de données
 ```
 
 ⚠️ **Les secrets ne s'affichent JAMAIS dans les logs**
-
 ---
 
 ## 🔑 Gestion des Clés SSH
-
-### Générer une clé dédiée
-```bash
 ssh-keygen -t ed25519 -C "github-actions@freijstack" -f ~/.ssh/gh-actions
 ```
 
@@ -250,10 +193,6 @@ ssh-keygen -t ed25519 -C "github-actions@freijstack" -f ~/.ssh/gh-actions
 ```
 -----BEGIN OPENSSH PRIVATE KEY-----
 [EXAMPLE — DO NOT USE REAL KEYS]
------END OPENSSH PRIVATE KEY-----
-```
-
-### Permissions sur le VPS
 ```bash
 # Ajouter la clé publique
 cat ~/.ssh/gh-actions.pub >> ~/.ssh/authorized_keys
@@ -262,7 +201,6 @@ cat ~/.ssh/gh-actions.pub >> ~/.ssh/authorized_keys
 chmod 700 ~/.ssh
 chmod 600 ~/.ssh/authorized_keys
 ```
-
 ---
 
 ## 📊 Scanning Continu
@@ -277,13 +215,7 @@ Détecte les failles de sécurité dans le code:
 Scanne les images Docker pour vulnérabilités:
 ```bash
 trivy image nom-image:tag
-```
 
-### Dependabot
-Alertes automatiques pour dépendances vulnérables:
-- `package.json` (npm)
-- `package-lock.json`
-- `Dockerfile`
 
 ---
 

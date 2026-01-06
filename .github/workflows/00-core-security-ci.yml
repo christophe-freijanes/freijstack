@@ -151,7 +151,7 @@ jobs:
       - name: 📥 Checkout
         uses: actions/checkout@v4
       - name: 🕵️ Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2.3.4
+        uses: gitleaks/gitleaks-action@v2
         with:
           args: >-
             detect
