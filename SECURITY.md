@@ -1,10 +1,10 @@
-## 🔒 Politique de Sécurité - FreijStack
-# 🛡️ Structure Sécurité Centralisée (2026)
+# 🔒 Politique de Sécurité - FreijStack
+## 🛡️ Structure Sécurité Centralisée (2026)
 Ce document décrit les mesures de sécurité et les bonnes pratiques pour protéger le dépôt FreijStack.
 
 ---
 
-## 🛡️ Structure Sécurité Centralisée (2026)
+### Vue d’ensemble
 
 Depuis janvier 2026, la sécurité CI/CD et les scripts sont harmonisés pour une maintenance optimale :
 
@@ -40,41 +40,46 @@ Depuis janvier 2026, la sécurité CI/CD et les scripts sont harmonisés pour un
 
 ## 📋 Fichiers Sensibles à NE JAMAIS Commiter
 
-### 1. Variables d'Environnement
+### 1. Variables d’environnement
 
 - ❌ `.env` (production)
 - ❌ `.env.local`
 - ❌ `.env.*.local`
 - ✅ `.env.example` (template avec valeurs vides)
 
-**Raison**: Contient secrets, tokens, mots de passe
+**Raison :** contient des secrets (tokens, mots de passe, clés API).
 
-## 🔒 Politique de Sécurité - FreijStack
+### 2. Clés, certificats & artefacts sensibles
 
 - ❌ `*.pem`, `*.key`, `*.crt`
 - ❌ Clés SSH privées (`id_rsa`, `id_ed25519`)
 
-**Raison**: Permettent l'accès aux systèmes
+**Raison :** permettent l’accès direct à des systèmes et environnements.
 
-## 🛡️ Structure Sécurité Centralisée (2026)
+### 3. Identifiants, credentials & bases de données
 
-### 3. Credentials & Authentification
+- ❌ `credentials.json` (Google, AWS, etc.)
+- ❌ Mots de passe / DSN / chaînes de connexion en clair
+- ❌ Bases locales (`*.db`, `*.sqlite`)
 
-- ❌ `credentials.json` (Google, AWS)
-- ❌ Database passwords
+**Raison :** exfiltration de données et compromission de comptes/ressources.
 
-- ❌ Bases de données (`*.db`, `*.sqlite`)
-
-## ✅ Bonnes Pratiques
+### ✅ Bonnes pratiques
 
 ```bash
 cp .env.example .env
-**À ne pas faire :**
-```bash
-
-**Pour le développement local**:
 ```
 
+**À ne pas faire :**
+
+```bash
+# Ne jamais ajouter un fichier .env réel au dépôt
+git add .env
+```
+
+**Pour le développement local :**
+- Utiliser `.env.local` (ignoré par Git) ou l’équivalent.
+- Préférer un gestionnaire de secrets pour les environnements partagés (GitHub Secrets, SSM Parameter Store, Vault, etc.).
 
 ---
 
@@ -178,6 +183,7 @@ git push --force-with-lease
 - Alerter l'équipe immédiatement
 - Vérifier les logs d'accès
 - Changer les mots de passe associés
+
 ---
 
 ## 🔐 Secrets GitHub Actions
@@ -203,6 +209,7 @@ JWT_SECRET     # Secret JWT
 ```
 
 ⚠️ **Les secrets ne s'affichent JAMAIS dans les logs**
+
 ---
 
 ## 🔑 Gestion des Clés SSH
@@ -228,6 +235,7 @@ cat ~/.ssh/gh-actions.pub >> ~/.ssh/authorized_keys
 chmod 700 ~/.ssh
 chmod 600 ~/.ssh/authorized_keys
 ```
+
 ---
 
 ## 📊 Scanning Continu
@@ -292,5 +300,5 @@ trivy image nom-image:tag
 ---
 
 **Créé par**: Christophe FREIJANES  
-**Date**: Décembre 2025  
+**Date**: Janvier 2026  
 **Statut**: 🔒 Active - Mises à jour régulières
