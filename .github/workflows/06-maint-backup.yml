@@ -36,7 +36,7 @@ env:
 jobs:
   security:
     name: 🛡️ Shield • Guardian
-    uses: ./.github/workflows/01-security-gitleaks.yml
+    uses: ./.github/workflows/00-core-security-ci.yml
     permissions:
       contents: read
       actions: read
