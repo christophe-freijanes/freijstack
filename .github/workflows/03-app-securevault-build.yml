@@ -31,19 +31,20 @@ jobs:
   build-and-push:
     name: 🏗️ Build & Push images
     runs-on: ubuntu-latest
-
     env:
-      # For now, both branches push to the PROD registry domain.
-      # If you still want -beta tags on develop, we handle it below.
       REGISTRY_HOST: registry.freijstack.com
       REGISTRY_USERNAME: ${{ secrets.REGISTRY_USER_PROD }}
       REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
-
+    outputs:
+      image_tag: ${{ steps.compute_tags.outputs.image_tag }}
+      sha_tag: ${{ steps.compute_tags.outputs.sha_tag }}
+      tag_suffix: ${{ steps.compute_tags.outputs.tag_suffix }}
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
 
       - name: 🔧 Compute tags
+        id: compute_tags
         run: |
           set -euo pipefail
 
@@ -54,15 +55,18 @@ jobs:
 
           SHA_TAG="$(echo "${GITHUB_SHA}" | cut -c1-7)"
 
-          # develop -> "-beta" tags, master -> normal tags
           if [ "${GITHUB_REF}" = "refs/heads/develop" ] || [ "${{ inputs.environment }}" = "staging" ]; then
-            echo "TAG_SUFFIX=-beta" >> "$GITHUB_ENV"
+            TAG_SUFFIX="-beta"
           else
-            echo "TAG_SUFFIX=" >> "$GITHUB_ENV"
+            TAG_SUFFIX=""
           fi
 
-          echo "IMAGE_TAG=${TAG_INPUT}" >> "$GITHUB_ENV"
-          echo "SHA_TAG=${SHA_TAG}" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=$TAG_INPUT" >> "$GITHUB_ENV"
+          echo "SHA_TAG=$SHA_TAG" >> "$GITHUB_ENV"
+          echo "TAG_SUFFIX=$TAG_SUFFIX" >> "$GITHUB_ENV"
+          echo "image_tag=$TAG_INPUT" >> "$GITHUB_OUTPUT"
+          echo "sha_tag=$SHA_TAG" >> "$GITHUB_OUTPUT"
+          echo "tag_suffix=$TAG_SUFFIX" >> "$GITHUB_OUTPUT"
 
       - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -89,9 +93,7 @@ jobs:
           username: ${{ env.REGISTRY_USERNAME }}
           password: ${{ env.REGISTRY_PASSWORD }}
 
-      # -------------------------
       # BACKEND IMAGE
-      # -------------------------
       - name: 🏗️ Build & push backend
         uses: docker/build-push-action@v5
         with:
@@ -99,14 +101,12 @@ jobs:
           file: ./saas/securevault/backend/Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_BACKEND }}:${{ env.IMAGE_TAG }}${{ env.TAG_SUFFIX }}
-            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_BACKEND }}:${{ env.SHA_TAG }}${{ env.TAG_SUFFIX }}
+            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_BACKEND }}:${{ steps.compute_tags.outputs.image_tag }}${{ steps.compute_tags.outputs.tag_suffix }}
+            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_BACKEND }}:${{ steps.compute_tags.outputs.sha_tag }}${{ steps.compute_tags.outputs.tag_suffix }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # -------------------------
       # FRONTEND IMAGE
-      # -------------------------
       - name: 🏗️ Build & push frontend
         uses: docker/build-push-action@v5
         with:
@@ -116,7 +116,24 @@ jobs:
           build-args: |
             REACT_APP_API_URL=${{ vars.SECUREVAULT_API_URL }}
           tags: |
-            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_FRONTEND }}:${{ env.IMAGE_TAG }}${{ env.TAG_SUFFIX }}
-            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_FRONTEND }}:${{ env.SHA_TAG }}${{ env.TAG_SUFFIX }}
+            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_FRONTEND }}:${{ steps.compute_tags.outputs.image_tag }}${{ steps.compute_tags.outputs.tag_suffix }}
+            ${{ env.REGISTRY_HOST }}/${{ env.IMAGE_FRONTEND }}:${{ steps.compute_tags.outputs.sha_tag }}${{ steps.compute_tags.outputs.tag_suffix }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  security-scan:
+    name: Security Scan SecureVault Images
+    needs: build-and-push
+    uses: ./.github/workflows/00-core-security-ci.yml
+    with:
+      environment: ${{ inputs.environment || 'production' }}
+      run_trivy_image: true
+      trivy_images: |
+        registry.freijstack.com/securevault-backend:${{ needs.build-and-push.outputs.image_tag }}${{ needs.build-and-push.outputs.tag_suffix }}
+        registry.freijstack.com/securevault-backend:${{ needs.build-and-push.outputs.sha_tag }}${{ needs.build-and-push.outputs.tag_suffix }}
+        registry.freijstack.com/securevault-frontend:${{ needs.build-and-push.outputs.image_tag }}${{ needs.build-and-push.outputs.tag_suffix }}
+        registry.freijstack.com/securevault-frontend:${{ needs.build-and-push.outputs.sha_tag }}${{ needs.build-and-push.outputs.tag_suffix }}
+      registry_host: registry.freijstack.com
+    secrets:
+      REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
+      REGISTRY_PASSWORD_PROD: ${{ secrets.REGISTRY_PASSWORD_PROD }}

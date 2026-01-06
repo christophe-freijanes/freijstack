@@ -53,18 +53,19 @@ env:
 
 jobs:
   security:
-    name: 🛡️ Shield Protection
-    uses: ./.github/workflows/01-security-gitleaks.yml
+    name: 🛡️ Security Scan (Infra)
+    uses: ./.github/workflows/00-core-security-ci.yml
+    with:
+      environment: ${{ github.event.inputs.environment || 'staging' }}
+      scan_paths: |
+        base-infra
+      gate_prod_only: true
+      fail_on_gitleaks: true
+      run_zap: false
     permissions:
       contents: read
       actions: read
       security-events: write
-    with:
-      scan_paths: |
-        base-infra
-      fail_on_gitleaks: true
-      upload_sarif: true
-      publish_score_artifact: true
 
   validate:
     name: 🔍 Validate Configuration

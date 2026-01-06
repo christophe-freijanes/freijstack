@@ -52,3 +52,18 @@ jobs:
           tags: |
             registry.freijstack.com/portfolio:latest
             registry.freijstack.com/portfolio:${{ github.sha }}
+
+  security-scan:
+    name: Security Scan Portfolio Image
+    needs: build
+    uses: ./.github/workflows/00-core-security-ci.yml
+    with:
+      environment: ${{ inputs.environment || 'production' }}
+      run_trivy_image: true
+      trivy_images: |
+        registry.freijstack.com/portfolio:${{ github.sha }}
+        registry.freijstack.com/portfolio:latest
+      registry_host: registry.freijstack.com
+    secrets:
+      REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
+      REGISTRY_PASSWORD_PROD: ${{ secrets.REGISTRY_PASSWORD_PROD }}

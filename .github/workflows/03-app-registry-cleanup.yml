@@ -89,7 +89,7 @@ jobs:
             echo "🔍 Running cleanup script..."
             /tmp/cleanup-registry.sh \
               registry.freijstack.com \
-              ${{ secrets.REGISTRY_USERNAME_PROD }} \
+              ${{ secrets.REGISTRY_USER_PROD }} \
               '${{ secrets.REGISTRY_PASSWORD_PROD }}' \
               ${{ github.event.inputs.max_age_days || '90' }}
 

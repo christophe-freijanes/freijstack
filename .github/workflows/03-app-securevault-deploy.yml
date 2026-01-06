@@ -14,8 +14,25 @@ on:
         options: [staging, production]
 
 jobs:
+  security:
+    name: 🛡️ Security Scan (SecureVault)
+    uses: ./.github/workflows/00-core-security-ci.yml
+    with:
+      environment: ${{ github.event.inputs.environment || 'staging' }}
+      scan_paths: |
+        saas/securevault
+      gate_prod_only: true
+      fail_on_gitleaks: true
+      run_zap: true
+      dast_url: "https://vault.freijstack.com"
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+
   deploy-staging:
     name: 🚀 Deploy SecureVault (Staging)
+    needs: security
     if: |
       (github.event_name == 'workflow_run' &&
        github.event.workflow_run.conclusion == 'success' &&
@@ -39,6 +56,7 @@ jobs:
 
   deploy-production:
     name: 🚀 Deploy SecureVault (Production)
+    needs: security
     if: |
       (github.event_name == 'workflow_run' &&
        github.event.workflow_run.conclusion == 'success' &&

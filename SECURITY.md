@@ -6,6 +6,36 @@ Ce document décrit les mesures de sécurité et les bonnes pratiques pour prot�
 
 ---
 
+# 🛡️ Structure Sécurité Centralisée (2026)
+
+Depuis janvier 2026, la sécurité CI/CD et les scripts sont harmonisés pour une maintenance optimale :
+
+## 1. Workflows CI/CD
+- **.github/workflows/security-ci.yml** : Unifie PR, production, nightly (SAST, secrets, Trivy, DAST, etc.)
+- **.github/workflows/00-core-security-ci.yml** : Orchestrateur réutilisable appelé par le workflow principal
+
+## 2. Scripts Sécurité
+- **scripts/security-check.sh** : Script unique pour toutes les vérifications pré-commit (fichiers sensibles, secrets, debug, etc.)
+- Les autres scripts sécurité ont été supprimés (voir historique Git si besoin)
+
+## 3. Documentation
+- **SECURITY.md** (ce fichier) : Point d’entrée unique pour toutes les pratiques et procédures sécurité
+
+## 4. Bonnes pratiques DevSecOps
+- Centralisation, automatisation, suppression des doublons
+- Score de sécurité GitHub surveillé en continu
+- Utilisation de Gitleaks, Trivy, CodeQL, Dependabot
+
+---
+
+> **Mise à jour 2026 :**
+> - Un seul workflow sécurité CI/CD pour tous les contextes
+> - Un seul script shell principal pour les checks sécurité
+> - Documentation centralisée ici
+> - Suppression des fichiers/scripts redondants
+
+---
+
 ## 📋 Fichiers Sensibles à NE JAMAIS Commiter
 
 ### 1. Variables d'Environnement
