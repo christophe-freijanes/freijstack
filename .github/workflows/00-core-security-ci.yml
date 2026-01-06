@@ -1,0 +1,315 @@
+name: 🛡️ Security CI (Core Orchestrator)
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Target environment (staging|production|pr)"
+        required: true
+        type: string
+
+      scan_paths:
+        description: "Paths to scan (newline-separated)."
+        required: false
+        type: string
+        default: |
+          saas
+          base-infra
+          docs
+          scripts
+
+      # --- Optional components toggles ---
+      run_codeql:
+        description: "Run CodeQL SAST"
+        required: false
+        type: boolean
+        default: true
+
+      run_inspector:
+        description: "Run Inspector (Gitleaks + Trivy FS + optional lint/audit)"
+        required: false
+        type: boolean
+        default: true
+
+      run_trivy_image:
+        description: "Run Trivy image scan (requires trivy_images input)"
+        required: false
+        type: boolean
+        default: false
+
+      trivy_images:
+        description: "Container images to scan (newline-separated, FULL refs). Example: registry-ui.freijstack.com/app:tag"
+        required: false
+        type: string
+        default: ""
+
+      registry_host:
+        description: "Registry host for docker login (e.g., registry-ui.freijstack.com)."
+        required: false
+        type: string
+        default: "registry.freijstack.com"
+
+      run_zap:
+        description: "Run OWASP ZAP baseline (DAST) (requires dast_url input)"
+        required: false
+        type: boolean
+        default: false
+
+      dast_url:
+        description: "Public URL to scan with OWASP ZAP (e.g., https://vault.freijstack.com)."
+        required: false
+        type: string
+        default: ""
+
+      # --- Gating ---
+      gate_prod_only:
+        description: "If true, enforce hard-fail gates only when environment == production."
+        required: false
+        type: boolean
+        default: true
+
+      fail_on_gitleaks:
+        description: "Fail if gitleaks finds leaks (effective when gate is active)."
+        required: false
+        type: boolean
+        default: true
+
+      trivy_severity_gate:
+        description: "Trivy severity threshold for gating (e.g., HIGH,CRITICAL)."
+        required: false
+        type: string
+        default: "HIGH,CRITICAL"
+
+      # --- Optional Snyk (requires secret SNYK_TOKEN) ---
+      run_snyk:
+        description: "Run Snyk (requires SNYK_TOKEN secret)."
+        required: false
+        type: boolean
+        default: false
+
+    secrets:
+      SNYK_TOKEN:
+        required: false
+
+      # Registry creds (needed for private image pulls/scans)
+      REGISTRY_USER_PROD:
+        required: false
+      REGISTRY_PASSWORD_PROD:
+        required: false
+      REGISTRY_USER_STAGING:
+        required: false
+      REGISTRY_PASSWORD_STAGING:
+        required: false
+
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+
+concurrency:
+  group: security-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: 🧭 Resolve gating mode
+    runs-on: ubuntu-latest
+    outputs:
+      gate_active: ${{ steps.gate.outputs.gate_active }}
+    steps:
+      - id: gate
+        run: |
+          set -euo pipefail
+          env="${{ inputs.environment }}"
+          gate_prod_only="${{ inputs.gate_prod_only }}"
+          gate_active="false"
+
+          if [ "$gate_prod_only" = "true" ] && [ "$env" = "production" ]; then
+            gate_active="true"
+          elif [ "$gate_prod_only" = "false" ]; then
+            gate_active="true"
+          fi
+
+          echo "gate_active=$gate_active" >> "$GITHUB_OUTPUT"
+          echo "Gate active: $gate_active (env=$env, gate_prod_only=$gate_prod_only)" >> "$GITHUB_STEP_SUMMARY"
+
+  codeql:
+    name: 🧠 CodeQL
+    needs: [gate]
+    if: ${{ inputs.run_codeql }}
+    uses: ./.github/workflows/01-security-codeql.yml
+    with:
+      environment: ${{ inputs.environment }}
+    secrets: inherit
+
+  gitleaks:
+    name: 🔑 Gitleaks (secrets scan)
+    needs: [gate]
+    if: ${{ inputs.run_inspector }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+      - name: 🕵️ Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: >-
+            detect
+            --source="${{ inputs.scan_paths }}"
+            --report-format sarif
+            --report-path gitleaks-report.sarif
+        continue-on-error: true
+      - name: 📤 Upload SARIF (Code Scanning)
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: gitleaks-report.sarif
+          category: gitleaks
+
+  snyk:
+    name: 🧪 Snyk (optional)
+    needs: [gate]
+    if: ${{ inputs.run_snyk }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+      - name: 🧪 Snyk test
+        uses: snyk/actions@master
+        with:
+          command: test
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true
+      - name: 📤 Upload Snyk results (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk-results
+          path: snyk*.*
+        continue-on-error: true
+
+  trivy-image-list:
+    name: 🐳 Build Trivy image list
+    needs: [gate]
+    if: ${{ inputs.run_trivy_image && inputs.trivy_images != '' }}
+    runs-on: ubuntu-latest
+    outputs:
+      images_json: ${{ steps.images.outputs.images_json }}
+    steps:
+      - name: 🧾 Build image list (newline → JSON array)
+        id: images
+        run: |
+          set -euo pipefail
+          json=$(
+            printf "%s" "${{ inputs.trivy_images }}" \
+            | sed '/^\s*$/d' \
+            | jq -R -s -c 'split("\n") | map(select(length>0))'
+          )
+          echo "images_json=$json" >> "$GITHUB_OUTPUT"
+          echo "Images: $json" >> "$GITHUB_STEP_SUMMARY"
+
+  trivy-image:
+    name: 🐳 Trivy • Image scan (private registry)
+    needs: [gate, trivy-image-list]
+    if: ${{ inputs.run_trivy_image && inputs.trivy_images != '' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.trivy-image-list.outputs.images_json) }}
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔐 Docker login (private registry)
+        run: |
+          set -euo pipefail
+          host="${{ inputs.registry_host }}"
+          env="${{ inputs.environment }}"
+
+          if [ "$env" = "staging" ]; then
+            user="${{ secrets.REGISTRY_USER_STAGING }}"
+            pass="${{ secrets.REGISTRY_PASSWORD_STAGING }}"
+          else
+            user="${{ secrets.REGISTRY_USER_PROD }}"
+            pass="${{ secrets.REGISTRY_PASSWORD_PROD }}"
+          fi
+
+          if [ -n "$user" ] && [ -n "$pass" ]; then
+            echo "$pass" | docker login "$host" -u "$user" --password-stdin
+          else
+            echo "⚠️ No registry credentials provided for env=$env. Pull/scan may fail if images are private."
+          fi
+
+      - name: 🧪 Pull image (verify tag exists)
+        run: |
+          set -euo pipefail
+          echo "Pulling ${{ matrix.image }}"
+          docker pull "${{ matrix.image }}"
+
+      - name: 🛡️ Trivy image scan → SARIF (+ gate via exit-code)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "image"
+          image-ref: "${{ matrix.image }}"
+          format: "sarif"
+          output: "trivy-image-${{ strategy.job-index }}.sarif"
+          severity: "${{ inputs.trivy_severity_gate }}"
+          ignore-unfixed: true
+          vuln-type: "os,library"
+          exit-code: ${{ needs.gate.outputs.gate_active == 'true' && '1' || '0' }}
+        env:
+          TRIVY_USERNAME: ${{ inputs.environment == 'staging' && secrets.REGISTRY_USER_STAGING || secrets.REGISTRY_USER_PROD }}
+          TRIVY_PASSWORD: ${{ inputs.environment == 'staging' && secrets.REGISTRY_PASSWORD_STAGING || secrets.REGISTRY_PASSWORD_PROD }}
+
+      - name: 📤 Upload SARIF (Code Scanning)
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: "trivy-image-${{ strategy.job-index }}.sarif"
+          category: "trivy-image-${{ matrix.image }}"
+
+  zap-dast:
+    name: 🌐 OWASP ZAP (DAST)
+    needs: [gate]
+    if: ${{ inputs.run_zap && inputs.dast_url != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: 🧾 Plan
+        run: |
+          set -euo pipefail
+          echo "Target: ${{ inputs.dast_url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Gate active: ${{ needs.gate.outputs.gate_active }}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 🕷️ ZAP baseline scan (non-blocking)
+        if: ${{ needs.gate.outputs.gate_active != 'true' }}
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: ${{ inputs.dast_url }}
+          allow_issue_writing: false
+          fail_action: false
+          cmd_options: "-a"
+
+      - name: 🕷️ ZAP baseline scan (blocking - gate)
+        if: ${{ needs.gate.outputs.gate_active == 'true' }}
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: ${{ inputs.dast_url }}
+          allow_issue_writing: false
+          fail_action: true
+          cmd_options: "-a"
+
+      - name: 📎 Upload ZAP reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: |
+            report_html.html
+            report_json.json
+            report_md.md
+          retention-days: 7
+        continue-on-error: true

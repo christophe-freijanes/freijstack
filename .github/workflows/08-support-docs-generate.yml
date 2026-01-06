@@ -28,7 +28,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '18'
           cache: 'npm'
@@ -190,7 +190,7 @@ jobs:
 
       - name: Setup Pages
         if: github.ref == 'refs/heads/master'
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
 
       - name: Upload Pages artifact
         if: github.ref == 'refs/heads/master'
@@ -275,7 +275,7 @@ jobs:
 
       - name: Post results
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             github.rest.issues.createComment({

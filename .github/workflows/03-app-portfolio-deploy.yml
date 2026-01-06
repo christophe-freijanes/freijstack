@@ -8,8 +8,25 @@ on:
   workflow_dispatch: {}
 
 jobs:
+  security:
+    name: 🛡️ Security Scan (Portfolio)
+    uses: ./.github/workflows/00-core-security-ci.yml
+    with:
+      environment: 'production'
+      scan_paths: |
+        saas/portfolio
+      gate_prod_only: true
+      fail_on_gitleaks: true
+      run_zap: true
+      dast_url: "https://portfolio.freijstack.com"
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+
   deploy-production:
     name: 🚀 Deploy Portfolio (Production)
+    needs: security
     if: |
       github.event_name == 'workflow_dispatch' ||
       (

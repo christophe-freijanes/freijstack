@@ -6,6 +6,45 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.37.12](https://github.com/christophe-freijanes/freijstack/compare/v1.37.11...v1.37.12) (2026-01-06)
+
+### ♻️ Code Refactoring
+
+* update workflow names for consistency and clarity ([#147](https://github.com/christophe-freijanes/freijstack/issues/147)) ([0f1f62e](https://github.com/christophe-freijanes/freijstack/commit/0f1f62ed97276359282e372f8c83f0005df097af))
+
+### 📚 Documentation
+
+* correct heading level for centralized security structure in SECURITY.md ([96b5b1c](https://github.com/christophe-freijanes/freijstack/commit/96b5b1cc7bbfe6bb74ea87e111daed1d2672f5cd))
+* enhance SECURITY.md with additional best practices and updated guidelines ([7859c06](https://github.com/christophe-freijanes/freijstack/commit/7859c067b133b27c37b51ac0061f0ab50ff0ac32))
+* improve formatting and consistency in SECURITY.md ([8a63a5f](https://github.com/christophe-freijanes/freijstack/commit/8a63a5fcbc6fbea16788033d1e22bb5e1a903700))
+* improve security practices section for clarity and formatting ([d21fac6](https://github.com/christophe-freijanes/freijstack/commit/d21fac6b8f9acba4be42f0229b59db40a381476b))
+* update security policy structure and improve section headings in SECURITY.md ([6cc0f44](https://github.com/christophe-freijanes/freijstack/commit/6cc0f44ce0348b4618d69c14f02e5f64811effe5))
+* update security practices and remove outdated START_HERE files ([c21a7ce](https://github.com/christophe-freijanes/freijstack/commit/c21a7ce3200928962236d6cd840bed6970c703ae))
+* update security practices and remove outdated START_HERE files ([#148](https://github.com/christophe-freijanes/freijstack/issues/148)) ([51a8aba](https://github.com/christophe-freijanes/freijstack/commit/51a8aba6584042c5cc4382eb1ea81e4ad5144b2c))
+
+### 🔧 Chores
+
+* **deps-dev:** bump jest in /saas/securevault/backend ([#163](https://github.com/christophe-freijanes/freijstack/issues/163)) ([cc0472f](https://github.com/christophe-freijanes/freijstack/commit/cc0472f8848ceb98ad0662640569f9e6a153c90b))
+* **deps-dev:** bump typescript in /saas/securevault/frontend ([#156](https://github.com/christophe-freijanes/freijstack/issues/156)) ([60f7f72](https://github.com/christophe-freijanes/freijstack/commit/60f7f727ed017820b4c87e24e2eeeea40d9f6033))
+* **deps:** bump actions/configure-pages from 4 to 5 ([#150](https://github.com/christophe-freijanes/freijstack/issues/150)) ([af333c0](https://github.com/christophe-freijanes/freijstack/commit/af333c072aa915de731b49e010e242d654f1a881))
+* **deps:** bump actions/github-script from 7 to 8 ([#155](https://github.com/christophe-freijanes/freijstack/issues/155)) ([d290bfc](https://github.com/christophe-freijanes/freijstack/commit/d290bfc50c29c3e1dc621325be4d9434bf063931))
+* **deps:** bump actions/setup-node from 4 to 6 ([#153](https://github.com/christophe-freijanes/freijstack/issues/153)) ([d904200](https://github.com/christophe-freijanes/freijstack/commit/d90420093db023196a0f8ad3965fd39a8a05c062))
+* **deps:** bump bcrypt in /saas/securevault/backend ([#157](https://github.com/christophe-freijanes/freijstack/issues/157)) ([00079aa](https://github.com/christophe-freijanes/freijstack/commit/00079aad5220672c5cc5bc2637dd3632c412babf))
+* **deps:** bump docker/build-push-action from 5 to 6 ([#151](https://github.com/christophe-freijanes/freijstack/issues/151)) ([956975f](https://github.com/christophe-freijanes/freijstack/commit/956975f98577e66c61581402a9f4c096e6bfe28a))
+* **deps:** bump dotenv in /saas/securevault/backend ([#160](https://github.com/christophe-freijanes/freijstack/issues/160)) ([d3ecd8e](https://github.com/christophe-freijanes/freijstack/commit/d3ecd8e7094d6ab1cfd747b9d1dc67e4d5f15af2))
+* **deps:** bump express in /saas/securevault/backend ([#166](https://github.com/christophe-freijanes/freijstack/issues/166)) ([e4bd459](https://github.com/christophe-freijanes/freijstack/commit/e4bd459bf1efe57325e943e5fc1d148e7cad6896))
+* **deps:** bump express-rate-limit in /saas/securevault/backend ([#159](https://github.com/christophe-freijanes/freijstack/issues/159)) ([5ee6267](https://github.com/christophe-freijanes/freijstack/commit/5ee626700900490cc507d6e5cd2a969984d1b111))
+* **deps:** bump helmet in /saas/securevault/backend ([#154](https://github.com/christophe-freijanes/freijstack/issues/154)) ([9b8c331](https://github.com/christophe-freijanes/freijstack/commit/9b8c3315896f6521776b68fe60626dd6e47498f5))
+* **deps:** bump joi in /saas/securevault/backend ([#152](https://github.com/christophe-freijanes/freijstack/issues/152)) ([c7b7e65](https://github.com/christophe-freijanes/freijstack/commit/c7b7e65a80f4df66bbbd706a07dadcc3652667cc))
+* **deps:** bump lucide-react in /saas/securevault/frontend ([#158](https://github.com/christophe-freijanes/freijstack/issues/158)) ([5972cc6](https://github.com/christophe-freijanes/freijstack/commit/5972cc6fee2e374b51fca9859c9a351ac163767b))
+* **deps:** bump react in /saas/securevault/frontend ([#165](https://github.com/christophe-freijanes/freijstack/issues/165)) ([7774ddc](https://github.com/christophe-freijanes/freijstack/commit/7774ddcb20ffe16189039dc7834493903dd61677))
+* **deps:** bump react-dom in /saas/securevault/frontend ([#161](https://github.com/christophe-freijanes/freijstack/issues/161)) ([fbc4298](https://github.com/christophe-freijanes/freijstack/commit/fbc429877563894ba4d6868fb2fe969518add169))
+* **deps:** bump react-router-dom in /saas/securevault/frontend ([#162](https://github.com/christophe-freijanes/freijstack/issues/162)) ([c72993e](https://github.com/christophe-freijanes/freijstack/commit/c72993eff8d08d12bba08e1df40a1366a431f81c))
+* **deps:** bump uuid from 9.0.1 to 13.0.0 in /saas/securevault/backend ([#164](https://github.com/christophe-freijanes/freijstack/issues/164)) ([a13ccda](https://github.com/christophe-freijanes/freijstack/commit/a13ccdaa900012d2d3e6cc9ac47384c90204ba8a))
+* update Gitleaks action version and clean up Security.md ([cd552a6](https://github.com/christophe-freijanes/freijstack/commit/cd552a6ce07b8b40c84064309d32c8fcf91dcc55))
+* update package.json for improved release rules and add devDependencies ([f84f186](https://github.com/christophe-freijanes/freijstack/commit/f84f1862ea3c14fdb9ee9fb39a653eda5b742904))
+* update workflow name and improve formatting in SECURITY.md ([859756d](https://github.com/christophe-freijanes/freijstack/commit/859756de919fb2200f7e49d95e26dd947e18a180))
+
 ## [1.37.11](https://github.com/christophe-freijanes/freijstack/compare/v1.37.10...v1.37.11) (2026-01-05)
 
 ### 🐛 Bug Fixes

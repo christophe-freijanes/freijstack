@@ -19,8 +19,25 @@ on:
           - production
 
 jobs:
+  security:
+    name: 🛡️ Security Scan (Registry)
+    uses: ./.github/workflows/00-core-security-ci.yml
+    with:
+      environment: ${{ github.event.inputs.environment || 'production' }}
+      scan_paths: |
+        saas/registry
+      gate_prod_only: true
+      fail_on_gitleaks: true
+      run_zap: true
+      dast_url: "https://registry.freijstack.com/v2/"
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+
   deploy:
     name: 🚀 Deploy Registry (${{ github.event.inputs.environment || 'production' }})
+    needs: security
     uses: ./.github/workflows/00-core-full-deploy.yml
     with:
       app_name: "registry"
