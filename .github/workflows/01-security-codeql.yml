@@ -1,4 +1,4 @@
-name: 🧠 Security • CodeQL (Reusable)
+name: 🧠 Security • CodeQL
 
 on:
   workflow_call:

@@ -149,10 +149,10 @@ git reset HEAD~1              # Annuler le commit
 git checkout -- .env          # Restaurer fichier local
 ```
 
-# 2. Mettre à jour sur tous les systèmes (GitHub, VPS, etc.)
-# 3. Invalider l'ancienne clé
+## 2. Mettre à jour sur tous les systèmes (GitHub, VPS, etc.)
+## 3. Invalider l'ancienne clé
 
-# Nettoyer l'historique Git (dangereux!)
+## Nettoyer l'historique Git (dangereux!)
 git filter-branch --tree-filter 'rm -f .env' HEAD
 git push --force-with-lease
 ```
@@ -186,6 +186,9 @@ JWT_SECRET     # Secret JWT
 ---
 
 ## 🔑 Gestion des Clés SSH
+
+### Générer une clé dédiée
+```bash
 ssh-keygen -t ed25519 -C "github-actions@freijstack" -f ~/.ssh/gh-actions
 ```
 
@@ -193,11 +196,12 @@ ssh-keygen -t ed25519 -C "github-actions@freijstack" -f ~/.ssh/gh-actions
 ```
 -----BEGIN OPENSSH PRIVATE KEY-----
 [EXAMPLE — DO NOT USE REAL KEYS]
-```bash
-# Ajouter la clé publique
-cat ~/.ssh/gh-actions.pub >> ~/.ssh/authorized_keys
+-----END OPENSSH PRIVATE KEY-----
+```
 
-# Permissions correctes
+### Ajouter la clé publique et permissions
+```bash
+cat ~/.ssh/gh-actions.pub >> ~/.ssh/authorized_keys
 chmod 700 ~/.ssh
 chmod 600 ~/.ssh/authorized_keys
 ```
