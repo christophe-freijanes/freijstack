@@ -6,7 +6,7 @@ Ce document décrit les mesures de sécurité et les bonnes pratiques pour prot�
 
 ---
 
-# 🛡️ Structure Sécurité Centralisée (2026)
+## 🛡️ Structure Sécurité Centralisée (2026)
 
 Depuis janvier 2026, la sécurité CI/CD et les scripts sont harmonisés pour une maintenance optimale :
 
