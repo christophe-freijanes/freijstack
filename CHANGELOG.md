@@ -6,6 +6,17 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.37.14](https://github.com/christophe-freijanes/freijstack/compare/v1.37.13...v1.37.14) (2026-01-07)
+
+### 🐛 Bug Fixes
+
+* update Docker registry credentials to use secrets for security ([be747a6](https://github.com/christophe-freijanes/freijstack/commit/be747a656c5a2f2966c94d2dc87379f54dd5e710))
+
+### 🔧 Chores
+
+* add security documentation and licensing files ([#170](https://github.com/christophe-freijanes/freijstack/issues/170)) ([642c429](https://github.com/christophe-freijanes/freijstack/commit/642c42926c9ea1d57feb689e4736266c236c8009)), closes [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+* enforce failure on Gitleaks scan if issues are found ([#169](https://github.com/christophe-freijanes/freijstack/issues/169)) ([dcf178d](https://github.com/christophe-freijanes/freijstack/commit/dcf178daa0e918fbfb0bc8ea3e1d7faeda66df47)), closes [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
 ## [1.37.13](https://github.com/christophe-freijanes/freijstack/compare/v1.37.12...v1.37.13) (2026-01-07)
 
 ### ♻️ Code Refactoring
