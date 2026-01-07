@@ -1,81 +1,76 @@
-# Hardened Nginx config for Portfolio (DEV/STAGING/PROD)
-# - Designed to run *behind Traefik* (TLS terminated at Traefik)
-# - HTTP only inside the Docker network
-# - Unprivileged port (8080) to support rootless/nginx-unprivileged images
-#
-# If you ever decide to terminate TLS in Nginx (not recommended with Traefik),
-# do it in a dedicated container or an explicit separate config.
-
-server_tokens off;
+# Nginx static site (secure-by-default) — behind Traefik (TLS terminated upstream)
+# - Runs on 8080 so container can run as non-root
+# - Security headers tuned for this portfolio (external images/fonts/CDN allowed)
 
 server {
-    listen 8080;
-    server_name _;
+    listen 8080 default_server;
+    listen [::]:8080 default_server;
 
+    server_name _;
     root /usr/share/nginx/html;
     index index.html;
 
-    # Basic request hardening
-    client_max_body_size 1m;
-    keepalive_timeout 15s;
+    # Reduce information leakage
+    server_tokens off;
 
-    # If you want real client IPs in logs, Traefik should forward them.
-    # Adjust trusted proxy CIDRs if your Docker network differs.
-    real_ip_header X-Forwarded-For;
-    set_real_ip_from 10.0.0.0/8;
-    set_real_ip_from 172.16.0.0/12;
-    set_real_ip_from 192.168.0.0/16;
-    real_ip_recursive on;
-
-    # Security headers (HSTS should be handled by Traefik because it's HTTPS-only)
+    # --- Security headers ---
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-Frame-Options "DENY" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-    add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=()" always;
 
-    # CSP: conservative default (adjust if you load external assets)
-    add_header Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" always;
+    # If you have full HTTPS everywhere (Traefik websecure only), you can enable HSTS.
+    # Uncomment ONLY if Traefik always serves HTTPS for this host.
+    # add_header Strict-Transport-Security "max-age=15552000; includeSubDomains; preload" always;
 
-    # Compression
+    # Content Security Policy:
+    # - Allows external images (LinkedIn + shields.io), fonts (Google Fonts), and CSS CDN (Font Awesome)
+    # - Blocks plugins/objects and framing
+    add_header Content-Security-Policy
+        "default-src 'self'; \
+        base-uri 'self'; \
+        object-src 'none'; \
+        frame-ancestors 'none'; \
+        img-src 'self' data: https:; \
+        font-src 'self' https: data:; \
+        style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; \
+        script-src 'self'; \
+        connect-src 'self' https:;" always;
+
+    # --- Compression ---
     gzip on;
-    gzip_comp_level 5;
-    gzip_min_length 1024;
     gzip_vary on;
     gzip_proxied any;
-    gzip_disable "msie6";
+    gzip_comp_level 6;
     gzip_types
         text/plain
         text/css
-        application/json
-        application/javascript
         text/javascript
+        application/javascript
+        application/json
         application/xml
-        application/xml+rss
+        application/rss+xml
         image/svg+xml;
 
-    # SPA routing
-    location / {
-        try_files $uri $uri/ /index.html;
-        autoindex off;
-    }
-
-    # Cache static assets
-    location ~* \.(?:css|js|png|jpg|jpeg|webp|gif|svg|ico|woff2?)$ {
+    # --- Static caching ---
+    location ~* \.(?:css|js|mjs|png|jpg|jpeg|gif|webp|svg|ico|woff2?)$ {
         expires 30d;
-        add_header Cache-Control "public, max-age=2592000, immutable";
+        add_header Cache-Control "public, max-age=2592000, immutable" always;
         try_files $uri =404;
-        access_log off;
     }
 
-    # Block access to hidden files (.git, .env, etc.)
+    location = /robots.txt { try_files $uri =404; access_log off; }
+    location = /sitemap.xml { try_files $uri =404; access_log off; }
+
+    # Deny hidden files (except ACME if ever used directly)
     location ~ /\.(?!well-known) {
         deny all;
         access_log off;
         log_not_found off;
     }
 
-    # Restrict methods
-    if ($request_method !~ ^(GET|HEAD)$) {
-        return 405;
+    # SPA-friendly fallback (optional)
+    location / {
+        try_files $uri $uri/ /index.html;
     }
 }
