@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.37.16](https://github.com/christophe-freijanes/freijstack/compare/v1.37.15...v1.37.16) (2026-01-07)
+
+### 🐛 Bug Fixes
+
+* update Trivy action version and enhance SARIF file handling ([6dc1af9](https://github.com/christophe-freijanes/freijstack/commit/6dc1af9e0e21cbc789ba2f5be67cc60344017e99))
+
 ## [1.37.15](https://github.com/christophe-freijanes/freijstack/compare/v1.37.14...v1.37.15) (2026-01-07)
 
 ### 🐛 Bug Fixes
