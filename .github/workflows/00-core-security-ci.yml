@@ -287,7 +287,7 @@ jobs:
 
       - name: 🕷️ ZAP baseline scan (non-blocking)
         if: ${{ needs.gate.outputs.gate_active != 'true' }}
-        uses: zaproxy/action-baseline@v0.14.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: ${{ inputs.dast_url }}
           allow_issue_writing: false
@@ -296,7 +296,7 @@ jobs:
 
       - name: 🕷️ ZAP baseline scan (blocking - gate)
         if: ${{ needs.gate.outputs.gate_active == 'true' }}
-        uses: zaproxy/action-baseline@v0.14.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: ${{ inputs.dast_url }}
           allow_issue_writing: false
