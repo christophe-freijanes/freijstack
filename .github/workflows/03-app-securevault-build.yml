@@ -41,7 +41,7 @@ jobs:
       tag_suffix: ${{ steps.compute_tags.outputs.tag_suffix }}
     steps:
       - name: 📥 Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: 🔧 Compute tags
         id: compute_tags
