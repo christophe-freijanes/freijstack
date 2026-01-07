@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.37.15](https://github.com/christophe-freijanes/freijstack/compare/v1.37.14...v1.37.15) (2026-01-07)
+
+### 🐛 Bug Fixes
+
+* update Docker login credentials to use secrets for enhanced security ([de52d43](https://github.com/christophe-freijanes/freijstack/commit/de52d434179e81fcbca2cdc6a9cbfe5b5943babb))
+
 ## [1.37.14](https://github.com/christophe-freijanes/freijstack/compare/v1.37.13...v1.37.14) (2026-01-07)
 
 ### 🐛 Bug Fixes
