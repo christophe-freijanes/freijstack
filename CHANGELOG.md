@@ -6,6 +6,18 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.37.17](https://github.com/christophe-freijanes/freijstack/compare/v1.37.16...v1.37.17) (2026-01-07)
+
+### 🐛 Bug Fixes
+
+* update default registry host and enhance gitleaks steps with improved logging and error handling ([574a7e8](https://github.com/christophe-freijanes/freijstack/commit/574a7e87aa24b248aee205616ac45be1f7695c0b))
+
+### 🔧 Chores
+
+* **deps:** bump actions/checkout from 4 to 6 ([#180](https://github.com/christophe-freijanes/freijstack/issues/180)) ([c85b7df](https://github.com/christophe-freijanes/freijstack/commit/c85b7dfa9e166066a14639dd4cd5232f964dbadb))
+* **deps:** bump github/codeql-action from 3 to 4 ([#178](https://github.com/christophe-freijanes/freijstack/issues/178)) ([35f72f6](https://github.com/christophe-freijanes/freijstack/commit/35f72f606e5d91e3425452291bcf7cd5a2be8408))
+* **deps:** bump react-router-dom in /saas/securevault/frontend ([#179](https://github.com/christophe-freijanes/freijstack/issues/179)) ([0379878](https://github.com/christophe-freijanes/freijstack/commit/03798784cdb3e1ad78ed514dc8dc6a56c711b911))
+
 ## [1.37.16](https://github.com/christophe-freijanes/freijstack/compare/v1.37.15...v1.37.16) (2026-01-07)
 
 ### 🐛 Bug Fixes
