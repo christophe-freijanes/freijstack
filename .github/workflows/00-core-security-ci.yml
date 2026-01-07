@@ -151,7 +151,7 @@ jobs:
       security-events: write
 
     steps:
-      - name: 📥 Checkout
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: 📦 Install gitleaks
