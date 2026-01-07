@@ -261,7 +261,7 @@ jobs:
           docker pull "${{ matrix.image }}"
 
       - name: 🛡️ Trivy image scan → SARIF (+ gate via exit-code)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.30.0
         with:
           scan-type: "image"
           image-ref: "${{ matrix.image }}"
@@ -275,12 +275,32 @@ jobs:
           TRIVY_USERNAME: ${{ inputs.environment == 'staging' && secrets.REGISTRY_USER_STAGING || secrets.REGISTRY_USER_PROD }}
           TRIVY_PASSWORD: ${{ inputs.environment == 'staging' && secrets.REGISTRY_PASSWORD_STAGING || secrets.REGISTRY_PASSWORD_PROD }}
 
+      - name: 🔎 Verify SARIF file
+        if: always()
+        run: |
+          set -euo pipefail
+          ls -lah
+          test -s "trivy-image-${{ strategy.job-index }}.sarif"
+
+      - name: 🧾 Build safe SARIF category
+        if: always()
+        id: cat
+        run: |
+          set -euo pipefail
+          img="${{ matrix.image }}"
+          safe="$(printf "%s" "$img" | sed -E 's/[^a-zA-Z0-9._-]+/-/g')"
+          safe="$(printf "%.200s" "$safe")"
+          echo "category=trivy-image-$safe" >> "$GITHUB_OUTPUT"
+          echo "Category: trivy-image-$safe" >> "$GITHUB_STEP_SUMMARY"
+
       - name: 📤 Upload SARIF (Code Scanning)
         if: always()
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: "trivy-image-${{ strategy.job-index }}.sarif"
-          category: "trivy-image-${{ matrix.image }}"
+          category: ${{ steps.cat.outputs.category }}
+          wait-for-processing: true
+
 
   zap-dast:
     name: 🌐 OWASP ZAP (DAST)
