@@ -184,7 +184,7 @@ jobs:
         continue-on-error: true
       - name: 📤 Upload Snyk results (artifact)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: snyk-results
           path: snyk*.*
@@ -305,7 +305,7 @@ jobs:
 
       - name: 📎 Upload ZAP reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: zap-report
           path: |
