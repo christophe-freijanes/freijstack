@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.37.19](https://github.com/christophe-freijanes/freijstack/compare/v1.37.18...v1.37.19) (2026-01-07)
+
+### 🐛 Bug Fixes
+
+* change ZAP DAST fail action to non-blocking ([f26c463](https://github.com/christophe-freijanes/freijstack/commit/f26c463481922e8e3fd9e20f2dc520b193f51660))
+
 ## [1.37.18](https://github.com/christophe-freijanes/freijstack/compare/v1.37.17...v1.37.18) (2026-01-07)
 
 ### 🐛 Bug Fixes
