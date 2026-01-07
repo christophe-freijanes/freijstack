@@ -47,7 +47,7 @@ on:
         description: "Registry host for docker login (e.g., registry-ui.freijstack.com)."
         required: false
         type: string
-        default: "registry.freijstack.com"
+        default: "registry-ui.freijstack.com"
 
       run_zap:
         description: "Run OWASP ZAP baseline (DAST) (requires dast_url input)"
@@ -143,17 +143,18 @@ jobs:
     secrets: inherit
 
   gitleaks:
-    name: Gitleaks (CLI, no external action)
+    name: 🧪 Gitleaks (CLI, no external action)
+    needs: [gate]
     runs-on: ubuntu-latest
     permissions:
       contents: read
       security-events: write
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
 
-      - name: Install gitleaks
+      - name: 📦 Install gitleaks
         run: |
           set -euo pipefail
           VERSION="8.21.2"
@@ -162,7 +163,9 @@ jobs:
           sudo install -m 0755 gitleaks /usr/local/bin/gitleaks
           gitleaks version
 
-      - name: Run gitleaks (SARIF)
+      - name: 🔍 Run gitleaks (SARIF)
+        id: scan
+        continue-on-error: true
         run: |
           set -euo pipefail
           gitleaks detect \
@@ -172,10 +175,23 @@ jobs:
             --report-path gitleaks.sarif \
             --exit-code 1
 
-      - name: Upload SARIF to GitHub Security
+      - name: 📤 Upload SARIF to GitHub Security
+        if: always()
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: gitleaks.sarif
+          category: gitleaks
+
+      - name: ✅ Enforce gitleaks gate (optional)
+        if: ${{ needs.gate.outputs.gate_active == 'true' && inputs.fail_on_gitleaks == true }}
+        run: |
+          set -euo pipefail
+          # If gitleaks step failed, fail the job now (gate mode)
+          if [ "${{ steps.scan.outcome }}" != "success" ]; then
+            echo "Gitleaks detected leaks and gate is active. Failing." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "Gitleaks gate passed." >> "$GITHUB_STEP_SUMMARY"
 
   snyk:
     name: 🧪 Snyk (optional)
@@ -184,7 +200,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
+
+      # NOTE: If your Actions allowlist does not include "snyk/*", this will be blocked.
       - name: 🧪 Snyk test
         uses: snyk/actions@master
         with:
@@ -192,6 +210,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         continue-on-error: true
+
       - name: 📤 Upload Snyk results (artifact)
         if: always()
         uses: actions/upload-artifact@v6
@@ -232,12 +251,21 @@ jobs:
 
     steps:
       - name: 📥 Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
-      - name: 🔐 Docker login (private registry)
+      - name: 🧾 Derive registry host from image
+        id: reg
         run: |
           set -euo pipefail
-          host="${{ inputs.registry_host }}"
+          img="${{ matrix.image }}"
+          host="$(printf "%s" "$img" | awk -F/ '{print $1}')"
+          echo "host=$host" >> "$GITHUB_OUTPUT"
+          echo "Derived registry host: $host" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 🔐 Docker login (private registry) - required
+        run: |
+          set -euo pipefail
+          host="${{ steps.reg.outputs.host }}"
           env="${{ inputs.environment }}"
 
           if [ "$env" = "staging" ]; then
@@ -248,11 +276,13 @@ jobs:
             pass="${{ secrets.REGISTRY_PASSWORD_PROD }}"
           fi
 
-          if [ -n "$user" ] && [ -n "$pass" ]; then
-            echo "$pass" | docker login "$host" -u "$user" --password-stdin
-          else
-            echo "⚠️ No registry credentials provided for env=$env. Pull/scan may fail if images are private."
+          if [ -z "${user:-}" ] || [ -z "${pass:-}" ]; then
+            echo "❌ Missing registry credentials for env=$env (host=$host). Cannot pull private images." >&2
+            exit 1
           fi
+
+          echo "$pass" | docker login "$host" -u "$user" --password-stdin
+          echo "✅ Logged in to $host for env=$env" >> "$GITHUB_STEP_SUMMARY"
 
       - name: 🧪 Pull image (verify tag exists)
         run: |
@@ -261,6 +291,7 @@ jobs:
           docker pull "${{ matrix.image }}"
 
       - name: 🛡️ Trivy image scan → SARIF (+ gate via exit-code)
+        id: trivy
         uses: aquasecurity/trivy-action@0.30.0
         with:
           scan-type: "image"
@@ -276,14 +307,23 @@ jobs:
           TRIVY_PASSWORD: ${{ inputs.environment == 'staging' && secrets.REGISTRY_PASSWORD_STAGING || secrets.REGISTRY_PASSWORD_PROD }}
 
       - name: 🔎 Verify SARIF file
+        id: sarif
         if: always()
         run: |
           set -euo pipefail
-          ls -lah
-          test -s "trivy-image-${{ strategy.job-index }}.sarif"
+          f="trivy-image-${{ strategy.job-index }}.sarif"
+          echo "Expected SARIF: $f" >> "$GITHUB_STEP_SUMMARY"
+          ls -lah >> "$GITHUB_STEP_SUMMARY" || true
+          if [ -f "$f" ] && [ -s "$f" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "✅ SARIF exists and is not empty." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ SARIF missing or empty. Upload will be skipped." >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: 🧾 Build safe SARIF category
-        if: always()
+        if: ${{ always() && steps.sarif.outputs.exists == 'true' }}
         id: cat
         run: |
           set -euo pipefail
@@ -294,13 +334,12 @@ jobs:
           echo "Category: trivy-image-$safe" >> "$GITHUB_STEP_SUMMARY"
 
       - name: 📤 Upload SARIF (Code Scanning)
-        if: always()
+        if: ${{ always() && steps.sarif.outputs.exists == 'true' }}
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: "trivy-image-${{ strategy.job-index }}.sarif"
           category: ${{ steps.cat.outputs.category }}
           wait-for-processing: true
-
 
   zap-dast:
     name: 🌐 OWASP ZAP (DAST)
