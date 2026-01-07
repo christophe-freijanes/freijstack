@@ -41,7 +41,7 @@ jobs:
       tag_suffix: ${{ steps.compute_tags.outputs.tag_suffix }}
     steps:
       - name: 📥 Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: 🔧 Compute tags
         id: compute_tags
@@ -90,8 +90,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY_HOST }}
-          username: ${{ env.REGISTRY_USERNAME }}
-          password: ${{ env.REGISTRY_PASSWORD }}
+          username: ${{ secrets.REGISTRY_USER_PROD }}
+          password: ${{ secrets.REGISTRY_PASSWORD_PROD }}
 
       # BACKEND IMAGE
       - name: 🏗️ Build & push backend

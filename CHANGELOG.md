@@ -6,6 +6,59 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.37.20](https://github.com/christophe-freijanes/freijstack/compare/v1.37.19...v1.37.20) (2026-01-07)
+
+### ♻️ Code Refactoring
+
+* **gitleaks:** switch to CLI installation and update report handling ([#177](https://github.com/christophe-freijanes/freijstack/issues/177)) ([5481219](https://github.com/christophe-freijanes/freijstack/commit/5481219ff82bacf82ac72c9d52064d230e22799a)), closes [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
+## [1.37.19](https://github.com/christophe-freijanes/freijstack/compare/v1.37.18...v1.37.19) (2026-01-07)
+
+### 🐛 Bug Fixes
+
+* change ZAP DAST fail action to non-blocking ([f26c463](https://github.com/christophe-freijanes/freijstack/commit/f26c463481922e8e3fd9e20f2dc520b193f51660))
+
+## [1.37.18](https://github.com/christophe-freijanes/freijstack/compare/v1.37.17...v1.37.18) (2026-01-07)
+
+### 🐛 Bug Fixes
+
+* update Trivy image scan step to be non-blocking and add controlled gate for production ([34568e4](https://github.com/christophe-freijanes/freijstack/commit/34568e440300b53e0b907fc75554c1ca23e26265))
+
+## [1.37.17](https://github.com/christophe-freijanes/freijstack/compare/v1.37.16...v1.37.17) (2026-01-07)
+
+### 🐛 Bug Fixes
+
+* update default registry host and enhance gitleaks steps with improved logging and error handling ([574a7e8](https://github.com/christophe-freijanes/freijstack/commit/574a7e87aa24b248aee205616ac45be1f7695c0b))
+
+### 🔧 Chores
+
+* **deps:** bump actions/checkout from 4 to 6 ([#180](https://github.com/christophe-freijanes/freijstack/issues/180)) ([c85b7df](https://github.com/christophe-freijanes/freijstack/commit/c85b7dfa9e166066a14639dd4cd5232f964dbadb))
+* **deps:** bump github/codeql-action from 3 to 4 ([#178](https://github.com/christophe-freijanes/freijstack/issues/178)) ([35f72f6](https://github.com/christophe-freijanes/freijstack/commit/35f72f606e5d91e3425452291bcf7cd5a2be8408))
+* **deps:** bump react-router-dom in /saas/securevault/frontend ([#179](https://github.com/christophe-freijanes/freijstack/issues/179)) ([0379878](https://github.com/christophe-freijanes/freijstack/commit/03798784cdb3e1ad78ed514dc8dc6a56c711b911))
+
+## [1.37.16](https://github.com/christophe-freijanes/freijstack/compare/v1.37.15...v1.37.16) (2026-01-07)
+
+### 🐛 Bug Fixes
+
+* update Trivy action version and enhance SARIF file handling ([6dc1af9](https://github.com/christophe-freijanes/freijstack/commit/6dc1af9e0e21cbc789ba2f5be67cc60344017e99))
+
+## [1.37.15](https://github.com/christophe-freijanes/freijstack/compare/v1.37.14...v1.37.15) (2026-01-07)
+
+### 🐛 Bug Fixes
+
+* update Docker login credentials to use secrets for enhanced security ([de52d43](https://github.com/christophe-freijanes/freijstack/commit/de52d434179e81fcbca2cdc6a9cbfe5b5943babb))
+
+## [1.37.14](https://github.com/christophe-freijanes/freijstack/compare/v1.37.13...v1.37.14) (2026-01-07)
+
+### 🐛 Bug Fixes
+
+* update Docker registry credentials to use secrets for security ([be747a6](https://github.com/christophe-freijanes/freijstack/commit/be747a656c5a2f2966c94d2dc87379f54dd5e710))
+
+### 🔧 Chores
+
+* add security documentation and licensing files ([#170](https://github.com/christophe-freijanes/freijstack/issues/170)) ([642c429](https://github.com/christophe-freijanes/freijstack/commit/642c42926c9ea1d57feb689e4736266c236c8009)), closes [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+* enforce failure on Gitleaks scan if issues are found ([#169](https://github.com/christophe-freijanes/freijstack/issues/169)) ([dcf178d](https://github.com/christophe-freijanes/freijstack/commit/dcf178daa0e918fbfb0bc8ea3e1d7faeda66df47)), closes [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
 ## [1.37.13](https://github.com/christophe-freijanes/freijstack/compare/v1.37.12...v1.37.13) (2026-01-07)
 
 ### ♻️ Code Refactoring
