@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.37.20](https://github.com/christophe-freijanes/freijstack/compare/v1.37.19...v1.37.20) (2026-01-07)
+
+### ♻️ Code Refactoring
+
+* **gitleaks:** switch to CLI installation and update report handling ([#177](https://github.com/christophe-freijanes/freijstack/issues/177)) ([5481219](https://github.com/christophe-freijanes/freijstack/commit/5481219ff82bacf82ac72c9d52064d230e22799a)), closes [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
 ## [1.37.19](https://github.com/christophe-freijanes/freijstack/compare/v1.37.18...v1.37.19) (2026-01-07)
 
 ### 🐛 Bug Fixes
