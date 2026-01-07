@@ -1,0 +1,16 @@
+
+User-agent: *
+Allow: /
+Crawl-delay: 10
+Sitemap: https://portfolio.freijstack.com/sitemap.xml
+Allow: /saas/portfolio/cv/CV-Christophe-FREIJANES.pdf
+
+# Spécifique Googlebot
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 5
+
+# Spécifique Bingbot
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 5

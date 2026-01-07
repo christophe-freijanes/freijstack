@@ -1,26 +1,24 @@
-FROM nginx:1.27-alpine
+# Portfolio container (secure baseline)
+# - Nginx unprivileged (non-root)
+# - Runs behind Traefik (TLS terminated at Traefik)
+# - Serves static assets + SPA routing
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+FROM nginxinc/nginx-unprivileged:alpine
 
-# Copy all files from the portfolio directory to nginx html directory
-COPY . /usr/share/nginx/html/
+# Replace default server config
+RUN rm -f /etc/nginx/conf.d/default.conf
 
-# Remove Docker-related files that were copied
-RUN rm -f /usr/share/nginx/html/Dockerfile \
-          /usr/share/nginx/html/docker-compose.yml \
-          /usr/share/nginx/html/docker-compose.prod.yml \
-          /usr/share/nginx/html/nginx.conf \
-          /usr/share/nginx/html/.dockerignore \
-          /usr/share/nginx/html/.gitignore \
-          /usr/share/nginx/html/README.md
+# Use the same hardened config for dev/staging/prod
+COPY nginx.conf.prod /etc/nginx/conf.d/default.conf
 
-# Expose port 80
-EXPOSE 80
+# Copy site
+COPY . /usr/share/nginx/html
 
-# Health check
+# Expose unprivileged port
+EXPOSE 8080
+
+# Healthcheck (wget is available on alpine)
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost/ || exit 1
+  CMD wget --quiet --tries=1 --spider http://127.0.0.1:8080/ || exit 1
 
-# Start nginx
 CMD ["nginx", "-g", "daemon off;"]
