@@ -6,6 +6,28 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.37.13](https://github.com/christophe-freijanes/freijstack/compare/v1.37.12...v1.37.13) (2026-01-07)
+
+### ♻️ Code Refactoring
+
+* **gitleaks:** switch to CLI installation and update report handling ([06649db](https://github.com/christophe-freijanes/freijstack/commit/06649dba3ffe35407bbe03f3e6d374a7f86d9a89))
+
+### 🔧 Chores
+
+* add security documentation and licensing files ([8991e35](https://github.com/christophe-freijanes/freijstack/commit/8991e351c54b14700fa383e57bf8a31655550297))
+* **deps:** bump actions/download-artifact from 4 to 7 ([#172](https://github.com/christophe-freijanes/freijstack/issues/172)) ([9abdb08](https://github.com/christophe-freijanes/freijstack/commit/9abdb08d312530b509b957dd3302b3df5c44f412))
+* **deps:** bump actions/setup-python from 5 to 6 ([#176](https://github.com/christophe-freijanes/freijstack/issues/176)) ([8379f0a](https://github.com/christophe-freijanes/freijstack/commit/8379f0a4ddc24eb9c2975dc8d3e66abcd8b698ce))
+* **deps:** bump actions/upload-artifact from 4 to 6 ([#171](https://github.com/christophe-freijanes/freijstack/issues/171)) ([c1ff6c5](https://github.com/christophe-freijanes/freijstack/commit/c1ff6c5ec48998f042ed30bfde5571527df2f022))
+* **deps:** bump actions/upload-pages-artifact from 3 to 4 ([#175](https://github.com/christophe-freijanes/freijstack/issues/175)) ([f8cf22a](https://github.com/christophe-freijanes/freijstack/commit/f8cf22a6874f629991c14b151bb4cdd05b80bc9a))
+* **deps:** bump express-rate-limit in /saas/securevault/backend ([#173](https://github.com/christophe-freijanes/freijstack/issues/173)) ([d1c9f75](https://github.com/christophe-freijanes/freijstack/commit/d1c9f75888c220ea2a8462291a7de7cda9724c59))
+* **deps:** bump joi in /saas/securevault/backend ([#167](https://github.com/christophe-freijanes/freijstack/issues/167)) ([f807419](https://github.com/christophe-freijanes/freijstack/commit/f807419418b87e620b057360e2d991570fb8d407)), closes [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+* **deps:** bump zaproxy/action-baseline from 0.14.0 to 0.15.0 ([#174](https://github.com/christophe-freijanes/freijstack/issues/174)) ([b016e56](https://github.com/christophe-freijanes/freijstack/commit/b016e56688ce22acba0dc09f30eb1b9514cf968e))
+* enforce failure on Gitleaks scan if issues are found ([1968d29](https://github.com/christophe-freijanes/freijstack/commit/1968d29e9cc37f9b78dc546c07af0e3b2a76b61b))
+* re-enable fail_on_gitleaks option in security scan job ([5b5a75f](https://github.com/christophe-freijanes/freijstack/commit/5b5a75f9508d01210dbdbaf12369aa9696ca1e6f))
+* remove fail_on_gitleaks option from security scan job ([ed5be1f](https://github.com/christophe-freijanes/freijstack/commit/ed5be1f95b8cddea995028fb92c785dfe88c93e6))
+* update security job to use core security CI workflow ([2a4c8ae](https://github.com/christophe-freijanes/freijstack/commit/2a4c8ae085a2636e3fb8f11516812e3efee380e7))
+* update security job to use core security CI workflow ([#168](https://github.com/christophe-freijanes/freijstack/issues/168)) ([b1b8dfd](https://github.com/christophe-freijanes/freijstack/commit/b1b8dfd5bfc837cbaeeaabd1cb993a88343234f6)), closes [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
 ## [1.37.12](https://github.com/christophe-freijanes/freijstack/compare/v1.37.11...v1.37.12) (2026-01-06)
 
 ### ♻️ Code Refactoring
