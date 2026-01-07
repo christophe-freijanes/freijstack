@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.37.18](https://github.com/christophe-freijanes/freijstack/compare/v1.37.17...v1.37.18) (2026-01-07)
+
+### 🐛 Bug Fixes
+
+* update Trivy image scan step to be non-blocking and add controlled gate for production ([34568e4](https://github.com/christophe-freijanes/freijstack/commit/34568e440300b53e0b907fc75554c1ca23e26265))
+
 ## [1.37.17](https://github.com/christophe-freijanes/freijstack/compare/v1.37.16...v1.37.17) (2026-01-07)
 
 ### 🐛 Bug Fixes
