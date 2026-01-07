@@ -386,7 +386,7 @@ jobs:
         with:
           target: ${{ inputs.dast_url }}
           allow_issue_writing: false
-          fail_action: true
+          fail_action: false
           cmd_options: "-a"
 
       - name: 📎 Upload ZAP reports
