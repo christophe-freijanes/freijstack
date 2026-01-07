@@ -184,7 +184,7 @@ jobs:
         continue-on-error: true
       - name: 📤 Upload Snyk results (artifact)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: snyk-results
           path: snyk*.*
@@ -287,7 +287,7 @@ jobs:
 
       - name: 🕷️ ZAP baseline scan (non-blocking)
         if: ${{ needs.gate.outputs.gate_active != 'true' }}
-        uses: zaproxy/action-baseline@v0.14.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: ${{ inputs.dast_url }}
           allow_issue_writing: false
@@ -296,7 +296,7 @@ jobs:
 
       - name: 🕷️ ZAP baseline scan (blocking - gate)
         if: ${{ needs.gate.outputs.gate_active == 'true' }}
-        uses: zaproxy/action-baseline@v0.14.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: ${{ inputs.dast_url }}
           allow_issue_writing: false
@@ -305,7 +305,7 @@ jobs:
 
       - name: 📎 Upload ZAP reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: zap-report
           path: |
