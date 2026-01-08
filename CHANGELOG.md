@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.37.23](https://github.com/christophe-freijanes/freijstack/compare/v1.37.22...v1.37.23) (2026-01-08)
+
+### 🐛 Bug Fixes
+
+* update default registry host and enhance gitleaks steps with improved logging and error handling ([#181](https://github.com/christophe-freijanes/freijstack/issues/181)) ([6754e0e](https://github.com/christophe-freijanes/freijstack/commit/6754e0e2a21a627fe4099cc10ba6aae2e9420e19)), closes [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
 ## [1.37.22](https://github.com/christophe-freijanes/freijstack/compare/v1.37.21...v1.37.22) (2026-01-08)
 
 ### 🐛 Bug Fixes
