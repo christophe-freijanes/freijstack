@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.38.2](https://github.com/christophe-freijanes/freijstack/compare/v1.38.1...v1.38.2) (2026-01-08)
+
+### 🐛 Bug Fixes
+
+* update "Retour à l’accueil" links to point to the new portfolio URL ([ae04a32](https://github.com/christophe-freijanes/freijstack/commit/ae04a3254941e284fe873cfc0db41a5d8819f9e1))
+
 ## [1.38.1](https://github.com/christophe-freijanes/freijstack/compare/v1.38.0...v1.38.1) (2026-01-08)
 
 ### 🐛 Bug Fixes
