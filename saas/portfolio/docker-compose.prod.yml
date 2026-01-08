@@ -1,31 +1,24 @@
 services:
   portfolio:
-    image: ${PORTFOLIO_IMAGE:-registry.freijstack.com/portfolio:latest}
+    image: registry.freijstack.com/portfolio:latest
     container_name: portfolio
-    restart: unless-stopped
-    networks:
-      - web
+    restart: always
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=web"
-      # Router
-      - "traefik.http.routers.portfolio.rule=Host(`portfolio.${DOMAIN_NAME:-freijstack.com}`)"
+      - "traefik.docker.network=freijstack"
+      - "traefik.http.routers.portfolio.rule=Host(`portfolio.freijstack.com`)"
       - "traefik.http.routers.portfolio.entrypoints=websecure"
       - "traefik.http.routers.portfolio.tls=true"
-      - "traefik.http.routers.portfolio.tls.certresolver=mytlschallenge"
-      # Service (Nginx listens on 8080 in the container)
-      - "traefik.http.services.portfolio.loadbalancer.server.port=8080"
-    tmpfs:
-      - /var/cache/nginx
-      - /var/run
-      - /run
+      - "traefik.http.services.portfolio.loadbalancer.server.port=80"
+    networks:
+      - freijstack
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:8080/"]
+      test: ["CMD", "curl", "-f", "http://localhost/"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
 
 networks:
-  web:
+  freijstack:
     external: true
