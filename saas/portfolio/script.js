@@ -3,24 +3,41 @@
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
+        // Easter egg : clic sur le logo du footer
+        const footerEgg = document.getElementById('footerEgg');
+        if (footerEgg) {
+            footerEgg.addEventListener('click', function(e) {
+                window.location.href = 'hidden.html';
+            });
+            footerEgg.title = '??';
+        }
     // Détection et application automatique du thème saisonnier
     function applySeasonalTheme() {
         const month = new Date().getMonth() + 1; // 1 = janvier, 12 = décembre
         let seasonClass = '';
+        let faviconFile = 'favicon.svg';
         
         if (month >= 12 || month <= 2) {
             seasonClass = 'season-winter'; // Hiver: décembre, janvier, février
+            faviconFile = 'favicon-winter.svg';
         } else if (month >= 3 && month <= 5) {
             seasonClass = 'season-spring'; // Printemps: mars, avril, mai
+            faviconFile = 'favicon-spring.svg';
         } else if (month >= 6 && month <= 8) {
             seasonClass = 'season-summer'; // Été: juin, juillet, août
+            faviconFile = 'favicon-summer.svg';
         } else if (month >= 9 && month <= 11) {
             seasonClass = 'season-autumn'; // Automne: septembre, octobre, novembre
+            faviconFile = 'favicon-autumn.svg';
         }
-        
         // Retirer toutes les classes de palette et appliquer la saison
         document.body.classList.remove('palette-neutral', 'season-winter', 'season-spring', 'season-summer', 'season-autumn');
         document.body.classList.add(seasonClass);
+        // Mettre à jour le favicon
+        const favicon = document.querySelector('link[rel="icon"]');
+        if (favicon) {
+            favicon.setAttribute('href', '/assets/' + faviconFile);
+        }
     }
     
     // Appliquer le thème au chargement
