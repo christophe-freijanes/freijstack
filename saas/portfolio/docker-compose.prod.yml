@@ -1,8 +1,6 @@
-version: "3.8"
-
 services:
   portfolio:
-    image: ${PORTFOLIO_IMAGE:-registry-ui.freijstack.com/portfolio:latest}
+    image: ${PORTFOLIO_IMAGE:-registry.freijstack.com/portfolio:latest}
     container_name: portfolio
     restart: unless-stopped
     networks:
