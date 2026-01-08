@@ -1,12 +1,52 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+            <meta name="description" content="Portfolio de Christophe FREIJANES, spécialiste Cloud, Sécurité, DevSecOps, Montréal, France, Canada. Projets, certifications, expertise, contact.">
+            <link rel="canonical" href="https://portfolio.freijstack.com/">
+            <!-- Progressive Web App / Mobile Experience -->
+            <meta name="theme-color" content="#1a2233">
+            <meta name="apple-mobile-web-app-capable" content="yes">
+            <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+            <meta name="mobile-web-app-capable" content="yes">
+            <link rel="apple-touch-icon" href="/assets/favicon-192.png">
+            <!-- Open Graph complet -->
+            <meta property="og:type" content="website">
+            <meta property="og:title" content="Christophe FREIJANES - Cloud, Sécurité, DevSecOps">
+            <meta property="og:description" content="Portfolio de Christophe FREIJANES, expert Cloud, Sécurité, DevSecOps, Montréal, France, Canada. Projets, certifications, contact.">
+            <meta property="og:url" content="https://portfolio.freijstack.com/">
+            <meta property="og:locale" content="fr_FR">
+            <meta property="og:site_name" content="Portfolio Christophe FREIJANES">
+            <!-- JSON-LD Schema.org -->
+            <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "Person",
+                "name": "Christophe FREIJANES",
+                "url": "https://portfolio.freijstack.com/",
+                "image": "https://portfolio.freijstack.com/assets/og-1200x630.webp",
+                "jobTitle": "Spécialiste Cloud & Sécurité - DevSecOps",
+                "sameAs": [
+                    "https://www.linkedin.com/in/christophe-freijanes/",
+                    "https://github.com/christophe-freijanes"
+                ],
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": "Montréal",
+                    "addressCountry": "CA"
+                }
+            }
+            </script>
     <!-- Autres balises meta et liens -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <!-- Autres balises meta et liens -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; connect-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'self';">
+    <!-- Open Graph image for social sharing -->
+    <meta property="og:image" content="images/og-1200x630.webp">
+    <meta property="og:image:type" content="image/webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <title>Christophe FREIJANES - Spécialiste Cloud &amp; Sécurité</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,7 +68,7 @@
                 <a href="index.html#projets" class="nav-link" data-section="projets" data-i18n="nav.projects">Projets</a>
                 <a href="index.html#experience" class="nav-link" data-section="experience" data-i18n="nav.experience">Expérience</a>
                 <a href="index.html#contact" class="nav-link" data-section="contact" data-i18n="nav.contact">Contact</a>
-                <a href="https://drive.google.com/file/d/1WKTv123ZXFl1fO5jh6qGCK3ElArEpcki/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="btn-cv" id="downloadCV">
+                <a href="cv/CV-Christophe-FREIJANES.pdf" target="_blank" rel="noopener noreferrer" class="btn-cv" id="downloadCV">
                     <i class="fas fa-download"></i> CV
                 </a>
                 <div class="language-selector">
@@ -57,7 +97,7 @@
                         <span class="greeting" data-i18n="hero.greeting">👋 Bienvenue sur mon portfolio</span>
                         <div class="hero-title-with-photo">
                             <h1 data-i18n="hero.title">Christophe FREIJANES</h1>
-                            <img src="https://media.licdn.com/dms/image/v2/D4E03AQHyCt861VGacw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1675225312705?e=1768435200&amp;v=beta&amp;t=s_3kn8z0iu8Pem2iP6fohEFwn8Def88I5Yv3qZJeshk" alt="Photo de profil LinkedIn Christophe Freijanes" class="profile-photo-inline">
+                            <img src="images/christophe-profile-400.webp" alt="Photo de profil Christophe Freijanes" class="profile-photo-inline" width="96" height="96" loading="lazy">
                         </div>
                         <p class="title-main" data-i18n="hero.role">Spécialiste senior Cloud &amp; Sécurité - DevSecOps</p>
                         <p class="subtitle" data-i18n="hero.tagline">Sécurité infonuagique • DevSecOps • Infrastructure as Code • Automatisation</p>
@@ -530,14 +570,15 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <span class="logo">CF</span>
+                    <span class="logo" id="footerEgg" style="cursor:pointer;">CF</span>
                     <span class="brand-text">Christophe FREIJANES</span>
                 </div>
 
                 <nav class="footer-nav" aria-label="Footer navigation">
                     <a href="index.html#accueil" data-i18n="footer.home">Accueil</a>
                     <a href="index.html#projets" data-i18n="footer.projects">Projets</a>
-                    <a href="https://drive.google.com/file/d/1WKTv123ZXFl1fO5jh6qGCK3ElArEpcki/view?usp=sharing" target="_blank" rel="noopener noreferrer">CV</a>
+                    <a href="cv/CV-Christophe-FREIJANES.pdf" target="_blank" rel="noopener noreferrer">CV</a>
+                    <a href="resume.html" target="_blank" rel="noopener noreferrer">ATS</a>
                 </nav>
 
                 <div class="footer-contact">
