@@ -25,9 +25,8 @@ RUN rm -rf \
       /usr/share/nginx/html/nginx*.conf \
       /usr/share/nginx/html/README.md || true
 
-# Prepare runtime dirs and permissions for non-root nginx user
-RUN mkdir -p /var/cache/nginx /var/run && \
-    chown -R nginx:nginx /var/cache/nginx /var/run /usr/share/nginx/html /etc/nginx/conf.d
+RUN mkdir -p /var/cache/nginx /var/run /run && \
+  chown -R nginx:nginx /var/cache/nginx /var/run /run /usr/share/nginx/html /etc/nginx/conf.d
 
 USER nginx
 
