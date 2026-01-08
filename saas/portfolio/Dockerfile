@@ -1,32 +1,31 @@
 # syntax=docker/dockerfile:1
-# Portfolio container (static site) — hardened
-# - Uses Nginx on 8080 and runs as non-root (nginx user)
-# - Copies only required assets (reduces attack surface)
+# Portfolio container (static site) — hardened for Traefik
+# - Nginx listens on 8080 (non-root)
+# - TLS is terminated by Traefik (no certs inside this container)
+# - Minimal attack surface + safe runtime dirs
 
 FROM nginx:1.27-alpine
 
-# Remove default config and install our hardened config
+# Remove default site
 RUN rm -f /etc/nginx/conf.d/default.conf
 
-# Copy nginx configuration (prod and dev should be identical; keep one source of truth)
+# Copy reverse-proxy-friendly nginx config
 COPY nginx.conf.prod /etc/nginx/conf.d/default.conf
 
-# Copy site files
-COPY . /usr/share/nginx/html/
+# Copy static website content
+COPY . /usr/share/nginx/html
 
-# Remove Docker/CI files that should never be served
-RUN rm -f \
-    /usr/share/nginx/html/Dockerfile \
-    /usr/share/nginx/html/docker-compose.yml \
-    /usr/share/nginx/html/docker-compose.prod.yml \
-    /usr/share/nginx/html/docker-compose.staging.yml \
-    /usr/share/nginx/html/nginx.conf \
-    /usr/share/nginx/html/nginx.conf.prod \
-    /usr/share/nginx/html/.dockerignore \
-    /usr/share/nginx/html/.gitignore \
-    /usr/share/nginx/html/README.md || true
+# Optional: remove build/dev artifacts if present (non-fatal)
+RUN rm -rf \
+      /usr/share/nginx/html/.git \
+      /usr/share/nginx/html/.github \
+      /usr/share/nginx/html/node_modules \
+      /usr/share/nginx/html/Dockerfile \
+      /usr/share/nginx/html/docker-compose*.yml \
+      /usr/share/nginx/html/nginx*.conf \
+      /usr/share/nginx/html/README.md || true
 
-# Prepare runtime dirs so we can drop root
+# Prepare runtime dirs and permissions for non-root nginx user
 RUN mkdir -p /var/cache/nginx /var/run && \
     chown -R nginx:nginx /var/cache/nginx /var/run /usr/share/nginx/html /etc/nginx/conf.d
 
