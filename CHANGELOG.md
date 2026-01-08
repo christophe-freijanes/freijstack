@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.40.1](https://github.com/christophe-freijanes/freijstack/compare/v1.40.0...v1.40.1) (2026-01-08)
+
+### 🐛 Bug Fixes
+
+* update "Retour à l’accueil" links to point to the new portfolio URL ([#187](https://github.com/christophe-freijanes/freijstack/issues/187)) ([2465b07](https://github.com/christophe-freijanes/freijstack/commit/2465b072f2412fa753321f71348f80dd437add74)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
 ## [1.40.0](https://github.com/christophe-freijanes/freijstack/compare/v1.39.0...v1.40.0) (2026-01-08)
 
 ### 🚀 Features
