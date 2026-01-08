@@ -6,6 +6,30 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.40.1](https://github.com/christophe-freijanes/freijstack/compare/v1.40.0...v1.40.1) (2026-01-08)
+
+### 🐛 Bug Fixes
+
+* update "Retour à l’accueil" links to point to the new portfolio URL ([#187](https://github.com/christophe-freijanes/freijstack/issues/187)) ([2465b07](https://github.com/christophe-freijanes/freijstack/commit/2465b072f2412fa753321f71348f80dd437add74)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
+## [1.40.0](https://github.com/christophe-freijanes/freijstack/compare/v1.39.0...v1.40.0) (2026-01-08)
+
+### 🚀 Features
+
+* enhance code header with visual indicators and improved styling ([c0d487f](https://github.com/christophe-freijanes/freijstack/commit/c0d487f4abcde34345417e8bfe619cd7d1839e1d))
+
+## [1.39.0](https://github.com/christophe-freijanes/freijstack/compare/v1.38.4...v1.39.0) (2026-01-08)
+
+### 🚀 Features
+
+* add hidden Easter egg functionality in code header ([60057d2](https://github.com/christophe-freijanes/freijstack/commit/60057d2c366eb12cc465705c5ea46b0f1ddf0f9b))
+
+## [1.38.4](https://github.com/christophe-freijanes/freijstack/compare/v1.38.3...v1.38.4) (2026-01-08)
+
+### 🐛 Bug Fixes
+
+* update profile image alt text for better accessibility and SEO ([c0dd453](https://github.com/christophe-freijanes/freijstack/commit/c0dd4539037615dff7c6251b409d674ebb2d8d09))
+
 ## [1.38.3](https://github.com/christophe-freijanes/freijstack/compare/v1.38.2...v1.38.3) (2026-01-08)
 
 ### 🐛 Bug Fixes

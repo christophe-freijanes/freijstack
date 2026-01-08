@@ -11,6 +11,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             footerEgg.title = '??';
         }
+        // Easter egg : clic sur le bouton rouge de la fenêtre code-header
+        const hiddenEgg = document.getElementById('hiddenEgg');
+        if (hiddenEgg) {
+            hiddenEgg.addEventListener('click', function(e) {
+                window.location.href = 'hidden.html';
+            });
+            hiddenEgg.title = 'Red button';
+        }
     // Détection et application automatique du thème saisonnier
     function applySeasonalTheme() {
         const month = new Date().getMonth() + 1; // 1 = janvier, 12 = décembre
