@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.38.3](https://github.com/christophe-freijanes/freijstack/compare/v1.38.2...v1.38.3) (2026-01-08)
+
+### 🐛 Bug Fixes
+
+* update portfolio image registry in Docker Compose files  ([#186](https://github.com/christophe-freijanes/freijstack/issues/186)) ([26cdf4b](https://github.com/christophe-freijanes/freijstack/commit/26cdf4bf2d905c9b1f2ce0dac6953022b08fff40)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
 ## [1.38.2](https://github.com/christophe-freijanes/freijstack/compare/v1.38.1...v1.38.2) (2026-01-08)
 
 ### 🐛 Bug Fixes
