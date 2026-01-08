@@ -1,18 +1,17 @@
+version: "3.8"
+
 services:
   portfolio:
-    image: registry.freijstack.com/portfolio:latest
-    container_name: portfolio-staging
-    restart: always
-    labels:
-      # Traefik labels pour routage automatique
-      - "traefik.enable=true"
-      - "traefik.http.routers.portfolio-staging.rule=Host(`portfolio-staging.freijstack.com`)"
-      - "traefik.http.routers.portfolio-staging.entrypoints=websecure"
-      - "traefik.http.routers.portfolio-staging.tls=true"
-      - "traefik.http.services.portfolio-staging.loadbalancer.server.port=8080"
-      - "traefik.docker.network=freijstack"
+    build:
+      context: .
+    image: portfolio:local
+    container_name: portfolio-local
+    restart: unless-stopped
+    # Local dev: expose on localhost; prod uses Traefik.
+    ports:
+      - "8080:8080"
     networks:
-      - freijstack
+      - web
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:8080/"]
       interval: 30s
@@ -21,10 +20,5 @@ services:
       start_period: 10s
 
 networks:
-  freijstack:
+  web:
     external: true
-
-# Usage:
-# docker compose -f saas/portfolio/docker-compose.yml up -d
-# docker compose -f saas/portfolio/docker-compose.yml down
-# docker compose -f saas/portfolio/docker-compose.yml logs -f
