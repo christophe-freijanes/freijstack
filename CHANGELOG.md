@@ -6,6 +6,22 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.41.2](https://github.com/christophe-freijanes/freijstack/compare/v1.41.1...v1.41.2) (2026-01-09)
+
+### 🐛 Bug Fixes
+
+* update "Retour à l’accueil" links to point to the new portfolio ([#188](https://github.com/christophe-freijanes/freijstack/issues/188)) ([1dc5d8b](https://github.com/christophe-freijanes/freijstack/commit/1dc5d8b836136b1a4b328f94b443f775c4b66256)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
+### 📚 Documentation
+
+* auto-generate diagrams and index [skip ci] ([#189](https://github.com/christophe-freijanes/freijstack/issues/189)) ([3ce952d](https://github.com/christophe-freijanes/freijstack/commit/3ce952d7f0c06236a5f0f6106246386d31a3be24)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+* **documentation:** Refactor: code structure for improved readability and maintainability ([#190](https://github.com/christophe-freijanes/freijstack/issues/190)) ([e8ca97c](https://github.com/christophe-freijanes/freijstack/commit/e8ca97c9d32ba3ef97c11bbcd1269c7c1cfaba62)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+* **documentation:** Remove: hover sound functionality and associated audio file ([#191](https://github.com/christophe-freijanes/freijstack/issues/191)) ([d0c60b9](https://github.com/christophe-freijanes/freijstack/commit/d0c60b935e260523be470c82fc6e3167867c8060)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
+### 🔧 Chores
+
+* remove obsolete robots.txt, site.webmanifest, and sitemap.xml files ([14e1eeb](https://github.com/christophe-freijanes/freijstack/commit/14e1eebde0d2f2e55fcc158a168b7023aac9cdfa))
+
 ## [1.41.1](https://github.com/christophe-freijanes/freijstack/compare/v1.41.0...v1.41.1) (2026-01-09)
 
 ### 🐛 Bug Fixes
