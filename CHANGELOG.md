@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.41.3](https://github.com/christophe-freijanes/freijstack/compare/v1.41.2...v1.41.3) (2026-01-09)
+
+### 🐛 Bug Fixes
+
+* update nginx configuration to allow access to images ([afabcae](https://github.com/christophe-freijanes/freijstack/commit/afabcae1b5b50fb19594ce937abecd7be0da5aee))
+
 ## [1.41.2](https://github.com/christophe-freijanes/freijstack/compare/v1.41.1...v1.41.2) (2026-01-09)
 
 ### 🐛 Bug Fixes
