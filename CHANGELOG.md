@@ -6,6 +6,16 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.41.1](https://github.com/christophe-freijanes/freijstack/compare/v1.41.0...v1.41.1) (2026-01-09)
+
+### 🐛 Bug Fixes
+
+* saas/portfolio/public/docs/DEPLOYMENT.md:3:79 error MD047/single-trailing-newline Files should end with a single newline character ([03cd2ab](https://github.com/christophe-freijanes/freijstack/commit/03cd2ab2cc1e925ac3d875d240d4fbbac24e6477))
+
+### 📚 Documentation
+
+* Add comment to sitemap.xml for clarity ([ee2ef85](https://github.com/christophe-freijanes/freijstack/commit/ee2ef854cec864cb91fd3bed441bb8c2fd182f58))
+
 ## [1.41.0](https://github.com/christophe-freijanes/freijstack/compare/v1.40.1...v1.41.0) (2026-01-09)
 
 ### 🚀 Features
