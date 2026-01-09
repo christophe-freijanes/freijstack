@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const footerEgg = document.getElementById('footerEgg');
         if (footerEgg) {
             footerEgg.addEventListener('click', function(e) {
-                window.location.href = 'hidden.html';
+                window.location.href = 'pages/hidden.html';
             });
             footerEgg.title = '??';
         }
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const hiddenEgg = document.getElementById('hiddenEgg');
         if (hiddenEgg) {
             hiddenEgg.addEventListener('click', function(e) {
-                window.location.href = 'hidden.html';
+                window.location.href = 'pages/hidden.html';
             });
             hiddenEgg.title = 'Red button';
         }
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Mettre à jour le favicon
         const favicon = document.querySelector('link[rel="icon"]');
         if (favicon) {
-            favicon.setAttribute('href', '/assets/' + faviconFile);
+            favicon.setAttribute('href', 'images/' + faviconFile);
         }
     }
     
@@ -274,7 +274,18 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('[data-i18n]').forEach(element => {
             const key = element.getAttribute('data-i18n');
             if (translations[lang] && translations[lang][key]) {
-                element.textContent = translations[lang][key];
+                // Si l'élément contient des enfants (ex: icônes), ne remplacer que le nœud texte principal
+                let replaced = false;
+                element.childNodes.forEach(node => {
+                    if (node.nodeType === Node.TEXT_NODE && !replaced) {
+                        node.textContent = translations[lang][key];
+                        replaced = true;
+                    }
+                });
+                // Si aucun nœud texte trouvé, fallback sur textContent
+                if (!replaced) {
+                    element.textContent = translations[lang][key];
+                }
             }
         });
         
