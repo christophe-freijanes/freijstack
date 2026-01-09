@@ -8,7 +8,7 @@
             <meta name="apple-mobile-web-app-capable" content="yes">
             <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
             <meta name="mobile-web-app-capable" content="yes">
-            <link rel="apple-touch-icon" href="/assets/favicon-192.png">
+            <link rel="apple-touch-icon" href="images/favicon-192.png">
             <!-- Open Graph complet -->
             <meta property="og:type" content="website">
             <meta property="og:title" content="Christophe FREIJANES - Cloud, Sécurité, DevSecOps">
@@ -23,7 +23,7 @@
                 "@type": "Person",
                 "name": "Christophe FREIJANES",
                 "url": "https://portfolio.freijstack.com/",
-                "image": "https://portfolio.freijstack.com/assets/og-1200x630.webp",
+                "image": "https://portfolio.freijstack.com/images/og-1200x630.webp",
                 "jobTitle": "Spécialiste Cloud & Sécurité - DevSecOps",
                 "sameAs": [
                     "https://www.linkedin.com/in/christophe-freijanes/",
@@ -52,7 +52,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Fira+Code:wght@400;500&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <!-- Navigation -->
@@ -97,7 +97,14 @@
                         <span class="greeting" data-i18n="hero.greeting">👋 Bienvenue sur mon portfolio</span>
                         <div class="hero-title-with-photo">
                             <h1 data-i18n="hero.title">Christophe FREIJANES</h1>
-                            <img src="/images/christophe-profile-400.webp" alt="Photo de profil Christophe FREIJANES, expert Cloud, Sécurité, DevSecOps, Montréal, France, Canada. Projets, certifications" class="profile-photo-inline" width="96" height="96" loading="lazy">
+                                <img src="images/christophe-profile-400.webp"
+                                 srcset="images/christophe-profile-128.webp 128w,
+                                     images/christophe-profile-256.webp 256w,
+                                     images/christophe-profile-400.webp 400w,
+                                     images/christophe-profile-512.webp 512w"
+                                 sizes="(max-width: 600px) 128px, (max-width: 900px) 256px, 400px"
+                                 alt="Photo de profil Christophe FREIJANES, expert Cloud, Sécurité, DevSecOps, Montréal, France, Canada. Projets, certifications"
+                                 class="profile-photo-inline" width="96" height="96" loading="lazy">
                         </div>
                         <p class="title-main" data-i18n="hero.role">Spécialiste senior Cloud &amp; Sécurité - DevSecOps</p>
                         <p class="subtitle" data-i18n="hero.tagline">Sécurité infonuagique • DevSecOps • Infrastructure as Code • Automatisation</p>
@@ -578,7 +585,7 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
                     <a href="index.html#accueil" data-i18n="footer.home">Accueil</a>
                     <a href="index.html#projets" data-i18n="footer.projects">Projets</a>
                     <a href="cv/CV-Christophe-FREIJANES.pdf" target="_blank" rel="noopener noreferrer">CV</a>
-                    <a href="resume.html" target="_blank" rel="noopener noreferrer">ATS</a>
+                    <a href="pages/resume.html" target="_blank" rel="noopener noreferrer">ATS</a>
                 </nav>
 
                 <div class="footer-contact">
@@ -588,7 +595,7 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="js/script.js"></script>
 </body>
 </html><!-- Updated 01/02/2026 19:34:38 -->
 <!-- Test build trigger - 01/02/2026 19:53:14 -->
