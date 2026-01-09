@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.42.0](https://github.com/christophe-freijanes/freijstack/compare/v1.41.3...v1.42.0) (2026-01-09)
+
+### 🚀 Features
+
+* Add various HTML pages for portfolio ([#194](https://github.com/christophe-freijanes/freijstack/issues/194)) ([dcff683](https://github.com/christophe-freijanes/freijstack/commit/dcff683e9f745ab2f14b1fef252b1f2cd91eca43)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
 ## [1.41.3](https://github.com/christophe-freijanes/freijstack/compare/v1.41.2...v1.41.3) (2026-01-09)
 
 ### 🐛 Bug Fixes
