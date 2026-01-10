@@ -6,6 +6,17 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.43.0](https://github.com/christophe-freijanes/freijstack/compare/v1.42.0...v1.43.0) (2026-01-10)
+
+### 🚀 Features
+
+* add back-to-top button with animations and functionality ([76ad912](https://github.com/christophe-freijanes/freijstack/commit/76ad91209b64fe47de0cf8c19dd63c09062170a5))
+
+### 🔧 Chores
+
+* remove CodeQL and Security Scan badges from pull request template ([213e50e](https://github.com/christophe-freijanes/freijstack/commit/213e50ecd2caf0a0e83818a06cb241a20c7af62f))
+* update LICENSE to include detailed definitions and terms ([ddda3bc](https://github.com/christophe-freijanes/freijstack/commit/ddda3bc802d090dfd142cad1c0d43ad25ce6be36))
+
 ## [1.42.0](https://github.com/christophe-freijanes/freijstack/compare/v1.41.3...v1.42.0) (2026-01-09)
 
 ### 🚀 Features
