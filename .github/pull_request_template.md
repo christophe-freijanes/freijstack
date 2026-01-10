@@ -2,8 +2,7 @@
 
 [![Infrastructure](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/02-infra-deploy.yml?branch=master&label=Infrastructure&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/02-infra-deploy.yml)
 [![Prod Health](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/05-health-prod.yml?branch=develop&label=Prod%20Health&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/05-health-prod.yml)
-[![CodeQL](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/01-security-codeql.yml?branch=master&label=CodeQL&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/01-security-codeql.yml)
-[![Security Scan](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/01-security-publish-score.yml?label=Security%20Score&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/01-security-publish-score.yml)
+
 
 ---
 
