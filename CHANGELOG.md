@@ -6,6 +6,16 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.43.1](https://github.com/christophe-freijanes/freijstack/compare/v1.43.0...v1.43.1) (2026-01-10)
+
+### 🐛 Bug Fixes
+
+* update nginx configuration to allow access to images ([#195](https://github.com/christophe-freijanes/freijstack/issues/195)) ([4f5a328](https://github.com/christophe-freijanes/freijstack/commit/4f5a328443aeef793f31376a7c7199e5e04d1a28)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
+### 🔧 Chores
+
+* update LICENSE to include detailed definitions and terms ([#196](https://github.com/christophe-freijanes/freijstack/issues/196)) ([1f84853](https://github.com/christophe-freijanes/freijstack/commit/1f84853e615afd247195cba591f5674073ab7045)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
 ## [1.43.0](https://github.com/christophe-freijanes/freijstack/compare/v1.42.0...v1.43.0) (2026-01-10)
 
 ### 🚀 Features
