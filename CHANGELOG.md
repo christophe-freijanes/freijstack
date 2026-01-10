@@ -6,6 +6,27 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.43.1](https://github.com/christophe-freijanes/freijstack/compare/v1.43.0...v1.43.1) (2026-01-10)
+
+### 🐛 Bug Fixes
+
+* update nginx configuration to allow access to images ([#195](https://github.com/christophe-freijanes/freijstack/issues/195)) ([4f5a328](https://github.com/christophe-freijanes/freijstack/commit/4f5a328443aeef793f31376a7c7199e5e04d1a28)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
+### 🔧 Chores
+
+* update LICENSE to include detailed definitions and terms ([#196](https://github.com/christophe-freijanes/freijstack/issues/196)) ([1f84853](https://github.com/christophe-freijanes/freijstack/commit/1f84853e615afd247195cba591f5674073ab7045)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
+## [1.43.0](https://github.com/christophe-freijanes/freijstack/compare/v1.42.0...v1.43.0) (2026-01-10)
+
+### 🚀 Features
+
+* add back-to-top button with animations and functionality ([76ad912](https://github.com/christophe-freijanes/freijstack/commit/76ad91209b64fe47de0cf8c19dd63c09062170a5))
+
+### 🔧 Chores
+
+* remove CodeQL and Security Scan badges from pull request template ([213e50e](https://github.com/christophe-freijanes/freijstack/commit/213e50ecd2caf0a0e83818a06cb241a20c7af62f))
+* update LICENSE to include detailed definitions and terms ([ddda3bc](https://github.com/christophe-freijanes/freijstack/commit/ddda3bc802d090dfd142cad1c0d43ad25ce6be36))
+
 ## [1.42.0](https://github.com/christophe-freijanes/freijstack/compare/v1.41.3...v1.42.0) (2026-01-09)
 
 ### 🚀 Features

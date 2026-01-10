@@ -3,6 +3,26 @@
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
+            // Bouton retour en haut
+            const backToTopBtn = document.getElementById('backToTop');
+            if (backToTopBtn) {
+                window.addEventListener('scroll', function() {
+                    if (window.scrollY > 300) {
+                        backToTopBtn.classList.add('show');
+                    } else {
+                        backToTopBtn.classList.remove('show');
+                    }
+                });
+                backToTopBtn.addEventListener('click', function() {
+                    // Ajoute la classe rotate pour l'animation
+                    backToTopBtn.classList.add('rotate');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    // Retire la classe après l'animation
+                    setTimeout(function() {
+                        backToTopBtn.classList.remove('rotate');
+                    }, 500);
+                });
+            }
         // Easter egg : clic sur le logo du footer
         const footerEgg = document.getElementById('footerEgg');
         if (footerEgg) {
