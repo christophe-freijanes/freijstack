@@ -6,6 +6,16 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.45.0](https://github.com/christophe-freijanes/freijstack/compare/v1.44.0...v1.45.0) (2026-01-11)
+
+### 🚀 Features
+
+* add back-to-top button with animations and functionality ([#197](https://github.com/christophe-freijanes/freijstack/issues/197)) ([16857d2](https://github.com/christophe-freijanes/freijstack/commit/16857d29d218142ec68a61b46d4fec4b65fc4520)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
+### 🐛 Bug Fixes
+
+* update favicon path and enhance Content Security Policy; add Google Tag Manager script ([48d751f](https://github.com/christophe-freijanes/freijstack/commit/48d751f440febff48d4555baf72c6d06332ec2e1))
+
 ## [1.44.0](https://github.com/christophe-freijanes/freijstack/compare/v1.43.1...v1.44.0) (2026-01-11)
 
 ### 🚀 Features
