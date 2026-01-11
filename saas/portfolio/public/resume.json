@@ -75,5 +75,58 @@
       "endDate": "2022"
     }
   ],
-  "cvUrl": "https://portfolio.freijstack.com/cv/CV-Christophe-FREIJANES.pdf"
+  "cvUrl": "https://portfolio.freijstack.com/cv/CV-Christophe-FREIJANES.pdf",
+  "skills": [
+    "AWS",
+    "GCP",
+    "Kubernetes",
+    "Terraform",
+    "Ansible",
+    "CI/CD",
+    "GitHub Actions",
+    "GitLab CI",
+    "Jenkins",
+    "Python",
+    "Bash",
+    "PowerShell",
+    "YAML",
+    "n8n",
+    "Grafana",
+    "Prometheus",
+    "Nagios",
+    "Centreon",
+    "Commvault",
+    "Clumio",
+    "Cohesity",
+    "Veeam",
+    "VMware",
+    "KVM",
+    "OVirt",
+    "RHV"
+  ],
+  "language": [
+    {
+      "@type": "Language",
+      "name": "Français",
+      "proficiencyLevel": "C2"
+    },
+    {
+      "@type": "Language",
+      "name": "Anglais",
+      "proficiencyLevel": "B2"
+    }
+  ],
+  "memberOf": [
+    "Linux Foundation",
+    "DevSecOps Community",
+    "CNCF"
+  ],
+  "gender": "Male",
+  "profile": [
+    "https://portfolio.freijstack.com/images/christophe-profile-400.webp"
+    "https://github.com/christophe-freijane",
+    "https://www.linkedin.com/in/christophe-freijanes/",
+    "https://portfolio.freijstack.com/cv/CV-Christophe-FREIJANES.pdf",
+    "https://app.wisemapping.com/c/maps/1451212/public"
+  ]
 }
