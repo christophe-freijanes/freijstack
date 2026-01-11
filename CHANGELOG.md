@@ -6,6 +6,13 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.48.0](https://github.com/christophe-freijanes/freijstack/compare/v1.47.1...v1.48.0) (2026-01-11)
+
+### 🚀 Features
+
+* add Analytics script to index.html ([#198](https://github.com/christophe-freijanes/freijstack/issues/198)) ([135d681](https://github.com/christophe-freijanes/freijstack/commit/135d68199d0b4e6a5eac8009acc05b6151c0fde7)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+* add Analytics script to index.html ([#199](https://github.com/christophe-freijanes/freijstack/issues/199)) ([de3a9b1](https://github.com/christophe-freijanes/freijstack/commit/de3a9b1aec1c7db4fdbfa4c386d2b235da771c74)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
 ## [1.47.1](https://github.com/christophe-freijanes/freijstack/compare/v1.47.0...v1.47.1) (2026-01-11)
 
 ### 🐛 Bug Fixes
