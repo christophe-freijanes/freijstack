@@ -12,9 +12,10 @@
   },
   "sameAs": [
     "https://www.linkedin.com/in/christophe-freijanes/",
-    "https://github.com/christophe-freijanes"
+    "https://github.com/christophe-freijanes",
+    "https://calendly.com/christophe-freijanes"
   ],
-  "description": "Expert Cloud, Sécurité, DevSecOps, Montréal, France, Canada. Projets, certifications, contact.",
+  "description": "Administration et sécurisation de solutions cloud (AWS, GCP, Kubernetes), automatisation (Terraform, Ansible, CI/CD) et gestion des sauvegardes & DRP. Expert Cloud, Sécurité, DevSecOps, Montréal, Canada. ",
   "worksFor": {
     "@type": "Organization",
     "name": "Freijstack"
@@ -127,6 +128,7 @@
     "https://github.com/christophe-freijanes",
     "https://www.linkedin.com/in/christophe-freijanes/",
     "https://portfolio.freijstack.com/cv/CV-Christophe-FREIJANES.pdf",
-    "https://app.wisemapping.com/c/maps/1451212/public"
+    "https://app.wisemapping.com/c/maps/1451212/public",
+    "https://calendly.com/christophe-freijanes"
   ]
 }
