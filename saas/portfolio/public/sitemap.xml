@@ -16,5 +16,8 @@
     <loc>https://portfolio.freijstack.com/pages/resume.html</loc>
     <priority>0.5</priority>
   </url>
-  <!-- Ajoutez d'autres URLs importantes ici -->
+  <url>
+    <loc>https://calendly.com/christophe-freijanes</loc>
+    <priority>0.6</priority>
+  </url>
 </urlset>

@@ -3,4 +3,6 @@ Disallow: /
 Allow: /index.html
 Allow: /pages/resume.html
 Allow: /cv/CV-Christophe-FREIJANES.pdf
+Allow: /sitemap.xml
+Allow: https://calendly.com/christophe-freijanes
 Sitemap: https://portfolio.freijstack.com/sitemap.xml

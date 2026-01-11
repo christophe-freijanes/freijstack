@@ -3,26 +3,49 @@
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
-            // Bouton retour en haut
-            const backToTopBtn = document.getElementById('backToTop');
-            if (backToTopBtn) {
-                window.addEventListener('scroll', function() {
-                    if (window.scrollY > 300) {
-                        backToTopBtn.classList.add('show');
-                    } else {
-                        backToTopBtn.classList.remove('show');
-                    }
-                });
-                backToTopBtn.addEventListener('click', function() {
-                    // Ajoute la classe rotate pour l'animation
-                    backToTopBtn.classList.add('rotate');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                    // Retire la classe après l'animation
-                    setTimeout(function() {
-                        backToTopBtn.classList.remove('rotate');
-                    }, 500);
-                });
+    // ...existing code...
+    // Bouton retour en haut
+    const backToTopBtn = document.getElementById('backToTop');
+    if (backToTopBtn) {
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
             }
+        });
+        backToTopBtn.addEventListener('click', function() {
+            backToTopBtn.classList.add('rotate');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(function() {
+                backToTopBtn.classList.remove('rotate');
+            }, 500);
+        });
+    }
+
+    // Init gestion cookies depuis le footer
+    initManageCookiesButton();
+        // Fonction pour ouvrir la modal cookies depuis le footer
+        function initManageCookiesButton() {
+            const btn = document.getElementById('manageCookiesBtn');
+            if (!btn) return;
+            btn.addEventListener('click', () => {
+                // 1) si tu as une fonction dédiée
+                if (typeof window.openCookiePreferences === 'function') {
+                    window.openCookiePreferences();
+                    return;
+                }
+                // 2) fallback : ouvre la modal si elle existe
+                const modal = document.getElementById('cookiePreferencesModal');
+                if (modal) {
+                    modal.classList.add('is-open');
+                    modal.setAttribute('aria-hidden', 'false');
+                    document.body.classList.add('modal-open');
+                } else {
+                    console.warn('Cookie preferences modal not found.');
+                }
+            });
+        }
         // Easter egg : clic sur le logo du footer
         const footerEgg = document.getElementById('footerEgg');
         if (footerEgg) {
