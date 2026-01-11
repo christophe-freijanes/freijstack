@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.47.0](https://github.com/christophe-freijanes/freijstack/compare/v1.46.0...v1.47.0) (2026-01-11)
+
+### 🚀 Features
+
+* enhance resume JSON with additional skills, languages, memberships, and profile links ([746ab2a](https://github.com/christophe-freijanes/freijstack/commit/746ab2a863d360addf5416dd377b2245c1365263))
+
 ## [1.46.0](https://github.com/christophe-freijanes/freijstack/compare/v1.45.0...v1.46.0) (2026-01-11)
 
 ### 🚀 Features
