@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.44.0](https://github.com/christophe-freijanes/freijstack/compare/v1.43.1...v1.44.0) (2026-01-11)
+
+### 🚀 Features
+
+* add Analytics script to index.html ([b2fd25f](https://github.com/christophe-freijanes/freijstack/commit/b2fd25feab3256a244873246e76879083138513a))
+
 ## [1.43.1](https://github.com/christophe-freijanes/freijstack/compare/v1.43.0...v1.43.1) (2026-01-10)
 
 ### 🐛 Bug Fixes
