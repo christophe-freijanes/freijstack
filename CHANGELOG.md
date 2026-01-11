@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.47.1](https://github.com/christophe-freijanes/freijstack/compare/v1.47.0...v1.47.1) (2026-01-11)
+
+### 🐛 Bug Fixes
+
+* correct JSON syntax by adding missing commas in profile links ([9131b25](https://github.com/christophe-freijanes/freijstack/commit/9131b2579efd4c8ea41244d421e838fe72aa019a))
+
 ## [1.47.0](https://github.com/christophe-freijanes/freijstack/compare/v1.46.0...v1.47.0) (2026-01-11)
 
 ### 🚀 Features
