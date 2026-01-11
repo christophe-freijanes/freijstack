@@ -1,0 +1,132 @@
+{
+  "@context": "https://schema.org/",
+  "@type": "Person",
+  "name": "Christophe FREIJANES",
+  "jobTitle": "Spécialiste Cloud & Sécurité - DevSecOps",
+  "url": "https://portfolio.freijstack.com/",
+  "image": "https://portfolio.freijstack.com/images/christophe-profile-400.webp",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Montréal",
+    "addressCountry": "CA"
+  },
+  "sameAs": [
+    "https://www.linkedin.com/in/christophe-freijanes/",
+    "https://github.com/christophe-freijanes"
+  ],
+  "description": "Expert Cloud, Sécurité, DevSecOps, Montréal, France, Canada. Projets, certifications, contact.",
+  "worksFor": {
+    "@type": "Organization",
+    "name": "Freijstack"
+  },
+  "email": "cfr.pro@gmx.ca",
+  "award": [
+    "AWS Cloud Practitioner",
+    "Ansible Automation Platform",
+    "CompTIA Security+",
+    "TEF Canada (Français C2)",
+    "Kubernetes KCNA",
+    "ITIL v4 Foundation",
+    "LFCS Linux Foundation"
+  ],
+  "hasOccupation": [
+    {
+      "@type": "Occupation",
+      "name": "Administrator Cloud Backup & DRP"
+    },
+    {
+      "@type": "Occupation",
+      "name": "Security Specialist"
+    },
+    {
+      "@type": "Occupation",
+      "name": "DevSecOps Engineer"
+    }
+  ],
+  "knowsAbout": [
+    "Cloud (AWS, GCP, Kubernetes)",
+    "Sécurité (IAM, SSO, Hardening, Tenable)",
+    "DevSecOps (Terraform, Ansible, CI/CD, GitHub Actions, GitLab CI, Jenkins)",
+    "Automatisation (Python, Bash, PowerShell, YAML, n8n)",
+    "Monitoring (Grafana, Prometheus, Nagios, Centreon)",
+    "Sauvegarde & DRP (Commvault, Clumio, Cohesity, Veeam)",
+    "Virtualisation (VMware, KVM, OVirt, RHV)"
+  ],
+  "workExperience": [
+    {
+      "@type": "Organization",
+      "name": "ACENSI",
+      "description": "Conception et déploiement de stratégies de sauvegarde as-code, automatisation CI/CD et sécurité cloud, observabilité et playbooks d’incident.",
+      "startDate": "2023",
+      "endDate": "Présent"
+    },
+    {
+      "@type": "Organization",
+      "name": "SQUAD",
+      "description": "Administration et sécurisation de 3000+ VM, automatisation du hardening RedHat via Ansible, containerisation et pipelines CI/CD sécurisés.",
+      "startDate": "2022",
+      "endDate": "2023"
+    },
+    {
+      "@type": "Organization",
+      "name": "ECONOCOM",
+      "description": "Déploiement d’Ansible AWX/AAP et playbooks modulaires, automatisation des contrôles d’accès et procédures de sécurité.",
+      "startDate": "2020",
+      "endDate": "2022"
+    }
+  ],
+  "cvUrl": "https://portfolio.freijstack.com/cv/CV-Christophe-FREIJANES.pdf",
+  "skills": [
+    "AWS",
+    "GCP",
+    "Kubernetes",
+    "Terraform",
+    "Ansible",
+    "CI/CD",
+    "GitHub Actions",
+    "GitLab CI",
+    "Jenkins",
+    "Python",
+    "Bash",
+    "PowerShell",
+    "YAML",
+    "n8n",
+    "Grafana",
+    "Prometheus",
+    "Nagios",
+    "Centreon",
+    "Commvault",
+    "Clumio",
+    "Cohesity",
+    "Veeam",
+    "VMware",
+    "KVM",
+    "OVirt",
+    "RHV"
+  ],
+  "language": [
+    {
+      "@type": "Language",
+      "name": "Français",
+      "proficiencyLevel": "C2"
+    },
+    {
+      "@type": "Language",
+      "name": "Anglais",
+      "proficiencyLevel": "B2"
+    }
+  ],
+  "memberOf": [
+    "Linux Foundation",
+    "DevSecOps Community",
+    "CNCF"
+  ],
+  "gender": "Male",
+  "profile": [
+    "https://portfolio.freijstack.com/images/christophe-profile-400.webp",
+    "https://github.com/christophe-freijanes",
+    "https://www.linkedin.com/in/christophe-freijanes/",
+    "https://portfolio.freijstack.com/cv/CV-Christophe-FREIJANES.pdf",
+    "https://app.wisemapping.com/c/maps/1451212/public"
+  ]
+}
