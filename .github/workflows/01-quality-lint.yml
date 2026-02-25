@@ -85,7 +85,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
       - name: Install tflint
         run: curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
       - name: Run terraform fmt -check (if .tf files exist)
