@@ -294,7 +294,7 @@ jobs:
       - name: 🛡️ Trivy image scan → SARIF (non-blocking)
         id: trivy
         continue-on-error: true
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           scan-type: "image"
           image-ref: "${{ matrix.image }}"
