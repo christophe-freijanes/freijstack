@@ -1871,6 +1871,25 @@ section {
     color: var(--bg-primary);
 }
 
+.assistant-next {
+    align-self: flex-start;
+    max-width: 92%;
+    padding: 7px 11px;
+    background: transparent;
+    border: 1px solid var(--accent, #24c066);
+    border-radius: 12px;
+    color: var(--accent, #24c066);
+    text-align: left;
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.assistant-next:hover,
+.assistant-next:focus-visible {
+    background: var(--bg-secondary);
+}
+
 .assistant-questions {
     display: flex;
     flex-wrap: wrap;
