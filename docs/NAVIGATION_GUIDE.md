@@ -1,13 +1,15 @@
-# 🗺️ FreijStack Documentation Navigation Guide
+<a id="-freijstack-documentation-navigation-guide"></a>
+# FreijStack Documentation Navigation Guide
 
 **Purpose**: Help users find the right documentation quickly  
-**Status**: ✅ Updated for Phase 7 structure
 
 ---
 
-## 📍 Start Here Based on Your Role
+<a id="-start-here-based-on-your-role"></a>
+## Start Here Based on Your Role
 
-### 👤 New User / Getting Started
+<a id="-new-user--getting-started"></a>
+### New User / Getting Started
 ```
 START → docs/00-overview/QUICK_DEPLOY_GUIDE.md
         ↓
@@ -18,7 +20,8 @@ START → docs/00-overview/QUICK_DEPLOY_GUIDE.md
         docs/02-deployment/DEPLOYMENT.md
 ```
 
-### 🏗️ Infrastructure Engineer
+<a id="-infrastructure-engineer"></a>
+### Infrastructure Engineer
 ```
 START → docs/01-architecture/DOCKER_STRUCTURE.md
         ↓
@@ -29,7 +32,8 @@ START → docs/01-architecture/DOCKER_STRUCTURE.md
         docs/02-deployment/PRO_DEPLOYMENT.md
 ```
 
-### ⚙️ DevOps / Operations
+<a id="-devops--operations"></a>
+### DevOps / Operations
 ```
 START → docs/01-architecture/CI_CD_ARCHITECTURE.md
         ↓
@@ -42,7 +46,8 @@ START → docs/01-architecture/CI_CD_ARCHITECTURE.md
         docs/04-operations/TROUBLESHOOTING.md
 ```
 
-### 🔒 Security / Compliance
+<a id="-security--compliance"></a>
+### Security / Compliance
 ```
 START → docs/SECURITY.md (root level)
         ↓
@@ -53,7 +58,8 @@ START → docs/SECURITY.md (root level)
         docs/03-guides/MONITORING.md
 ```
 
-### 📊 Manager / Project Lead
+<a id="-manager--project-lead"></a>
+### Manager / Project Lead
 ```
 START → docs/00-overview/README.md
         ↓
@@ -66,17 +72,17 @@ START → docs/00-overview/README.md
 
 ---
 
-## 🧭 Documentation Map
+<a id="-documentation-map"></a>
+## Documentation Map
 
 ### Category: 00-overview
 **Level**: Beginner  
-**Time to Read**: 15-30 minutes  
 **Purpose**: Get started and understand the basics
 
 | Document | Best For | When to Read |
 |----------|----------|--------------|
 | **INDEX.md** | Guided tour | First time |
-| **QUICK_DEPLOY_GUIDE.md** | 5-minute setup | Impatient users |
+| **QUICK_DEPLOY_GUIDE.md** | Initial setup | Initial deployment |
 | **USER_GUIDE.md** | End user documentation | Daily operations |
 | **README.md** | Project overview | Context setting |
 
@@ -86,7 +92,6 @@ START → docs/00-overview/README.md
 
 ### Category: 01-architecture
 **Level**: Intermediate  
-**Time to Read**: 30-60 minutes  
 **Purpose**: Understand how the system is built
 
 | Document | Best For | When to Read |
@@ -101,7 +106,6 @@ START → docs/00-overview/README.md
 
 ### Category: 02-deployment
 **Level**: Intermediate-Advanced  
-**Time to Read**: 20-40 minutes  
 **Purpose**: How to deploy applications
 
 | Document | Best For | When to Read |
@@ -116,7 +120,6 @@ START → docs/00-overview/README.md
 
 ### Category: 03-guides
 **Level**: Intermediate-Advanced  
-**Time to Read**: 30-45 minutes  
 **Purpose**: How to operate and manage systems
 
 | Document | Best For | When to Read |
@@ -131,7 +134,6 @@ START → docs/00-overview/README.md
 
 ### Category: 04-operations
 **Level**: Advanced  
-**Time to Read**: 20-30 minutes (per issue)  
 **Purpose**: Troubleshooting and maintenance
 
 | Document | Best For | When to Read |
@@ -145,7 +147,6 @@ START → docs/00-overview/README.md
 
 ### Category: 05-reference
 **Level**: Advanced  
-**Time to Read**: Variable  
 **Purpose**: Detailed specifications and checklists
 
 | Document | Best For | When to Read |
@@ -162,7 +163,6 @@ START → docs/00-overview/README.md
 
 ### Archive: 00-phases
 **Level**: Historical Reference  
-**Time to Read**: 30-45 minutes per phase  
 **Purpose**: Implementation history and context
 
 | Document | Focus | When to Read |
@@ -180,7 +180,8 @@ START → docs/00-overview/README.md
 
 ---
 
-## 🎯 Quick Search by Topic
+<a id="-quick-search-by-topic"></a>
+## Quick Search by Topic
 
 ### Need to...
 
@@ -220,7 +221,8 @@ START → docs/00-overview/README.md
 
 ---
 
-## 📚 Documentation Path by Experience Level
+<a id="-documentation-path-by-experience-level"></a>
+## Documentation Path by Experience Level
 
 ### Level 1: Complete Beginner (0-1 weeks)
 ```
@@ -269,7 +271,8 @@ Total: 500+ minutes to expert competency
 
 ---
 
-## 🔍 Finding Things
+<a id="-finding-things"></a>
+## Finding Things
 
 ### By Feature
 - **Portfolio**: `docs/02-deployment/DEPLOYMENT.md`
@@ -295,7 +298,8 @@ Total: 500+ minutes to expert competency
 
 ---
 
-## 📖 Reading Order Recommendations
+<a id="-reading-order-recommendations"></a>
+## Reading Order Recommendations
 
 ### For Deployment Team
 ```
@@ -326,7 +330,8 @@ Total: 500+ minutes to expert competency
 
 ---
 
-## 💡 Tips for Using This Documentation
+<a id="-tips-for-using-this-documentation"></a>
+## Tips for Using This Documentation
 
 ### Tip 1: Start with Overview
 New users should always start with `00-overview/` category first.
@@ -347,42 +352,29 @@ Each document links to related documents. Follow those links when curious.
 
 ---
 
-## 🎓 Learning Outcomes by Category
+<a id="-learning-outcomes-by-category"></a>
+## Learning Outcomes by Category
 
 ### After Reading 00-overview
-✅ Understand project purpose  
-✅ Can do basic deployment  
-✅ Know where to find more info  
+Project purpose, initial deployment and documentation entry points.
 
 ### After Reading 01-architecture
-✅ Understand system design  
-✅ Know all components  
-✅ Can explain architecture  
+System design and components.
 
 ### After Reading 02-deployment
-✅ Can deploy applications  
-✅ Know deployment procedures  
-✅ Know production checklist  
+Deployment procedures and production checklist.
 
 ### After Reading 03-guides
-✅ Can run automation  
-✅ Can backup system  
-✅ Can monitor services  
+Automation, backups and monitoring.
 
 ### After Reading 04-operations
-✅ Can troubleshoot issues  
-✅ Can fix common problems  
-✅ Know when to escalate  
+Diagnosis, common problems and escalation.
 
 ### After Reading 05-reference
-✅ Expert-level knowledge  
-✅ Can design changes  
-✅ Can mentor others  
+Specifications and change planning.
 
 ### After Reading 00-phases
-✅ Understand implementation context  
-✅ Know why decisions were made  
-✅ Can plan future phases  
+Implementation history and design decisions.
 
 ---
 

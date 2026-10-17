@@ -1,64 +1,75 @@
-# 📚 Index Documentation - FreijStack
+<a id="-index-documentation---freijstack"></a>
+# Index Documentation - FreijStack
 
-Guide de navigation complet pour la documentation du projet FreijStack.
+Navigation de la documentation FreijStack.
 
 **Dernière mise à jour**: Janvier 2026  
 **Total fichiers**: 16 documentations + 3 privées  
-**État**: ✅ Optimisé et consolidé
 
 ---
 
-## 🎯 Quick Start - Par Besoin
+<a id="-quick-start---par-besoin"></a>
+## Quick Start - Par Besoin
 
-### 👤 Je suis nouveau sur le projet
+<a id="-je-suis-nouveau-sur-le-projet"></a>
+### Je suis nouveau sur le projet
 1. **[README.md](../README.md)** - Vue d'ensemble générale
 2. **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Architecture technique
 3. **[QUICK_DEPLOY_GUIDE.md](./QUICK_DEPLOY_GUIDE.md)** - Démarrage rapide
 
-### 🚀 Je veux déployer l'application
+<a id="-je-veux-déployer-lapplication"></a>
+### Je veux déployer l'application
 1. **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Guide déploiement complet
 2. **[SECUREVAULT_DEPLOYMENT.md](./SECUREVAULT_DEPLOYMENT.md)** - SecureVault spécifique
 3. **[CI_CD_ARCHITECTURE.md](./CI_CD_ARCHITECTURE.md)** - Workflows automatisés
 
-### 🤖 Je veux comprendre l'automatisation
+<a id="-je-veux-comprendre-lautomatisation"></a>
+### Je veux comprendre l'automatisation
 1. **[AUTOMATION_GUIDE.md](./AUTOMATION_GUIDE.md)** - Guide automatisation complet
 2. **[CI_CD_ARCHITECTURE.md](./CI_CD_ARCHITECTURE.md)** - Architecture CI/CD avec diagrammes
 
-### 🔧 J'ai un problème à résoudre
+<a id="-jai-un-problème-à-résoudre"></a>
+### J'ai un problème à résoudre
 1. **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Guide dépannage complet
    - Problèmes déploiement
    - Erreurs HTTP/SSL
    - SecureVault (CORS, Registration)
    - Docker, DNS, Frontend, CI/CD
 
-### 📊 Je veux monitorer l'application
+<a id="-je-veux-monitorer-lapplication"></a>
+### Je veux monitorer l'application
 1. **[MONITORING.md](./MONITORING.md)** - Setup monitoring Prometheus/Grafana/Loki
 2. **[CI_CD_ARCHITECTURE.md](./CI_CD_ARCHITECTURE.md)** - Health checks & alertes
 
-### 🔐 Je veux sécuriser l'infrastructure
+<a id="-je-veux-sécuriser-linfrastructure"></a>
+### Je veux sécuriser l'infrastructure
 1. **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Sécurité & Conformité
 2. **[docs-private/SECRET_ROTATION.md](../docs-private/SECRET_ROTATION.md)** - Rotation secrets
 3. **[docs-private/SSO_SAML_CONFIG.md](../docs-private/SSO_SAML_CONFIG.md)** - Configuration SSO
 
-### 🌐 Je veux développer pour le Portfolio
+<a id="-je-veux-développer-pour-le-portfolio"></a>
+### Je veux développer pour le Portfolio
 1. **[saas/portfolio/README.md](../saas/portfolio/README.md)** - Portfolio spécifique
 2. **[USER_GUIDE.md](./USER_GUIDE.md)** - Guide utilisateur
 
-### 🗄️ Je veux utiliser SecureVault
+<a id="-je-veux-utiliser-securevault"></a>
+### Je veux utiliser SecureVault
 1. **[USER_GUIDE.md](./USER_GUIDE.md)** - Guide utilisateur complet
 2. **[SECUREVAULT_DEPLOYMENT.md](./SECUREVAULT_DEPLOYMENT.md)** - Déploiement
 3. **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md#securevault---problèmes-enregistrement)** - Dépannage
 
 ---
 
-## 📚 Documentation Complète
+<a id="-documentation-complète"></a>
+## Documentation
 
-### 🏢 Documentation Principale (9 fichiers)
+<a id="-documentation-principale-9-fichiers"></a>
+### Documentation Principale (9 fichiers)
 
 #### Architecture & Infrastructure
 | Document | Contenu | Public |
 |----------|---------|--------|
-| **[ARCHITECTURE.md](./ARCHITECTURE.md)** | 📋 Architecture technique complète, stack, infrastructure | ✅ Public |
+| **[ARCHITECTURE.md](./ARCHITECTURE.md)** | 📋 Architecture technique, stack, infrastructure | ✅ Public |
 | **[DOCKER_STRUCTURE.md](./DOCKER_STRUCTURE.md)** | 🐳 Structure Docker, composition, volumes | ✅ Public |
 | **[DEPLOYMENT.md](./DEPLOYMENT.md)** | 🚀 Guide déploiement VPS, setup initial, configuration | ✅ Public |
 
@@ -78,7 +89,8 @@ Guide de navigation complet pour la documentation du projet FreijStack.
 
 ---
 
-### 🆕 Documentation Nouvelle/Consolidée (4 fichiers)
+<a id="-documentation-nouvelleconsolidée-4-fichiers"></a>
+### Documentation Nouvelle/Consolidée (4 fichiers)
 
 | Document | Contenu | Création | Type |
 |----------|---------|----------|------|
@@ -89,17 +101,19 @@ Guide de navigation complet pour la documentation du projet FreijStack.
 
 ---
 
-### 🎯 Documentation Spécialisée (3 fichiers)
+<a id="-documentation-spécialisée-3-fichiers"></a>
+### Documentation Spécialisée (3 fichiers)
 
 | Document | Contenu | Audience |
 |----------|---------|----------|
-| **[PRO_DEPLOYMENT.md](./PRO_DEPLOYMENT.md)** | 🏢 Guide déploiement PRO/Enterprise avec SLA | DevOps avancé |
-| **[SECUREVAULT_DEPLOYMENT.md](./SECUREVAULT_DEPLOYMENT.md)** | 🔐 Déploiement spécifique SecureVault, backend+frontend+DB | DevOps SecureVault |
-| **[QUICK_DEPLOY_GUIDE.md](./QUICK_DEPLOY_GUIDE.md)** | ⚡ Guide démarrage rapide 5 minutes | Nouveaux |
+| **[PRO_DEPLOYMENT.md](./PRO_DEPLOYMENT.md)** | Guide déploiement PRO/Enterprise avec SLA | DevOps avancé |
+| **[SECUREVAULT_DEPLOYMENT.md](./SECUREVAULT_DEPLOYMENT.md)** | Déploiement spécifique SecureVault, backend+frontend+DB | DevOps SecureVault |
+| **[QUICK_DEPLOY_GUIDE.md](./QUICK_DEPLOY_GUIDE.md)** | Guide de démarrage rapide | Nouveaux |
 
 ---
 
-### 🔒 Documentation Privée (3 fichiers)
+<a id="-documentation-privée-3-fichiers"></a>
+### Documentation Privée (3 fichiers)
 
 **Emplacement**: `docs-private/`
 
@@ -113,15 +127,17 @@ Guide de navigation complet pour la documentation du projet FreijStack.
 
 ---
 
-### 📄 Navigation (1 fichier)
+<a id="-navigation-1-fichier"></a>
+### Navigation (1 fichier)
 
 | Document | Contenu |
 |----------|---------|
-| **[README.md](./README.md)** | 📚 Index principal documentation |
+| **[README.md](./README.md)** | Index principal documentation |
 
 ---
 
-## 🗂️ Structure Hiérarchique
+<a id="-structure-hiérarchique"></a>
+## Structure Hiérarchique
 
 ```
 docs/
@@ -162,7 +178,8 @@ docs-private/
 
 ---
 
-## 🎓 Chemins de Lecture Recommandés
+<a id="-chemins-de-lecture-recommandés"></a>
+## Chemins de Lecture Recommandés
 
 ### Pour DevOps / SRE
 
@@ -207,7 +224,8 @@ docs-private/
 
 ---
 
-## 🔍 Recherche Rapide par Mot-Clé
+<a id="-recherche-rapide-par-mot-clé"></a>
+## Recherche Rapide par Mot-Clé
 
 ### Infrastructure
 - **Traefik** → ARCHITECTURE.md, DEPLOYMENT.md
@@ -242,7 +260,8 @@ docs-private/
 
 ---
 
-## 📊 Statistiques Documentation
+<a id="-statistiques-documentation"></a>
+## Statistiques Documentation
 
 | Métrique | Valeur |
 |----------|--------|
@@ -265,7 +284,8 @@ docs-private/
 
 ---
 
-## 🔗 Liens Utiles
+<a id="-liens-utiles"></a>
+## Liens Utiles
 
 ### Internes
 - [README.md](../README.md) - Page d'accueil projet
@@ -282,7 +302,8 @@ docs-private/
 
 ---
 
-## ✏️ Comment Contribuer à la Documentation
+<a id="-comment-contribuer-à-la-documentation"></a>
+## Comment Contribuer à la Documentation
 
 1. **Créer une branche** : `git checkout -b docs/improvement`
 2. **Faire les changements** : Éditer fichiers .md
@@ -292,14 +313,15 @@ docs-private/
 
 ### Guide de Style
 - **Utiliser Markdown** standard
-- **Ajouter emojis** pour clarté
+- **Utiliser des titres courts** et une rédaction technique simple
 - **Inclure exemples** de code
 - **Lier documents** entre eux
 - **Mettre à jour INDEX.md** si nouveaux fichiers
 
 ---
 
-## 📞 Support & Questions
+<a id="-support--questions"></a>
+## Support & Questions
 
 - **Issues GitHub** : [github.com/christophe-freijanes/freijstack/issues](https://github.com/christophe-freijanes/freijstack/issues)
 - **Email** : christophe.freijanes@freijstack.com
@@ -307,7 +329,8 @@ docs-private/
 
 ---
 
-## 🎯 Prochaines Étapes Documentaires
+<a id="-prochaines-étapes-documentaires"></a>
+## Prochaines Étapes Documentaires
 
 - [ ] Créer SSO_OVERVIEW.md (version publique non-sensible)
 - [ ] Ajouter video tutorials

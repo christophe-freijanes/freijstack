@@ -1,5 +1,6 @@
 
-# FreijStack 🚀
+<a id="freijstack-"></a>
+# FreijStack
 
 [![Infrastructure](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/02-infra-deploy.yml?branch=master&label=Infrastructure&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/02-infra-deploy.yml)
 [![Production Health Check](https://img.shields.io/github/actions/workflow/status/christophe-freijanes/freijstack/05-health-prod.yml?branch=develop&label=Prod%20Health&style=flat-square&logo=github-actions)](https://github.com/christophe-freijanes/freijstack/actions/workflows/05-health-prod.yml)
@@ -14,9 +15,10 @@
 
 ---
 
-## 📝 Résumé
+<a id="-résumé"></a>
+## Résumé
 
-**FreijStack** est une stack DevSecOps complète et production-ready pour déployer, monitorer et sécuriser des applications SaaS (Portfolio, SecureVault, Registre Docker, n8n...) sur VPS, avec :
+**FreijStack** est une stack DevSecOps pour déployer, monitorer et sécuriser des applications SaaS (Portfolio, SecureVault, Registre Docker, n8n...) sur VPS, avec :
 
 ✅ **CI/CD automatisé** - GitHub Actions avec 21+ workflows  
 ✅ **Infrastructure Docker** - Traefik, nginx, services conteneurisés  
@@ -29,7 +31,8 @@ Projet maintenu par **Christophe FREIJANES** – Senior Cloud & Security Special
 
 ---
 
-## 📑 Table des matières
+<a id="-table-des-matières"></a>
+## Table des matières
 
 - [Accès rapides](#accès-rapides)
 - [Démarrage rapide](#démarrage-rapide)
@@ -43,7 +46,8 @@ Projet maintenu par **Christophe FREIJANES** – Senior Cloud & Security Special
 
 ---
 
-## 🚦 Accès rapides
+<a id="-accès-rapides"></a>
+## Accès rapides
 
 - **Portfolio Production** : https://portfolio.freijstack.com/
 - **Portfolio Staging** : https://portfolio-staging.freijstack.com/
@@ -55,7 +59,8 @@ Projet maintenu par **Christophe FREIJANES** – Senior Cloud & Security Special
 
 ---
 
-## ⚡ Démarrage rapide
+<a id="-démarrage-rapide"></a>
+## Démarrage rapide
 
 ### Infrastructure de Base (Traefik, nginx, n8n)
 
@@ -87,34 +92,31 @@ docker compose up -d --build
 
 ---
 
----
 
-
-## 📚 Documentation Complète
+<a id="-documentation-complète"></a>
+## Documentation
 
 | Document | Description |
 |----------|-------------|
-| 🗺️ [Index & Navigation](docs/00-overview/INDEX.md) | Guide complet de navigation de la documentation |
-| 📘 [Architecture Technique](docs/01-architecture/ARCHITECTURE.md) | Vue d'ensemble infrastructure, CI/CD, déploiement |
-| 🏗️ [Infrastructure Base](base-infra/README.md) | Docker Compose, Traefik v2, n8n, intégration |
-| 📌 [Guide Déploiement](docs/02-deployment/DEPLOYMENT.md) | Déploiement complet sur VPS, étape par étape |
-| 🚀 [SecureVault Pro](docs/02-deployment/PRO_DEPLOYMENT.md) | Déploiement avancé SecureVault production |
-| 📊 [CI/CD Architecture](docs/01-architecture/CI_CD_ARCHITECTURE.md) | Diagramme Mermaid, 21+ workflows documentés |
-| 🤖 [Guide Automatisation](docs/03-guides/AUTOMATION_GUIDE.md) | CI/CD, staging éphémère, health checks, rollback |
-| 🔐 [SecureVault Manager](saas/securevault/README.md) | Gestionnaire de secrets chiffrés, AES-256-GCM |
-| 🐳 [Applications SaaS](saas/README.md) | Portfolio, SecureVault, Harbor - Vue d'ensemble |
-| 📊 [Monitoring & Alertes](docs/03-guides/MONITORING.md) | Prometheus, Grafana, Loki, dashboards |
-| 🔍 [Troubleshooting](docs/04-operations/TROUBLESHOOTING.md) | Diagnostic, CORS, Registration, déploiement |
-| 🔐 [Sécurité](SECURITY.md) | Bonnes pratiques, secrets, chiffrement |
-| 📋 [Audit Documentaire](docs/05-reference/DOCUMENTATION_AUDIT.md) | Audit complet de la documentation |
-| 🔖 [Pull Request Template](.github/pull_request_template.md) | Checklist validation PR |
+| [Index & Navigation](docs/00-overview/INDEX.md) | Navigation de la documentation |
+| [Architecture Technique](docs/01-architecture/ARCHITECTURE.md) | Vue d'ensemble infrastructure, CI/CD, déploiement |
+| [Infrastructure Base](base-infra/README.md) | Docker Compose, Traefik v2, n8n, intégration |
+| [Guide Déploiement](docs/02-deployment/DEPLOYMENT.md) | Déploiement complet sur VPS, étape par étape |
+| [SecureVault Pro](docs/02-deployment/PRO_DEPLOYMENT.md) | Déploiement avancé SecureVault production |
+| [CI/CD Architecture](docs/01-architecture/CI_CD_ARCHITECTURE.md) | Diagramme Mermaid, 21+ workflows documentés |
+| [Guide Automatisation](docs/03-guides/AUTOMATION_GUIDE.md) | CI/CD, staging éphémère, health checks, rollback |
+| [SecureVault Manager](saas/securevault/README.md) | Gestionnaire de secrets chiffrés, AES-256-GCM |
+| [Applications SaaS](saas/README.md) | Portfolio, SecureVault, Harbor - Vue d'ensemble |
+| [Monitoring & Alertes](docs/03-guides/MONITORING.md) | Prometheus, Grafana, Loki, dashboards |
+| [Troubleshooting](docs/04-operations/TROUBLESHOOTING.md) | Diagnostic, CORS, Registration, déploiement |
+| [Sécurité](SECURITY.md) | Bonnes pratiques, secrets, chiffrement |
+| [Audit Documentaire](docs/05-reference/DOCUMENTATION_AUDIT.md) | Audit complet de la documentation |
+| [Pull Request Template](.github/pull_request_template.md) | Checklist validation PR |
 
 ---
 
-
----
-
-## 🗂️ Structure du Projet
+<a id="-structure-du-projet"></a>
+## Structure du Projet
 
 ```
 freijstack/
@@ -203,7 +205,8 @@ freijstack/
 └── README.md                        # Ce fichier
 ```
 
-## 🎯 Sections
+<a id="-sections"></a>
+## Sections
 
 ### Infrastructure (`/base-infra`)
 
@@ -213,9 +216,7 @@ Infrastructure centralisée gérée par Docker Compose:
 - **Portfolio**: Site web statique nginx (production + staging)
 
 Tous les services partagent le réseau Docker `web` pour la communication avec Traefik.
-- **Traefik** - Reverse proxy avec TLS automatique (Let's Encrypt)
-- **nginx** - Serveur web statique pour Portfolio (volumes `/srv/www`)
-- **n8n** - Plateforme d'automation et workflows
+- **nginx** : serveur web statique pour Portfolio (volumes `/srv/www`).
 
 Voir [base-infra/README.md](base-infra/README.md) pour les détails.
 
@@ -224,49 +225,49 @@ Voir [base-infra/README.md](base-infra/README.md) pour les détails.
 Portfolio web multilingue (FR/EN) avec:
 - **Design responsif** HTML5/CSS3 vanilla
 - **Thèmes saisonniers** automatiques (Hiver/Printemps/Été/Automne)
-- **Système i18n complet** (150+ clés de traduction)
-- **Animations fluides** (profil photo, curseur lumineux, hover effects)
+- **Système i18n** (150+ clés de traduction)
+- **Animations** (profil photo, curseur lumineux, hover effects)
 - **Certifications** avec lien vers Credly
 - **Skills** 9 catégories (Cloud & Security, DevSecOps, Backup, Automation, Monitoring, OS, Virtualization, Storage, Methodologies)
 - **Expériences** 5 positions (HARDIS, DIGIMIND, ECONOCOM, SQUAD, ACENSI)
 - **Projets** 6 réalisations avec détails techniques
 - **Sécurité**: Content Security Policy, WCAG AA compliance
 
-**Accès**: 
-- 📍 Docker Registry** — Registre Docker privé
-- 🐳 Docker Registry v2
-- 🖥️ Joxit UI pour gestion visuelle
-- 🔐 Authentification htpasswd
-- 📦 Stockage local/cloud
-- 🔄 Cleanup automatisé des anciennes images
+**Accès**:
+- Docker Registry** — Registre Docker privé
+- Docker Registry v2
+- Joxit UI pour gestion visuelle
+- Authentification htpasswd
+- Stockage local/cloud
+- Cleanup automatisé des anciennes images
 
 Voir [saas/registry/README.md](saas/registry/README.md).
 
 **3. **Production**: https://portfolio.freijstack.com/
-- 📍 **Staging**: https://portfolio-staging.freijstack.com/
-- 📍 **Local**: Ouvrir `saas/portfolio/index.html` dans un navigateur
+- **Staging**: https://portfolio-staging.freijstack.com/
+- **Local**: Ouvrir `saas/portfolio/index.html` dans un navigateur
 
 ### SaaS Démos (`/saas`)
 
 Applications SaaS conteneurisées de démonstration :
 
 **1. SecureVault Manager** — Gestionnaire de secrets chiffrés
-- 🔐 Secrets chiffrés (AES-256-GCM)
+- Secrets chiffrés (AES-256-GCM)
 - ✅ Authentification JWT + RBAC
-- 📝 Audit logs détaillés
-- 🐳 Docker + Traefik + TLS
-- 🗃️ PostgreSQL
+- Audit logs détaillés
+- Docker + Traefik + TLS
+- PostgreSQL
 
 Voir [saas/securevault/README.md](saas/securevault/README.md).
 
 **2. n8n** — Plateforme d'automation & workflows
-- 🤖 Visual workflow builder
-- 🔌 400+ intégrations natives
-- ⏰ Scheduling & webhooks
-- 📊 ETL & data sync
-- 🔐 Credential management
+- Visual workflow builder
+- 400+ intégrations natives
+- Scheduling & webhooks
+- ETL & data sync
+- Credential management
 
-ℹ️ n8n est géré et documenté dans [base-infra/README.md](base-infra/README.md) (voir la section dédiée à l'automation).
+ℹ n8n est géré et documenté dans [base-infra/README.md](base-infra/README.md) (voir la section dédiée à l'automation).
 
 **Vue d'ensemble SaaS**: [saas/README.md](saas/README.md)
 
@@ -274,9 +275,10 @@ Voir [saas/securevault/README.md](saas/securevault/README.md).
 
 - `architecture.md` - Vue d'ensemble de l'architecture technique et déploiement
 
-## 🚀 CI/CD Pipeline
+<a id="-cicd-pipeline"></a>
+## CI/CD Pipeline
 
-Le projet utilise **GitHub Actions** avec un pipeline de déploiement automatique complet.
+Le projet utilise **GitHub Actions** avec un pipeline de déploiement automatique.
 
 ### Branches & Déploiement
 
@@ -291,33 +293,34 @@ Le projet utilise **GitHub Actions** avec un pipeline de déploiement automatiqu
    - HTML validation (W3C)
    - CSS/JS syntax check
 
-2. 🔨 **Build & Optimize**
+2. **Build & Optimize**
    - CSS minification (csso-cli)
    - JS minification (terser)
    - Asset optimization
 
-3. 🔐 **Security Scan**
+3. **Security Scan**
    - **CodeQL** - Code analysis
    - **Gitleaks** - Secret detection
    - **Trivy** - Vulnerability scanning
 
-4. 🌐 **Deploy to GitHub Pages**
+4. **Deploy to GitHub Pages**
    - Staging uniquement (develop branch)
    - Backup automatique
 
-5. 🚀 **Deploy to VPS**
+5. **Deploy to VPS**
    - Déploiement via rsync (SSH)
    - Traefik restart pour routing
    - Production + Staging paths
 
-6. 📊 **Post-Deploy**
+6. **Post-Deploy**
    - Backup cleanup (garde 7 derniers)
    - Validation des URLs
    - Status notifications
 
-**Voir**: Voir les fichiers dans [.github/workflows/](.github/workflows/) pour la configuration CI/CD détaillée.
+**Voir**: Les fichiers dans [.github/workflows/](.github/workflows/) pour la configuration CI/CD détaillée.
 
-## 🏗️ Infrastructure & Déploiement
+<a id="-infrastructure--déploiement"></a>
+## Infrastructure & Déploiement
 
 ### Stack Technique
 
@@ -443,7 +446,8 @@ git push origin develop
 # Puis merger vers master quand prêt
 ```
 
-## 💻 Technologies
+<a id="-technologies"></a>
+## Technologies
 
 ### Portfolio
 - HTML5, CSS3 (CSS Variables, Flexbox, Grid)
@@ -466,7 +470,8 @@ git push origin develop
 - SSH + rsync
 - GitHub Actions
 
-## 🔐 Sécurité
+<a id="-sécurité"></a>
+## Sécurité
 
 ✅ **Portfolio**:
 - Content Security Policy (CSP) headers
@@ -486,15 +491,17 @@ git push origin develop
 - Path-based routing (no root exposure)
 - SSH key-based auth
 
-## 🌍 Langues
+<a id="-langues"></a>
+## Langues
 
 Portfolio entièrement traduit:
-- 🇫🇷 Français (FR)
-- 🇬🇧 Anglais (EN)
+- Français (FR)
+- Anglais (EN)
 
 Sélection de langue automatique avec persistance localStorage.
 
-## 📊 Compétences Clés
+<a id="-compétences-clés"></a>
+## Compétences Clés
 
 - Cloud: AWS, Azure, GCP, Kubernetes, Docker
 - Sécurité: DevSecOps, SIEM, WAF, PKI, Hardening
@@ -503,12 +510,14 @@ Sélection de langue automatique avec persistance localStorage.
 - Méthodologies: Agile, ITIL, CI/CD, GitOps
 
 
-## 📬 Contact
+<a id="-contact"></a>
+## Contact
 
-- 🎓 [Certifications Credly](https://www.credly.com/users/christophe-freijanes)
-- 💼 [LinkedIn & Email](https://portfolio.freijstack.com/) (voir section contact du portfolio)
+- [Certifications Credly](https://www.credly.com/users/christophe-freijanes)
+- [LinkedIn & Email](https://portfolio.freijstack.com/) (voir section contact du portfolio)
 
-## 📝 Licence
+<a id="-licence"></a>
+## Licence
 
 Tous droits réservés © 2025 Christophe FREIJANES
 
