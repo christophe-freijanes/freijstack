@@ -116,7 +116,11 @@ jobs:
           set -euo pipefail
 
           SSH_TARGET="${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
-          BRANCH="${GITHUB_REF##*/}"
+          BRANCH="${{ github.event.workflow_run.head_branch || github.ref_name }}"
+          if [[ "${{ inputs.app_name }}" == "portfolio" && "${{ inputs.environment }}" == "production" && "$BRANCH" != "master" ]]; then
+            echo "❌ Portfolio production requires master (got: $BRANCH)"
+            exit 1
+          fi
 
           # Pass all env vars to the remote script (secrets may be empty)
           REMOTE_ENV="APP_NAME='${{ inputs.app_name }}' \
