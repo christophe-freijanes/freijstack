@@ -1,0 +1,86 @@
+# EditorConfig - Configuration d'éditeur unifiée
+# Documentation: https://editorconfig.org/
+
+# Fichier racine
+root = true
+
+# Par défaut pour tous les fichiers
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# Markdown (autoriser trailing whitespace pour line breaks)
+[*.md]
+trim_trailing_whitespace = false
+indent_size = 2
+
+# YAML
+[*.{yml,yaml}]
+indent_size = 2
+
+# JSON
+[*.json]
+indent_size = 2
+
+# Python
+[*.py]
+indent_size = 4
+max_line_length = 120
+
+# Shell scripts
+[*.sh]
+indent_size = 2
+end_of_line = lf
+
+# PowerShell
+[*.ps1]
+indent_size = 4
+end_of_line = crlf
+
+# JavaScript/TypeScript
+[*.{js,ts,jsx,tsx}]
+indent_size = 2
+
+# CSS/SCSS
+[*.{css,scss,sass}]
+indent_size = 2
+
+# HTML
+[*.html]
+indent_size = 2
+
+# Terraform
+[*.tf]
+indent_size = 2
+
+# Dockerfile
+[Dockerfile*]
+indent_size = 2
+
+# Makefile (utilise tabs obligatoirement)
+[Makefile]
+indent_style = tab
+
+# Configuration files
+[*.{toml,ini,conf}]
+indent_size = 2
+
+# SQL
+[*.sql]
+indent_size = 2
+
+# XML
+[*.xml]
+indent_size = 2
+
+# Package files
+[{package.json,package-lock.json,composer.json}]
+indent_size = 2
+
+# Git files
+[.git*]
+indent_size = 2

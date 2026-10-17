@@ -1,296 +1,295 @@
-# Portfolio - Christophe FREIJANES
+# 🌐 Portfolio FreijStack
 
-[![Live](https://img.shields.io/badge/live-portfolio.freijstack.com-success?style=flat-square&logo=globe)](https://portfolio.freijstack.com/)
-[![Staging](https://img.shields.io/badge/staging-portfolio--staging.freijstack.com-blue?style=flat-square&logo=globe)](https://portfolio-staging.freijstack.com/)
-[![Multilingue](https://img.shields.io/badge/languages-FR%2FEN-orange?style=flat-square&logo=language)](./index.html)
-[![Responsive](https://img.shields.io/badge/responsive-mobile--first-green?style=flat-square&logo=device)](./style.css)
-[![WCAG AA](https://img.shields.io/badge/accessibility-WCAG%20AA-blue?style=flat-square&logo=ada)](./index.html)
+[![Responsive Design](https://img.shields.io/badge/design-Responsive%20HTML5%2FCSS3-blue?style=flat-square&logo=html5)](./index.html)
+[![i18n Support](https://img.shields.io/badge/i18n-FR%2FEN-green?style=flat-square&logo=translation)](./script.js)
+[![Accessibility](https://img.shields.io/badge/a11y-WCAG%20AA-purple?style=flat-square)](./index.html)
+[![Security](https://img.shields.io/badge/security-CSP-red?style=flat-square)](./index.html)
 [![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red?style=flat-square)](../../LICENSE)
 
-Portfolio web professionnel multilingue (FR/EN) mettant en avant les compétences Cloud & Security / DevSecOps.
+---
 
-## 📌 Caractéristiques
+## 📝 Présentation
 
-### Design & UX
-- **Responsive** - Adapté desktop, tablet, mobile
-- **Thèmes saisonniers** - Changement automatique de couleurs selon la saison (Hiver/Printemps/Été/Automne)
-- **Animations fluides** - Transitions CSS3 et JavaScript
-- **Curseur lumineux** - Effet personnalisé (radial-gradient)
-- **Profil photo** - Animation slideIn avec glow effect
-- **Accessibilité WCAG AA** - Contraste 4.5:1, sémantique HTML5
+Portfolio web multilingue et responsive de **Christophe FREIJANES** – Senior Cloud & Security Specialist (DevSecOps).
 
-### Multilingue (i18n)
-- 150+ clés de traduction (FR/EN)
-- Sélecteur de langue dans la barre de navigation
-- Persistance en localStorage
-- Changement de langue sans rechargement de page
+### 🎯 Contenu
 
-### Sécurité
-- **Content Security Policy (CSP)** - Headers restrictifs
-- **No external trackers** - Vie privée complète
-- **HTML validation** - W3C compliance
-- **WCAG AA** - Accessibilité
+Le portfolio présente :
 
-### Contenu
-- **Hero section** - Présentation avec code block
-- **Certifications** - Lien vers profil Credly avec hover surbrillance
-- **9 catégories de compétences**:
-  - Cloud & Security
-  - DevSecOps & CI/CD
-  - Backup & Disaster Recovery
-  - Automation & Development (Python, Bash, PowerShell, YAML, n8n)
-  - Monitoring & Observability
-  - Operating Systems (RedHat/Fedora/Amazon Linux, Debian/Ubuntu, Windows Server, ArchLinux)
-  - Virtualization & Infrastructure (VMware, RHV, OVirt, KVM, Load Balancing)
-  - Storage Solutions (SAN, NAS, S3, Data Replication)
-  - Methodologies (DevSecOps, Agile SAFe, ITIL v4)
-- **Expériences** - Timeline avec 5 positions professionnelles:
-  - ACENSI (2023 - Aujourd'hui): DevSecOps, Cloud Security, Backup-as-Code
-  - SQUAD (2022-2023): System Engineering, Hardening, Containers
-  - ECONOCOM (2020-2022): Infrastructure, Automation, Storage
-  - DIGIMIND (2020): R&D, Monitoring, Big Data
-  - HARDIS (2019-2020): CloudOps, Backup, Compliance
-- **Projets** - 6 réalisations avec détails techniques
-- **Footer** - Navigation et informations de contact
+- **Compétences Techniques**: Cloud (AWS, Azure, GCP), DevSecOps, Infrastructure, Monitoring, Méthodologies
+- **Expériences Professionnelles**: 5 positions avec contexte détaillé et réalisations
+- **Projets Récents**: 6 réalisations techniques avec cas d'usage
+- **Certifications**: Badges Credly avec liens directs
+- **Contact & Liens**: Email, formulaire, LinkedIn, GitHub, Twitter
 
-## 🚀 Utilisation
+---
 
-### Avec Docker (Production/Staging)
+## 🌍 Langues Supportées
 
-Le portfolio est maintenant géré par **son propre docker-compose.yml** :
+- 🇫🇷 **Français (FR)** - Langue par défaut
+- 🇬🇧 **Anglais (EN)** - Version anglaise complète
 
-```bash
-# Prérequis: Traefik doit être démarré
-cd base-infra
-docker network create web
-docker volume create traefik_data
-docker-compose up -d
+La sélection est persistée en localStorage automatiquement.
 
-# Démarrer le portfolio
-cd ../portfolio
-cp .env.example .env
-nano .env  # Configurer DOMAIN_NAME
-docker-compose up -d
+---
 
-# Vérifier
-docker-compose ps
-docker logs -f portfolio
+## 🎨 Fonctionnalités Principales
+
+✨ **Design & UX**:
+- Responsive Design (desktop, tablette, mobile)
+- Thèmes saisonniers automatiques
+- Animations fluides (CSS3)
+- Dark mode support
+- Curseur lumineux avec particules
+- Photo profil dynamique
+
+🔐 **Sécurité**:
+- Content Security Policy (CSP)
+- HTTPS/TLS (Let's Encrypt)
+- Pas de tracking externe
+- Pas de cookies
+- Validation HTML5
+- XSS Protection
+
+♿ **Accessibilité**:
+- WCAG AA Compliance
+- Sémantique HTML5
+- Contraste 4.5:1+
+- Navigation clavier
+- ARIA labels
+- Alt text descriptifs
+
+---
+
+## 🏗️ Structure
+
 ```
-
-**URLs**:
-- Production: https://portfolio.freijstack.com
-- Staging: https://portfolio-staging.freijstack.com
-
-**Voir**: [../../base-infra/BASE_INTEGRATION.md](../../base-infra/BASE_INTEGRATION.md)
-
-### Ouvrir localement
-```bash
-# Option 1: Ouvrir directement
-# Double-cliquez sur index.html
-
-# Option 2: Serveur local (Python)
-cd saas/portfolio
-python3 -m http.server 8000
-# Accès: http://localhost:8000
-
-# Option 3: Serveur local (Node.js)
-npx http-server .
-# Accès: http://localhost:8080
-```
-
-### En Développement
-```bash
-# Créer une branche feature
-git checkout -b feat/ma-modification
-
-# Editer portfolio/index.html, style.css, script.js
-# Tester localement
-
-# Commit et push vers develop
-git add saas/portfolio/
-git commit -m "feat: description de la modification"
-git push origin feat/ma-modification
-
-# Créer une PR sur develop
-# Vérifier https://freijstack.com/portfolio-staging/
-# Merger dans develop quand OK
-# CI/CD déploie automatiquement vers staging
-
-# Quand prêt pour production:
-git checkout develop
-git pull
-git checkout master
-git merge develop
-git push origin master
-# CI/CD déploie automatiquement vers production
-```
-
-## 📊 Performance
-
-- **Pas de frameworks lourds** - HTML5/CSS3/JavaScript vanilla
-- **CSS variables** - Optimise les recalculs
-- **Animations GPU** - Transform et opacity uniquement
-- **Lazy loading** - Images optimisées
-- **Minification** - CSS/JS minifiés en production (via CI/CD)
-
-**Lighthouse** (local):
-- Performance: 95+
-- Accessibility: 100
-- Best Practices: 95+
-- SEO: 100
-
-# Accès: http://localhost:8080
-```
-
-## 📁 Fichiers
-
-| Fichier | Description |
-|---------|-------------|
-| `index.html` | Structure HTML5 sémantique avec data-i18n, CSP headers |
-| `style.css` | Styling avec CSS variables, animations, responsive design |
-| `script.js` | Logique i18n, thèmes saisonniers, interactions, email handling |
-| `public/` | Assets statiques (si nécessaire) |
-
-## 🎨 Thèmes Saisonniers
-
-Changement automatique selon le mois:
-- **Hiver** (Déc-Fév): Bleu `#5ec4e8`
-- **Printemps** (Mar-Mai): Vert `#5cd685`
-- **Été** (Jun-Août): Orange `#f5a142`
-- **Automne** (Sep-Nov): Orange rouille `#d97845`
-
-Variables CSS utilisées:
-```css
---accent              /* Couleur principale */
---accent-rgb          /* RGB pour rgba() */
---text-primary        /* Texte principal */
---text-secondary      /* Texte secondaire */
---bg-primary          /* Fond principal */
---border-color        /* Couleur des bordures */
-```
-
-## 🌐 Langues Supportées
-
-| Code | Langue |
-|------|--------|
-| `fr` | Français |
-| `en` | English |
-
-## ♿ Accessibilité & Sécurité
-
-✅ **WCAG AA Compliance**
-- Contraste minimum 4.5:1 pour tous les textes
-- HTML5 sémantique (header, nav, main, footer, section)
-- Attributs aria-label pour landmarks
-- Pas de contenu masqué aux lecteurs d'écran
-
-✅ **Content Security Policy**
-```
-default-src 'self'
-script-src 'self' https://cdnjs.cloudflare.com https://fonts.googleapis.com
-style-src 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com
-img-src 'self' data: https:
-font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:
-```
-
-✅ **Pas de trackers externes**
-- Google Fonts et Font Awesome sont autorisés
-- Aucun analytics (Google, Facebook, etc.)
-- Aucun cookie tiers
-
-## 🔧 Technologies
-
-- **HTML5** - Structure sémantique
-- **CSS3** - Flexbox, Grid, Variables CSS, Animations
-- **JavaScript vanilla** - Aucun framework ou dépendance externe
-- **Font Awesome 6.4.0** - Icônes
-- **Google Fonts** - Typographie (Inter, Fira Code)
-
-## 📊 Performance
-
-- Pas de frameworks lourds
-- CSS variables pour optimiser les recalculs
-- Animations matérielles (transform, opacity)
-- Lazy loading des images (portfolio photo LinkedIn)
-- Bundle taille: < 50KB (HTML+CSS+JS minifiés)
-
-## 🔄 CI/CD & Déploiement
-
-Le portfolio est déployé automatiquement via GitHub Actions:
-
-### Workflow
-1. **Validate** - Linting HTML/CSS/JS
-2. **Build** - Minification CSS/JS
-3. **Security Scan** - Gitleaks, Trivy, CodeQL
-4. **Deploy**:
-   - `develop` branch → `portfolio-staging.freijstack.com`
-   - `master` branch → `portfolio.freijstack.com`
-
-### Branches
-- `develop` - Staging (test avant production)
-- `master` - Production (live)
-
-### Déploiement Manuel
-```bash
-# Sur develop
-git checkout develop
-git add portfolio/
-git commit -m "feat: modification"
-git push origin develop
-# Vérifier https://freijstack.com/portfolio-staging/
-
-# Merger vers master quand OK
-git checkout master
-git merge develop
-git push origin master
-# https://portfolio.freijstack.com/ mis à jour automatiquement
-```
-
-## 📝 Maintenance
-
-### Ajouter une traduction
-1. Ajouter `data-i18n="key"` à l'élément HTML
-2. Ajouter la clé dans `script.js`:
-```javascript
-translations.fr.key = "Texte français";
-translations.en.key = "English text";
-```
-
-### Modifier les couleurs saisonnières
-Éditer dans `style.css`:
-```css
-body.season-winter {
-  --accent: #5ec4e8;
-  --accent-rgb: 94, 196, 232;
-}
-```
-
-### Ajouter des animations
-Utiliser les animations existantes ou créer dans `style.css` → `@keyframes`
-
-## 🐛 Dépannage
-
-### Problème: Images ne chargent pas
-```
-CSP bloque les images externes
-Solution: Ajouter le domaine à img-src dans le CSP header
-```
-
-### Problème: Police ne s'applique pas
-```
-Google Fonts peut être bloqué
-Solution: Vérifier la connexion réseau et CSP
-```
-
-### Problème: Langue ne persiste pas
-```
-localStorage désactivé ou site en mode anonyme
-Solution: Vérifier les paramètres du navigateur
+portfolio/
+├── index.html              # Page principale
+├── style.css               # Styles (CSS variables, responsive)
+├── script.js               # Logique JavaScript (i18n, animations)
+├── public/                 # Assets statiques
+│   ├── images/             # Photos, icônes
+│   ├── favicons/           # favicon, manifest
+│   └── manifest.json       # PWA manifest
+├── README.md               # Ce fichier
+└── .gitignore
 ```
 
 ---
 
+## 🚀 Accès Rapides
+
+- **Production**: https://portfolio.freijstack.com/ (master branch)
+- **Staging**: https://portfolio-staging.freijstack.com/ (develop branch)
+- **Local**: Ouvrir index.html ou serveur local
+
+---
+
+## ⚡ Démarrage Local
+
+### Option 1: Ouvrir Directement
+```bash
+# Double-cliquez sur index.html
+```
+
+### Option 2: Serveur Python
+```bash
+cd saas/portfolio
+python3 -m http.server 8000
+# http://localhost:8000
+```
+
+### Option 3: Serveur Node.js
+```bash
+npx http-server .
+# http://localhost:8080
+```
+
+### Option 4: Live Server VS Code
+```bash
+# Extension VS Code → Click droit → "Open with Live Server"
+```
+
+### Option 5: Docker
+```bash
+docker build -t portfolio:latest .
+docker run -d -p 8000:80 --name portfolio portfolio:latest
+# http://localhost:8000
+```
+
+---
+
+## 📊 Sections Principales
+
+| Section | Contenu |
+|---------|---------|
+| Hero | Welcome, avatar, call-to-action |
+| About | Bio détaillée, points clés |
+| Skills | 9 catégories, 50+ compétences |
+| Experience | 5 positions, timeline interactive |
+| Projects | 6 réalisations, modals, links |
+| Certifications | Badges Credly avec liens |
+| Contact | Email, formulaire, social links |
+
+---
+
+## 🔒 Sécurité
+
+### Headers de Sécurité
+- Content-Security-Policy (CSP)
+- Strict-Transport-Security (HSTS)
+- X-Content-Type-Options
+- X-Frame-Options
+- X-XSS-Protection
+
+### HTTPS/TLS
+- ✅ Let's Encrypt certificats
+- ✅ TLS 1.3 uniquement
+- ✅ Redirection HTTP → HTTPS (301)
+- ✅ HSTS preload ready
+
+### Privacy
+- ✅ Pas de tracking (0 Google Analytics)
+- ✅ Pas de cookies tiers
+- ✅ Pas d'API keys exposées
+- ✅ GDPR compliant
+
+---
+
+## 📝 Customization
+
+### Modifier le Contenu
+
+Tous les textes et données dans `script.js`:
+
+```javascript
+// Traductions i18n
+const translations = { fr: { ... }, en: { ... } };
+
+// Expériences
+const experiences = [ { title, company, dates, ... } ];
+
+// Projets
+const projects = [ { title, description, url, ... } ];
+
+// Certifications
+const certifications = [ { name, issuer, credlyId, url } ];
+```
+
+### Ajouter une Certification
+
+```javascript
+const certifications = [
+  {
+    name: 'AWS Solutions Architect',
+    issuer: 'AWS',
+    credlyId: '12345',
+    url: 'https://credly.com/...'
+  }
+];
+```
+
+### Modifier les Thèmes
+
+```css
+/* style.css */
+:root {
+  --color-primary: #0066cc;
+  --color-accent: #ff6600;
+}
+
+[data-season="winter"] {
+  --color-primary: #0066ff;  /* Bleu */
+}
+```
+
+---
+
+## 🛠️ Maintenance
+
+### Health Checks
+
+```bash
+# Accessibilité
+curl -v https://portfolio.freijstack.com/
+
+# Headers de sécurité
+curl -I https://portfolio.freijstack.com/
+
+# TLS version
+openssl s_client -connect portfolio.freijstack.com:443
+```
+
+### Logs Production
+
+```bash
+# Logs d'accès nginx
+tail -f /var/log/nginx/portfolio.access.log
+
+# Logs d'erreur
+tail -f /var/log/nginx/portfolio.error.log
+```
+
+---
+
+## 🚀 Déploiement
+
+### CI/CD Workflow
+
+```
+Code Push → GitHub
+   ↓
+GitHub Actions
+   ├─> Validate (HTML/CSS/JS)
+   ├─> Security (CodeQL, Gitleaks)
+   ├─> Build (Minify)
+   └─> Deploy (rsync)
+      ├─> Staging (develop)
+      └─> Production (master)
+```
+
+### Mise à Jour
+
+```bash
+# Développement
+git checkout develop
+# Editer les fichiers...
+git add .
+git commit -m "feat: portfolio update"
+git push origin develop
+# Auto-déploiement sur staging
+
+# Quand prêt: merger vers master
+git checkout master
+git merge develop
+git push origin master
+# Auto-déploiement en production
+```
+
+---
+
+## 📚 Documentation
+
+- **Architecture**: [../../docs/01-architecture/ARCHITECTURE.md](../../docs/01-architecture/ARCHITECTURE.md)
+- **Déploiement**: [../../docs/02-deployment/DEPLOYMENT.md](../../docs/02-deployment/DEPLOYMENT.md)
+- **SaaS Apps**: [../README.md](../README.md)
+- **Infrastructure**: [../../base-infra/README.md](../../base-infra/README.md)
+
+---
+
+## 📬 Contact
+
+- 📧 **Email**: [portfolio.freijstack.com](https://portfolio.freijstack.com) (formulaire)
+- 💼 **LinkedIn**: [christophe-freijanes](https://www.linkedin.com/in/christophe-freijanes)
+- 🎓 **Credly**: [Certifications](https://www.credly.com/users/christophe-freijanes)
+- 🐙 **GitHub**: [@christophe-freijanes](https://github.com/christophe-freijanes)
+
+---
+
+© 2025 Christophe FREIJANES. Tous droits réservés.
+
 **Créé par**: Christophe FREIJANES  
-**Dernière mise à jour**: Décembre 2025  
-**Version**: 2.1  
-**Status**: ✅ Production
+**Dernière mise à jour**: Janvier 2026  
+**Version**: 2.6.0  
+**Status**: ✅ Production Ready

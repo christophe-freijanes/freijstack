@@ -1,0 +1,76 @@
+# Nginx static site (secure-by-default) — behind Traefik (TLS terminated upstream)
+# - Runs on 8080 so container can run as non-root
+# - Security headers tuned for this portfolio (external images/fonts/CDN allowed)
+
+server {
+    listen 8080 default_server;
+    listen [::]:8080 default_server;
+
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Reduce information leakage
+    server_tokens off;
+
+    # --- Security headers ---
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=()" always;
+
+    # If you have full HTTPS everywhere (Traefik websecure only), you can enable HSTS.
+    # Uncomment ONLY if Traefik always serves HTTPS for this host.
+    # add_header Strict-Transport-Security "max-age=15552000; includeSubDomains; preload" always;
+
+    # Content Security Policy:
+    # - Allows external images (LinkedIn + shields.io), fonts (Google Fonts), and CSS CDN (Font Awesome)
+    # - Blocks plugins/objects and framing
+    add_header Content-Security-Policy
+        "default-src 'self'; \
+        base-uri 'self'; \
+        object-src 'none'; \
+        frame-ancestors 'none'; \
+        img-src 'self' data: https:; \
+        font-src 'self' https: data:; \
+        style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; \
+        script-src 'self'; \
+        connect-src 'self' https:;" always;
+
+    # --- Compression ---
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_types
+        text/plain
+        text/css
+        text/javascript
+        application/javascript
+        application/json
+        application/xml
+        application/rss+xml
+        image/svg+xml;
+
+    # --- Static caching ---
+    location ~* \.(?:css|js|mjs|png|jpg|jpeg|gif|webp|svg|ico|woff2?)$ {
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000, immutable" always;
+        try_files $uri =404;
+    }
+
+    location = /robots.txt { try_files $uri =404; access_log off; }
+    location = /sitemap.xml { try_files $uri =404; access_log off; }
+
+    # Deny hidden files (except ACME if ever used directly)
+    location ~ /\.(?!well-known) {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
+    # SPA-friendly fallback (optional)
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

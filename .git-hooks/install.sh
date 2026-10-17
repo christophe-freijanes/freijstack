@@ -50,7 +50,19 @@ echo "================================"
 echo -e "${GREEN}✅ Installation terminée!${NC}"
 echo ""
 echo "Les hooks suivants sont actifs:"
-ls -1 .git/hooks | grep -v "sample" || echo "Aucun hook"
+found=0
+for hook in .git/hooks/*; do
+    name=$(basename "$hook")
+    [[ "$name" == *sample* ]] && continue
+    if [ -f "$hook" ]; then
+        echo "$name"
+        found=1
+    fi
+done
+
+if [ "$found" -eq 0 ]; then
+    echo "Aucun hook"
+fi
 echo ""
 echo "Prochaines étapes:"
 echo "1. Les hooks s'exécuteront automatiquement"

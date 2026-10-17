@@ -1,0 +1,106 @@
+// Configuration markdownlint-cli2
+// Documentation: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+{
+  // Fichiers à ignorer
+  "ignores": [
+    "node_modules/**",
+    "**/node_modules/**",
+    ".git/**",
+    "CHANGELOG.md"
+  ],
+
+  // Configuration des règles
+  "config": {
+    // Activer toutes les règles par défaut
+    "default": true,
+
+    // MD013 - Longueur de ligne (désactivé complètement)
+    "MD013": false,
+
+    // MD033 - Inline HTML (autorisé pour badges et icônes)
+    "MD033": {
+      "allowed_elements": [
+        "div",
+        "br",
+        "img",
+        "details",
+        "summary",
+        "a",
+        "kbd",
+        "sub",
+        "sup"
+      ]
+    },
+
+    // MD041 - Premier élément doit être un heading (désactivé)
+    "MD041": false,
+
+    // MD024 - Plusieurs headings avec le même contenu (autorisé avec niveaux différents)
+    "MD024": {
+      "siblings_only": true
+    },
+
+    // MD046 - Style de code block (fenced par défaut)
+    "MD046": {
+      "style": "fenced"
+    },
+
+    // MD049 - Style d'emphase (asterisk)
+    "MD049": {
+      "style": "asterisk"
+    },
+
+    // MD050 - Style de strong (asterisk)
+    "MD050": {
+      "style": "asterisk"
+    },
+
+    // MD040 - Code blocks should have a language (autorisé sans langage)
+    "MD040": false,
+
+    // MD031 - Fenced code blocks surrounded by blank lines (désactivé)
+    "MD031": false,
+
+    // MD032 - Lists surrounded by blank lines (désactivé)
+    "MD032": false,
+
+    // MD060 - Table column style (désactivé)
+    "MD060": false,
+
+    // MD037 - Spaces inside emphasis markers (désactivé)
+    "MD037": false,
+
+    // MD022 - Headings surrounded by blank lines (désactivé)
+    "MD022": false,
+
+    // MD034 - Bare URL used (désactivé)
+    "MD034": false,
+
+    // MD012 - Multiple consecutive blank lines (désactivé)
+    "MD012": false,
+
+    // MD009 - Trailing spaces (désactivé)
+    "MD009": false,
+
+    // MD029 - Ordered list item prefix (désactivé)
+    "MD029": false,
+
+    // MD026 - Trailing punctuation in heading (désactivé)
+    "MD026": false,
+
+    // MD051 - Link fragments should be valid (désactivé)
+    "MD051": false,
+
+    // MD030 - Spaces after list markers (désactivé)
+    "MD030": false,
+
+    // MD036 - Emphasis used instead of a heading (désactivé)
+    "MD036": false,
+
+    // MD058 - Tables should be surrounded by blank lines (désactivé)
+    "MD058": false,
+
+    // MD042 - No empty links (désactivé)
+    "MD042": false
+  }
+}

@@ -4,11 +4,11 @@
   "description": "SecureVault Manager - Frontend Application",
   "private": true,
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.20.1",
-    "axios": "^1.6.2",
-    "lucide-react": "^0.294.0"
+    "axios": "^1.20.0",
+    "lucide-react": "^0.562.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.3",
+    "react-router-dom": "^7.18.4"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -17,7 +17,8 @@
     "eject": "react-scripts eject"
   },
   "devDependencies": {
-    "react-scripts": "5.0.1"
+    "react-scripts": "5.0.1",
+    "typescript": "6.0.2"
   },
   "eslintConfig": {
     "extends": [

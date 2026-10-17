@@ -2,10 +2,15 @@
 *.log
 npm-debug.log*
 
-# Environment
+# Environment files (secrets)
 .env
 .env.local
-.env.production
+.env.development
+
+# Templates committed to repo (no secrets):
+# .env.production (template)
+# .env.staging (template)
+# .env.example (documentation)
 
 # Dependencies
 node_modules/

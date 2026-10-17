@@ -1,0 +1,53 @@
+name: 🚀 SaaS • Portfolio Deploy
+
+on:
+  workflow_run:
+    workflows: ["🏗️ Build & Push Portfolio"]
+    types: [completed]
+
+  workflow_dispatch: {}
+
+jobs:
+  security:
+    name: 🛡️ Security Scan (Portfolio)
+    uses: ./.github/workflows/00-core-security-ci.yml
+    with:
+      environment: 'production'
+      scan_paths: |
+        saas/portfolio
+      gate_prod_only: true
+      fail_on_gitleaks: true
+      run_zap: true
+      dast_url: "https://portfolio.freijstack.com"
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+
+  deploy-production:
+    name: 🚀 Deploy Portfolio (Production)
+    needs: security
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'master'
+      )
+
+    uses: ./.github/workflows/00-core-full-deploy.yml
+
+    with:
+      app_name: "portfolio"
+      environment: "production"
+      deploy_dir: "/srv/www/portfolio"
+      project_path: "saas/portfolio"
+      docker_compose_file: "docker-compose.prod.yml"
+      run_migrations: false
+
+    secrets:
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
+      VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
+      REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
+      REGISTRY_PASSWORD_PROD: ${{ secrets.REGISTRY_PASSWORD_PROD }}

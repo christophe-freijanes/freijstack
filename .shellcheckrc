@@ -1,0 +1,16 @@
+# ShellCheck configuration
+# Only show critical errors (syntax errors, undefined vars, etc.)
+
+# Disable style/info/warning level checks (comma-separated)
+disable=SC2129,SC2034,SC2153,SC2012,SC2086,SC2087,SC2155,SC2006
+
+# Severity threshold: only show errors (syntax, logic bugs)
+# Skips: warning, info, style
+severity=error
+
+# Keep enabled: critical issues only
+# - SC1xxx: Syntax errors
+# - Undefined variables, command not found, etc.
+
+# External sources (allow sourcing from /etc, /usr, common paths)
+source-path=SCRIPTDIR

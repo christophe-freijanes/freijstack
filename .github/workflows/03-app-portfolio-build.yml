@@ -1,0 +1,69 @@
+name: 🏗️ Build & Push Portfolio
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        default: production
+        type: choice
+        options:
+          - staging
+          - production
+
+  push:
+    branches:
+      - master
+      - develop
+    paths:
+      - saas/portfolio/**
+
+env:
+  IMAGE_NAME: portfolio
+
+jobs:
+  build:
+    name: Build & Push Portfolio
+    runs-on: ubuntu-latest
+
+    env:
+      REGISTRY_HOST: registry.freijstack.com
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USER_PROD }}
+      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Login registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_HOST }}
+          username: ${{ secrets.REGISTRY_USER_PROD }}
+          password: ${{ secrets.REGISTRY_PASSWORD_PROD }}
+
+      - name: Build & Push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./saas/portfolio
+          file: ./saas/portfolio/Dockerfile
+          push: true
+          tags: |
+            registry.freijstack.com/portfolio:latest
+            registry.freijstack.com/portfolio:${{ github.sha }}
+
+  security-scan:
+    name: Security Scan Portfolio Image
+    needs: build
+    uses: ./.github/workflows/00-core-security-ci.yml
+    with:
+      environment: ${{ inputs.environment || 'production' }}
+      run_trivy_image: true
+      trivy_images: |
+        registry.freijstack.com/portfolio:${{ github.sha }}
+        registry.freijstack.com/portfolio:latest
+      registry_host: registry.freijstack.com
+    secrets:
+      REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
+      REGISTRY_PASSWORD_PROD: ${{ secrets.REGISTRY_PASSWORD_PROD }}

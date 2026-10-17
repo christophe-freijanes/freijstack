@@ -1,0 +1,204 @@
+name: 📊 Publish Security Score
+
+# Déclenché APRÈS le post-deploy health check pour publier le score de sécurité
+# Respecte le pipeline DevSecOps : Security → Deploy → Score
+
+on:
+  workflow_run:
+    workflows:
+      - '🩺 Health Check • Post-Deploy'
+    types: [completed]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  # Vérifie que le déploiement a réussi avant de publier le score
+  check-deployment:
+    name: ✅ Verify Deployment Success
+    runs-on: ubuntu-latest
+    outputs:
+      deployment_success: ${{ steps.check.outputs.success }}
+    steps:
+      - name: 📋 Check source workflow status
+        id: check
+        run: |
+          if [ "${{ github.event.workflow_run.conclusion }}" = "success" ]; then
+            echo "✅ Post-deploy health check passed"
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ Post-deploy health check failed or was skipped"
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
+
+  # Publie le score de sécurité global après le déploiement réussi
+  publish-score:
+    name: 📊 Generate & Publish Global Security Score
+    needs: check-deployment
+    if: needs.check-deployment.outputs.deployment_success == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 Download all security artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: ./security-artifacts
+        continue-on-error: true
+
+      - name: 📊 Compute Global Security Score
+        id: compute_score
+        run: |
+          set -euo pipefail
+          echo "📊 Calculating global security score..."
+
+          TOTAL_SCORE=100
+          ISSUES=0
+          APPS=0
+
+          for app in registry portfolio securevault infra; do
+            DIR="./security-artifacts/${app}"
+            if [ -d "$DIR" ]; then
+              echo "Processing $app..."
+              if [ -f "$DIR/security-score.json" ]; then
+                SCORE=$(jq -r '.message' "$DIR/security-score.json" | grep -oE '[0-9]+(?=/10)' || echo "10")
+                SCORE=$((SCORE * 10))
+                TOTAL_SCORE=$((TOTAL_SCORE + SCORE))
+                APPS=$((APPS + 1))
+              fi
+              if [ -f "$DIR/gitleaks-report.json" ]; then
+                LEAKS=$(jq 'length' "$DIR/gitleaks-report.json" 2>/dev/null || echo 0)
+                ISSUES=$((ISSUES + LEAKS))
+              fi
+              if [ -f "$DIR/trivy-report.json" ]; then
+                CRITICAL=$(jq '[.Results[]?.Misconfigurations[]? | select(.Severity=="CRITICAL")] | length' "$DIR/trivy-report.json" 2>/dev/null || echo 0)
+                HIGH=$(jq '[.Results[]?.Misconfigurations[]? | select(.Severity=="HIGH")] | length' "$DIR/trivy-report.json" 2>/dev/null || echo 0)
+                ISSUES=$((ISSUES + CRITICAL + HIGH))
+              fi
+            fi
+          done
+
+          if [ "$APPS" -gt 0 ]; then
+            GLOBAL_SCORE=$((TOTAL_SCORE / APPS))
+          else
+            GLOBAL_SCORE=100
+          fi
+
+          if [ "$GLOBAL_SCORE" -lt 0 ]; then
+            GLOBAL_SCORE=0
+          elif [ "$GLOBAL_SCORE" -gt 100 ]; then
+            GLOBAL_SCORE=100
+          fi
+
+          echo "GLOBAL_SCORE=$GLOBAL_SCORE" >> $GITHUB_ENV
+          echo "SECURITY_ISSUES=$ISSUES" >> $GITHUB_ENV
+          echo "Global Security Score: $GLOBAL_SCORE/100"
+          echo "Total Issues: $ISSUES"
+
+      - name: 🎨 Create Global Score Badge
+        run: |
+          set -euo pipefail
+          SCORE=${{ env.GLOBAL_SCORE }}
+          if [ "$SCORE" -ge 90 ]; then
+            COLOR="green"; STATUS="Excellent"
+          elif [ "$SCORE" -ge 80 ]; then
+            COLOR="yellowgreen"; STATUS="Good"
+          elif [ "$SCORE" -ge 70 ]; then
+            COLOR="yellow"; STATUS="Fair"
+          elif [ "$SCORE" -ge 60 ]; then
+            COLOR="orange"; STATUS="Poor"
+          else
+            COLOR="red"; STATUS="Critical"
+          fi
+          cat > global-security-score-badge.svg << EOF
+          <svg xmlns="http://www.w3.org/2000/svg" width="200" height="20">
+            <linearGradient id="b" x2="0" y2="100%">
+              <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+              <stop offset="1" stop-opacity=".1"/>
+            </linearGradient>
+            <clipPath id="a">
+              <rect width="200" height="20" rx="3"/>
+            </clipPath>
+            <g clip-path="url(#a)">
+              <path fill="#555" d="M0 0h150v20H0z"/>
+              <path fill="#${COLOR}" d="M150 0h50v20H150z"/>
+              <path fill="url(#b)" d="M0 0h200v20H0z"/>
+            </g>
+            <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
+              <text x="75" y="15" fill="#010101" fill-opacity=".3">Global Security</text>
+              <text x="75" y="14">Global Security</text>
+              <text x="175" y="15" fill="#010101" fill-opacity=".3">$SCORE/100</text>
+              <text x="175" y="14">$SCORE/100</text>
+            </g>
+          </svg>
+          EOF
+          echo "BADGE_COLOR=$COLOR" >> $GITHUB_ENV
+          echo "BADGE_STATUS=$STATUS" >> $GITHUB_ENV
+
+      - name: 📋 Generate Global Security Report
+        run: |
+          cat > GLOBAL_SECURITY_REPORT.md << 'EOF'
+          # 📊 Global Security Score Report
+
+          **Generated**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')
+
+          ## 🎯 Overall Score
+
+          ![Global Security Score Badge](global-security-score-badge.svg)
+
+          - **Score**: ${{ env.GLOBAL_SCORE }}/100
+          - **Status**: ${{ env.BADGE_STATUS }}
+          - **Issues Found**: ${{ env.SECURITY_ISSUES }}
+
+          ## 🔍 Scan Details
+
+          _See per-app security artifacts for details._
+
+          ---
+
+          **Last Updated**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')
+          EOF
+
+      - name: 📤 Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: global-security-score-report
+          path: |
+            global-security-score-badge.svg
+            GLOBAL_SECURITY_REPORT.md
+
+      - name: 📝 Create Summary
+        run: |
+          echo "## 📊 Global Security Score Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Score**: ${{ env.GLOBAL_SCORE }}/100 (${{ env.BADGE_STATUS }})" >> $GITHUB_STEP_SUMMARY
+          echo "**Issues**: ${{ env.SECURITY_ISSUES }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📈 Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- Badge: global-security-score-badge.svg" >> $GITHUB_STEP_SUMMARY
+          echo "- Report: GLOBAL_SECURITY_REPORT.md" >> $GITHUB_STEP_SUMMARY
+
+  # Notification finale
+  notify:
+    name: 🔔 Notify Security Score
+    needs: [check-deployment, publish-score]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📊 Final Status
+        run: |
+          if [ "${{ needs.check-deployment.outputs.deployment_success }}" = "true" ]; then
+            echo "✅ Security Score published after successful deployment"
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "## ✅ Security Score Published" >> $GITHUB_STEP_SUMMARY
+            echo "Score is maintenant disponible dans les artefacts" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⏭️ Skipped: Deployment health check did not pass"
+          fi

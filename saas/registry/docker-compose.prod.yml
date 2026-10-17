@@ -1,0 +1,66 @@
+services:
+  registry:
+    image: registry:2
+    container_name: registry
+    restart: unless-stopped
+    environment:
+      REGISTRY_HTTP_RELATIVEURLS: "true"
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    ports:
+      - "5000:5000"
+    volumes:
+      - registry-data-prod:/var/lib/registry
+      - ./config.yml:/etc/docker/registry/config.yml:ro
+      - ./.htpasswd:/etc/docker/registry/auth/htpasswd:ro
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.registry-prod.rule=Host(`registry.freijstack.com`)"
+      - "traefik.http.routers.registry-prod.entrypoints=websecure"
+      - "traefik.http.routers.registry-prod.tls=true"
+      - "traefik.http.routers.registry-prod.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.registry-prod.service=registry-prod"
+      - "traefik.http.services.registry-prod.loadbalancer.server.port=5000"
+      - "traefik.http.services.registry-prod.loadbalancer.server.scheme=http"
+
+  registry-ui:
+    image: joxit/docker-registry-ui:latest
+    container_name: registry-ui
+    restart: unless-stopped
+    environment:
+      SINGLE_REGISTRY: "true"
+      REGISTRY_TITLE: "Freijstack Private Registry (Production)"
+      NGINX_PROXY_PASS_URL: "http://registry:5000"
+      DELETE_IMAGES: "true"
+      SHOW_CONTENT_DIGEST: "true"
+      REGISTRY_SECURED: "true"
+      REGISTRY_USERNAME: "${REGISTRY_USER_PROD}"
+      REGISTRY_PASSWORD: "${REGISTRY_PASSWORD_PROD}"
+    depends_on:
+      - registry
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.registry-ui-prod.rule=Host(`registry-ui.freijstack.com`)"
+      - "traefik.http.routers.registry-ui-prod.entrypoints=websecure"
+      - "traefik.http.routers.registry-ui-prod.tls=true"
+      - "traefik.http.routers.registry-ui-prod.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.registry-ui-prod.service=registry-ui-prod"
+      - "traefik.http.services.registry-ui-prod.loadbalancer.server.port=80"
+      - "traefik.http.services.registry-ui-prod.loadbalancer.server.scheme=http"
+
+volumes:
+  registry-data-prod:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data-prod
+
+networks:
+  web:
+    external: true

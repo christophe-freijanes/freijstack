@@ -1,77 +1,107 @@
 # 🔒 Politique de Sécurité - FreijStack
-
-## Vue d'ensemble
-
+## 🛡️ Structure Sécurité Centralisée (2026)
 Ce document décrit les mesures de sécurité et les bonnes pratiques pour protéger le dépôt FreijStack.
+
+---
+
+### Vue d’ensemble
+
+Depuis janvier 2026, la sécurité CI/CD et les scripts sont harmonisés pour une maintenance optimale :
+
+## 1. Workflows CI/CD
+
+- **.github/workflows/security-ci.yml** : Unifie PR, production, nightly (SAST, secrets, Trivy, DAST, etc.)
+- **.github/workflows/00-core-security-ci.yml** : Orchestrateur réutilisable appelé par le workflow principal
+
+## 2. Scripts Sécurité
+
+- **scripts/security-check.sh** : Script unique pour toutes les vérifications pré-commit (fichiers sensibles, secrets, debug, etc.)
+- Les autres scripts sécurité ont été supprimés (voir historique Git si besoin)
+
+## 3. Documentation
+
+- **SECURITY.md** (ce fichier) : Point d’entrée unique pour toutes les pratiques et procédures sécurité
+
+## 4. Bonnes pratiques DevSecOps
+
+- Centralisation, automatisation, suppression des doublons
+- Score de sécurité GitHub surveillé en continu
+- Utilisation de Gitleaks, Trivy, CodeQL, Dependabot
+
+---
+
+> **Mise à jour 2026 :**
+> - Un seul workflow sécurité CI/CD pour tous les contextes
+> - Un seul script shell principal pour les checks sécurité
+> - Documentation centralisée ici
+> - Suppression des fichiers/scripts redondants
 
 ---
 
 ## 📋 Fichiers Sensibles à NE JAMAIS Commiter
 
-### 1. Variables d'Environnement
+### 1. Variables d’environnement
+
 - ❌ `.env` (production)
 - ❌ `.env.local`
 - ❌ `.env.*.local`
 - ✅ `.env.example` (template avec valeurs vides)
 
-**Raison**: Contient secrets, tokens, mots de passe
+**Raison :** contient des secrets (tokens, mots de passe, clés API).
 
-### 2. Clés Cryptographiques
+### 2. Clés, certificats & artefacts sensibles
+
 - ❌ `*.pem`, `*.key`, `*.crt`
 - ❌ Clés SSH privées (`id_rsa`, `id_ed25519`)
-- ❌ Certificats SSL/TLS
 
-**Raison**: Permettent l'accès aux systèmes
+**Raison :** permettent l’accès direct à des systèmes et environnements.
 
-### 3. Credentials & Authentification
-- ❌ `credentials.json` (Google, AWS)
-- ❌ API keys
-- ❌ OAuth tokens
-- ❌ Database passwords
+### 3. Identifiants, credentials & bases de données
 
-**Raison**: Donnent accès aux services externes
+- ❌ `credentials.json` (Google, AWS, etc.)
+- ❌ Mots de passe / DSN / chaînes de connexion en clair
+- ❌ Bases locales (`*.db`, `*.sqlite`)
 
-### 4. Données Privées
-- ❌ Bases de données (`*.db`, `*.sqlite`)
-- ❌ Backups sensibles
-- ❌ Fichiers logs contenant secrets
+**Raison :** exfiltration de données et compromission de comptes/ressources.
 
----
+### ✅ Bonnes pratiques
 
-## ✅ Bonnes Pratiques
-
-### 1. Utiliser `.env.example`
 ```bash
-# ✅ BON
 cp .env.example .env
-# Remplir les valeurs réelles seulement localement
+```
 
-# ❌ MAUVAIS
+**À ne pas faire :**
+
+```bash
+# Ne jamais ajouter un fichier .env réel au dépôt
 git add .env
 ```
 
-### 2. Gérer les Secrets Correctement
+**Pour le développement local :**
+- Utiliser `.env.local` (ignoré par Git) ou l’équivalent.
+- Préférer un gestionnaire de secrets pour les environnements partagés (GitHub Secrets, SSM Parameter Store, Vault, etc.).
 
-**Pour le développement local**:
-```bash
-# Créer un fichier .env non-tracké
-echo "JWT_SECRET=votre-secret-ici" >> .env
-echo ".env" >> .gitignore
-```
+---
 
-**Pour la production** (GitHub Actions):
-- Utiliser **GitHub Secrets** (Settings → Secrets)
-- Accès via `${{ secrets.MA_CLE }}`
+## 🏆 Security Score & Tableau de bord GitHub
 
-**Pour le VPS**:
-- Créer les fichiers `.env` **directement sur le VPS**
-- Ne jamais les pousser via Git
+Le dépôt utilise le **Security Score** GitHub, visible dans l’onglet "Security" du repository. Ce score agrège :
+- Détection de secrets (Gitleaks)
+- Vulnérabilités de dépendances (Dependabot)
+- Analyse de code (CodeQL)
+- Scans d’images (Trivy)
+- Bonnes pratiques de configuration
+
+**Objectif :** Maintenir un score de sécurité le plus élevé possible (idéalement 100 %).
+
+### Bonnes pratiques :
+
+- Corriger rapidement toutes les alertes de sécurité GitHub
+- Activer toutes les protections proposées (branch protection, secret scanning, etc.)
 
 ### 3. Clés SSH pour GitHub Actions
-```bash
-# Générer une clé SSH dédiée
-ssh-keygen -t ed25519 -f ~/.ssh/github_actions -N ""
 
+```bash
 # Copier la clé **PRIVÉE** dans GitHub Secrets
 cat ~/.ssh/github_actions
 
@@ -80,6 +110,7 @@ cat ~/.ssh/github_actions.pub >> ~/.ssh/authorized_keys
 ```
 
 ### 4. Audit des Fichiers Trackés
+
 ```bash
 # Vérifier qu'aucun .env n'est tracké
 git ls-files | grep -E '\.env|\.key|\.pem'
@@ -92,17 +123,16 @@ gitleaks detect --verbose
 
 ## 🔍 Gitleaks - Prévention Automatique
 
-Le projet inclut **Gitleaks** dans la CI/CD pour détecter les secrets accidentels.
-
 ### Configuration: `.github/workflows/main.yml`
+
 ```yaml
 - name: Run Gitleaks
-  uses: gitleaks/gitleaks-action@v2
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ### Configuration locale:
+
 ```bash
 # Installer gitleaks
 brew install gitleaks  # ou curl/wget
@@ -115,18 +145,10 @@ gitleaks detect --source git --verbose
 ```
 
 ### Fichier d'ignore: `.gitleaksignore`
+
 ```
-# False positives (documentations, exemples)
 saas/securevault/README.md:example-key:42
 ```
-
----
-
-## 📝 Checklist de Sécurité
-
-Avant chaque commit:
-
-- [ ] ✅ Aucun `.env` non-example
 - [ ] ✅ Aucune clé SSH (`*.key`, `*.pem`)
 - [ ] ✅ Aucun `credentials.json`
 - [ ] ✅ Aucune base de données (`*.db`, `*.sqlite`)
@@ -139,20 +161,20 @@ Avant chaque commit:
 ## 🚨 Si un Secret a Été Commité
 
 ### 1. Action Immédiate
+
 ```bash
 # NE PAS pousser vers le serveur si possible
 git reset HEAD~1              # Annuler le commit
 git checkout -- .env          # Restaurer fichier local
 ```
 
-### 2. Si déjà poussé sur GitHub
-```bash
-# Rotation des secrets
-# 1. Générer une nouvelle clé/token
-# 2. Mettre à jour sur tous les systèmes (GitHub, VPS, etc.)
-# 3. Invalider l'ancienne clé
+## 2. Mettre à jour sur tous les systèmes (GitHub, VPS, etc.)
 
-# Nettoyer l'historique Git (dangereux!)
+## 3. Invalider l'ancienne clé
+
+## Nettoyer l'historique Git (dangereux!)
+
+```sh
 git filter-branch --tree-filter 'rm -f .env' HEAD
 git push --force-with-lease
 ```
@@ -175,10 +197,10 @@ VPS_HOST       # IP/domaine du VPS
 VPS_USER       # Utilisateur SSH
 VPS_SSH_KEY    # Clé SSH PRIVÉE
 JWT_SECRET     # Secret JWT
-DB_PASSWORD    # Mot de passe base de données
 ```
 
 ### Utiliser les Secrets
+
 ```yaml
 - name: Deploy
   env:
@@ -193,24 +215,23 @@ DB_PASSWORD    # Mot de passe base de données
 ## 🔑 Gestion des Clés SSH
 
 ### Générer une clé dédiée
+
 ```bash
 ssh-keygen -t ed25519 -C "github-actions@freijstack" -f ~/.ssh/gh-actions
 ```
 
 ### Format à mettre dans GitHub Secrets
+
 ```
 -----BEGIN OPENSSH PRIVATE KEY-----
-MIGfMA0GCSq...
-... (contenu complet)
+[EXAMPLE — DO NOT USE REAL KEYS]
 -----END OPENSSH PRIVATE KEY-----
 ```
 
-### Permissions sur le VPS
-```bash
-# Ajouter la clé publique
-cat ~/.ssh/gh-actions.pub >> ~/.ssh/authorized_keys
+### Ajouter la clé publique et permissions
 
-# Permissions correctes
+```bash
+cat ~/.ssh/gh-actions.pub >> ~/.ssh/authorized_keys
 chmod 700 ~/.ssh
 chmod 600 ~/.ssh/authorized_keys
 ```
@@ -220,22 +241,19 @@ chmod 600 ~/.ssh/authorized_keys
 ## 📊 Scanning Continu
 
 ### CodeQL (GitHub-native)
+
 Détecte les failles de sécurité dans le code:
 - Injection SQL
 - XSS
 - Authentification faible
 
 ### Trivy (Images Docker)
+
 Scanne les images Docker pour vulnérabilités:
+
 ```bash
 trivy image nom-image:tag
 ```
-
-### Dependabot
-Alertes automatiques pour dépendances vulnérables:
-- `package.json` (npm)
-- `package-lock.json`
-- `Dockerfile`
 
 ---
 
@@ -281,6 +299,13 @@ Alertes automatiques pour dépendances vulnérables:
 
 ---
 
+## Cryptography Notice
+This project includes cryptographic functionality.
+Users are responsible for compliance with
+local regulations regarding encryption software.
+
+---
+
 **Créé par**: Christophe FREIJANES  
-**Date**: Décembre 2025  
+**Date**: Janvier 2026  
 **Statut**: 🔒 Active - Mises à jour régulières

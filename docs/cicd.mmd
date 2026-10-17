@@ -1,0 +1,208 @@
+%%{init: {'theme':'dark', 'themeVariables': { 'fontSize':'14px'}}}%%
+graph TB
+    %% Sources
+    DEV["👨‍💻 Développeur"]
+    GITHUB["📦 GitHub Repository"]
+    
+    %% Branches
+    DEVELOP["🌿 Branch: develop<br/>(staging)"]
+    MASTER["🌿 Branch: master<br/>(production)"]
+    PR["🔀 Pull Request"]
+    
+    %% CI/CD Pipeline - Full DevSecOps
+    FULL_DEPLOY["🔒 full-deploy.yml<br/>DevSecOps Orchestrator<br/>───<br/>1️⃣ 🛡️ Security (Gitleaks+Trivy)<br/>2️⃣ 🧹 Lint (Auto-detect)<br/>3️⃣ 🧪 Test & Build<br/>4️⃣ 🚀 Deploy Queue<br/>5️⃣ 📊 Summary"]
+    
+    %% App Deployments (unified)
+    APP_DEPLOY["📄 Portfolio<br/>🔐 SecureVault<br/>🐳 Registry<br/>───<br/>uses: full-deploy.yml"]
+    
+    %% Infrastructure
+    INFRA_DEPLOY["🏗️ Infrastructure Deploy<br/>Traefik + n8n<br/>(independent)"]
+    
+    %% Deploy Queue
+    DEPLOY_QUEUE["🎯 deploy-queue.yml<br/>Orchestrator SSH<br/>───<br/>⏱️ Staggered Start (5-20s)<br/>🔐 SSH Setup (5 retry)<br/>🐳 Docker Deploy<br/>🗄️ Migrations (optional)"]
+    
+    %% Post-Deploy Health
+    HEALTHCHECK_POST["🏥 Health Check Post-Deploy<br/>Smart Cooldown (5-90s)<br/>🏥 Warm-up Detection (502/503/000)<br/>Master only"]
+    
+    %% Security Score
+    SECURITY_SCORE["📊 Publish Security Score<br/>🔍 Gitleaks + Trivy<br/>🎨 Badge + Report<br/>After successful health check"]
+    
+    %% Continuous Monitoring
+    HEALTHCHECK_PROD["🏥 Health Check Prod<br/>Every 30min • v1.2<br/>10s connect, 30s max"]
+    HEALTHCHECK_DEV["🏥 Health Check Dev<br/>Every hour • v1.2<br/>10s connect, 30s max"]
+    
+    %% Releases
+    RELEASE_PR["📝 Release Changelog PR<br/>semantic-release --dry-run"]
+    RELEASE_AUTO["🚀 Release Automation<br/>semantic-release + tag"]
+    
+    %% Maintenance
+    BACKUP["💾 Backup to Cloud<br/>PostgreSQL + Config<br/>(daily)"]
+    ROTATE["🔄 Rotate Secrets<br/>JWT + DB Passwords<br/>(monthly)"]
+    
+    %% Environments
+    VPS_STAGING["🖥️ VPS Staging<br/>Docker Compose"]
+    VPS_PROD["🖥️ VPS Production<br/>Docker Compose"]
+    
+    %% Cloud
+    S3["☁️ AWS S3<br/>Backup Storage"]
+    AZURE["☁️ Azure Blob<br/>Backup Storage"]
+    GITHUB_PAGES["📄 GitHub Pages<br/>Security Badge"]
+    
+    %% Notifications
+    DISCORD["📧 Discord Webhook<br/>Notifications"]
+    
+    %% Developer Flow
+    DEV -->|git push develop| DEVELOP
+    DEV -->|git push master| MASTER
+    DEV -->|create PR| PR
+    
+    DEVELOP --> GITHUB
+    MASTER --> GITHUB
+    PR --> GITHUB
+    
+    %% Full DevSecOps Pipeline for Apps
+    DEVELOP -->|Portfolio/SecureVault/Registry| FULL_DEPLOY
+    MASTER -->|Portfolio/SecureVault/Registry| FULL_DEPLOY
+    PR -->|App changes| FULL_DEPLOY
+    
+    FULL_DEPLOY -->|All gates ✅| DEPLOY_QUEUE
+    DEPLOY_QUEUE -->|SSH + Queue| VPS_STAGING
+    DEPLOY_QUEUE -->|SSH + Queue| VPS_PROD
+    
+    %% Post-Deploy Health Check (master only)
+    VPS_PROD -->|After deploy| HEALTHCHECK_POST
+    HEALTHCHECK_POST -->|✅ Success| SECURITY_SCORE
+    
+    %% Continuous Monitoring (independent cron)
+    VPS_PROD -.->|every 30min| HEALTHCHECK_PROD
+    VPS_STAGING -.->|every hour| HEALTHCHECK_DEV
+    
+    HEALTHCHECK_PROD -->|if alert| DISCORD
+    HEALTHCHECK_DEV -->|if alert| DISCORD
+    
+    %% Infrastructure (independent)
+    DEVELOP -->|base-infra changes| INFRA_DEPLOY
+    MASTER -->|base-infra changes| INFRA_DEPLOY
+    INFRA_DEPLOY -->|Traefik/n8n| VPS_STAGING
+    INFRA_DEPLOY -->|Traefik/n8n| VPS_PROD
+    
+    %% Release Flow
+    MASTER -->|push trigger| RELEASE_PR
+    RELEASE_PR -->|create PR| GITHUB
+    GITHUB -->|merge PR| RELEASE_AUTO
+    RELEASE_AUTO -->|tag + release| GITHUB
+    
+    %% Maintenance (independent cron)
+    GITHUB -.->|daily 03:00 UTC| BACKUP
+    GITHUB -.->|monthly 1st| ROTATE
+    
+    BACKUP -->|compress + encrypt| S3
+    BACKUP -->|compress + encrypt| AZURE
+    BACKUP -->|notify| DISCORD
+    
+    ROTATE -->|new secrets| VPS_PROD
+    ROTATE -->|new secrets| VPS_STAGING
+    ROTATE -->|notify| DISCORD
+    
+    %% Security Score Publishing
+    SECURITY_SCORE -->|Badge + Report| GITHUB_PAGES
+    SECURITY_SCORE -->|notify| DISCORD
+    DEV -->|git push master| MASTER
+    DEV -->|create PR| PR
+    
+    DEVELOP --> GITHUB
+    MASTER --> GITHUB
+    PR --> GITHUB
+    
+    %% PR Checks
+    PR -->|on open/edit| PR_CHECK
+    PR -->|trigger| CODEQL
+    PR_CHECK -->|status check| GITHUB
+    CODEQL -->|results| GITHUB
+    
+    %% Security Scheduled
+    GITHUB -.->|cron: daily 04:00| SECURITY
+    GITHUB -.->|cron: weekly| CODEQL
+    SECURITY -->|publish| SECURITY_SCORE
+    SECURITY_SCORE -->|upload| PAGES
+    SECURITY -->|if leaks found| DISCORD
+    
+    %% Deploy from develop
+    DEVELOP -->|push trigger| INFRA_DEPLOY
+    DEVELOP -->|push trigger| PORTFOLIO_DEPLOY
+    DEVELOP -->|push trigger| VAULT_DEPLOY
+    DEVELOP -->|push trigger| HARBOR_DEPLOY
+    
+    INFRA_DEPLOY -->|docker-compose up| VPS_STAGING
+    PORTFOLIO_DEPLOY -->|rsync + nginx reload| VPS_STAGING
+    VAULT_DEPLOY -->|docker-compose + migrations| VPS_STAGING
+    HARBOR_DEPLOY -->|docker-compose| VPS_STAGING
+    
+    %% Deploy from master
+    MASTER -->|push trigger| INFRA_DEPLOY
+    MASTER -->|push trigger| PORTFOLIO_DEPLOY
+    MASTER -->|push trigger| VAULT_DEPLOY
+    MASTER -->|push trigger| HARBOR_DEPLOY
+    
+    INFRA_DEPLOY -->|docker-compose up| VPS_PROD
+    PORTFOLIO_DEPLOY -->|rsync + nginx reload| VPS_PROD
+    VAULT_DEPLOY -->|docker-compose + migrations| VPS_PROD
+    HARBOR_DEPLOY -->|docker-compose| VPS_PROD
+    
+    %% Post-Deploy Checks (master only)
+    PORTFOLIO_DEPLOY -->|workflow_run: success + master| HEALTHCHECK_POST
+    VAULT_DEPLOY -->|workflow_run: success + master| HEALTHCHECK_POST
+    HARBOR_DEPLOY -->|workflow_run: success + master| HEALTHCHECK_POST
+    INFRA_DEPLOY -->|workflow_run: success + master| HEALTHCHECK_POST
+    
+    %% Continuous Monitoring
+    VPS_PROD -.->|cron: */30 min| HEALTHCHECK_PROD
+    VPS_STAGING -.->|cron: hourly| HEALTHCHECK_DEV
+    
+    HEALTHCHECK_PROD -->|if status >= 3| DISCORD
+    HEALTHCHECK_DEV -->|if status >= 3| DISCORD
+    
+    HEALTHCHECK_PROD -->|auto-restart if 3x fail| VPS_PROD
+    HEALTHCHECK_DEV -->|auto-restart if 3x fail| VPS_STAGING
+    
+    %% Release Flow
+    MASTER -->|push trigger| RELEASE_PR
+    RELEASE_PR -->|create PR| GITHUB
+    GITHUB -->|merge PR| RELEASE_AUTO
+    RELEASE_AUTO -->|create tag| GITHUB
+    RELEASE_AUTO -->|publish release| GITHUB
+    
+    %% Maintenance Scheduled
+    GITHUB -.->|cron: daily 03:00| BACKUP
+    GITHUB -.->|cron: monthly 1st| ROTATE
+    
+    BACKUP -->|compress + encrypt| S3
+    BACKUP -->|compress + encrypt| AZURE
+    BACKUP -->|notify| DISCORD
+    
+    ROTATE -->|new secrets| VPS_PROD
+    ROTATE -->|new secrets| VPS_STAGING
+    ROTATE -->|summary email| DISCORD
+    
+    %% Styling
+    classDef sourceNode fill:#1a1a2e,stroke:#16213e,stroke-width:2px,color:#fff
+    classDef branchNode fill:#0f3460,stroke:#16213e,stroke-width:2px,color:#fff
+    classDef prNode fill:#16213e,stroke:#0f3460,stroke-width:2px,color:#fff
+    classDef secNode fill:#d32f2f,stroke:#9a0007,stroke-width:2px,color:#fff
+    classDef deployNode fill:#533483,stroke:#6c4f9e,stroke-width:2px,color:#fff
+    classDef healthNode fill:#f39c12,stroke:#c87f0a,stroke-width:2px,color:#fff
+    classDef envNode fill:#e94560,stroke:#a83244,stroke-width:3px,color:#fff
+    classDef cloudNode fill:#048ba8,stroke:#0a6e7f,stroke-width:2px,color:#fff
+    classDef releaseNode fill:#27ae60,stroke:#1e8449,stroke-width:2px,color:#fff
+    classDef notifyNode fill:#9b59b6,stroke:#6c3483,stroke-width:2px,color:#fff
+    
+    class DEV,GITHUB sourceNode
+    class DEVELOP,MASTER branchNode
+    class PR,PR_CHECK prNode
+    class CODEQL,SECURITY,SECURITY_SCORE secNode
+    class INFRA_DEPLOY,PORTFOLIO_DEPLOY,VAULT_DEPLOY,HARBOR_DEPLOY,BACKUP,ROTATE deployNode
+    class HEALTHCHECK_POST,HEALTHCHECK_PROD,HEALTHCHECK_DEV healthNode
+    class VPS_STAGING,VPS_PROD envNode
+    class S3,AZURE,PAGES cloudNode
+    class RELEASE_PR,RELEASE_AUTO releaseNode
+    class DISCORD notifyNode

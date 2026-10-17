@@ -1,0 +1,66 @@
+services:
+  registry:
+    image: registry:2
+    container_name: registry-staging
+    restart: unless-stopped
+    environment:
+      REGISTRY_HTTP_RELATIVEURLS: "true"
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    ports:
+      - "5001:5000"
+    volumes:
+      - registry-data-staging:/var/lib/registry
+      - ./config.yml:/etc/docker/registry/config.yml:ro
+      - ./.htpasswd:/etc/docker/registry/auth/htpasswd:ro
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.registry-staging.rule=Host(`registry-staging.freijstack.com`)"
+      - "traefik.http.routers.registry-staging.entrypoints=websecure"
+      - "traefik.http.routers.registry-staging.tls=true"
+      - "traefik.http.routers.registry-staging.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.registry-staging.service=registry-staging"
+      - "traefik.http.services.registry-staging.loadbalancer.server.port=5000"
+      - "traefik.http.services.registry-staging.loadbalancer.server.scheme=http"
+
+  registry-ui:
+    image: joxit/docker-registry-ui:latest
+    container_name: registry-ui-staging
+    restart: unless-stopped
+    environment:
+      SINGLE_REGISTRY: "true"
+      REGISTRY_TITLE: "Freijstack Private Registry (Staging)"
+      NGINX_PROXY_PASS_URL: "http://registry:5000"
+      DELETE_IMAGES: "true"
+      SHOW_CONTENT_DIGEST: "true"
+      REGISTRY_SECURED: "true"
+      REGISTRY_USERNAME: "${REGISTRY_USER_STAGING}"
+      REGISTRY_PASSWORD: "${REGISTRY_PASSWORD_STAGING}"
+    depends_on:
+      - registry
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.registry-ui-staging.rule=Host(`registry-ui-staging.freijstack.com`)"
+      - "traefik.http.routers.registry-ui-staging.entrypoints=websecure"
+      - "traefik.http.routers.registry-ui-staging.tls=true"
+      - "traefik.http.routers.registry-ui-staging.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.registry-ui-staging.service=registry-ui-staging"
+      - "traefik.http.services.registry-ui-staging.loadbalancer.server.port=80"
+      - "traefik.http.services.registry-ui-staging.loadbalancer.server.scheme=http"
+
+volumes:
+  registry-data-staging:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data-staging
+
+networks:
+  web:
+    external: true

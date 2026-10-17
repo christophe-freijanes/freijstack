@@ -1,0 +1,346 @@
+name: 🎯 Deploy Queue (Orchestrator)
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        description: 'Application name (portfolio, securevault, registry, etc.)'
+        required: true
+        type: string
+      environment:
+        description: 'Target environment (staging or production)'
+        required: true
+        type: string
+      deploy_dir:
+        description: 'VPS deployment directory'
+        required: true
+        type: string
+      project_path:
+        description: 'Project subdirectory (e.g., saas/portfolio)'
+        required: false
+        type: string
+        default: ''
+      docker_compose_file:
+        description: 'Docker Compose file to use'
+        required: false
+        type: string
+        default: 'docker-compose.yml'
+      run_migrations:
+        description: 'Run database migrations after deploy (if image changed)'
+        required: false
+        type: boolean
+        default: false
+      migrate_service:
+        description: 'Compose service name to run migrations on'
+        required: false
+        type: string
+        default: 'backend'
+      healthcheck_url:
+        description: 'Public URL to wait for (e.g. https://vault.freijstack.com/api/healthz)'
+        required: false
+        type: string
+        default: ''
+      custom_script:
+        description: 'Custom deployment script (bash)'
+        required: false
+        type: string
+        default: ''
+      skip_security:
+        description: 'Compatibility flag (not used here)'
+        required: false
+        type: boolean
+        default: false
+      skip_lint:
+        description: 'Compatibility flag (not used here)'
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      VPS_SSH_KEY:
+        required: true
+      VPS_SSH_HOST:
+        required: true
+      VPS_SSH_USER:
+        required: true
+      REGISTRY_PASSWORD_STAGING:
+        required: false
+      REGISTRY_USER_STAGING:
+        required: false
+      REGISTRY_USER_PROD:
+        required: false
+      REGISTRY_PASSWORD_PROD:
+        required: false
+
+concurrency:
+  group: vps-ssh-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  deploy:
+    name: 🚀 Deploy ${{ inputs.app_name }} to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: ${{ inputs.environment }}
+
+    steps:
+      - name: ✅ Validate required registry secrets (production only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ inputs.environment }}" = "production" ]; then
+            if [ -z "${{ secrets.REGISTRY_USER_PROD }}" ] || [ -z "${{ secrets.REGISTRY_PASSWORD_PROD }}" ]; then
+              echo "❌ Missing required PROD registry secrets."
+              echo "   Provide REGISTRY_USER_PROD and REGISTRY_PASSWORD_PROD as repo secrets or as Environment secrets for 'production'."
+              exit 1
+            fi
+          fi
+
+      - name: ⏱️ Staggered Start (avoid SSH collisions)
+        run: |
+          set -euo pipefail
+          DELAY=$((5 + RANDOM % 16))
+          echo "⏳ Waiting ${DELAY}s"
+          sleep "$DELAY"
+
+      - name: 📥 Checkout code
+        uses: actions/checkout@v6
+
+      - name: 🔐 Setup SSH
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.VPS_SSH_HOST }}" >> ~/.ssh/known_hosts || true
+          echo "SSH_OPTIONS=-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" >> "$GITHUB_ENV"
+
+      - name: 🚀 Deploy ${{ inputs.app_name }}
+        run: |
+          set -euo pipefail
+
+          SSH_TARGET="${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
+          BRANCH="${GITHUB_REF##*/}"
+
+          REMOTE_ENV="APP_NAME='${{ inputs.app_name }}' \
+          ENVIRONMENT='${{ inputs.environment }}' \
+          DEPLOY_DIR='${{ inputs.deploy_dir }}' \
+          PROJECT_PATH='${{ inputs.project_path }}' \
+          COMPOSE_FILE='${{ inputs.docker_compose_file }}' \
+          GH_REPO='${{ github.repository }}' \
+          GH_BRANCH='${BRANCH}' \
+          GH_SHA='${{ github.sha }}' \
+          RUN_MIGRATIONS='${{ inputs.run_migrations }}' \
+          MIGRATE_SERVICE='${{ inputs.migrate_service }}' \
+          HEALTHCHECK_URL='${{ inputs.healthcheck_url }}' \
+          REGISTRY_USER_STAGING='${{ secrets.REGISTRY_USER_STAGING }}' \
+          REGISTRY_PASSWORD_STAGING='${{ secrets.REGISTRY_PASSWORD_STAGING }}' \
+          REGISTRY_USER_PROD='${{ secrets.REGISTRY_USER_PROD }}' \
+          REGISTRY_PASSWORD_PROD='${{ secrets.REGISTRY_PASSWORD_PROD }}'"
+
+          ssh $SSH_OPTIONS -i ~/.ssh/deploy_key "$SSH_TARGET" "$REMOTE_ENV" bash <<'DEPLOY_SCRIPT'
+          set -euo pipefail
+          export DOCKER_CLI_HINTS=false
+
+          : "${APP_NAME:?}"
+          : "${ENVIRONMENT:?}"
+          : "${DEPLOY_DIR:?}"
+          : "${COMPOSE_FILE:?}"
+          : "${GH_REPO:?}"
+          : "${GH_BRANCH:?}"
+          : "${GH_SHA:?}"
+          : "${RUN_MIGRATIONS:?}"
+          : "${MIGRATE_SERVICE:?}"
+          : "${REGISTRY_HOST:?}"
+
+          # 🔐 Only require PROD registry credentials when deploying production
+          if [ "$ENVIRONMENT" = "production" ]; then
+            : "${REGISTRY_USER_PROD:?}"
+            : "${REGISTRY_PASSWORD_PROD:?}"
+          fi
+
+          if ! docker compose version >/dev/null 2>&1; then
+            echo "❌ Docker Compose not available on VPS"
+            exit 1
+          fi
+
+          echo "🔒 Volume protection: enabled (never run docker compose down -v)"
+          echo "🚀 Deploying ${APP_NAME} → ${ENVIRONMENT}"
+          echo "📁 DEPLOY_DIR=${DEPLOY_DIR}"
+          echo "📄 COMPOSE_FILE=${COMPOSE_FILE}"
+          echo "🔀 BRANCH=${GH_BRANCH}"
+          echo "🧾 SHA=${GH_SHA}"
+          echo "🧪 healthcheck_url=${HEALTHCHECK_URL:-<none>}"
+          echo "🗄️ migrations=${RUN_MIGRATIONS} (service=${MIGRATE_SERVICE})"
+
+          mkdir -p "$DEPLOY_DIR"
+          cd "$DEPLOY_DIR"
+
+          if [ -d ".git" ]; then
+            git fetch origin --tags
+            git reset --hard "origin/${GH_BRANCH}"
+            git clean -fd
+          else
+            git clone -b "${GH_BRANCH}" "https://github.com/${GH_REPO}.git" .
+          fi
+
+          if [ -n "${PROJECT_PATH:-}" ]; then
+            cd "$PROJECT_PATH"
+          fi
+
+          if [ ! -f "$COMPOSE_FILE" ]; then
+            echo "❌ Compose file not found: $COMPOSE_FILE (cwd=$(pwd))"
+            ls -lah
+            exit 1
+          fi
+
+          # ==========================================================
+          # Registry: htpasswd safe generation (if app is registry)
+          # ==========================================================
+          if [ "$APP_NAME" = "registry" ]; then
+            if [ "$ENVIRONMENT" = "production" ]; then
+              USER="${REGISTRY_USER_PROD:-}"
+              PASS="${REGISTRY_PASSWORD_PROD:-}"
+            else
+              USER="${REGISTRY_USER_STAGING:-}"
+              PASS="${REGISTRY_PASSWORD_STAGING:-}"
+            fi
+
+            if [ -z "${USER}" ] || [ -z "${PASS}" ]; then
+              echo "❌ Registry deploy requires registry credentials for ${ENVIRONMENT}"
+              exit 1
+            fi
+
+            echo "🔐 Generating .htpasswd for registry (${ENVIRONMENT})"
+            docker run --rm httpd:2 htpasswd -Bbn "$USER" "$PASS" > .htpasswd
+            ls -lah .htpasswd
+          fi
+
+          # ==========================================================
+          # Login to registry for pulling private images (non-registry apps)
+          # IMPORTANT: if you removed registry-staging, staging also uses prod registry.
+          # ==========================================================
+          if [ "$APP_NAME" != "registry" ]; then
+            LOGIN_USER="${REGISTRY_USER_PROD:-}"
+            LOGIN_PASS="${REGISTRY_PASSWORD_PROD:-}"
+
+            if [ -n "${LOGIN_USER}" ] && [ -n "${LOGIN_PASS}" ]; then
+              echo "🔐 docker login registry.freijstack.com (env=${ENVIRONMENT})"
+              echo "${LOGIN_PASS}" | docker login registry.freijstack.com -u "${LOGIN_USER}" --password-stdin
+            else
+              echo "⚠️ Registry credentials missing; compose pull may fail if images are private."
+            fi
+          fi
+
+          # ==========================================================
+          # Detect backend image change (for conditional migrations)
+          # Works only if migrate_service exists AND is an image-based service (not build).
+          # ==========================================================
+          NEED_MIGRATE=0
+          OLD_IMAGE_ID=""
+          NEW_IMAGE_ID=""
+
+          if [ "${RUN_MIGRATIONS}" = "true" ] || [ "${RUN_MIGRATIONS}" = "True" ]; then
+            echo "🔎 Checking whether ${MIGRATE_SERVICE} image changed..."
+
+            # Get current running container id for service (if exists)
+            CUR_CID="$(docker compose -f "$COMPOSE_FILE" ps -q "${MIGRATE_SERVICE}" 2>/dev/null || true)"
+            if [ -n "$CUR_CID" ]; then
+              OLD_IMAGE_ID="$(docker inspect -f '{{.Image}}' "$CUR_CID" 2>/dev/null || true)"
+              echo "   current container image id: ${OLD_IMAGE_ID:-<unknown>}"
+            else
+              echo "   no existing container for ${MIGRATE_SERVICE} (first deploy?)"
+            fi
+          fi
+
+          # ==========================================================
+          # Deploy logic (never delete volumes)
+          # ==========================================================
+          if [ "$ENVIRONMENT" = "production" ]; then
+            echo "🟢 Production deploy: pull + up (no down)"
+            docker compose -f "$COMPOSE_FILE" pull
+            docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+          else
+            echo "🟡 Staging deploy: down (no -v) + pull + up"
+            docker compose -f "$COMPOSE_FILE" down --remove-orphans || true
+            docker compose -f "$COMPOSE_FILE" pull
+            docker compose -f "$COMPOSE_FILE" up -d --build --remove-orphans
+          fi
+
+          # ==========================================================
+          # Determine new image id after up
+          # ==========================================================
+          if [ "${RUN_MIGRATIONS}" = "true" ] || [ "${RUN_MIGRATIONS}" = "True" ]; then
+            NEW_CID="$(docker compose -f "$COMPOSE_FILE" ps -q "${MIGRATE_SERVICE}" 2>/dev/null || true)"
+            if [ -n "$NEW_CID" ]; then
+              NEW_IMAGE_ID="$(docker inspect -f '{{.Image}}' "$NEW_CID" 2>/dev/null || true)"
+              echo "   new container image id: ${NEW_IMAGE_ID:-<unknown>}"
+
+              if [ -z "$OLD_IMAGE_ID" ]; then
+                NEED_MIGRATE=1
+              elif [ -n "$NEW_IMAGE_ID" ] && [ "$NEW_IMAGE_ID" != "$OLD_IMAGE_ID" ]; then
+                NEED_MIGRATE=1
+              fi
+            else
+              echo "⚠️ Could not find container for migrate_service=${MIGRATE_SERVICE}"
+            fi
+          fi
+
+          # ==========================================================
+          # Health wait (public URL if provided)
+          # ==========================================================
+          if [ -n "${HEALTHCHECK_URL:-}" ]; then
+            echo "⏳ Waiting for healthcheck_url to return 200..."
+            LAST_CODE=""
+            for i in {1..90}; do
+              LAST_CODE="$(curl -s -o /dev/null -w "%{http_code}" "${HEALTHCHECK_URL}" || true)"
+              echo "  attempt ${i}/90 -> HTTP ${LAST_CODE}"
+              if [ "$LAST_CODE" = "200" ]; then
+                echo "✅ Health URL OK"
+                break
+              fi
+              sleep 1
+            done
+
+            if [ "$LAST_CODE" != "200" ]; then
+              echo "❌ Health URL not ready: ${HEALTHCHECK_URL} (last=${LAST_CODE})"
+              echo "📊 Compose status:"
+              docker compose -f "$COMPOSE_FILE" ps || true
+              echo "📜 Last logs (migrate service):"
+              docker compose -f "$COMPOSE_FILE" logs --tail=80 "${MIGRATE_SERVICE}" || true
+              exit 1
+            fi
+          fi
+
+          # ==========================================================
+          # Run migrations only if image changed
+          # ==========================================================
+          if [ "${RUN_MIGRATIONS}" = "true" ] || [ "${RUN_MIGRATIONS}" = "True" ]; then
+            if [ "$NEED_MIGRATE" -eq 1 ]; then
+              echo "🗄️ Running migrations (image changed) on service=${MIGRATE_SERVICE}..."
+              docker compose -f "$COMPOSE_FILE" exec -T "${MIGRATE_SERVICE}" npm run migrate
+              echo "✅ Migrations completed"
+            else
+              echo "⏭️ Skipping migrations (backend image unchanged)"
+            fi
+          fi
+
+          echo "📊 Containers:"
+          docker compose -f "$COMPOSE_FILE" ps
+
+          echo "📦 Volumes:"
+          docker volume ls
+          DEPLOY_SCRIPT
+
+      - name: ✅ Deployment Summary
+        if: success()
+        run: |
+          set -euo pipefail
+          echo "## ✅ Deployment Successful" >> "$GITHUB_STEP_SUMMARY"
+          echo "- App: ${{ inputs.app_name }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Env: ${{ inputs.environment }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Commit: ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"

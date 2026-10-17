@@ -1,0 +1,102 @@
+name: 🤖 PR Title Automation
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  auto-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Auto-generate PR title
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            // Si le titre commence déjà par un type conventionnel, ne rien faire
+            const conventionalTypes = /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([^)]+\))?!?: /;
+            if (conventionalTypes.test(pr.title)) {
+              console.log('✅ Le titre suit déjà Conventional Commits');
+              return;
+            }
+
+            // Récupérer les fichiers modifiés
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            // Analyser les fichiers pour déterminer le type
+            const filePaths = files.map(f => f.filename);
+            let type = 'chore';
+            let scope = '';
+
+            // Déterminer le type basé sur les fichiers modifiés
+            if (filePaths.some(f => f.startsWith('docs/'))) {
+              type = 'docs';
+              scope = 'documentation';
+            } else if (filePaths.some(f => f.startsWith('.github/workflows/'))) {
+              type = 'ci';
+              scope = 'github-actions';
+            } else if (filePaths.some(f => f.includes('Dockerfile') || f.includes('docker-compose'))) {
+              type = 'build';
+              scope = 'docker';
+            } else if (filePaths.some(f => f.startsWith('saas/portfolio/'))) {
+              type = 'feat';
+              scope = 'portfolio';
+            } else if (filePaths.some(f => f.startsWith('saas/'))) {
+              type = 'feat';
+              scope = 'saas';
+            } else if (filePaths.some(f => f.endsWith('.md'))) {
+              type = 'docs';
+            } else if (filePaths.some(f => f.endsWith('.css'))) {
+              type = 'style';
+              scope = 'ui';
+            } else if (filePaths.some(f => f.endsWith('.js'))) {
+              type = 'feat';
+            }
+
+            // Créer le nouveau titre
+            const scopePart = scope ? `(${scope})` : '';
+            const newTitle = `${type}${scopePart}: ${pr.title}`;
+
+            // Mettre à jour le titre de la PR
+            await github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              title: newTitle
+            });
+
+            // Ajouter un commentaire explicatif
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `🤖 **Titre de PR automatisé**\n\n` +
+                    `Le titre a été formaté selon [Conventional Commits](https://www.conventionalcommits.org/):\n\n` +
+                    `**Ancien titre**: \`${pr.title}\`\n` +
+                    `**Nouveau titre**: \`${newTitle}\`\n\n` +
+                    `Types détectés:\n` +
+                    `- **Type**: \`${type}\`\n` +
+                    `${scope ? `- **Scope**: \`${scope}\`\n` : ''}` +
+                    `- **Fichiers analysés**: ${filePaths.length}\n\n` +
+                    `Vous pouvez modifier le titre manuellement si nécessaire.`
+            });
+
+            console.log(`✅ Titre mis à jour: ${newTitle}`);

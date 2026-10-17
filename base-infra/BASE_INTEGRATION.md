@@ -19,19 +19,22 @@ Ce document explique comment l'infrastructure de base (Traefik) s'intègre avec 
 │  - Port 80 (HTTP → HTTPS redirect)              │
 │  - Port 443 (HTTPS)                             │
 │  - Let's Encrypt ACME (TLS certificates)        │
-└─────┬───────────────────┬────────────────┬──────┘
-      │                   │                │
-      ▼                   ▼                ▼
-┌─────────────┐  ┌────────────────┐  ┌─────────────┐
-│ Portfolio   │  │ SecureVault    │  │    n8n      │
-│ (nginx)     │  │ (backend+front)│  │ (workflows) │
-│             │  │                │  │             │
-│ saas/       │  │ saas/          │  │ saas/n8n/   │
-│ portfolio/  │  │ securevault/   │  │             │
-│ docker-     │  │ securevault/   │  │ docker-     │
-│ compose.yml │  │ docker-        │  │ compose.yml │
-│             │  │ compose.yml    │  │             │
-└─────────────┘  └────────────────┘  └─────────────┘
+│  - Portfolio (nginx volumes /srv/www)           │
+│  - n8n (automation platform)                    │
+└──────────────────┬──────────────────────────────┘
+                   │
+                   ▼
+           ┌────────────────┐
+           │ SecureVault    │
+           │ (backend+front)│
+           │                │
+           │ saas/          │
+           │ securevault/   │
+           │ docker-        │
+           │ compose.yml    │
+           │ (.env.prod/    │
+           │  .env.staging) │
+           └────────────────┘
 ```
 
 ---
@@ -57,10 +60,10 @@ docker network inspect web
 
 | Service | Compose File | Network | Traefik Labels |
 |---------|-------------|---------|----------------|
-| **Traefik** | base-infra/ | web (attaché) | - |
-| **Portfolio** | saas/portfolio/ | web (external) | ✅ |
-| **SecureVault** | saas/securevault/ | web (external) | ✅ |
-| **n8n** | saas/n8n/ | web (external) | ✅ |
+| **Traefik** | base-infra/docker-compose.yml | web (interne) | ✅ Dashboard |
+| **Portfolio** | base-infra/docker-compose.yml | web (interne) | ✅ |
+| **n8n** | base-infra/docker-compose.yml | web (interne) | ✅ |
+| **SecureVault** | saas/securevault/docker-compose.yml | web (external) | ✅ |
 
 ---
 
@@ -80,37 +83,29 @@ docker-compose ps
 curl http://localhost:8080/ping
 ```
 
-### 2️⃣ Applications (ordre flexible)
+### 2️⃣ Applications SaaS
 
-Une fois Traefik actif, démarrer les applications :
-
-#### Portfolio
-
-```bash
-cd saas/portfolio
-cp .env.example .env
-nano .env
-docker-compose up -d
-```
+Le portfolio et n8n sont déjà inclus dans base-infra. Il ne reste qu'à déployer SecureVault :
 
 #### SecureVault
 
 ```bash
 cd saas/securevault
-cp .env.example .env
-nano .env
-docker-compose up -d
+
+# Pour production
+cp .env.production .env
+nano .env  # Ajouter les secrets (JWT_SECRET, ENCRYPTION_KEY, etc.)
+docker compose up -d
+./init-db.sh
+
+# Pour staging
+cp .env.staging .env
+nano .env  # Ajouter les secrets staging
+docker compose up -d
 ./init-db.sh
 ```
 
-#### n8n
-
-```bash
-cd saas/n8n
-cp .env.example .env
-nano .env
-docker-compose up -d
-```
+**Note**: Un seul `docker-compose.yml` pour les deux environnements. La différence est dans le fichier `.env` utilisé.
 
 ---
 
@@ -148,9 +143,11 @@ Tous les sous-domaines pointent vers **la même IP VPS** :
 ```
 portfolio.freijstack.com        → VPS_IP (A record)
 portfolio-staging.freijstack.com → VPS_IP (A record)
+automation.freijstack.com       → VPS_IP (A record)
 vault.freijstack.com            → VPS_IP (A record)
 vault-api.freijstack.com        → VPS_IP (A record)
-n8n.freijstack.com              → VPS_IP (A record)
+vault-staging.freijstack.com    → VPS_IP (A record)
+vault-api-staging.freijstack.com → VPS_IP (A record)
 ```
 
 ### Routage Traefik
@@ -159,11 +156,13 @@ Traefik route basé sur le **hostname** :
 
 | URL | Application | Port Interne | Compose File |
 |-----|-------------|--------------|--------------|
-| `portfolio.freijstack.com` | Portfolio (prod) | 80 | saas/portfolio/ |
-| `portfolio-staging.freijstack.com` | Portfolio (staging) | 80 | saas/portfolio/ |
+| `portfolio.freijstack.com` | Portfolio (prod) | 80 | base-infra/ |
+| `portfolio-staging.freijstack.com` | Portfolio (staging) | 80 | base-infra/ |
+| `automation.freijstack.com` | n8n | 5678 | base-infra/ |
 | `vault.freijstack.com` | SecureVault Frontend | 80 | saas/securevault/ |
 | `vault-api.freijstack.com` | SecureVault Backend | 3001 | saas/securevault/ |
-| `n8n.freijstack.com` | n8n | 5678 | saas/n8n/ |
+| `vault-staging.freijstack.com` | SecureVault Frontend (staging) | 80 | saas/securevault/ |
+| `vault-api-staging.freijstack.com` | SecureVault Backend (staging) | 3001 | saas/securevault/ |
 
 ---
 
@@ -175,36 +174,47 @@ Traefik route basé sur le **hostname** :
 # Traefik (certificats SSL)
 docker volume create traefik_data
 
-# Portfolio (pas de volume, fichiers statiques)
-# Les fichiers sont dans /srv/www sur le VPS
-
-# SecureVault
-docker volume create securevault_postgres_data
-
-# n8n
+# n8n (workflows et configuration)
 docker volume create n8n_data
+
+# Portfolio (pas de volume Docker)
+# Fichiers statiques dans /srv/www/portfolio et /srv/www/portfolio-staging
+
+# SecureVault (base de données PostgreSQL)
+docker volume create securevault_postgres_data
+docker volume create securevault_staging_postgres_data  # Pour staging
 ```
 
 ### Backup des Volumes
 
 ```bash
-# Backup traefik_data (certificats)
+# Backup traefik_data (certificats SSL)
 docker run --rm \
   -v traefik_data:/data \
   -v $(pwd):/backup \
   alpine tar czf /backup/traefik-backup.tar.gz -C /data .
 
-# Backup n8n_data
+# Backup n8n_data (workflows)
 docker run --rm \
-  -v n8n_n8n_data:/data \
+  -v n8n_data:/data \
   -v $(pwd):/backup \
   alpine tar czf /backup/n8n-backup.tar.gz -C /data .
 
-# Backup securevault
+# Backup SecureVault PostgreSQL (production)
 docker run --rm \
   -v securevault_postgres_data:/data \
   -v $(pwd):/backup \
-  alpine tar czf /backup/securevault-db-backup.tar.gz -C /data .
+  alpine tar czf /backup/securevault-prod-db.tar.gz -C /data .
+
+# Backup SecureVault PostgreSQL (staging)
+docker run --rm \
+  -v securevault_staging_postgres_data:/data \
+  -v $(pwd):/backup \
+  alpine tar czf /backup/securevault-staging-db.tar.gz -C /data .
+
+# Backup Portfolio (fichiers statiques)
+tar czf portfolio-backup.tar.gz -C /srv/www/portfolio .
+tar czf portfolio-staging-backup.tar.gz -C /srv/www/portfolio-staging .
 ```
 
 ---
@@ -234,16 +244,24 @@ Chaque application a :
 ### Logs Centralisés
 
 ```bash
-# Logs de tous les services
+# Tous les containers actifs
 docker ps --format "table {{.Names}}\t{{.Status}}"
 
-# Logs Traefik
+# Logs infrastructure de base (Traefik, portfolio, n8n)
+cd base-infra && docker compose logs -f
+
+# Logs Traefik uniquement
 docker logs -f traefik
 
-# Logs d'une app spécifique
-cd saas/portfolio && docker-compose logs -f
-cd saas/securevault && docker-compose logs -f
-cd saas/n8n && docker-compose logs -f
+# Logs n8n
+docker logs -f n8n
+
+# Logs Portfolio (nginx)
+docker logs -f portfolio
+docker logs -f portfolio-staging
+
+# Logs SecureVault
+cd saas/securevault && docker compose logs -f
 ```
 
 ### Health Checks
@@ -254,8 +272,8 @@ curl http://localhost:8080/ping
 
 # Applications (via Traefik)
 curl -I https://portfolio.freijstack.com
-curl -I https://vault-api.freijstack.com/health
-curl -I https://n8n.freijstack.com
+curl -I https://automation.freijstack.com
+curl https://vault-api.freijstack.com/health
 
 # Certificats SSL
 echo | openssl s_client -servername portfolio.freijstack.com \
@@ -304,36 +322,34 @@ docker volume create traefik_data
 docker volume create n8n_data
 docker volume create securevault_postgres_data
 
-# 4. Démarrer Traefik (BASE)
-cd base-infra
-docker-compose up -d
-docker-compose logs -f
+# 4. Préparer les répertoires Portfolio
+sudo mkdir -p /srv/www/portfolio
+sudo mkdir -p /srv/www/portfolio-staging
+# Copier les fichiers HTML/CSS/JS du portfolio dans /srv/www/portfolio
 
-# Attendre que Traefik soit prêt
+# 5. Démarrer l'infrastructure de base (Traefik + Portfolio + n8n)
+cd base-infra
+docker compose up -d
+docker compose logs -f
+
+# Attendre que Traefik soit prêt (15-30 secondes)
 # Vérifier: curl http://localhost:8080/ping
 
-# 5. Démarrer Portfolio
-cd ../portfolio
-cp .env.example .env
-nano .env  # Configurer variables
-docker-compose up -d
-
-# 6. Démarrer SecureVault
+# 6. Démarrer SecureVault (production)
 cd ../saas/securevault
-cp .env.example .env
-nano .env  # Configurer secrets
-docker-compose up -d
+cp .env.production .env
+nano .env  # Ajouter JWT_SECRET, ENCRYPTION_KEY, POSTGRES_PASSWORD
+docker compose up -d
 ./init-db.sh
 
-# 7. Démarrer n8n
-cd ../n8n
-cp .env.example .env
-nano .env  # Configurer clés
-docker-compose up -d
-
-# 8. Vérifier tout
+# 7. Vérifier tous les containers
 docker ps
 docker network inspect web
+
+# 8. Tester les URLs
+curl -I https://portfolio.freijstack.com
+curl -I https://automation.freijstack.com
+curl https://vault-api.freijstack.com/health
 ```
 
 ---
@@ -371,20 +387,25 @@ command:
 
 ### GitHub Actions
 
-Chaque service a son workflow :
+Workflows disponibles :
 
-- `infrastructure-deploy.yml` → Valide base-infra
-- `portfolio-deploy.yml` → Déploie portfolio
-- `securevault-deploy.yml` → Déploie SecureVault
-- `n8n-deploy.yml` → Valide n8n
+- `infrastructure-deploy.yml` → Déploie base-infra (Traefik + Portfolio + n8n)
+- `securevault-deploy.yml` → Déploie SecureVault (production/staging)
+- `rotate-secrets.yml` → Rotation automatique des secrets SecureVault
+
+**Architecture variabilisée** :
+- Variables centralisées au niveau workflow (chemins, domaines, branches)
+- Un seul docker-compose.yml par service avec templates .env
+- Environnements gérés via fichiers .env.production et .env.staging
 
 ### Déploiement Automatique
 
-Push sur `master` déclenche :
-1. Build & tests
-2. Security scans
+Push sur `master` ou `develop` déclenche :
+1. Validation & tests
+2. Security scans (Gitleaks)
 3. Deploy to VPS via SSH
-4. Health checks
+4. Health checks avec délai de 15s
+5. Verification Traefik routers
 
 ---
 
@@ -393,9 +414,11 @@ Push sur `master` déclenche :
 | Service | Documentation |
 |---------|---------------|
 | **base-infra** | [README.md](README.md) |
-| **Portfolio** | [../saas/portfolio/README.md](../saas/portfolio/README.md) |
+| **Portfolio** | [../portfolio/README.md](../portfolio/README.md) |
 | **SecureVault** | [../saas/securevault/README.md](../saas/securevault/README.md) |
-| **n8n** | [../saas/n8n/README.md](../saas/n8n/README.md) |
+| **Architecture** | [../docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) |
+| **Déploiement** | [../docs/DEPLOYMENT.md](../docs/DEPLOYMENT.md) |
+| **Troubleshooting** | [../docs/TROUBLESHOOTING.md](../docs/TROUBLESHOOTING.md) |
 
 ---
 

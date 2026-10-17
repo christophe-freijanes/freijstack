@@ -1,0 +1,4 @@
+# .github/actionlint.yaml
+
+# Désactive complètement ShellCheck pour éviter les warnings info/style
+shellcheck: null

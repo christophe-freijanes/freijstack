@@ -40,6 +40,10 @@ function App() {
   return (
     <Router>
       <div className="App">
+        {/* DEMO Watermark */}
+        <div className="demo-watermark">
+          <span className="demo-watermark-text">DEMO</span>
+        </div>
         <Routes>
           <Route 
             path="/login" 

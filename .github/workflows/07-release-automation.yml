@@ -1,0 +1,82 @@
+name: 🚀 Release Automation • Semantic Versioning
+
+on:
+  push:
+    branches: [master, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    name: 🏷️ Semantic Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout (full history)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false # important: on utilise RELEASE_TOKEN, pas le GITHUB_TOKEN auto
+
+      - name: 🟢 Setup Node.js (with npm cache)
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 📦 Install semantic-release tooling
+        run: |
+          set -euo pipefail
+          # Note: Même stack que release-changelog-pr.yml
+          npm install -D \
+            semantic-release \
+            @semantic-release/commit-analyzer \
+            @semantic-release/release-notes-generator \
+            @semantic-release/github \
+            @semantic-release/git \
+            @semantic-release/changelog \
+            conventional-changelog-conventionalcommits
+
+      - name: 🔧 Configure git identity (for @semantic-release/git)
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: 🔐 Configure git credentials with RELEASE_TOKEN
+        run: |
+          set -euo pipefail
+          git config --global credential.helper store
+          echo "https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com" > ~/.git-credentials
+          git remote set-url origin "https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com/${{ github.repository }}.git"
+
+      - name: 🏷️ Fetch all tags from repository
+        run: |
+          set -euo pipefail
+          echo "📥 Fetching all existing tags..."
+          git fetch --tags --force
+          echo "✅ Current tags:"
+          git tag --sort=-version:refname | head -5
+
+      - name: 🏷️ Release on develop (tag + GitHub Release)
+        if: ${{ github.ref_name == 'develop' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          set -euo pipefail
+          echo "🚀 Publishing release on develop..."
+          npx semantic-release
+
+      - name: ⚠️ Skip release on master
+        if: ${{ github.ref_name == 'master' }}
+        run: |
+          echo "⚠️ Releases are now created on develop branch only"
+          echo "ℹ️ Master branch is kept for historical compatibility"

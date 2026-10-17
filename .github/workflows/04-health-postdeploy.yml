@@ -1,0 +1,97 @@
+name: "🩺 Health Check • Post-Deploy"
+
+on:
+  workflow_run:
+    workflows:
+      - "🏗️ Infra • VPS Deploy"
+      - "📄 SaaS • Portfolio Deploy"
+      - "🔐 SaaS • SecureVault Deploy"
+      - "🐳 SaaS • Registry Deploy"
+    types:
+      - completed
+
+concurrency:
+  group: "postdeploy-healthcheck-${{ github.event.workflow_run.head_branch }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  prepare:
+    name: "🧾 Prepare targets"
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'master'
+    runs-on: ubuntu-latest
+
+    outputs:
+      warmup_url: ${{ steps.compute.outputs.warmup_url }}
+      checks: ${{ steps.compute.outputs.checks }}
+
+    steps:
+      - name: "🧾 Summary (source workflow)"
+        run: |
+          {
+            echo "## 🩺 Post-Deploy Health Check"
+            echo ""
+            echo "- Source workflow: **${{ github.event.workflow_run.name }}**"
+            echo "- Branch: **${{ github.event.workflow_run.head_branch }}**"
+            echo "- Conclusion: **${{ github.event.workflow_run.conclusion }}**"
+            echo "- Run: ${{ github.event.workflow_run.html_url }}"
+            echo "- Commit: \`${{ github.event.workflow_run.head_sha }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - id: compute
+        name: "🎯 Compute URLs"
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          WORKFLOW="${{ github.event.workflow_run.name }}"
+
+          CHECKS="https://portfolio.freijstack.com|200,301,302|Portfolio"
+          WARMUP_URL="https://portfolio.freijstack.com"
+
+          case "$WORKFLOW" in
+            *Portfolio*)
+              WARMUP_URL="https://portfolio.freijstack.com"
+              ;;
+
+            *SecureVault*)
+              WARMUP_URL="https://vault.freijstack.com"
+              CHECKS="${CHECKS}
+              https://vault.freijstack.com/|200,301,302,304|SecureVault Frontend
+              https://vault.freijstack.com/api/health|200|SecureVault API"
+              ;;
+
+            *Registry*)
+              WARMUP_URL="https://registry.freijstack.com/v2/"
+              CHECKS="${CHECKS}
+              https://registry.freijstack.com/v2/|401,200|Docker Registry API
+              https://registry-ui.freijstack.com/|200,301,302|Docker Registry UI"
+              ;;
+          esac
+
+          echo "warmup_url=${WARMUP_URL}" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "checks<<EOF"
+            echo "${CHECKS}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+  healthcheck:
+    name: "🩺 Run checks"
+    needs:
+      - prepare
+    uses: ./.github/workflows/00-core-healthcheck.yml
+    with:
+      warmup_url: ${{ needs.prepare.outputs.warmup_url }}
+      checks: ${{ needs.prepare.outputs.checks }}
+      max_wait_seconds: 90
+      warmup_interval_seconds: 5
+      max_retries: 8
+      sleep_between_retries: 10

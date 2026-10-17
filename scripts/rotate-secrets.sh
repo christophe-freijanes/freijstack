@@ -111,7 +111,6 @@ echo -e "${YELLOW}🗄️  Updating database password...${NC}"
 
 # Get DB_USER and DB_NAME from .env
 DB_USER=$(grep "^DB_USER=" "$ENV_FILE" | cut -d'=' -f2)
-DB_NAME=$(grep "^DB_NAME=" "$ENV_FILE" | cut -d'=' -f2)
 
 # Update postgres password via docker
 cd "$COMPOSE_DIR"

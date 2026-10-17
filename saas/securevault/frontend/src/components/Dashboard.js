@@ -1,8 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { LogOut, Plus, Eye, EyeOff, Trash2, Edit2, Shield, Clock } from 'lucide-react';
+import { LogOut, Plus, Eye, Trash2, Shield, Clock } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+
+const getAuthHeaders = () => ({
+  headers: {
+    'Authorization': `Bearer ${localStorage.getItem('token')}`
+  }
+});
 
 function Dashboard({ onLogout }) {
   const [secrets, setSecrets] = useState([]);
@@ -20,25 +26,7 @@ function Dashboard({ onLogout }) {
     expires_at: ''
   });
 
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-    loadSecrets();
-    loadAuditLogs();
-  }, []);
-
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    return {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    };
-  };
-
-  const loadSecrets = async () => {
+  const loadSecrets = useCallback(async () => {
     try {
       const response = await axios.get(`${API_URL}/secrets`, getAuthHeaders());
       setSecrets(response.data.secrets);
@@ -50,16 +38,28 @@ function Dashboard({ onLogout }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [onLogout]);
 
-  const loadAuditLogs = async () => {
+  const loadAuditLogs = useCallback(async () => {
     try {
       const response = await axios.get(`${API_URL}/audit?limit=20`, getAuthHeaders());
       setAuditLogs(response.data.logs);
     } catch (error) {
       console.error('Error loading audit logs:', error);
+      if (error.response?.status === 401) {
+        onLogout();
+      }
     }
-  };
+  }, [onLogout]);
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+    loadSecrets();
+    loadAuditLogs();
+  }, [loadSecrets, loadAuditLogs]);
 
   const handleCreateSecret = async (e) => {
     e.preventDefault();
@@ -137,9 +137,28 @@ function Dashboard({ onLogout }) {
         >
           📝 Audit Logs ({auditLogs.length})
         </button>
+        <button 
+          className={`tab ${activeTab === 'settings' ? 'active' : ''}`}
+          onClick={() => setActiveTab('settings')}
+        >
+          ⚙️ Paramètres
+        </button>
       </div>
 
       <main className="dashboard-content">
+        {activeTab === 'settings' && (
+          <div className="settings-section">
+            <h2>Paramètres du compte</h2>
+            <div className="settings-list">
+              <div className="settings-item"><strong>Profil utilisateur</strong> (à venir)</div>
+              <div className="settings-item"><strong>RBAC</strong> (contrôle d'accès, à venir)</div>
+              <div className="settings-item"><strong>MFA</strong> (authentification multi-facteurs, à venir)</div>
+              <div className="settings-item"><strong>SSO</strong> (connexion unique, à venir)</div>
+              <div className="settings-item"><strong>Préférences</strong> (langue, thème, etc. à venir)</div>
+            </div>
+            <p style={{marginTop: '2rem', color: '#94a3b8'}}>⚡ Cette section est en construction pour la gestion avancée du profil, des accès et de la sécurité.</p>
+          </div>
+        )}
         {activeTab === 'secrets' && (
           <div className="secrets-section">
             <div className="section-header">
