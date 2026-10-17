@@ -27,7 +27,7 @@
     "speakeasy": "^2.0.0",
     "qrcode": "^1.5.3",
     "nodemailer": "^10.0.9",
-    "uuid": "^13.0.0",
+    "uuid": "^14.0.0",
     "multer": "^2.4.0",
     "csv-parser": "^3.0.0"
   },
