@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "source": "Expérience et CV PDF 2026 fourni ; centres d’intérêt et style communiqués directement par l’auteur.",
+  "source": "CV PDF 2026, portfolio, et faits personnels explicitement communiqués par l'auteur (rubriques identifiées).",
   "items": [
     {
       "id": "platform",
@@ -33,7 +33,9 @@
           "AWS is where I do much of my work. I enjoy making operations simpler across a platform spanning several hundred accounts.",
           "At La Caisse, I help make a large-scale AWS platform more reliable. CloudFormation and SSM support inventory, patching and operational checks. The aim? Simpler, safer operations."
         ]
-      }
+      },
+      "topic_en": "AWS platforms",
+      "source": "CV PDF 2026 et portfolio"
     },
     {
       "id": "sre",
@@ -68,7 +70,9 @@
           "In SRE, I prefer one useful alert over ten noisy ones. Datadog and CloudWatch help me focus on the signal.",
           "I like observability that actually helps teams. Dashboards, alert tuning, Lambda and Step Functions: find the useful signal, then document what matters with RCAs and runbooks."
         ]
-      }
+      },
+      "topic_en": "SRE and observability",
+      "source": "CV PDF 2026 et portfolio"
     },
     {
       "id": "finops",
@@ -100,7 +104,9 @@
           "FinOps is practical for me: find costs that bring no value. On AWS, I've contributed to cleaning up tens of thousands of snapshots.",
           "I like connecting technology to impact. At La Caisse, that means snapshot cleanup and cost visibility; at ACENSI, it included a Python FinOps dashboard using the Clumio API."
         ]
-      }
+      },
+      "topic_en": "FinOps and impact",
+      "source": "CV PDF 2026 et portfolio"
     },
     {
       "id": "automation",
@@ -133,7 +139,9 @@
           "I like automating work that slows teams down. At ACENSI, Terraform and Ansible helped cut manual interventions by 60%.",
           "My approach is simple: less repetition, more reliability. I've worked with Terraform, Ansible and Python, and now CloudFormation and SSM. At SQUAD, Ansible hardening covered the full Linux fleet."
         ]
-      }
+      },
+      "topic_en": "Automation and IaC",
+      "source": "CV PDF 2026 et portfolio"
     },
     {
       "id": "security",
@@ -169,7 +177,9 @@
           "I prefer security built in from day one. IAM, KMS, IMDSv2 and CIS hardening are part of the approach, not an afterthought.",
           "I've worked in finance, insurance and eIDAS environments. My takeaway: strong controls should protect without making operations unnecessarily complex."
         ]
-      }
+      },
+      "topic_en": "Security and compliance",
+      "source": "CV PDF 2026 et portfolio"
     },
     {
       "id": "aiops",
@@ -203,7 +213,9 @@
           "I'm passionate about agentic AI when it genuinely helps cloud operations. I explore MCP, Strands and Bedrock, with proper safeguards.",
           "I'm interested in specialized agents and orchestration. For production, I believe AI needs governance: read-only access when appropriate, human oversight and verifiable outcomes."
         ]
-      }
+      },
+      "topic_en": "AIOps and agents",
+      "source": "CV PDF 2026 et portfolio"
     },
     {
       "id": "backup",
@@ -236,7 +248,9 @@
           "Resilience is more than backups. Recovery must be tested against RTO and RPO targets.",
           "At ACENSI, I worked with Commvault, Clumio and failover tests. One notable project involved S3 replication for more than 80 TB. I value designs we can actually test."
         ]
-      }
+      },
+      "topic_en": "Backup and resilience",
+      "source": "CV PDF 2026 et portfolio"
     },
     {
       "id": "certifications",
@@ -268,7 +282,9 @@
           "I enjoy learning and keeping my skills current. My CV lists AWS Cloud Practitioner, Security+, KCNA, LFCS and ITIL v4, plus Red Hat Ansible training.",
           "My listed credentials include AWS Cloud Practitioner (2026), CompTIA Security+ (2024), KCNA (2023), LFCS (2022) and ITIL v4 (2021), plus Red Hat Ansible Automation Platform training in 2025."
         ]
-      }
+      },
+      "topic_en": "Certifications",
+      "source": "CV PDF 2026 et portfolio"
     },
     {
       "id": "education",
@@ -297,7 +313,9 @@
           "I earned a BTS SIO diploma from Greta du Forez in 2002. Since then, I've kept learning through real-world work and training.",
           "My initial qualification is a BTS SIO (2002). More than twenty years of hands-on work followed, backed by cloud, Linux, security and automation credentials."
         ]
-      }
+      },
+      "topic_en": "Education",
+      "source": "CV PDF 2026 et portfolio"
     },
     {
       "id": "languages",
@@ -328,7 +346,9 @@
           "French is my native language, and I use English at a professional level.",
           "I'm comfortable communicating in French and also work in English. My CV states professional English proficiency, without a specified TOEIC or IELTS score."
         ]
-      }
+      },
+      "topic_en": "Languages",
+      "source": "CV PDF 2026 et portfolio"
     },
     {
       "id": "experience",
@@ -362,7 +382,9 @@
           "I have more than 20 years of hands-on infrastructure experience. Today my focus is AWS, reliability and automation.",
           "My career spans healthcare, industry, insurance and finance. Since June 2026, I've been a Principal AWS Platform Specialist at La Caisse, following ACENSI and SQUAD. I enjoy solving real problems with teams."
         ]
-      }
+      },
+      "topic_en": "Professional background",
+      "source": "CV PDF 2026 et portfolio"
     },
     {
       "id": "sectors",
@@ -395,7 +417,9 @@
           "I've worked across finance, insurance, healthcare and industry. It taught me to adapt quickly.",
           "Finance at La Caisse, insurance at ACENSI, eIDAS at SQUAD, plus earlier healthcare work: I like understanding the people and operations behind the technology."
         ]
-      }
+      },
+      "topic_en": "Industry experience",
+      "source": "CV PDF 2026 et portfolio"
     },
     {
       "id": "scale",
@@ -435,7 +459,9 @@
           "A few figures tell the story: several hundred AWS accounts, more than 80 TB replicated, and 60% fewer manual interventions in an automation project.",
           "I like measurable results: tens of thousands of snapshots cleaned up, a 3,000+ VM environment, and Linux hardening automated across the full SQUAD fleet."
         ]
-      }
+      },
+      "topic_en": "Measurable results",
+      "source": "CV PDF 2026 et portfolio"
     },
     {
       "id": "projects",
@@ -463,7 +489,9 @@
           "I enjoy useful projects: SSM inventory and maintenance, observability, FinOps and AI agents. Code and examples are on my GitHub.",
           "My projects share a goal: simpler operations. From AWS automation to Datadog/CloudWatch and agentic AI, I focus on tools people can really use."
         ]
-      }
+      },
+      "topic_en": "Projects",
+      "source": "CV PDF 2026 et portfolio"
     },
     {
       "id": "availability",
@@ -494,7 +522,9 @@
           "I'm based in the Montréal area and open to conversations about hybrid or remote roles. Let's discuss specific availability.",
           "I'm a Canadian permanent resident based in Montréal. My CV mentions hybrid and remote work; a conversation is the best place to discuss timing and arrangements."
         ]
-      }
+      },
+      "topic_en": "Work arrangements",
+      "source": "CV PDF 2026 et portfolio"
     },
     {
       "id": "teamwork",
@@ -539,7 +569,9 @@
           "My working style? Listening, open communication and initiative. I'd rather build a simple solution together than give a long speech."
         ]
       },
-      "next": "projects"
+      "next": "projects",
+      "topic_en": "Teamwork and communication",
+      "source": "Informations partagées directement par l'auteur"
     },
     {
       "id": "interests",
@@ -592,7 +624,9 @@
           "Handball was part of my life for 24 years. I also enjoy soccer, hockey, visual creativity and world cuisine. I love making things and sharing experiences!"
         ]
       },
-      "next": "teamwork"
+      "next": "teamwork",
+      "topic_en": "Interests outside work",
+      "source": "Informations partagées directement par l'auteur"
     }
   ]
 }
