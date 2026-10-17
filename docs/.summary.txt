@@ -1,11 +1,11 @@
 ===========================================
 📚 FreijStack Documentation Summary
 ===========================================
-Generated: Thu Jan  8 21:17:06 UTC 2026
+Generated: Sat Oct 17 12:06:31 UTC 2026
 
 📈 Metrics:
 - Total documents: 28
-- Total lines: 11878
+- Total lines: 11870
 - Generated diagrams: 0 PNG + 0 SVG
 
 📁 Main Sections:
