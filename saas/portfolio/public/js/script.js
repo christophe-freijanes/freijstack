@@ -898,10 +898,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (/(tu es une ia|es tu une ia|qui es tu|vraie ia|un robot|un bot|chatbot|are you ai|are you real|virtual assistant)/.test(q)) return 'identity';
 
         // Les questions personnelles et humaines passent avant les mots-clés génériques.
-        if (/(handball|hockey|soccer|football|sports?|photograph|photo|video|design|cuisine|loisirs?|hobb|hors travail|5 a 7|passions?)/.test(q)) {
+        if (/(handball|hockey|soccer|football|sports?|photograph|photo|video|design|cuisine|loisirs?|hobb|hors travail|en dehors du travail|outside work|free time|spare time|weekend|for fun|5 a 7|passions?)/.test(q)) {
             return knowledge.find(item => item.id === 'interests') || null;
         }
-        if (/(collabor|collegu|equipe|teamwork|team|soft skills?|savoir etre|sociab|communi|relationnel|esprit d equipe)/.test(q)) {
+        if (/(collabor|collegu|equipe|teamwork|team|soft skills?|savoir etre|sociab|communi|relationnel|esprit d equipe|qualites?|strengths?|points? forts?|working style|style de travail)/.test(q)) {
             return knowledge.find(item => item.id === 'teamwork') || null;
         }
 
@@ -913,6 +913,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (ranked.length && ranked[0].score > 0) return ranked[0].item;
         if (previousTopic && /^(encore|plus|detail|details|precise|preciser|developpe|raconte|more|tell me more|explain)/.test(q)) return previousTopic;
+        if (previousTopic && /^(et |et sinon|what about|how about|qu en est il)/.test(q)) {
+            return knowledge.find(item => item.id === previousTopic.next) || null;
+        }
         return null;
     }
 
