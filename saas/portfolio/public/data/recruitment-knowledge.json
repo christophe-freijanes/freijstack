@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "source": "CV Christophe Freijanes 2026 (PDF fourni), associé au contenu public du portfolio",
+  "version": 2,
+  "source": "Expérience et CV PDF 2026 fourni ; centres d’intérêt et style communiqués directement par l’auteur.",
   "items": [
     {
       "id": "platform",
@@ -23,7 +23,17 @@
       ],
       "fr": "À La Caisse (CDPQ), depuis juin 2026, Christophe contribue à la fiabilité d’une plateforme AWS couvrant plusieurs centaines de comptes. Il standardise les opérations avec CloudFormation et Systems Manager, notamment les inventaires et les maintenances Windows/Linux.",
       "en": "At La Caisse (CDPQ), since June 2026, Christophe has worked on the reliability of an AWS platform spanning several hundred accounts. His work includes CloudFormation and Systems Manager automation, inventory and Windows/Linux maintenance.",
-      "next": "sre"
+      "next": "sre",
+      "replies": {
+        "fr": [
+          "AWS, c'est mon terrain de jeu professionnel. J'aime simplifier les opérations d'une plateforme qui couvre plusieurs centaines de comptes.",
+          "Chez La Caisse, je travaille sur la fiabilité d'une plateforme AWS à grande échelle. Avec CloudFormation et SSM, j'automatise l'inventaire, le patching et les contrôles. Le but ? Des opérations plus simples et plus sûres."
+        ],
+        "en": [
+          "AWS is where I do much of my work. I enjoy making operations simpler across a platform spanning several hundred accounts.",
+          "At La Caisse, I help make a large-scale AWS platform more reliable. CloudFormation and SSM support inventory, patching and operational checks. The aim? Simpler, safer operations."
+        ]
+      }
     },
     {
       "id": "sre",
@@ -48,7 +58,17 @@
       ],
       "fr": "Son activité SRE comprend les tableaux de bord Datadog et CloudWatch, le réglage des alertes et la réduction du bruit sur Lambda et Step Functions. Il applique également SLO, RCA, runbooks et post-mortems.",
       "en": "His SRE work includes Datadog and CloudWatch dashboards, alert tuning and reducing noise across Lambda and Step Functions. He also uses SLOs, root-cause analysis, runbooks and post-mortems.",
-      "next": "finops"
+      "next": "finops",
+      "replies": {
+        "fr": [
+          "En SRE, je préfère une alerte utile à dix alertes bruyantes. Datadog et CloudWatch m'aident à aller à l'essentiel.",
+          "J'aime quand l'observabilité aide vraiment les équipes. Dashboards, alertes, Lambda et Step Functions : je cherche le signal utile, puis je documente avec des RCA et des runbooks."
+        ],
+        "en": [
+          "In SRE, I prefer one useful alert over ten noisy ones. Datadog and CloudWatch help me focus on the signal.",
+          "I like observability that actually helps teams. Dashboards, alert tuning, Lambda and Step Functions: find the useful signal, then document what matters with RCAs and runbooks."
+        ]
+      }
     },
     {
       "id": "finops",
@@ -70,7 +90,17 @@
       ],
       "fr": "Au sein de la plateforme AWS de La Caisse, il a contribué au nettoyage de plusieurs dizaines de milliers de snapshots et au suivi des coûts. Chez ACENSI, il a développé un tableau de bord FinOps Python intégrant l’API Clumio.",
       "en": "On La Caisse's AWS platform, he contributed to cleaning up tens of thousands of snapshots and monitoring costs. At ACENSI, he built a Python FinOps dashboard using the Clumio API.",
-      "next": "automation"
+      "next": "automation",
+      "replies": {
+        "fr": [
+          "Le FinOps, pour moi, c'est du concret : traquer ce qui coûte sans apporter de valeur. Sur AWS, j'ai participé au nettoyage de plusieurs dizaines de milliers de snapshots.",
+          "J'aime relier technique et impact. Chez La Caisse, j'ai contribué au nettoyage massif de snapshots et au suivi des coûts. Chez ACENSI, j'ai aussi créé un dashboard FinOps en Python autour de l'API Clumio."
+        ],
+        "en": [
+          "FinOps is practical for me: find costs that bring no value. On AWS, I've contributed to cleaning up tens of thousands of snapshots.",
+          "I like connecting technology to impact. At La Caisse, that means snapshot cleanup and cost visibility; at ACENSI, it included a Python FinOps dashboard using the Clumio API."
+        ]
+      }
     },
     {
       "id": "automation",
@@ -93,7 +123,17 @@
       ],
       "fr": "Chez ACENSI, l’automatisation Terraform/Ansible a réduit les interventions manuelles de 60 %. Chez SQUAD, le durcissement Linux via Ansible a couvert 100 % du parc sans intervention manuelle. Aujourd’hui, CloudFormation et SSM structurent ses opérations AWS.",
       "en": "At ACENSI, Terraform/Ansible automation reduced manual work by 60%. At SQUAD, Ansible hardening covered the entire Linux fleet without manual intervention. His current AWS work uses CloudFormation and SSM.",
-      "next": "security"
+      "next": "security",
+      "replies": {
+        "fr": [
+          "J'aime automatiser ce qui fait perdre du temps aux équipes. Chez ACENSI, Terraform et Ansible ont permis de réduire les interventions manuelles de 60 %.",
+          "Ma logique est simple : faire moins de gestes répétitifs et gagner en fiabilité. J'ai travaillé avec Terraform, Ansible, Python et maintenant CloudFormation et SSM. Chez SQUAD, le durcissement Linux a couvert 100 % du parc."
+        ],
+        "en": [
+          "I like automating work that slows teams down. At ACENSI, Terraform and Ansible helped cut manual interventions by 60%.",
+          "My approach is simple: less repetition, more reliability. I've worked with Terraform, Ansible and Python, and now CloudFormation and SSM. At SQUAD, Ansible hardening covered the full Linux fleet."
+        ]
+      }
     },
     {
       "id": "security",
@@ -119,7 +159,17 @@
       ],
       "fr": "Son expérience sécurité couvre IAM, KMS, IMDSv2, le moindre privilège, le durcissement CIS et la remédiation CVE. Il a travaillé dans des environnements réglementés, notamment les services financiers, l’assurance et eIDAS.",
       "en": "His security experience includes IAM, KMS, IMDSv2, least privilege, CIS hardening and CVE remediation. He has worked in regulated environments including financial services, insurance and eIDAS.",
-      "next": "sectors"
+      "next": "sectors",
+      "replies": {
+        "fr": [
+          "La sécurité, je la préfère intégrée dès le départ. IAM, KMS, IMDSv2, durcissement CIS : c'est une façon de travailler, pas une étape finale.",
+          "J'ai travaillé en finance, assurance et dans des environnements eIDAS. Ce que j'en retiens : les bons contrôles doivent protéger sans rendre l'exploitation inutilement complexe."
+        ],
+        "en": [
+          "I prefer security built in from day one. IAM, KMS, IMDSv2 and CIS hardening are part of the approach, not an afterthought.",
+          "I've worked in finance, insurance and eIDAS environments. My takeaway: strong controls should protect without making operations unnecessarily complex."
+        ]
+      }
     },
     {
       "id": "aiops",
@@ -143,7 +193,17 @@
       ],
       "fr": "Il conçoit des approches AIOps et agentiques pour les opérations AWS : MCP, agents spécialisés, orchestration, Human-in-the-Loop et accès read-only gouverné. Le CV mentionne Amazon Bedrock/AgentCore et Strands Agents SDK.",
       "en": "He designs agentic AIOps approaches for AWS operations: MCP, specialized agents, orchestration, human-in-the-loop controls and governed read-only access. His CV lists Amazon Bedrock/AgentCore and Strands Agents SDK.",
-      "next": "platform"
+      "next": "platform",
+      "replies": {
+        "fr": [
+          "L'IA agentique me passionne, surtout quand elle aide vraiment les opérations cloud. Je travaille sur des approches MCP, Strands et Bedrock, avec des garde-fous.",
+          "Je m'intéresse aux agents spécialisés et à l'orchestration. Pour moi, une bonne IA en production reste gouvernée : accès read-only quand nécessaire, contrôle humain et résultats vérifiables."
+        ],
+        "en": [
+          "I'm passionate about agentic AI when it genuinely helps cloud operations. I explore MCP, Strands and Bedrock, with proper safeguards.",
+          "I'm interested in specialized agents and orchestration. For production, I believe AI needs governance: read-only access when appropriate, human oversight and verifiable outcomes."
+        ]
+      }
     },
     {
       "id": "backup",
@@ -166,7 +226,17 @@
       ],
       "fr": "Chez ACENSI, il a travaillé sur les stratégies RTO/RPO, la réplication et les tests de failover, avec Commvault et Clumio. Son CV cite notamment une réplication Amazon S3 SRR sur plus de 80 To.",
       "en": "At ACENSI, he worked on RTO/RPO strategies, replication and failover tests using Commvault and Clumio. His CV mentions Amazon S3 SRR replication covering more than 80 TB.",
-      "next": "security"
+      "next": "security",
+      "replies": {
+        "fr": [
+          "La résilience, ce n'est pas juste une sauvegarde. Il faut savoir restaurer et tenir les objectifs RTO/RPO.",
+          "Chez ACENSI, j'ai travaillé sur Commvault, Clumio et des tests de failover. Un projet marquant : de la réplication S3 sur plus de 80 To. J'aime les architectures qu'on peut vraiment éprouver."
+        ],
+        "en": [
+          "Resilience is more than backups. Recovery must be tested against RTO and RPO targets.",
+          "At ACENSI, I worked with Commvault, Clumio and failover tests. One notable project involved S3 replication for more than 80 TB. I value designs we can actually test."
+        ]
+      }
     },
     {
       "id": "certifications",
@@ -188,7 +258,17 @@
       ],
       "fr": "Certifications et formations mentionnées : AWS Certified Cloud Practitioner (2026), Ansible Automation Platform Red Hat (2025), CompTIA Security+ (2024), KCNA (2023), LFCS (2022) et ITIL v4 Foundation (2021).",
       "en": "Listed certifications and training include AWS Certified Cloud Practitioner (2026), Red Hat Ansible Automation Platform (2025), CompTIA Security+ (2024), KCNA (2023), LFCS (2022) and ITIL v4 Foundation (2021).",
-      "next": "education"
+      "next": "education",
+      "replies": {
+        "fr": [
+          "J'aime apprendre et garder mes compétences à jour. Mon CV liste AWS Cloud Practitioner, Security+, KCNA, LFCS et ITIL v4, ainsi qu'une formation Red Hat Ansible.",
+          "Côté certifications : AWS Cloud Practitioner (2026), CompTIA Security+ (2024), KCNA (2023), LFCS (2022), ITIL v4 (2021). J'ai également suivi Ansible Automation Platform chez Red Hat en 2025."
+        ],
+        "en": [
+          "I enjoy learning and keeping my skills current. My CV lists AWS Cloud Practitioner, Security+, KCNA, LFCS and ITIL v4, plus Red Hat Ansible training.",
+          "My listed credentials include AWS Cloud Practitioner (2026), CompTIA Security+ (2024), KCNA (2023), LFCS (2022) and ITIL v4 (2021), plus Red Hat Ansible Automation Platform training in 2025."
+        ]
+      }
     },
     {
       "id": "education",
@@ -207,7 +287,17 @@
       ],
       "fr": "Son CV indique un BTS SIO obtenu au Greta du Forez en 2002. Ses compétences sont ensuite documentées par des certifications AWS, sécurité, Linux, Kubernetes, Ansible et ITIL.",
       "en": "His CV lists a BTS SIO diploma from Greta du Forez (2002). Subsequent credentials cover AWS, security, Linux, Kubernetes, Ansible and ITIL.",
-      "next": "certifications"
+      "next": "certifications",
+      "replies": {
+        "fr": [
+          "J'ai un BTS SIO du Greta du Forez, obtenu en 2002. Depuis, j'ai surtout appris en pratiquant et en me formant régulièrement.",
+          "Ma formation initiale est un BTS SIO (2002). La suite, c'est plus de vingt ans de terrain, complétés par des certifications cloud, Linux, sécurité et automatisation."
+        ],
+        "en": [
+          "I earned a BTS SIO diploma from Greta du Forez in 2002. Since then, I've kept learning through real-world work and training.",
+          "My initial qualification is a BTS SIO (2002). More than twenty years of hands-on work followed, backed by cloud, Linux, security and automation credentials."
+        ]
+      }
     },
     {
       "id": "languages",
@@ -228,7 +318,17 @@
       ],
       "fr": "Français : langue maternelle. Anglais : niveau professionnel, selon le CV fourni. Aucun score TOEIC/IELTS ni niveau CECRL n’y est indiqué.",
       "en": "French: native language. English: professional proficiency, according to the supplied CV. No TOEIC/IELTS score or CEFR level is specified.",
-      "next": "certifications"
+      "next": "certifications",
+      "replies": {
+        "fr": [
+          "Je parle français, ma langue maternelle, et j'utilise l'anglais à un niveau professionnel.",
+          "Pour les échanges, je suis à l'aise en français et je travaille aussi en anglais. Mon CV indique un niveau professionnel, sans score TOEIC ou IELTS précisé."
+        ],
+        "en": [
+          "French is my native language, and I use English at a professional level.",
+          "I'm comfortable communicating in French and also work in English. My CV states professional English proficiency, without a specified TOEIC or IELTS score."
+        ]
+      }
     },
     {
       "id": "experience",
@@ -252,7 +352,17 @@
       ],
       "fr": "Son parcours comprend plus de 20 ans en infrastructure. Il exerce depuis juin 2026 comme spécialiste principal Plateforme AWS / référent technique à La Caisse, après des missions DevSecOps/résilience chez ACENSI (2023–2026) et systèmes/sécurité chez SQUAD (2022–2023).",
       "en": "He has over 20 years in infrastructure. Since June 2026, he has served as Principal AWS Platform Specialist / Technical Lead at La Caisse, following DevSecOps/resilience work at ACENSI (2023–2026) and systems/security work at SQUAD (2022–2023).",
-      "next": "sectors"
+      "next": "sectors",
+      "replies": {
+        "fr": [
+          "J'ai plus de 20 ans de terrain en infrastructure. Aujourd'hui, je me concentre sur AWS, la fiabilité et l'automatisation.",
+          "Mon parcours passe par la santé, l'industrie, l'assurance et la finance. Depuis juin 2026, je suis spécialiste principal Plateforme AWS à La Caisse, après ACENSI et SQUAD. Ce que j'aime : résoudre des problèmes concrets avec les équipes."
+        ],
+        "en": [
+          "I have more than 20 years of hands-on infrastructure experience. Today my focus is AWS, reliability and automation.",
+          "My career spans healthcare, industry, insurance and finance. Since June 2026, I've been a Principal AWS Platform Specialist at La Caisse, following ACENSI and SQUAD. I enjoy solving real problems with teams."
+        ]
+      }
     },
     {
       "id": "sectors",
@@ -275,7 +385,17 @@
       ],
       "fr": "Il a travaillé dans les services financiers (La Caisse), l’assurance (ACENSI), des infrastructures eIDAS (SQUAD), l’industrie et la santé. Au Centre Hospitalier Métropole Savoie, il a assuré le support de 800 utilisateurs en environnement 24/7.",
       "en": "His background includes financial services (La Caisse), insurance (ACENSI), eIDAS infrastructure (SQUAD), industry and healthcare. At Centre Hospitalier Métropole Savoie, he supported 800 users in a 24/7 environment.",
-      "next": "experience"
+      "next": "experience",
+      "replies": {
+        "fr": [
+          "J'ai évolué dans plusieurs univers : finance, assurance, santé et industrie. Ça m'a appris à m'adapter vite.",
+          "Finance à La Caisse, assurance chez ACENSI, eIDAS chez SQUAD, et santé auparavant : j'aime découvrir les métiers derrière les systèmes. C'est souvent là que naissent les meilleures solutions."
+        ],
+        "en": [
+          "I've worked across finance, insurance, healthcare and industry. It taught me to adapt quickly.",
+          "Finance at La Caisse, insurance at ACENSI, eIDAS at SQUAD, plus earlier healthcare work: I like understanding the people and operations behind the technology."
+        ]
+      }
     },
     {
       "id": "scale",
@@ -305,7 +425,17 @@
       ],
       "fr": "Quelques repères chiffrés du CV : plusieurs centaines de comptes AWS, plusieurs dizaines de milliers de snapshots nettoyés, 60 % d’interventions manuelles en moins, plus de 80 To répliqués, plus de 3 000 VM et 100 % de couverture du durcissement Linux chez SQUAD.",
       "en": "Selected CV figures: several hundred AWS accounts, tens of thousands of snapshots cleaned, 60% fewer manual interventions, over 80 TB replicated, more than 3,000 VMs, and 100% Linux hardening coverage at SQUAD.",
-      "next": "automation"
+      "next": "automation",
+      "replies": {
+        "fr": [
+          "Quelques chiffres parlent d'eux-mêmes : plusieurs centaines de comptes AWS, plus de 80 To répliqués, et 60 % d'interventions manuelles en moins dans un projet d'automatisation.",
+          "J'aime mesurer l'effet du travail : plusieurs dizaines de milliers de snapshots nettoyés, plus de 3 000 VM dans un environnement, et un durcissement Linux automatisé sur 100 % du parc chez SQUAD."
+        ],
+        "en": [
+          "A few figures tell the story: several hundred AWS accounts, more than 80 TB replicated, and 60% fewer manual interventions in an automation project.",
+          "I like measurable results: tens of thousands of snapshots cleaned up, a 3,000+ VM environment, and Linux hardening automated across the full SQUAD fleet."
+        ]
+      }
     },
     {
       "id": "projects",
@@ -323,7 +453,17 @@
       ],
       "fr": "Le CV décrit plusieurs chantiers concrets : centralisation des inventaires et maintenances SSM, nettoyage massif de snapshots AWS, observabilité Datadog/CloudWatch et conception d'approches AIOps fondées sur MCP et agents spécialisés. Des exemples de code sont accessibles depuis le portfolio et GitHub.",
       "en": "The CV describes concrete initiatives: centralized SSM inventory and maintenance, large-scale AWS snapshot cleanup, Datadog/CloudWatch observability, and agentic AIOps approaches with MCP and specialized agents. Code examples are linked from the portfolio and GitHub.",
-      "next": "platform"
+      "next": "platform",
+      "replies": {
+        "fr": [
+          "J'aime les projets utiles : inventaires et maintenances SSM, observabilité, FinOps et agents IA. Le code et quelques exemples sont sur mon GitHub.",
+          "Mes projets tournent souvent autour du même objectif : simplifier les opérations. Entre automatisation AWS, Datadog/CloudWatch et IA agentique, j'essaie de rendre les outils vraiment utiles au quotidien."
+        ],
+        "en": [
+          "I enjoy useful projects: SSM inventory and maintenance, observability, FinOps and AI agents. Code and examples are on my GitHub.",
+          "My projects share a goal: simpler operations. From AWS automation to Datadog/CloudWatch and agentic AI, I focus on tools people can really use."
+        ]
+      }
     },
     {
       "id": "availability",
@@ -344,7 +484,115 @@
       ],
       "fr": "Le CV indique Montréal (Québec), résident permanent, et un intérêt pour un cadre hybride ou en télétravail. Il ne précise pas de date de disponibilité : ce point peut être discuté lors d'un échange.",
       "en": "The CV states Montréal, Québec, permanent resident, and hybrid or remote working arrangements. It does not specify a start date; availability can be discussed in a conversation.",
-      "next": "experience"
+      "next": "experience",
+      "replies": {
+        "fr": [
+          "Je suis basé dans la région de Montréal et ouvert aux échanges sur des rôles hybrides ou à distance. Pour les disponibilités précises, parlons-en.",
+          "Je suis résident permanent au Canada, basé à Montréal. Le CV mentionne hybride et télétravail ; le calendrier permet de discuter des modalités et des disponibilités."
+        ],
+        "en": [
+          "I'm based in the Montréal area and open to conversations about hybrid or remote roles. Let's discuss specific availability.",
+          "I'm a Canadian permanent resident based in Montréal. My CV mentions hybrid and remote work; a conversation is the best place to discuss timing and arrangements."
+        ]
+      }
+    },
+    {
+      "id": "teamwork",
+      "topic": "Collaboration et savoir-être",
+      "tags": [
+        "soft skill",
+        "soft skills",
+        "savoir etre",
+        "personnalite",
+        "personality",
+        "team",
+        "teamwork",
+        "equipe",
+        "collaboration",
+        "collaboratif",
+        "communiquant",
+        "communication",
+        "leadership",
+        "curiosite",
+        "curiosity",
+        "humain",
+        "human",
+        "attitude",
+        "esprit d equipe",
+        "colleague",
+        "collegue",
+        "relationnel",
+        "valeurs",
+        "values"
+      ],
+      "fr": "Il privilégie la collaboration et la communication, et aime travailler avec les autres.",
+      "en": "He values teamwork, communication and working with people.",
+      "replies": {
+        "fr": [
+          "J'aime travailler avec les gens. Écouter, partager, avancer ensemble : c'est mon truc. Ensemble, on va plus loin !",
+          "Je suis sociable, curieux et passionné par ce que je fais. J'aime expliquer simplement, aider l'équipe et trouver des solutions concrètes. Les bonnes idées naissent rarement tout seul.",
+          "Ma façon de travailler ? De l'écoute, du dialogue et de l'initiative. Je préfère une solution claire, construite à plusieurs, à un grand discours."
+        ],
+        "en": [
+          "I enjoy working with people. Listen, share ideas, make progress together. We go further as a team.",
+          "I'm sociable, curious and passionate about what I do. I like explaining things clearly, helping teammates and finding practical solutions.",
+          "My working style? Listening, open communication and initiative. I'd rather build a simple solution together than give a long speech."
+        ]
+      },
+      "next": "projects"
+    },
+    {
+      "id": "interests",
+      "topic": "Passions et centres d’intérêt",
+      "tags": [
+        "passion",
+        "passions",
+        "hobby",
+        "hobbies",
+        "loisir",
+        "loisirs",
+        "interet",
+        "interets",
+        "hors travail",
+        "outside work",
+        "vie perso",
+        "sport",
+        "sports",
+        "soccer",
+        "football",
+        "hockey",
+        "handball",
+        "24 ans",
+        "photo",
+        "photographie",
+        "photography",
+        "video",
+        "art",
+        "design",
+        "5 a 7",
+        "afterwork",
+        "social",
+        "cuisine",
+        "cooking",
+        "gastronomie",
+        "world food",
+        "voyage culinaire"
+      ],
+      "fr": "Ses centres d’intérêt incluent le sport, le handball pratiqué pendant 24 ans, la photographie, la vidéo, le design, l'art et la cuisine du monde.",
+      "en": "His interests include sports, 24 years of playing handball, photography, video, design, art and world cuisine.",
+      "replies": {
+        "fr": [
+          "En dehors du cloud ? Beaucoup de sport ! Soccer, hockey… et surtout le handball, que j'ai pratiqué pendant 24 ans. Ça m'a donné le goût du collectif.",
+          "J'adore l'image, la photo, la vidéo, l'art et le design. J'aime aussi les 5 à 7, les rencontres et découvrir des cuisines du monde entier.",
+          "Le handball a occupé 24 ans de ma vie. J'aime aussi le soccer, le hockey, la photo, la vidéo et la cuisine du monde. Bref, j'aime créer et partager !"
+        ],
+        "en": [
+          "Outside cloud? Quite a bit of sport! Soccer, hockey, and especially handball, which I played for 24 years. It shaped my love of teamwork.",
+          "I love photography, video, art and design. I also enjoy after-work get-togethers, meeting people and discovering cuisines from around the world.",
+          "Handball was part of my life for 24 years. I also enjoy soccer, hockey, visual creativity and world cuisine. I love making things and sharing experiences!"
+        ]
+      },
+      "next": "teamwork"
     }
   ]
 }
