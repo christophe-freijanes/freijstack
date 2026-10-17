@@ -60,7 +60,7 @@ def main():
             item["observed_labels"] = sorted(set(found), key=str.casefold)
         if args.report:
             print(f"{item['id']}: {len(found)} labels présents dans CV/portfolio")
-        if not found:
+        if not found and item.get("source") != "Informations partagées directement par l'auteur":
             errors.append(f"{item['id']}: aucun label retrouvé dans le CV ou portfolio")
     if errors:
         raise SystemExit("\n".join(errors))
