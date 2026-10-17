@@ -45,6 +45,10 @@ def main():
     ):
         parser.error("Dépôt origin non autorisé")
 
+    current = run("git", "-C", root, "branch", "--show-current")
+    if current != branch:
+        parser.error(f"Branche locale {current!r} différente de {branch!r}")
+
     modified = run("git", "-C", root, "status", "--porcelain")
     if modified:
         parser.error(f"Modifications locales présentes dans {root}. Déploiement bloqué.")
