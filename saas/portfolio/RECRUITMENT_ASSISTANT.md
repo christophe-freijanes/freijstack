@@ -55,6 +55,23 @@ sudo bash scripts/preview-docker.sh
 L'image locale `portfolio:pr286-review` est créée sans changer les conteneurs de production.
 Le site d'aperçu est lié à `127.0.0.1:18086` sur le VPS. Pour un contrôle visuel depuis Windows, construire également l'image via Docker Desktop/WSL sur le PC, ou utiliser un tunnel SSH authentifié. Le script refuse d'écraser un conteneur d'aperçu existant.
 
+## Publication contrôlée sur VPS
+
+**Préalable :** les deux PDF doivent être ajoutés à la branche PR #286 avec leurs SHA-256 attendus. Ne pas fusionner sur master : les anciens workflows ne sont pas encore sécurisés.
+
+Dans le terminal VPS avec le compte `freijac` :
+
+```bash
+sudo git -C /root/freijstack fetch origin fix/portfolio-bulle-ia-compacte-20261017
+REV=$(sudo git -C /root/freijstack rev-parse FETCH_HEAD)
+DIR=$(mktemp -d)
+sudo git -C /root/freijstack archive "$REV" saas/portfolio | sudo tar -x -C "$DIR"
+sudo bash "$DIR/saas/portfolio/scripts/release-portfolio-vps.sh" "$REV"
+```
+
+Le script vérifie les deux CV, l’index de recrutement et l’image Docker. Il teste les URL HTTP sur un conteneur temporaire lié à localhost, publie une image sous un tag unique dans le Registry, sauvegarde l’image actuelle et remplace **uniquement Portfolio**. Un échec avant la bascule laisse la production inchangée. En cas d’échec après bascule, il tente un retour arrière et affiche une commande de restauration manuelle.
+
+Ne pas utiliser l’ancien déploiement GitHub Actions avec l’utilisateur SSH non privilégié.
 ## Mise en ligne
 
 La branche `master` comporte encore un ancien workflow de déploiement non sécurisé. **Ne pas fusionner ni relancer l'ancien workflow avant validation du déploiement contrôlé.** Prévisualiser d'abord la branche dans une image Docker isolée, vérifier le bouton IA, le bouton retour en haut, les liens PDF et les réponses FR/EN.
