@@ -12,13 +12,13 @@ Workflows CI/CD et automatisations du projet.
 <a id="-liste-complète-des-workflows"></a>
 ## Workflows
 
-> **Note**: Workflows applicatifs (Portfolio, SecureVault, Registry) utilisent maintenant `00-core-full-deploy.yml` pour une pipeline DevSecOps unifiée. Voir [docs-private/DEVOPS_PIPELINES.md](../docs-private/DEVOPS_PIPELINES.md) pour les détails techniques.
+> **Note**: Workflows applicatifs (Portfolio, SecureVault, Registry) utilisent maintenant `00-core-full-deploy.yml` pour une pipeline DevSecOps unifiée. Voir docs-private/DEVOPS_PIPELINES.md (document interne non publié) pour les détails techniques.
 
 | Workflow | Fichier | Déclencheur | Durée | Description |
 |----------|---------|-------------|-------|-------------|
 | **Infrastructure Deploy**| [02-infra-deploy.yml](02-infra-deploy.yml) | Push master/develop (base-infra/*), manuel | ~3-5 min | Déploiement Traefik, n8n, portfolio |
 | **SecureVault Deploy**| [03-app-securevault-deploy.yml](03-app-securevault-deploy.yml) | Push develop (auto), manuel (prod) | ~5-7 min | Wrapper → 00-core-full-deploy.yml + migrations |
-| **Registry Build**| [03-app-registry-build.yml](03-app-registry-build.yml) | Push registry/*, manuel | ~2-3 min | Build images Docker Registry |
+| **Registry Build**| 03-app-registry-build.yml (absent du dépôt) | Push registry/*, manuel | ~2-3 min | Build images Docker Registry |
 | **Registry Deploy**| [03-app-registry-deploy.yml](03-app-registry-deploy.yml) | Push master (registry/*), manuel | ~3-4 min | Wrapper → 00-core-full-deploy.yml + HAProxy |
 | **Registry Cleanup**| [03-app-registry-cleanup.yml](03-app-registry-cleanup.yml) | Schedule (weekly), manuel | ~2-3 min | Nettoyage images obsolètes Registry |
 | **Portfolio Build**| [03-app-portfolio-build.yml](03-app-portfolio-build.yml) | Push portfolio/*, manuel | ~2-3 min | Build frontend Portfolio |
@@ -42,7 +42,7 @@ Workflows CI/CD et automatisations du projet.
 <a id="-workflow-1-securevault-deployment"></a>
 ## Workflow 1: SecureVault Deployment
 
-> **Note** : Depuis 2026, les workflows applicatifs (Portfolio, Registry, SecureVault) utilisent des wrappers qui déclenchent `00-core-full-deploy.yml` pour un pipeline DevSecOps unifié. Voir [DEVOPS_PIPELINES.md](../../docs-private/DEVOPS_PIPELINES.md) pour l'architecture détaillée.
+> **Note** : Depuis 2026, les workflows applicatifs (Portfolio, Registry, SecureVault) utilisent des wrappers qui déclenchent `00-core-full-deploy.yml` pour un pipeline DevSecOps unifié. Voir DEVOPS_PIPELINES.md (document interne non publié) pour l'architecture détaillée.
 
 ### Déclencheurs
 
@@ -374,7 +374,7 @@ on:
 | **JWT_SECRET** | Annuel | Tous les users re-login | ✅ |
 | **ENCRYPTION_KEY** | Annuel | ⚠️ Perte d'accès aux données | ✅ |
 
-Voir [SECRET_ROTATION.md](../docs-private/SECRET_ROTATION.md) pour le guide détaillé.
+Voir SECRET_ROTATION.md (document interne non publié) pour le guide détaillé.
 
 ---
 
@@ -428,7 +428,7 @@ JWT_SECRET=<CHANGEZ_MOI>
 ENCRYPTION_KEY=<CHANGEZ_MOI>
 ```
 
-Voir [SECUREVAULT_DEPLOYMENT.md](../docs/02-deployment/SECUREVAULT_DEPLOYMENT.md) pour le guide.
+Voir [SECUREVAULT_DEPLOYMENT.md](../../docs/02-deployment/SECUREVAULT_DEPLOYMENT.md) pour le guide.
 
 ---
 

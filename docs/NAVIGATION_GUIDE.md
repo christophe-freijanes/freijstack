@@ -224,50 +224,21 @@ START → docs/00-overview/README.md
 <a id="-documentation-path-by-experience-level"></a>
 ## Documentation Path by Experience Level
 
-### Level 1: Complete Beginner (0-1 weeks)
-```
-00-overview/INDEX.md (15 min)
-    ↓
-00-overview/QUICK_DEPLOY_GUIDE.md (10 min)
-    ↓
-01-architecture/ARCHITECTURE.md (30 min)
-    ↓
-00-overview/USER_GUIDE.md (15 min)
-    ↓
-02-deployment/DEPLOYMENT.md (20 min)
+### Initial setup
 
-Total: ~90 minutes to basic competency
-```
+Start with `00-overview/INDEX.md` and `00-overview/QUICK_DEPLOY_GUIDE.md`, then read the architecture and deployment guides before changing an environment.
 
-### Level 2: Intermediate (1-4 weeks)
-```
-01-architecture/ (full, 60 min)
-    ↓
-02-deployment/ (full, 40 min)
-    ↓
-03-guides/ (30 min)
-    ↓
-docs-private/00-phases/PHASE_2_COMPLETION.md (30 min)
-    ↓
-04-operations/TROUBLESHOOTING.md (20 min)
+### Operations
 
-Total: ~180 minutes to operational competency
-```
+Use the guides for the task at hand: monitoring, backups or troubleshooting. Check the source configuration when a guide and the deployed system disagree.
 
-### Level 3: Advanced (4-12 weeks)
-```
-All documentation (full review)
-    ↓
-docs-private/00-phases/ (all phases, 270 min)
-    ↓
-05-reference/ (full, variable)
-    ↓
-Source code review
-    ↓
-Production readiness assessment
+### Changes and review
 
-Total: 500+ minutes to expert competency
-```
+Read the relevant source code, configuration and tests before proposing a change. Internal phase notes provide historical context when available; reading time does not establish operational readiness.
+
+<a id="level-1-complete-beginner-0-1-weeks"></a>
+<a id="level-2-intermediate-1-4-weeks"></a>
+<a id="level-3-advanced-4-12-weeks"></a>
 
 ---
 

@@ -14,23 +14,23 @@ Navigation de la documentation FreijStack.
 <a id="-je-suis-nouveau-sur-le-projet"></a>
 ### Je suis nouveau sur le projet
 1. **[README.md](../README.md)** - Vue d'ensemble générale
-2. **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Architecture technique
+2. **[ARCHITECTURE.md](../01-architecture/ARCHITECTURE.md)** - Architecture technique
 3. **[QUICK_DEPLOY_GUIDE.md](./QUICK_DEPLOY_GUIDE.md)** - Démarrage rapide
 
 <a id="-je-veux-déployer-lapplication"></a>
 ### Je veux déployer l'application
-1. **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Guide déploiement complet
-2. **[SECUREVAULT_DEPLOYMENT.md](./SECUREVAULT_DEPLOYMENT.md)** - SecureVault spécifique
-3. **[CI_CD_ARCHITECTURE.md](./CI_CD_ARCHITECTURE.md)** - Workflows automatisés
+1. **[DEPLOYMENT.md](../02-deployment/DEPLOYMENT.md)** - Guide déploiement complet
+2. **[SECUREVAULT_DEPLOYMENT.md](../02-deployment/SECUREVAULT_DEPLOYMENT.md)** - SecureVault spécifique
+3. **[CI_CD_ARCHITECTURE.md](../01-architecture/CI_CD_ARCHITECTURE.md)** - Workflows automatisés
 
 <a id="-je-veux-comprendre-lautomatisation"></a>
 ### Je veux comprendre l'automatisation
-1. **[AUTOMATION_GUIDE.md](./AUTOMATION_GUIDE.md)** - Guide automatisation complet
-2. **[CI_CD_ARCHITECTURE.md](./CI_CD_ARCHITECTURE.md)** - Architecture CI/CD avec diagrammes
+1. **[AUTOMATION_GUIDE.md](../03-guides/AUTOMATION_GUIDE.md)** - Guide automatisation complet
+2. **[CI_CD_ARCHITECTURE.md](../01-architecture/CI_CD_ARCHITECTURE.md)** - Architecture CI/CD avec diagrammes
 
 <a id="-jai-un-problème-à-résoudre"></a>
 ### J'ai un problème à résoudre
-1. **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Guide dépannage complet
+1. **[TROUBLESHOOTING.md](../04-operations/TROUBLESHOOTING.md)** - Guide dépannage complet
    - Problèmes déploiement
    - Erreurs HTTP/SSL
    - SecureVault (CORS, Registration)
@@ -38,25 +38,25 @@ Navigation de la documentation FreijStack.
 
 <a id="-je-veux-monitorer-lapplication"></a>
 ### Je veux monitorer l'application
-1. **[MONITORING.md](./MONITORING.md)** - Setup monitoring Prometheus/Grafana/Loki
-2. **[CI_CD_ARCHITECTURE.md](./CI_CD_ARCHITECTURE.md)** - Health checks & alertes
+1. **[MONITORING.md](../03-guides/MONITORING.md)** - Setup monitoring Prometheus/Grafana/Loki
+2. **[CI_CD_ARCHITECTURE.md](../01-architecture/CI_CD_ARCHITECTURE.md)** - Health checks & alertes
 
 <a id="-je-veux-sécuriser-linfrastructure"></a>
 ### Je veux sécuriser l'infrastructure
-1. **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Sécurité & Conformité
-2. **[docs-private/SECRET_ROTATION.md](../docs-private/SECRET_ROTATION.md)** - Rotation secrets
-3. **[docs-private/SSO_SAML_CONFIG.md](../docs-private/SSO_SAML_CONFIG.md)** - Configuration SSO
+1. **[ARCHITECTURE.md](../01-architecture/ARCHITECTURE.md)** - Sécurité & Conformité
+2. **docs-private/SECRET_ROTATION.md (document interne non publié)** - Rotation secrets
+3. **docs-private/SSO_SAML_CONFIG.md (document interne non publié)** - Configuration SSO
 
 <a id="-je-veux-développer-pour-le-portfolio"></a>
 ### Je veux développer pour le Portfolio
-1. **[saas/portfolio/README.md](../saas/portfolio/README.md)** - Portfolio spécifique
+1. **[saas/portfolio/README.md](../../saas/portfolio/README.md)** - Portfolio spécifique
 2. **[USER_GUIDE.md](./USER_GUIDE.md)** - Guide utilisateur
 
 <a id="-je-veux-utiliser-securevault"></a>
 ### Je veux utiliser SecureVault
 1. **[USER_GUIDE.md](./USER_GUIDE.md)** - Guide utilisateur complet
-2. **[SECUREVAULT_DEPLOYMENT.md](./SECUREVAULT_DEPLOYMENT.md)** - Déploiement
-3. **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md#securevault---problèmes-enregistrement)** - Dépannage
+2. **[SECUREVAULT_DEPLOYMENT.md](../02-deployment/SECUREVAULT_DEPLOYMENT.md)** - Déploiement
+3. **[TROUBLESHOOTING.md](../04-operations/TROUBLESHOOTING.md#securevault---problèmes-enregistrement)** - Dépannage
 
 ---
 
@@ -69,23 +69,23 @@ Navigation de la documentation FreijStack.
 #### Architecture & Infrastructure
 | Document | Contenu | Public |
 |----------|---------|--------|
-| **[ARCHITECTURE.md](./ARCHITECTURE.md)** | 📋 Architecture technique, stack, infrastructure | ✅ Public |
-| **[DOCKER_STRUCTURE.md](./DOCKER_STRUCTURE.md)** | 🐳 Structure Docker, composition, volumes | ✅ Public |
-| **[DEPLOYMENT.md](./DEPLOYMENT.md)** | 🚀 Guide déploiement VPS, setup initial, configuration | ✅ Public |
+| **[ARCHITECTURE.md](../01-architecture/ARCHITECTURE.md)** | 📋 Architecture technique, stack, infrastructure | ✅ Public |
+| **[DOCKER_STRUCTURE.md](../01-architecture/DOCKER_STRUCTURE.md)** | 🐳 Structure Docker, composition, volumes | ✅ Public |
+| **[DEPLOYMENT.md](../02-deployment/DEPLOYMENT.md)** | 🚀 Guide déploiement VPS, setup initial, configuration | ✅ Public |
 
 #### Monitoring & Sécurité
 | Document | Contenu | Public |
 |----------|---------|--------|
-| **[MONITORING.md](./MONITORING.md)** | 📊 Setup Prometheus/Grafana/Loki, dashboards, alertes | ✅ Public |
-| **[AUDIT_SYSTEM.md](./AUDIT_SYSTEM.md)** | 🔍 Système d'audit SecureVault, logs, traçabilité | ✅ Public |
-| **[CLOUD_BACKUP.md](./CLOUD_BACKUP.md)** | 💾 Stratégie backup AWS S3 + Azure Blob, rétention | ✅ Public |
+| **[MONITORING.md](../03-guides/MONITORING.md)** | 📊 Setup Prometheus/Grafana/Loki, dashboards, alertes | ✅ Public |
+| **[AUDIT_SYSTEM.md](../05-reference/AUDIT_SYSTEM.md)** | 🔍 Système d'audit SecureVault, logs, traçabilité | ✅ Public |
+| **[CLOUD_BACKUP.md](../03-guides/CLOUD_BACKUP.md)** | 💾 Stratégie backup AWS S3 + Azure Blob, rétention | ✅ Public |
 
 #### Automatisation & Support
 | Document | Contenu | Public |
 |----------|---------|--------|
-| **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** | 🔧 Guide dépannage complet, diagnostic, solutions | ✅ Public |
+| **[TROUBLESHOOTING.md](../04-operations/TROUBLESHOOTING.md)** | 🔧 Guide dépannage complet, diagnostic, solutions | ✅ Public |
 | **[USER_GUIDE.md](./USER_GUIDE.md)** | 👤 Guide utilisateur SecureVault, features | ✅ Public |
-| **[FEATURES_ROADMAP.md](./FEATURES_ROADMAP.md)** | 🗺️ Roadmap produit, features plannifiées | ✅ Public |
+| **[FEATURES_ROADMAP.md](../05-reference/FEATURES_ROADMAP.md)** | 🗺️ Roadmap produit, features plannifiées | ✅ Public |
 
 ---
 
@@ -94,10 +94,10 @@ Navigation de la documentation FreijStack.
 
 | Document | Contenu | Création | Type |
 |----------|---------|----------|------|
-| **[CI_CD_ARCHITECTURE.md](./CI_CD_ARCHITECTURE.md)** | 📊 Diagramme Mermaid CI/CD, 16 workflows détaillés | ✅ Nouvelle | ✨ Important |
-| **[AUTOMATION_GUIDE.md](./AUTOMATION_GUIDE.md)** | 🤖 Guide automatisation consolidé (3 fichiers fusionnés) | ✅ Consolidée | ✨ Important |
-| **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** | 🔧 Enrichi : CORS + Registration intégrés | ✅ Enrichie | ✨ Important |
-| **[DOCUMENTATION_AUDIT.md](./DOCUMENTATION_AUDIT.md)** | 📋 Audit complet, plan d'optimisation, statistiques | ✅ Nouvelle | 📊 Référence |
+| **[CI_CD_ARCHITECTURE.md](../01-architecture/CI_CD_ARCHITECTURE.md)** | 📊 Diagramme Mermaid CI/CD, 16 workflows détaillés | ✅ Nouvelle | ✨ Important |
+| **[AUTOMATION_GUIDE.md](../03-guides/AUTOMATION_GUIDE.md)** | 🤖 Guide automatisation consolidé (3 fichiers fusionnés) | ✅ Consolidée | ✨ Important |
+| **[TROUBLESHOOTING.md](../04-operations/TROUBLESHOOTING.md)** | 🔧 Enrichi : CORS + Registration intégrés | ✅ Enrichie | ✨ Important |
+| **[DOCUMENTATION_AUDIT.md](../05-reference/DOCUMENTATION_AUDIT.md)** | 📋 Audit complet, plan d'optimisation, statistiques | ✅ Nouvelle | 📊 Référence |
 
 ---
 
@@ -106,8 +106,8 @@ Navigation de la documentation FreijStack.
 
 | Document | Contenu | Audience |
 |----------|---------|----------|
-| **[PRO_DEPLOYMENT.md](./PRO_DEPLOYMENT.md)** | Guide déploiement PRO/Enterprise avec SLA | DevOps avancé |
-| **[SECUREVAULT_DEPLOYMENT.md](./SECUREVAULT_DEPLOYMENT.md)** | Déploiement spécifique SecureVault, backend+frontend+DB | DevOps SecureVault |
+| **[PRO_DEPLOYMENT.md](../02-deployment/PRO_DEPLOYMENT.md)** | Guide déploiement PRO/Enterprise avec SLA | DevOps avancé |
+| **[SECUREVAULT_DEPLOYMENT.md](../02-deployment/SECUREVAULT_DEPLOYMENT.md)** | Déploiement spécifique SecureVault, backend+frontend+DB | DevOps SecureVault |
 | **[QUICK_DEPLOY_GUIDE.md](./QUICK_DEPLOY_GUIDE.md)** | Guide de démarrage rapide | Nouveaux |
 
 ---
@@ -119,9 +119,9 @@ Navigation de la documentation FreijStack.
 
 | Document | Contenu | Sensibilité |
 |----------|---------|-------------|
-| **[SECRET_ROTATION.md](../docs-private/SECRET_ROTATION.md)** | 🔄 Stratégie rotation secrets (JWT, DB, API keys) | 🔴 Sensible |
-| **[SSO_SAML_CONFIG.md](../docs-private/SSO_SAML_CONFIG.md)** | 🔐 Configuration SSO/SAML avec certificats | 🔴 Sensible |
-| **[README_RESET_PASSWORD.md](../docs-private/README_RESET_PASSWORD.md)** | 🔑 Procédure réinitialisation PostgreSQL password | 🔴 Sensible |
+| **SECRET_ROTATION.md (document interne non publié)** | 🔄 Stratégie rotation secrets (JWT, DB, API keys) | 🔴 Sensible |
+| **SSO_SAML_CONFIG.md (document interne non publié)** | 🔐 Configuration SSO/SAML avec certificats | 🔴 Sensible |
+| **README_RESET_PASSWORD.md (document interne non publié)** | 🔑 Procédure réinitialisation PostgreSQL password | 🔴 Sensible |
 
 **⚠️ Note** : Ces documents contiennent des configurations sensibles et des secrets. Accès limité.
 
@@ -289,9 +289,9 @@ docs-private/
 
 ### Internes
 - [README.md](../README.md) - Page d'accueil projet
-- [base-infra/README.md](../base-infra/README.md) - Infrastructure centralisée
-- [saas/portfolio/README.md](../saas/portfolio/README.md) - Portfolio multilingue
-- [saas/securevault/README.md](../saas/securevault/README.md) - SecureVault app
+- [base-infra/README.md](../../base-infra/README.md) - Infrastructure centralisée
+- [saas/portfolio/README.md](../../saas/portfolio/README.md) - Portfolio multilingue
+- [saas/securevault/README.md](../../saas/securevault/README.md) - SecureVault app
 
 ### Externes
 - [GitHub Repo](https://github.com/christophe-freijanes/freijstack)

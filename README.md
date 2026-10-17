@@ -366,7 +366,7 @@ Paths sur VPS:
 5. **Routing** → Traefik restart + health check
 6. **Live** → Site accessible via HTTPS
 
-**Voir**: [Architecture Détaillée](docs/01-architecture/architecture.md)
+**Voir**: [Architecture Détaillée](docs/01-architecture/ARCHITECTURE.md)
 
 ### Démarrage Rapide
 
