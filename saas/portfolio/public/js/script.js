@@ -164,8 +164,8 @@ document.addEventListener('DOMContentLoaded', function() {
             'assistant.eyebrow': 'ÉCHANGE RECRUTEMENT',
             'assistant.title': 'Assistant recrutement',
             'assistant.close': 'Fermer',
-            'assistant.notice': 'Assistant interactif fondé sur le CV et le portfolio, sans génération LLM.',
-            'assistant.greeting': 'Bonjour ! Posez une question sur AWS, mon parcours, mes certifications ou mes réalisations.',
+            'assistant.notice': 'Assistant virtuel : réponses inspirées de mon parcours et de mon style.',
+            'assistant.greeting': 'Bonjour ! Ravi de vous accueillir. Une question sur mon parcours, AWS ou le travail en équipe ?',
             'assistant.questions.title': 'Questions fréquentes',
             'assistant.question.experience': 'Mon parcours',
             'assistant.question.aws': 'AWS',
@@ -174,6 +174,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'assistant.question.impact': 'Réalisations',
             'assistant.question.certs': 'Certifications',
             'assistant.question.langs': 'Langues',
+            'assistant.question.teamwork': 'Travail en équipe',
             'assistant.question.skills': 'Mes compétences',
             'assistant.question.projects': 'Mes projets',
             'assistant.input.label': 'Votre question',
@@ -298,8 +299,8 @@ document.addEventListener('DOMContentLoaded', function() {
             'assistant.eyebrow': 'RECRUITMENT CHAT',
             'assistant.title': 'Recruitment assistant',
             'assistant.close': 'Close',
-            'assistant.notice': 'Interactive assistant based on the CV and portfolio, without LLM generation.',
-            'assistant.greeting': 'Hello! Ask about AWS, my background, certifications or achievements.',
+            'assistant.notice': 'Virtual assistant: answers inspired by my background and speaking style.',
+            'assistant.greeting': 'Welcome! Glad you stopped by. Curious about my background, AWS or teamwork?',
             'assistant.questions.title': 'Frequently asked questions',
             'assistant.question.experience': 'My experience',
             'assistant.question.aws': 'AWS',
@@ -308,6 +309,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'assistant.question.impact': 'Achievements',
             'assistant.question.certs': 'Certifications',
             'assistant.question.langs': 'Languages',
+            'assistant.question.teamwork': 'Teamwork',
             'assistant.question.skills': 'My skills',
             'assistant.question.projects': 'My projects',
             'assistant.input.label': 'Your question',
@@ -994,8 +996,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updatePlaceholder() {
         input.placeholder = language() === 'en'
-            ? 'Ask about my experience, skills or projects…'
-            : 'Posez une question sur mon parcours, mes compétences ou mes projets…';
+            ? 'Curious about my work? Ask away…'
+            : 'Une question sur mon parcours ? Je vous écoute…';
     }
 
     document.querySelectorAll('.lang-btn').forEach(function(button) {
