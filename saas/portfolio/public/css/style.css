@@ -1712,16 +1712,28 @@ section {
     height: 44px;
     padding: 0;
     border: 1px solid var(--border-color);
-    border-radius: 50%;
-    background: var(--accent, #24c066);
+    border-radius: 15px 15px 15px 4px;
+    background: linear-gradient(145deg, #49db91, var(--accent, #24c066));
     color: #04120a;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16);
+    box-shadow: 0 3px 15px rgba(16, 140, 80, 0.32);
     font-family: inherit;
     font-size: 0.8rem;
     font-weight: 700;
     cursor: pointer;
     opacity: 0.92;
     transition: opacity 0.2s, transform 0.2s;
+}
+
+.assistant-launch::after {
+    content: "";
+    position: absolute;
+    left: -1px;
+    bottom: -7px;
+    width: 11px;
+    height: 11px;
+    border-radius: 0 0 2px 9px;
+    background: var(--accent, #24c066);
+    transform: skewY(-25deg);
 }
 
 .assistant-launch:hover,
@@ -1844,6 +1856,7 @@ section {
     font-size: 0.9rem;
     line-height: 1.5;
     overflow-wrap: anywhere;
+    white-space: pre-line;
 }
 
 .assistant-reply {
