@@ -906,6 +906,19 @@ document.addEventListener('DOMContentLoaded', function() {
         if (next && next.id !== result.id) answer += '\n\n' + copy.lead + next.topic + copy.invite;
         addMessage(answer, false);
         previousTopic = result;
+        if (next && next.id !== result.id) {
+            const suggestion = document.createElement('button');
+            suggestion.type = 'button';
+            suggestion.className = 'assistant-next';
+            suggestion.textContent = copy.topic + next.topic;
+            suggestion.addEventListener('click', () => {
+                addMessage(next.topic, true);
+                suggestion.remove();
+                reply(next.id);
+            });
+            messages.appendChild(suggestion);
+            messages.scrollTop = messages.scrollHeight;
+        }
     }
 
     openButton.addEventListener('click', function() {
