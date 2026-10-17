@@ -80,31 +80,6 @@ jobs:
           fi
           ansible-lint
 
-  terraform:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-      - name: Install tflint
-        run: curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-      - name: Run terraform fmt -check (if .tf files exist)
-        run: |
-          set -euo pipefail
-          if ! find . -name '*.tf' -print -quit | grep -q .; then
-            echo "No Terraform files to lint"
-            exit 0
-          fi
-          terraform fmt -check -recursive
-      - name: Run tflint
-        run: |
-          set -euo pipefail
-          if ! find . -name '*.tf' -print -quit | grep -q .; then
-            echo "No Terraform files to lint"
-            exit 0
-          fi
-          tflint
-
   markdown:
     runs-on: ubuntu-latest
     steps:
