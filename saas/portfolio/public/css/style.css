@@ -1700,12 +1700,46 @@ section {
     background: var(--primary-dark);
 }
 
-/* Recruitment assistant */
-.assistant-nav-launch {
-    margin-left: 8px;
-    font: inherit;
-    font-size: 0.9rem;
-    font-weight: 600;
+/* Bulle IA discrète, opposée au bouton retour en haut */
+.assistant-launch {
+    position: fixed;
+    left: 24px;
+    bottom: 32px;
+    z-index: 1001;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    background: var(--accent, #24c066);
+    color: #04120a;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    opacity: 0.92;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.assistant-launch:hover,
+.assistant-launch:focus-visible {
+    opacity: 1;
+    transform: translateY(-2px);
+}
+
+.assistant-launch:focus-visible {
+    outline: 2px solid var(--accent, #24c066);
+    outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+    .assistant-launch {
+        left: 18px;
+        bottom: 18px;
+    }
 }
 
 .assistant-dialog {
