@@ -895,7 +895,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const q = normalize(question);
         if (!q) return null;
         if (/(rendez vous|prendre rdv|book|booking|appointment|calendar|calendrier|meeting)/.test(q)) return 'booking';
-        if (/(tu es une ia|vraie ia|un robot|un bot|chatbot|are you ai|are you real|virtual assistant)/.test(q)) return 'identity';
+        if (/(tu es une ia|es tu une ia|qui es tu|vraie ia|un robot|un bot|chatbot|are you ai|are you real|virtual assistant)/.test(q)) return 'identity';
+
+        // Les questions personnelles et humaines passent avant les mots-clés génériques.
+        if (/(handball|hockey|soccer|football|sports?|photograph|photo|video|design|cuisine|loisirs?|hobb|hors travail|5 a 7|passions?)/.test(q)) {
+            return knowledge.find(item => item.id === 'interests') || null;
+        }
+        if (/(collabor|collegu|equipe|teamwork|team|soft skills?|savoir etre|sociab|communi|relationnel|esprit d equipe)/.test(q)) {
+            return knowledge.find(item => item.id === 'teamwork') || null;
+        }
 
         const ranked = knowledge.map(item => {
             const score = item.tags.reduce((total, tag) =>
