@@ -815,29 +815,46 @@ document.addEventListener('DOMContentLoaded', function() {
     const language = () => localStorage.getItem('preferredLanguage') === 'en' ? 'en' : 'fr';
     const normalize = value => value.toLowerCase().normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9+]+/g, ' ').trim();
-    const messagesData = {
+    const phrases = {
         fr: {
-            openers: ['Un exemple concret : ', 'Voici un élément précis du CV : ', 'Sur ce sujet : '],
-            lead: 'Souhaitez-vous aussi explorer ',
-            invite: ' ? Vous pouvez également réserver un échange pour approfondir.',
-            missing: 'Je ne trouve pas de précision vérifiable sur ce point dans le CV et le portfolio. Essayez AWS, réalisations, certifications, langues ou sécurité. Vous pouvez aussi proposer un échange.',
-            unavailable: 'Le contenu détaillé ne peut pas être chargé pour le moment. Consultez le CV ATS ou proposez un échange.',
-            booking: 'Un échange permettra de poser vos questions directement. Utilisez le bouton « Réserver un échange » ci-dessous.',
-            topic: 'À explorer : '
+            missing: [
+                "Bonne question. Je préfère rester précis : je n'ai pas assez d'éléments vérifiés pour vous répondre. On peut parler du parcours, des projets ou des compétences.",
+                "Je n'ai pas cette information dans le CV ou le portfolio. Si vous voulez, parlons d'un sujet concret : AWS, SRE, certifications ou réalisations.",
+                "Sur ce point, je ne veux pas inventer. Le plus simple est de poser la question lors d'un échange."
+            ],
+            unavailable: "Je n'arrive pas à charger les informations pour le moment. Le CV ATS reste disponible, et vous pouvez aussi proposer un échange.",
+            booking: [
+                "Avec plaisir ! Le bouton « Réserver un échange » est juste en dessous.",
+                "Bonne idée. Pour aller plus loin, vous pouvez choisir un créneau avec « Réserver un échange »."
+            ],
+            identity: "Je suis l'assistant virtuel du portfolio, pas Christophe en direct. Je partage ses expériences et ses centres d'intérêt dans un style qui lui ressemble, sans inventer de faits.",
+            next: ["Ça vous intéresserait aussi de parler de ", "On peut également regarder ", "Un autre angle intéressant : "],
+            meeting: ["Pour approfondir, le bouton de rendez-vous est à votre disposition.", "Envie d'en discuter directement ? La prise de rendez-vous est juste en dessous."],
+            explore: "En savoir plus : "
         },
         en: {
-            openers: ['One concrete example: ', 'A specific CV detail: ', 'On that topic: '],
-            lead: 'Would you also like to explore ',
-            invite: '? You can also book a conversation for more details.',
-            missing: 'I cannot verify that detail in the CV or portfolio. Try AWS, achievements, certifications, languages or security. You can also book a conversation.',
-            unavailable: 'Detailed information is temporarily unavailable. Please see the ATS résumé or book a conversation.',
-            booking: 'You can ask your questions directly in a conversation. Use the “Book a conversation” button below.',
-            topic: 'Explore: '
+            missing: [
+                "Good question. I prefer to be precise: I don't have enough verified information to answer that. We can talk about experience, projects or skills.",
+                "That detail isn't in the résumé or portfolio. We could explore AWS, SRE, certifications or achievements instead.",
+                "I don't want to guess on this one. It's a good question to ask in a conversation."
+            ],
+            unavailable: "I can't load the information just now. The ATS résumé is available, and you can book a conversation.",
+            booking: [
+                "Of course! Use the “Book a conversation” button below.",
+                "Great idea. You can pick a time using the booking button below."
+            ],
+            identity: "I'm the portfolio's virtual assistant, not Christophe live. I share his experience and interests in a style inspired by him, without inventing details.",
+            next: ["Would you also like to hear about ", "We could also look at ", "Another interesting angle: "],
+            meeting: ["To explore this further, you can book a conversation below.", "Want to discuss this directly? The booking option is right below."],
+            explore: "Explore: "
         }
     };
+
+    const previousAnswers = new Map();
     let knowledge = [];
     let previousTopic = null;
-    fetch('data/recruitment-knowledge.json', { cache: 'no-store' })
+    let replyCount = 0;
+    const loading = fetch('data/recruitment-knowledge.json')
         .then(response => {
             if (!response.ok) throw new Error('Index non disponible');
             return response.json();
@@ -845,13 +862,23 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (!data || !Array.isArray(data.items)) throw new Error('Index invalide');
             knowledge = data.items.filter(item => item.id && Array.isArray(item.tags)
-                && typeof item.fr === 'string' && typeof item.en === 'string');
+                && item.replies && Array.isArray(item.replies.fr) && Array.isArray(item.replies.en));
         })
         .catch(() => { knowledge = []; });
 
+    function choose(values, key) {
+        if (!values.length) return '';
+        if (values.length === 1) return values[0];
+        const last = previousAnswers.get(key);
+        let index = Math.floor(Math.random() * values.length);
+        if (index === last) index = (index + 1 + Math.floor(Math.random() * (values.length - 1))) % values.length;
+        previousAnswers.set(key, index);
+        return values[index];
+    }
+
     function addMessage(text, isUser) {
         const message = document.createElement('p');
-        message.className = `assistant-message ${isUser ? 'assistant-user' : 'assistant-reply'}`;
+        message.className = 'assistant-message ' + (isUser ? 'assistant-user' : 'assistant-reply');
         message.textContent = text;
         messages.appendChild(message);
         messages.scrollTop = messages.scrollHeight;
@@ -859,60 +886,70 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function matches(question, keyword) {
         const key = normalize(keyword);
-        if (!key) return false;
-        return (' ' + question + ' ').includes(' ' + key + ' ');
+        return key && (' ' + question + ' ').includes(' ' + key + ' ');
     }
 
     function findTopic(question) {
         const q = normalize(question);
         if (!q) return null;
-        if (/(rendez vous|appointment|book|booking|meeting|calendrier|calendar)/.test(q)) {
-            return 'booking';
-        }
-        const scored = knowledge.map(item => {
-            let points = 0;
-            for (const tag of item.tags) {
-                if (matches(q, tag)) {
-                    points += normalize(tag).includes(' ') ? 4 : (tag.length >= 4 ? 3 : 1);
-                }
-            }
-            return { item, points };
-        }).sort((a, b) => b.points - a.points);
-        if (scored.length && scored[0].points > 0) return scored[0].item;
-        // Suivi court : continuer la conversation sans inventer de faits.
-        if (previousTopic && /^(et |plus|encore|detail|details|why|how|more|pourquoi|comment)/.test(q)) {
-            return knowledge.find(item => item.id === previousTopic.next) || null;
-        }
+        if (/(rendez vous|prendre rdv|book|booking|appointment|calendar|calendrier|meeting)/.test(q)) return 'booking';
+        if (/(tu es une ia|vraie ia|un robot|un bot|chatbot|are you ai|are you real|virtual assistant)/.test(q)) return 'identity';
+
+        const ranked = knowledge.map(item => {
+            const score = item.tags.reduce((total, tag) =>
+                total + (matches(q, tag) ? (normalize(tag).includes(' ') ? 5 : (tag.length >= 4 ? 3 : 1)) : 0), 0);
+            return { item, score };
+        }).sort((a, b) => b.score - a.score);
+
+        if (ranked.length && ranked[0].score > 0) return ranked[0].item;
+        if (previousTopic && /^(encore|plus|detail|details|precise|preciser|developpe|raconte|more|tell me more|explain)/.test(q)) return previousTopic;
         return null;
     }
 
-    function reply(topic, question) {
+    async function reply(topic, question = '') {
+        await loading;
         const lang = language();
-        const copy = messagesData[lang];
-        const result = typeof topic === 'string'
+        const copy = phrases[lang];
+        const result = topic
             ? knowledge.find(item => item.id === topic)
             : findTopic(question);
+        replyCount += 1;
+
         if (result === 'booking') {
-            addMessage(copy.booking, false);
+            addMessage(choose(copy.booking, lang + ':booking'), false);
+            return;
+        }
+        if (result === 'identity') {
+            addMessage(copy.identity, false);
             return;
         }
         if (!result) {
-            addMessage(knowledge.length ? copy.missing : copy.unavailable, false);
+            addMessage(knowledge.length
+                ? choose(copy.missing, lang + ':missing')
+                : copy.unavailable, false);
             return;
         }
-        const opener = copy.openers[Math.floor(Math.random() * copy.openers.length)];
-        let answer = opener + result[lang];
-        const next = knowledge.find(item => item.id === result.next);
-        if (next && next.id !== result.id) answer += '\n\n' + copy.lead + next.topic + copy.invite;
-        addMessage(answer, false);
+
+        const options = result.replies[lang];
+        let answer = choose(options, lang + ':' + result.id);
         previousTopic = result;
-        if (next && next.id !== result.id) {
+        const next = knowledge.find(item => item.id === result.next && item.id !== result.id);
+        // Relances occasionnelles, jamais systématiques.
+        const addFollowUp = next && replyCount % 3 !== 1 && Math.random() < 0.65;
+        if (addFollowUp) {
+            answer += '\n\n' + choose(copy.next, lang + ':transition') + (next.topic_en && lang === 'en' ? next.topic_en : next.topic) + ' ?';
+        } else if (replyCount > 2 && replyCount % 4 === 0) {
+            answer += '\n\n' + choose(copy.meeting, lang + ':meeting');
+        }
+        addMessage(answer, false);
+        if (addFollowUp) {
             const suggestion = document.createElement('button');
             suggestion.type = 'button';
             suggestion.className = 'assistant-next';
-            suggestion.textContent = copy.topic + next.topic;
+            const label = lang === 'en' && next.topic_en ? next.topic_en : next.topic;
+            suggestion.textContent = copy.explore + label;
             suggestion.addEventListener('click', () => {
-                addMessage(next.topic, true);
+                addMessage(label, true);
                 suggestion.remove();
                 reply(next.id);
             });
