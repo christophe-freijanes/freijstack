@@ -1,8 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { LogOut, Plus, Eye, EyeOff, Trash2, Edit2, Shield, Clock } from 'lucide-react';
+import { LogOut, Plus, Eye, Trash2, Shield, Clock } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+
+const getAuthHeaders = () => ({
+  headers: {
+    'Authorization': `Bearer ${localStorage.getItem('token')}`
+  }
+});
 
 function Dashboard({ onLogout }) {
   const [secrets, setSecrets] = useState([]);
@@ -20,25 +26,7 @@ function Dashboard({ onLogout }) {
     expires_at: ''
   });
 
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-    loadSecrets();
-    loadAuditLogs();
-  }, []);
-
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    return {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    };
-  };
-
-  const loadSecrets = async () => {
+  const loadSecrets = useCallback(async () => {
     try {
       const response = await axios.get(`${API_URL}/secrets`, getAuthHeaders());
       setSecrets(response.data.secrets);
@@ -50,16 +38,28 @@ function Dashboard({ onLogout }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [onLogout]);
 
-  const loadAuditLogs = async () => {
+  const loadAuditLogs = useCallback(async () => {
     try {
       const response = await axios.get(`${API_URL}/audit?limit=20`, getAuthHeaders());
       setAuditLogs(response.data.logs);
     } catch (error) {
       console.error('Error loading audit logs:', error);
+      if (error.response?.status === 401) {
+        onLogout();
+      }
     }
-  };
+  }, [onLogout]);
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+    loadSecrets();
+    loadAuditLogs();
+  }, [loadSecrets, loadAuditLogs]);
 
   const handleCreateSecret = async (e) => {
     e.preventDefault();
