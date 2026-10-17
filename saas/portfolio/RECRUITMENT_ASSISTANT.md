@@ -43,6 +43,18 @@ Test de syntaxe JavaScript :
 node --check saas/portfolio/public/js/script.js
 ```
 
+## Aperçu Docker sur VPS (sans déploiement)
+
+Après avoir ajouté les deux PDF dans la branche PR :
+
+```bash
+cd saas/portfolio
+sudo bash scripts/preview-docker.sh
+```
+
+L'image locale `portfolio:pr286-review` est créée sans changer les conteneurs de production.
+Le site d'aperçu est lié à `127.0.0.1:18086` sur le VPS. Pour un contrôle visuel depuis Windows, construire également l'image via Docker Desktop/WSL sur le PC, ou utiliser un tunnel SSH authentifié. Le script refuse d'écraser un conteneur d'aperçu existant.
+
 ## Mise en ligne
 
 La branche `master` comporte encore un ancien workflow de déploiement non sécurisé. **Ne pas fusionner ni relancer l'ancien workflow avant validation du déploiement contrôlé.** Prévisualiser d'abord la branche dans une image Docker isolée, vérifier le bouton IA, le bouton retour en haut, les liens PDF et les réponses FR/EN.
