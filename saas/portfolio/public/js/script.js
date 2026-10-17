@@ -800,25 +800,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!dialog || !openButton || !closeButton || !messages || !form || !input) return;
 
-    const responses = {
+    const language = () => localStorage.getItem('preferredLanguage') === 'en' ? 'en' : 'fr';
+    const normalize = value => value.toLowerCase().normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9+]+/g, ' ').trim();
+    const messagesData = {
         fr: {
-            experience: 'Le portfolio présente plus de 20 ans d’expérience en Cloud et sécurité. Depuis juin 2026, Christophe est Spécialiste principal – Plateforme AWS / Référent technique chez La Caisse (CDPQ). Son parcours inclut notamment ACENSI, SQUAD, ECONOCOM (projet ITER), DIGIMIND et HARDIS.',
-            skills: 'Les compétences affichées comprennent AWS, GCP, Kubernetes, Terraform, AWS CDK, CloudFormation, Ansible, Python, Bash/PowerShell, DevSecOps, SRE, FinOps, CloudWatch Logs, Datadog, LLM, MCP et Amazon Bedrock.',
-            projects: 'Le portfolio présente notamment Formation DevOps & CI/CD, ansible-webapp, student-list, freijstack, Docker Applications et Infrastructure as Code. Les liens sont dans la section Projets.',
-            booking: 'Vous pouvez réserver un échange avec le bouton Google Calendar ci-dessous.',
-            unknown: 'Je peux répondre à partir du portfolio sur le parcours, les compétences et les projets. Vous pouvez aussi réserver un échange avec le bouton Google Calendar.'
+            openers: ['Un exemple concret : ', 'Voici un élément précis du CV : ', 'Sur ce sujet : '],
+            lead: 'Souhaitez-vous aussi explorer ',
+            invite: ' ? Vous pouvez également réserver un échange pour approfondir.',
+            missing: 'Je ne trouve pas de précision vérifiable sur ce point dans le CV et le portfolio. Essayez AWS, réalisations, certifications, langues ou sécurité. Vous pouvez aussi proposer un échange.',
+            unavailable: 'Le contenu détaillé ne peut pas être chargé pour le moment. Consultez le CV ATS ou proposez un échange.',
+            booking: 'Un échange permettra de poser vos questions directement. Utilisez le bouton « Réserver un échange » ci-dessous.',
+            topic: 'À explorer : '
         },
         en: {
-            experience: 'The portfolio shows over 20 years of experience in Cloud and Security. Since June 2026, Christophe has been Principal Specialist – AWS Platform / Technical Lead at La Caisse (CDPQ). His background also includes ACENSI, SQUAD, ECONOCOM (ITER project), DIGIMIND and HARDIS.',
-            skills: 'Listed skills include AWS, GCP, Kubernetes, Terraform, AWS CDK, CloudFormation, Ansible, Python, Bash/PowerShell, DevSecOps, SRE, FinOps, CloudWatch Logs, Datadog, LLMs, MCP and Amazon Bedrock.',
-            projects: 'The portfolio features DevOps & CI/CD Training, ansible-webapp, student-list, freijstack, Docker Applications and Infrastructure as Code. Links are in the Projects section.',
-            booking: 'You can book a conversation using the Google Calendar button below.',
-            unknown: 'I can answer questions based on the portfolio about experience, skills and projects. You can also book a conversation using the Google Calendar button.'
+            openers: ['One concrete example: ', 'A specific CV detail: ', 'On that topic: '],
+            lead: 'Would you also like to explore ',
+            invite: '? You can also book a conversation for more details.',
+            missing: 'I cannot verify that detail in the CV or portfolio. Try AWS, achievements, certifications, languages or security. You can also book a conversation.',
+            unavailable: 'Detailed information is temporarily unavailable. Please see the ATS résumé or book a conversation.',
+            booking: 'You can ask your questions directly in a conversation. Use the “Book a conversation” button below.',
+            topic: 'Explore: '
         }
     };
-
-    const language = () => localStorage.getItem('preferredLanguage') === 'en' ? 'en' : 'fr';
-    const normalize = text => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    let knowledge = [];
+    let previousTopic = null;
+    fetch('data/recruitment-knowledge.json', { cache: 'no-store' })
+        .then(response => {
+            if (!response.ok) throw new Error('Index non disponible');
+            return response.json();
+        })
+        .then(data => {
+            if (!data || !Array.isArray(data.items)) throw new Error('Index invalide');
+            knowledge = data.items.filter(item => item.id && Array.isArray(item.tags)
+                && typeof item.fr === 'string' && typeof item.en === 'string');
+        })
+        .catch(() => { knowledge = []; });
 
     function addMessage(text, isUser) {
         const message = document.createElement('p');
@@ -828,15 +845,55 @@ document.addEventListener('DOMContentLoaded', function() {
         messages.scrollTop = messages.scrollHeight;
     }
 
-    function answerQuestion(question) {
-        const text = normalize(question);
-        const copy = responses[language()];
+    function matches(question, keyword) {
+        const key = normalize(keyword);
+        if (!key) return false;
+        return (' ' + question + ' ').includes(' ' + key + ' ');
+    }
 
-        if (/(book|booking|calendar|schedule|meeting|interview|rdv|rendez|reservation|reserve)/.test(text)) return copy.booking;
-        if (/(experience|parcours|career|background|caisse|cdpq|acensi|squad|econom|digimind|hardis|years|annee)/.test(text)) return copy.experience;
-        if (/(skill|competence|technical|technologie|aws|gcp|kubernetes|terraform|cloudformation|cdk|sre|finops|bedrock|mcp|datadog|cloudwatch|ansible|druva|devsecops)/.test(text)) return copy.skills;
-        if (/(project|projet|portfolio|ansible-webapp|student-list|freijstack|docker|formation|infrastructure as code)/.test(text)) return copy.projects;
-        return copy.unknown;
+    function findTopic(question) {
+        const q = normalize(question);
+        if (!q) return null;
+        if (/(rendez vous|appointment|book|booking|meeting|calendrier|calendar)/.test(q)) {
+            return 'booking';
+        }
+        const scored = knowledge.map(item => {
+            let points = 0;
+            for (const tag of item.tags) {
+                if (matches(q, tag)) {
+                    points += normalize(tag).includes(' ') ? 4 : (tag.length >= 4 ? 3 : 1);
+                }
+            }
+            return { item, points };
+        }).sort((a, b) => b.points - a.points);
+        if (scored.length && scored[0].points > 0) return scored[0].item;
+        // Suivi court : continuer la conversation sans inventer de faits.
+        if (previousTopic && /^(et |plus|encore|detail|details|why|how|more|pourquoi|comment)/.test(q)) {
+            return knowledge.find(item => item.id === previousTopic.next) || null;
+        }
+        return null;
+    }
+
+    function reply(topic, question) {
+        const lang = language();
+        const copy = messagesData[lang];
+        const result = typeof topic === 'string'
+            ? knowledge.find(item => item.id === topic)
+            : findTopic(question);
+        if (result === 'booking') {
+            addMessage(copy.booking, false);
+            return;
+        }
+        if (!result) {
+            addMessage(knowledge.length ? copy.missing : copy.unavailable, false);
+            return;
+        }
+        const opener = copy.openers[Math.floor(Math.random() * copy.openers.length)];
+        let answer = opener + result[lang];
+        const next = knowledge.find(item => item.id === result.next);
+        if (next && next.id !== result.id) answer += '\n\n' + copy.lead + next.topic + copy.invite;
+        addMessage(answer, false);
+        previousTopic = result;
     }
 
     openButton.addEventListener('click', function() {
@@ -856,20 +913,19 @@ document.addEventListener('DOMContentLoaded', function() {
         if (event.target === dialog) dialog.close();
     });
 
-    document.querySelectorAll('[data-assistant-topic]').forEach(function(button) {
-        button.addEventListener('click', function() {
-            const topic = button.dataset.assistantTopic;
+    document.querySelectorAll('[data-assistant-topic]').forEach(button => {
+        button.addEventListener('click', () => {
             addMessage(button.textContent.trim(), true);
-            addMessage(responses[language()][topic], false);
+            reply(button.dataset.assistantTopic);
         });
     });
 
-    form.addEventListener('submit', function(event) {
+    form.addEventListener('submit', event => {
         event.preventDefault();
         const question = input.value.trim();
         if (!question) return;
         addMessage(question, true);
-        addMessage(answerQuestion(question), false);
+        reply(null, question);
         form.reset();
         input.focus();
     });
