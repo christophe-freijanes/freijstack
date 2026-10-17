@@ -1,127 +1,143 @@
-# 📚 Index Documentation - FreijStack
+<a id="-index-documentation---freijstack"></a>
+# Index Documentation - FreijStack
 
-Guide de navigation complet pour la documentation du projet FreijStack.
+Navigation de la documentation FreijStack.
 
 **Dernière mise à jour**: Janvier 2026  
 **Total fichiers**: 16 documentations + 3 privées  
-**État**: ✅ Optimisé et consolidé
 
 ---
 
-## 🎯 Quick Start - Par Besoin
+<a id="-quick-start---par-besoin"></a>
+## Quick Start - Par Besoin
 
-### 👤 Je suis nouveau sur le projet
+<a id="-je-suis-nouveau-sur-le-projet"></a>
+### Je suis nouveau sur le projet
 1. **[README.md](../README.md)** - Vue d'ensemble générale
-2. **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Architecture technique
+2. **[ARCHITECTURE.md](../01-architecture/ARCHITECTURE.md)** - Architecture technique
 3. **[QUICK_DEPLOY_GUIDE.md](./QUICK_DEPLOY_GUIDE.md)** - Démarrage rapide
 
-### 🚀 Je veux déployer l'application
-1. **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Guide déploiement complet
-2. **[SECUREVAULT_DEPLOYMENT.md](./SECUREVAULT_DEPLOYMENT.md)** - SecureVault spécifique
-3. **[CI_CD_ARCHITECTURE.md](./CI_CD_ARCHITECTURE.md)** - Workflows automatisés
+<a id="-je-veux-déployer-lapplication"></a>
+### Je veux déployer l'application
+1. **[DEPLOYMENT.md](../02-deployment/DEPLOYMENT.md)** - Guide déploiement complet
+2. **[SECUREVAULT_DEPLOYMENT.md](../02-deployment/SECUREVAULT_DEPLOYMENT.md)** - SecureVault spécifique
+3. **[CI_CD_ARCHITECTURE.md](../01-architecture/CI_CD_ARCHITECTURE.md)** - Workflows automatisés
 
-### 🤖 Je veux comprendre l'automatisation
-1. **[AUTOMATION_GUIDE.md](./AUTOMATION_GUIDE.md)** - Guide automatisation complet
-2. **[CI_CD_ARCHITECTURE.md](./CI_CD_ARCHITECTURE.md)** - Architecture CI/CD avec diagrammes
+<a id="-je-veux-comprendre-lautomatisation"></a>
+### Je veux comprendre l'automatisation
+1. **[AUTOMATION_GUIDE.md](../03-guides/AUTOMATION_GUIDE.md)** - Guide automatisation complet
+2. **[CI_CD_ARCHITECTURE.md](../01-architecture/CI_CD_ARCHITECTURE.md)** - Architecture CI/CD avec diagrammes
 
-### 🔧 J'ai un problème à résoudre
-1. **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Guide dépannage complet
+<a id="-jai-un-problème-à-résoudre"></a>
+### J'ai un problème à résoudre
+1. **[TROUBLESHOOTING.md](../04-operations/TROUBLESHOOTING.md)** - Guide dépannage complet
    - Problèmes déploiement
    - Erreurs HTTP/SSL
    - SecureVault (CORS, Registration)
    - Docker, DNS, Frontend, CI/CD
 
-### 📊 Je veux monitorer l'application
-1. **[MONITORING.md](./MONITORING.md)** - Setup monitoring Prometheus/Grafana/Loki
-2. **[CI_CD_ARCHITECTURE.md](./CI_CD_ARCHITECTURE.md)** - Health checks & alertes
+<a id="-je-veux-monitorer-lapplication"></a>
+### Je veux monitorer l'application
+1. **[MONITORING.md](../03-guides/MONITORING.md)** - Setup monitoring Prometheus/Grafana/Loki
+2. **[CI_CD_ARCHITECTURE.md](../01-architecture/CI_CD_ARCHITECTURE.md)** - Health checks & alertes
 
-### 🔐 Je veux sécuriser l'infrastructure
-1. **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Sécurité & Conformité
-2. **[docs-private/SECRET_ROTATION.md](../docs-private/SECRET_ROTATION.md)** - Rotation secrets
-3. **[docs-private/SSO_SAML_CONFIG.md](../docs-private/SSO_SAML_CONFIG.md)** - Configuration SSO
+<a id="-je-veux-sécuriser-linfrastructure"></a>
+### Je veux sécuriser l'infrastructure
+1. **[ARCHITECTURE.md](../01-architecture/ARCHITECTURE.md)** - Sécurité & Conformité
+2. **docs-private/SECRET_ROTATION.md (document interne non publié)** - Rotation secrets
+3. **docs-private/SSO_SAML_CONFIG.md (document interne non publié)** - Configuration SSO
 
-### 🌐 Je veux développer pour le Portfolio
-1. **[saas/portfolio/README.md](../saas/portfolio/README.md)** - Portfolio spécifique
+<a id="-je-veux-développer-pour-le-portfolio"></a>
+### Je veux développer pour le Portfolio
+1. **[saas/portfolio/README.md](../../saas/portfolio/README.md)** - Portfolio spécifique
 2. **[USER_GUIDE.md](./USER_GUIDE.md)** - Guide utilisateur
 
-### 🗄️ Je veux utiliser SecureVault
+<a id="-je-veux-utiliser-securevault"></a>
+### Je veux utiliser SecureVault
 1. **[USER_GUIDE.md](./USER_GUIDE.md)** - Guide utilisateur complet
-2. **[SECUREVAULT_DEPLOYMENT.md](./SECUREVAULT_DEPLOYMENT.md)** - Déploiement
-3. **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md#securevault---problèmes-enregistrement)** - Dépannage
+2. **[SECUREVAULT_DEPLOYMENT.md](../02-deployment/SECUREVAULT_DEPLOYMENT.md)** - Déploiement
+3. **[TROUBLESHOOTING.md](../04-operations/TROUBLESHOOTING.md#securevault---problèmes-enregistrement)** - Dépannage
 
 ---
 
-## 📚 Documentation Complète
+<a id="-documentation-complète"></a>
+## Documentation
 
-### 🏢 Documentation Principale (9 fichiers)
+<a id="-documentation-principale-9-fichiers"></a>
+### Documentation Principale (9 fichiers)
 
 #### Architecture & Infrastructure
 | Document | Contenu | Public |
 |----------|---------|--------|
-| **[ARCHITECTURE.md](./ARCHITECTURE.md)** | 📋 Architecture technique complète, stack, infrastructure | ✅ Public |
-| **[DOCKER_STRUCTURE.md](./DOCKER_STRUCTURE.md)** | 🐳 Structure Docker, composition, volumes | ✅ Public |
-| **[DEPLOYMENT.md](./DEPLOYMENT.md)** | 🚀 Guide déploiement VPS, setup initial, configuration | ✅ Public |
+| **[ARCHITECTURE.md](../01-architecture/ARCHITECTURE.md)** | 📋 Architecture technique, stack, infrastructure | ✅ Public |
+| **[DOCKER_STRUCTURE.md](../01-architecture/DOCKER_STRUCTURE.md)** | 🐳 Structure Docker, composition, volumes | ✅ Public |
+| **[DEPLOYMENT.md](../02-deployment/DEPLOYMENT.md)** | 🚀 Guide déploiement VPS, setup initial, configuration | ✅ Public |
 
 #### Monitoring & Sécurité
 | Document | Contenu | Public |
 |----------|---------|--------|
-| **[MONITORING.md](./MONITORING.md)** | 📊 Setup Prometheus/Grafana/Loki, dashboards, alertes | ✅ Public |
-| **[AUDIT_SYSTEM.md](./AUDIT_SYSTEM.md)** | 🔍 Système d'audit SecureVault, logs, traçabilité | ✅ Public |
-| **[CLOUD_BACKUP.md](./CLOUD_BACKUP.md)** | 💾 Stratégie backup AWS S3 + Azure Blob, rétention | ✅ Public |
+| **[MONITORING.md](../03-guides/MONITORING.md)** | 📊 Setup Prometheus/Grafana/Loki, dashboards, alertes | ✅ Public |
+| **[AUDIT_SYSTEM.md](../05-reference/AUDIT_SYSTEM.md)** | 🔍 Système d'audit SecureVault, logs, traçabilité | ✅ Public |
+| **[CLOUD_BACKUP.md](../03-guides/CLOUD_BACKUP.md)** | 💾 Stratégie backup AWS S3 + Azure Blob, rétention | ✅ Public |
 
 #### Automatisation & Support
 | Document | Contenu | Public |
 |----------|---------|--------|
-| **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** | 🔧 Guide dépannage complet, diagnostic, solutions | ✅ Public |
+| **[TROUBLESHOOTING.md](../04-operations/TROUBLESHOOTING.md)** | 🔧 Guide dépannage complet, diagnostic, solutions | ✅ Public |
 | **[USER_GUIDE.md](./USER_GUIDE.md)** | 👤 Guide utilisateur SecureVault, features | ✅ Public |
-| **[FEATURES_ROADMAP.md](./FEATURES_ROADMAP.md)** | 🗺️ Roadmap produit, features plannifiées | ✅ Public |
+| **[FEATURES_ROADMAP.md](../05-reference/FEATURES_ROADMAP.md)** | 🗺️ Roadmap produit, features plannifiées | ✅ Public |
 
 ---
 
-### 🆕 Documentation Nouvelle/Consolidée (4 fichiers)
+<a id="-documentation-nouvelleconsolidée-4-fichiers"></a>
+### Documentation Nouvelle/Consolidée (4 fichiers)
 
 | Document | Contenu | Création | Type |
 |----------|---------|----------|------|
-| **[CI_CD_ARCHITECTURE.md](./CI_CD_ARCHITECTURE.md)** | 📊 Diagramme Mermaid CI/CD, 16 workflows détaillés | ✅ Nouvelle | ✨ Important |
-| **[AUTOMATION_GUIDE.md](./AUTOMATION_GUIDE.md)** | 🤖 Guide automatisation consolidé (3 fichiers fusionnés) | ✅ Consolidée | ✨ Important |
-| **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** | 🔧 Enrichi : CORS + Registration intégrés | ✅ Enrichie | ✨ Important |
-| **[DOCUMENTATION_AUDIT.md](./DOCUMENTATION_AUDIT.md)** | 📋 Audit complet, plan d'optimisation, statistiques | ✅ Nouvelle | 📊 Référence |
+| **[CI_CD_ARCHITECTURE.md](../01-architecture/CI_CD_ARCHITECTURE.md)** | 📊 Diagramme Mermaid CI/CD, 16 workflows détaillés | ✅ Nouvelle | ✨ Important |
+| **[AUTOMATION_GUIDE.md](../03-guides/AUTOMATION_GUIDE.md)** | 🤖 Guide automatisation consolidé (3 fichiers fusionnés) | ✅ Consolidée | ✨ Important |
+| **[TROUBLESHOOTING.md](../04-operations/TROUBLESHOOTING.md)** | 🔧 Enrichi : CORS + Registration intégrés | ✅ Enrichie | ✨ Important |
+| **[DOCUMENTATION_AUDIT.md](../05-reference/DOCUMENTATION_AUDIT.md)** | 📋 Audit complet, plan d'optimisation, statistiques | ✅ Nouvelle | 📊 Référence |
 
 ---
 
-### 🎯 Documentation Spécialisée (3 fichiers)
+<a id="-documentation-spécialisée-3-fichiers"></a>
+### Documentation Spécialisée (3 fichiers)
 
 | Document | Contenu | Audience |
 |----------|---------|----------|
-| **[PRO_DEPLOYMENT.md](./PRO_DEPLOYMENT.md)** | 🏢 Guide déploiement PRO/Enterprise avec SLA | DevOps avancé |
-| **[SECUREVAULT_DEPLOYMENT.md](./SECUREVAULT_DEPLOYMENT.md)** | 🔐 Déploiement spécifique SecureVault, backend+frontend+DB | DevOps SecureVault |
-| **[QUICK_DEPLOY_GUIDE.md](./QUICK_DEPLOY_GUIDE.md)** | ⚡ Guide démarrage rapide 5 minutes | Nouveaux |
+| **[PRO_DEPLOYMENT.md](../02-deployment/PRO_DEPLOYMENT.md)** | Guide déploiement PRO/Enterprise avec SLA | DevOps avancé |
+| **[SECUREVAULT_DEPLOYMENT.md](../02-deployment/SECUREVAULT_DEPLOYMENT.md)** | Déploiement spécifique SecureVault, backend+frontend+DB | DevOps SecureVault |
+| **[QUICK_DEPLOY_GUIDE.md](./QUICK_DEPLOY_GUIDE.md)** | Guide de démarrage rapide | Nouveaux |
 
 ---
 
-### 🔒 Documentation Privée (3 fichiers)
+<a id="-documentation-privée-3-fichiers"></a>
+### Documentation Privée (3 fichiers)
 
 **Emplacement**: `docs-private/`
 
 | Document | Contenu | Sensibilité |
 |----------|---------|-------------|
-| **[SECRET_ROTATION.md](../docs-private/SECRET_ROTATION.md)** | 🔄 Stratégie rotation secrets (JWT, DB, API keys) | 🔴 Sensible |
-| **[SSO_SAML_CONFIG.md](../docs-private/SSO_SAML_CONFIG.md)** | 🔐 Configuration SSO/SAML avec certificats | 🔴 Sensible |
-| **[README_RESET_PASSWORD.md](../docs-private/README_RESET_PASSWORD.md)** | 🔑 Procédure réinitialisation PostgreSQL password | 🔴 Sensible |
+| **SECRET_ROTATION.md (document interne non publié)** | 🔄 Stratégie rotation secrets (JWT, DB, API keys) | 🔴 Sensible |
+| **SSO_SAML_CONFIG.md (document interne non publié)** | 🔐 Configuration SSO/SAML avec certificats | 🔴 Sensible |
+| **README_RESET_PASSWORD.md (document interne non publié)** | 🔑 Procédure réinitialisation PostgreSQL password | 🔴 Sensible |
 
 **⚠️ Note** : Ces documents contiennent des configurations sensibles et des secrets. Accès limité.
 
 ---
 
-### 📄 Navigation (1 fichier)
+<a id="-navigation-1-fichier"></a>
+### Navigation (1 fichier)
 
 | Document | Contenu |
 |----------|---------|
-| **[README.md](./README.md)** | 📚 Index principal documentation |
+| **[README.md](./README.md)** | Index principal documentation |
 
 ---
 
-## 🗂️ Structure Hiérarchique
+<a id="-structure-hiérarchique"></a>
+## Structure Hiérarchique
 
 ```
 docs/
@@ -162,7 +178,8 @@ docs-private/
 
 ---
 
-## 🎓 Chemins de Lecture Recommandés
+<a id="-chemins-de-lecture-recommandés"></a>
+## Chemins de Lecture Recommandés
 
 ### Pour DevOps / SRE
 
@@ -207,7 +224,8 @@ docs-private/
 
 ---
 
-## 🔍 Recherche Rapide par Mot-Clé
+<a id="-recherche-rapide-par-mot-clé"></a>
+## Recherche Rapide par Mot-Clé
 
 ### Infrastructure
 - **Traefik** → ARCHITECTURE.md, DEPLOYMENT.md
@@ -242,7 +260,8 @@ docs-private/
 
 ---
 
-## 📊 Statistiques Documentation
+<a id="-statistiques-documentation"></a>
+## Statistiques Documentation
 
 | Métrique | Valeur |
 |----------|--------|
@@ -265,13 +284,14 @@ docs-private/
 
 ---
 
-## 🔗 Liens Utiles
+<a id="-liens-utiles"></a>
+## Liens Utiles
 
 ### Internes
 - [README.md](../README.md) - Page d'accueil projet
-- [base-infra/README.md](../base-infra/README.md) - Infrastructure centralisée
-- [saas/portfolio/README.md](../saas/portfolio/README.md) - Portfolio multilingue
-- [saas/securevault/README.md](../saas/securevault/README.md) - SecureVault app
+- [base-infra/README.md](../../base-infra/README.md) - Infrastructure centralisée
+- [saas/portfolio/README.md](../../saas/portfolio/README.md) - Portfolio multilingue
+- [saas/securevault/README.md](../../saas/securevault/README.md) - SecureVault app
 
 ### Externes
 - [GitHub Repo](https://github.com/christophe-freijanes/freijstack)
@@ -282,7 +302,8 @@ docs-private/
 
 ---
 
-## ✏️ Comment Contribuer à la Documentation
+<a id="-comment-contribuer-à-la-documentation"></a>
+## Comment Contribuer à la Documentation
 
 1. **Créer une branche** : `git checkout -b docs/improvement`
 2. **Faire les changements** : Éditer fichiers .md
@@ -292,14 +313,15 @@ docs-private/
 
 ### Guide de Style
 - **Utiliser Markdown** standard
-- **Ajouter emojis** pour clarté
+- **Utiliser des titres courts** et une rédaction technique simple
 - **Inclure exemples** de code
 - **Lier documents** entre eux
 - **Mettre à jour INDEX.md** si nouveaux fichiers
 
 ---
 
-## 📞 Support & Questions
+<a id="-support--questions"></a>
+## Support & Questions
 
 - **Issues GitHub** : [github.com/christophe-freijanes/freijstack/issues](https://github.com/christophe-freijanes/freijstack/issues)
 - **Email** : christophe.freijanes@freijstack.com
@@ -307,7 +329,8 @@ docs-private/
 
 ---
 
-## 🎯 Prochaines Étapes Documentaires
+<a id="-prochaines-étapes-documentaires"></a>
+## Prochaines Étapes Documentaires
 
 - [ ] Créer SSO_OVERVIEW.md (version publique non-sensible)
 - [ ] Ajouter video tutorials

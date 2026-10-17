@@ -1,4 +1,5 @@
-# 📚 Documentation FreijStack
+<a id="-documentation-freijstack"></a>
+# Documentation FreijStack
 
 [![GitHub](https://img.shields.io/badge/repo-github-blue?style=flat-square&logo=github)](https://github.com/christophe-freijanes/freijstack)
 [![Status](https://img.shields.io/badge/status-active-success?style=flat-square&logo=checklist)](../README.md)
@@ -11,56 +12,61 @@ Index de la documentation technique du projet FreijStack.
 
 ---
 
-## 🎯 Navigation Rapide
+<a id="-navigation-rapide"></a>
+## Navigation Rapide
 
-### 📖 Lire l'Index Complet
-👉 **[INDEX.md](./INDEX.md)** - Guide complet de navigation par besoin, par rôle, par mot-clé
+<a id="-lire-lindex-complet"></a>
+### Lire l'Index Complet
+**[INDEX.md](00-overview/INDEX.md)** - Navigation par besoin, rôle et mot-clé
 
-### 🚀 Démarrage Rapide
-- **Nouveau sur le projet ?** → [README Principal](../README.md) + [QUICK_DEPLOY_GUIDE.md](./QUICK_DEPLOY_GUIDE.md)
-- **Besoin de déployer ?** → [DEPLOYMENT.md](./DEPLOYMENT.md) + [CI_CD_ARCHITECTURE.md](./CI_CD_ARCHITECTURE.md)
-- **Un problème à résoudre ?** → [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
+<a id="-démarrage-rapide"></a>
+### Démarrage Rapide
+- **Nouveau sur le projet ?** → [README Principal](../README.md) + [QUICK_DEPLOY_GUIDE.md](00-overview/QUICK_DEPLOY_GUIDE.md)
+- **Besoin de déployer ?** → [DEPLOYMENT.md](02-deployment/DEPLOYMENT.md) + [CI_CD_ARCHITECTURE.md](01-architecture/CI_CD_ARCHITECTURE.md)
+- **Un problème à résoudre ?** → [TROUBLESHOOTING.md](04-operations/TROUBLESHOOTING.md)
 
 ---
 
-## 📖 Documents Disponibles (18+)
+<a id="-documents-disponibles-18"></a>
+## Documents Disponibles (18+)
 
 | Document | Description | Lien |
 |----------|-------------|------|
-| 📚 **INDEX Navigation** | 🆕 Guide complet navigation par besoin/rôle | [INDEX.md](INDEX.md) |
-| 🏠 **README Principal** | Vue d'ensemble du projet | [../README.md](../README.md) |
-| 🔗 **Integration Guide** | Guide d'intégration infrastructure + apps | [../base-infra/BASE_INTEGRATION.md](../base-infra/BASE_INTEGRATION.md) |
-| 🏗️ **Architecture Technique** | Infrastructure, stack, CI/CD, sécurité | [ARCHITECTURE.md](ARCHITECTURE.md) |
-| 📊 **CI/CD Architecture** | 🆕 Diagramme Mermaid + 21+ workflows | [CI_CD_ARCHITECTURE.md](CI_CD_ARCHITECTURE.md) |
-| 🤖 **Automatisation Guide** | 🆕 Guide complet automation consolidé | [AUTOMATION_GUIDE.md](AUTOMATION_GUIDE.md) |
-| 📌 **Guide Déploiement** | VPS setup, Docker, Traefik, rollback | [DEPLOYMENT.md](DEPLOYMENT.md) |
-| 🐳 **Structure Docker** | Containers, volumes, réseaux, composition | [DOCKER_STRUCTURE.md](DOCKER_STRUCTURE.md) |
-| 🚀 **Démarrage Rapide** | 5 minutes pour déployer | [QUICK_DEPLOY_GUIDE.md](QUICK_DEPLOY_GUIDE.md) |
-| 🔐 **SecureVault Deploy** | Pipeline CI/CD dédiée SecureVault | [SECUREVAULT_DEPLOYMENT.md](SECUREVAULT_DEPLOYMENT.md) |
-| 🔍 **Troubleshooting** | ✨ Enrichi : dépannage + CORS + Registration | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) |
-| 📊 **Guide Monitoring** | Prometheus, Grafana, Loki, alertes, dashboards | [MONITORING.md](MONITORING.md) |
-| 👤 **Guide Utilisateur** | SecureVault features, utilisation | [USER_GUIDE.md](USER_GUIDE.md) |
-| 🔍 **Système d'Audit** | Audit logs, traçabilité, compliance | [AUDIT_SYSTEM.md](AUDIT_SYSTEM.md) |
-| 💾 **Cloud Backup** | Stratégie AWS S3 + Azure Blob, rétention | [CLOUD_BACKUP.md](CLOUD_BACKUP.md) |
-| 🏢 **PRO Deployment** | Guide PRO/Enterprise avec SLA | [PRO_DEPLOYMENT.md](PRO_DEPLOYMENT.md) |
-| 🗺️ **Features Roadmap** | Roadmap produit, features plannifiées | [FEATURES_ROADMAP.md](FEATURES_ROADMAP.md) |
-| 📋 **Documentation Audit** | 🆕 Audit + plan d'optimisation | [DOCUMENTATION_AUDIT.md](DOCUMENTATION_AUDIT.md) |
+| **INDEX Navigation** | Guide navigation par besoin/rôle | [INDEX.md](00-overview/INDEX.md) |
+| **README Principal** | Vue d'ensemble du projet | [../README.md](../README.md) |
+| **Integration Guide** | Guide d'intégration infrastructure + apps | [../base-infra/BASE_INTEGRATION.md](../base-infra/BASE_INTEGRATION.md) |
+| **Architecture Technique** | Infrastructure, stack, CI/CD, sécurité | [ARCHITECTURE.md](01-architecture/ARCHITECTURE.md) |
+| **CI/CD Architecture** | Diagramme Mermaid + 21+ workflows | [CI_CD_ARCHITECTURE.md](01-architecture/CI_CD_ARCHITECTURE.md) |
+| **Automatisation Guide** | Guide automation consolidé | [AUTOMATION_GUIDE.md](03-guides/AUTOMATION_GUIDE.md) |
+| **Guide Déploiement** | VPS setup, Docker, Traefik, rollback | [DEPLOYMENT.md](02-deployment/DEPLOYMENT.md) |
+| **Structure Docker** | Containers, volumes, réseaux, composition | [DOCKER_STRUCTURE.md](01-architecture/DOCKER_STRUCTURE.md) |
+| **Démarrage Rapide** | Démarrage du déploiement | [QUICK_DEPLOY_GUIDE.md](00-overview/QUICK_DEPLOY_GUIDE.md) |
+| **SecureVault Deploy** | Pipeline CI/CD dédiée SecureVault | [SECUREVAULT_DEPLOYMENT.md](02-deployment/SECUREVAULT_DEPLOYMENT.md) |
+| **Troubleshooting** | Enrichi : dépannage + CORS + Registration | [TROUBLESHOOTING.md](04-operations/TROUBLESHOOTING.md) |
+| **Guide Monitoring** | Prometheus, Grafana, Loki, alertes, dashboards | [MONITORING.md](03-guides/MONITORING.md) |
+| **Guide Utilisateur** | SecureVault features, utilisation | [USER_GUIDE.md](00-overview/USER_GUIDE.md) |
+| **Système d'Audit** | Audit logs, traçabilité, compliance | [AUDIT_SYSTEM.md](05-reference/AUDIT_SYSTEM.md) |
+| **Cloud Backup** | Stratégie AWS S3 + Azure Blob, rétention | [CLOUD_BACKUP.md](03-guides/CLOUD_BACKUP.md) |
+| **PRO Deployment** | Guide PRO/Enterprise avec SLA | [PRO_DEPLOYMENT.md](02-deployment/PRO_DEPLOYMENT.md) |
+| **Features Roadmap** | Roadmap produit, features plannifiées | [FEATURES_ROADMAP.md](05-reference/FEATURES_ROADMAP.md) |
+| **Documentation Audit** | Audit + plan d'optimisation | [DOCUMENTATION_AUDIT.md](05-reference/DOCUMENTATION_AUDIT.md) |
 
 ---
-## 🎯 Par Thématique
+<a id="-par-thématique"></a>
+## Par Thématique
 
 ### Infrastructure & DevOps
-- [Integration Guide](../base-infra/BASE_INTEGRATION.md) - Guide complet d'intégration (Traefik + apps)
+- [Integration Guide](../base-infra/BASE_INTEGRATION.md) - Guide d'intégration (Traefik + apps)
 - [Infrastructure Base](../base-infra/README.md) - Docker Compose, Traefik
 - [Structure Docker](01-architecture/DOCKER_STRUCTURE.md) - Organisation containers, volumes, réseaux
-- [Architecture Technique Complète](01-architecture/architecture.md) - Infrastructure, CI/CD, sécurité, monitoring
+- [Architecture Technique Complète](01-architecture/ARCHITECTURE.md) - Infrastructure, CI/CD, sécurité, monitoring
 - [Guide Déploiement VPS](02-deployment/DEPLOYMENT.md) - Installation complète (Ubuntu, Docker, Traefik, DNS)
 - [SecureVault CI/CD Pipeline](02-deployment/SECUREVAULT_DEPLOYMENT.md) - Déploiement automatisé SecureVault
-- [Automatisation Complète](03-guides/AUTOMATION_GUIDE.md) - Zéro-intervention, staging éphémère, production 24/7
+- [Automatisation Complète](03-guides/AUTOMATION_GUIDE.md) - Staging éphémère et production
 - [Guide Monitoring](03-guides/MONITORING.md) - Prometheus, Grafana, Loki, alertes
-- [Configuration Docker Compose](01-architecture/architecture.md#34-docker-compose-configuration)
-- [Pipeline CI/CD](01-architecture/architecture.md#4-pipeline-cicd)
-- [GitHub Actions Workflows](../.github/workflows/README.md) - Documentation complète des workflows
+- [Configuration Docker Compose](01-architecture/ARCHITECTURE.md#34-docker-compose-configuration)
+- [Pipeline CI/CD](01-architecture/ARCHITECTURE.md#4-pipeline-cicd)
+- [GitHub Actions Workflows](../.github/workflows/README.md) - Documentation des workflows
 
 ### Backend & SaaS Applications
 - [SecureVault Manager](../saas/securevault/README.md) - Gestionnaire de secrets chiffrés
@@ -70,19 +76,20 @@ Index de la documentation technique du projet FreijStack.
 - [SecureVault CI/CD Pipeline](02-deployment/SECUREVAULT_DEPLOYMENT.md) - Déploiement automatisé SecureVault
 
 ### Sécurité
-- [Mesures de Sécurité](01-architecture/architecture.md#5-sécurité--conformité) - Politiques et conformité
-- [Scans Automatiques](01-architecture/architecture.md#job-3-security-scanning-) - CodeQL, Gitleaks, Trivy
-- [Conformité RGPD/WCAG](01-architecture/architecture.md#52-conformité--standards) - Standards et réglementations
+- [Mesures de Sécurité](01-architecture/ARCHITECTURE.md#5-sécurité--conformité) - Politiques et conformité
+- [Scans Automatiques](01-architecture/ARCHITECTURE.md#job-3-security-scanning-) - CodeQL, Gitleaks, Trivy
+- [Conformité RGPD/WCAG](01-architecture/ARCHITECTURE.md#52-conformité--standards) - Standards et réglementations
 
 ### Maintenance & Support
-- [Procédures de Maintenance](01-architecture/architecture.md#6-maintenance--monitoring) - Maintenance régulière
+- [Procédures de Maintenance](01-architecture/ARCHITECTURE.md#6-maintenance--monitoring) - Maintenance régulière
 - [Guide Troubleshooting](04-operations/TROUBLESHOOTING.md) - Diagnostic des problèmes
-- [Disaster Recovery](01-architecture/architecture.md#64-disaster-recovery) - Plan de récupération
-- [Roadmap Évolutions](01-architecture/architecture.md#7-évolutions-futures) - Futures améliorations
+- [Disaster Recovery](01-architecture/ARCHITECTURE.md#64-disaster-recovery) - Plan de récupération
+- [Roadmap Évolutions](01-architecture/ARCHITECTURE.md#7-évolutions-futures) - Futures améliorations
 
 ---
 
-## 🔍 Guides Rapides
+<a id="-guides-rapides"></a>
+## Guides Rapides
 
 ### Déployer Localement
 
@@ -128,11 +135,12 @@ Le déploiement est **automatique** via GitHub Actions :
 - Push sur `develop` → déploie vers staging
 - Push sur `master` → déploie vers production
 
-**Détails**: Voir [Pipeline CI/CD](architecture.md#4-pipeline-cicd)
+**Détails**: Voir [Pipeline CI/CD](01-architecture/ARCHITECTURE.md#4-pipeline-cicd)
 
 ---
 
-## 📚 Documentation Détaillée
+<a id="-documentation-détaillée"></a>
+## Documentation technique
 
 ### Sujets Avancés
 
@@ -151,13 +159,15 @@ Le déploiement est **automatique** via GitHub Actions :
 
 ---
 
-## 🔐 Informations de Sécurité
+<a id="-informations-de-sécurité"></a>
+## Informations de Sécurité
 
 ⚠️ **IMPORTANT**: Pour les vulnérabilités critiques, consultez le [SECURITY.md](../SECURITY.md)
 
 ---
 
-## 📞 Support & Contact
+<a id="-support--contact"></a>
+## Support & Contact
 
 **Mainteneur**: Christophe FREIJANES
 
@@ -167,7 +177,3 @@ Le déploiement est **automatique** via GitHub Actions :
 - LinkedIn: [Profil Christophe FREIJANES](https://www.linkedin.com/in/christophe-freijanes/)
 
 ---
-
-**Dernière mise à jour**: Décembre 2025
-
-**Status**: ✅ Documentation active et à jour

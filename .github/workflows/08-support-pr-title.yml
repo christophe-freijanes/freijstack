@@ -28,7 +28,7 @@ jobs:
             });
 
             // Si le titre commence déjà par un type conventionnel, ne rien faire
-            const conventionalTypes = /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert):/;
+            const conventionalTypes = /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([^)]+\))?!?: /;
             if (conventionalTypes.test(pr.title)) {
               console.log('✅ Le titre suit déjà Conventional Commits');
               return;
