@@ -1,0 +1,40 @@
+name: "🔐 Support • Vérifier SSH deploy"
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ssh-check:
+    name: Vérification SSH sans déploiement
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Préparer la clé et vérifier la configuration
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
+          VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
+          VPS_SSH_KNOWN_HOSTS: ${{ secrets.VPS_SSH_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${VPS_SSH_KEY:?Secret VPS_SSH_KEY manquant}"
+          : "${VPS_SSH_HOST:?Secret VPS_SSH_HOST manquant}"
+          : "${VPS_SSH_USER:?Secret VPS_SSH_USER manquant}"
+          : "${VPS_SSH_KNOWN_HOSTS:?Secret VPS_SSH_KNOWN_HOSTS manquant}"
+          test "$VPS_SSH_USER" = deploy || { echo "Utilisateur attendu : deploy"; exit 1; }
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$VPS_SSH_KEY" > "$HOME/.ssh/deploy_key"
+          chmod 600 "$HOME/.ssh/deploy_key"
+          printf '%s\n' "$VPS_SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/deploy_key" >/dev/null
+          ssh -o BatchMode=yes -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -o ConnectTimeout=10 \
+            -i "$HOME/.ssh/deploy_key" \
+            "$VPS_SSH_USER@$VPS_SSH_HOST" \
+            'test "$(id -un)" = deploy && echo "SSH deploy : OK"'
