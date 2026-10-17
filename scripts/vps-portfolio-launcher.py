@@ -59,13 +59,7 @@ def main():
             print("Aucune commande pull/up exécutée.")
             return
         raise SystemExit("REFUS : mode --apply suspendu ; Compose latest non verrouillé sur digest")
-        command = ["docker", "compose", "--project-name", PROJECT, "-f", str(COMPOSE)]
-        subprocess.run(command + ["pull", SERVICE], check=True, timeout=300)
-        subprocess.run(
-            command + ["up", "-d", "--no-deps", SERVICE],
-            check=True, timeout=300,
-        )
-        print("Portfolio : commande de déploiement terminée")
+
 
 
 if __name__ == "__main__":
