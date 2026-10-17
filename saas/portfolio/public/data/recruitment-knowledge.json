@@ -296,7 +296,12 @@
         "percent",
         "quantite",
         "how many",
-        "combien"
+        "combien",
+        "comptes",
+        "snapshots",
+        "interventions",
+        "vm",
+        "to"
       ],
       "fr": "Quelques repères chiffrés du CV : plusieurs centaines de comptes AWS, plusieurs dizaines de milliers de snapshots nettoyés, 60 % d’interventions manuelles en moins, plus de 80 To répliqués, plus de 3 000 VM et 100 % de couverture du durcissement Linux chez SQUAD.",
       "en": "Selected CV figures: several hundred AWS accounts, tens of thousands of snapshots cleaned, 60% fewer manual interventions, over 80 TB replicated, more than 3,000 VMs, and 100% Linux hardening coverage at SQUAD.",
