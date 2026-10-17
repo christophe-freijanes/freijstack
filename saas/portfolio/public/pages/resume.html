@@ -1,267 +1,43 @@
 <!doctype html>
 <html lang="fr-CA">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <title>CV – Christophe FREIJANES | DevSecOps / Cloud Security – Montréal</title>
-  <meta name="description" content="CV de Christophe FREIJANES – Spécialiste senior Cloud & Sécurité (DevSecOps) à Montréal. AWS, Terraform, CI/CD, sécurité cloud, automatisation, backup/DR, Kubernetes, Ansible, Agile, ITIL, infrastructure as code, monitoring, virtualisation, France, Canada." />
-  <meta name="keywords" content="CV, Cloud, Sécurité, DevOps, DevSecOps, Montréal, AWS, Terraform, CI/CD, Kubernetes, Ansible, Backup, Disaster Recovery, Agile, ITIL, Infrastructure as Code, Monitoring, Virtualisation, France, Canada, Consultant, Senior, Automatisation, Scripting, Linux, Windows, GitHub, LinkedIn" />
-  <link rel="canonical" href="https://portfolio.freijstack.com/resume.html" />
-
-  <!-- Open Graph (facultatif sur resume.html, mais utile si on partage le lien) -->
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="CV – Christophe FREIJANES | DevSecOps / Cloud Security" />
-  <meta property="og:description" content="AWS • Terraform • CI/CD • Sécurité cloud • Automatisation • Backup/DR – Montréal, QC" />
-  <meta property="og:url" content="https://portfolio.freijstack.com/resume.html" />
-  <meta property="og:image" content="https://portfolio.freijstack.com/saas/portfolio/images/og-1200x630.jpg" />
-  <meta property="og:image:secure_url" content="https://portfolio.freijstack.com/saas/portfolio/images/og-1200x630.jpg" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="Christophe FREIJANES – DevSecOps / Cloud Security" />
-
-  <!-- Minimal styles: lisible + imprimable, sans nuire au parsing -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CV ATS 2026 | Christophe FREIJANES — Plateforme AWS, SRE, DevSecOps, AIOps</title>
+  <meta name="description" content="CV ATS actualisé : spécialiste principal Plateforme AWS, SRE, DevSecOps, AIOps. Expériences, réalisations, certifications et langues.">
+  <link rel="canonical" href="https://portfolio.freijstack.com/pages/resume.html">
   <style>
-    :root { color-scheme: light; }
-    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: #111; background: #fff; }
-    .wrap { max-width: 980px; margin: 0 auto; padding: 28px 18px; }
-    header { border-bottom: 1px solid #e5e5e5; padding-bottom: 16px; margin-bottom: 20px; }
-    h1 { font-size: 28px; margin: 0 0 6px; }
-    .subtitle { font-size: 15px; margin: 0 0 10px; color: #333; }
-    .meta { display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: 14px; color: #222; }
-    .meta a { color: #111; }
-    main { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 26px; }
-    @media (max-width: 820px) { main { grid-template-columns: 1fr; } }
-
-    section { margin: 0 0 18px; }
-    h2 { font-size: 16px; margin: 0 0 10px; text-transform: uppercase; letter-spacing: .06em; }
-    h3 { font-size: 15px; margin: 0 0 6px; }
-    p { margin: 0 0 10px; line-height: 1.45; }
-    ul { margin: 0; padding-left: 18px; }
-    li { margin: 0 0 6px; line-height: 1.45; }
-    .card { border: 1px solid #eee; border-radius: 10px; padding: 12px 14px; }
-    .row { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-    .where { color: #333; font-size: 14px; }
-    .when { color: #444; font-size: 13px; white-space: nowrap; }
-    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-    .tag { font-size: 12px; border: 1px solid #ddd; border-radius: 999px; padding: 3px 8px; color: #222; }
-    .muted { color: #444; font-size: 13px; }
-    .print-note { margin-top: 14px; font-size: 13px; color: #444; }
-    @media print {
-      a { text-decoration: none; color: #111; }
-      .card { break-inside: avoid; }
-      header { border-bottom: 1px solid #bbb; }
-      .print-note { display: none; }
-    }
+    body{margin:0;background:#f4f6f8;color:#18202b;font:15px/1.48 Arial,Helvetica,sans-serif}
+    main{max-width:790px;margin:28px auto;padding:32px 38px;background:white;box-shadow:0 2px 16px #0001}
+    h1{margin:0;font-size:26px}h2{margin:23px 0 9px;font-size:16px;border-bottom:1px solid #d6dce2;padding-bottom:5px}
+    h3{font-size:15px;margin:14px 0 3px}.subtitle{font-weight:700;margin:5px 0}.contact,.dates{color:#35404d}
+    p{margin:7px 0}ul{padding-left:21px;margin:6px 0}li{margin:4px 0}
+    a{color:#0757a4}.actions{display:flex;gap:12px;flex-wrap:wrap;padding:11px 0 17px;border-bottom:1px solid #dde3e8}
+    button,.actions a{font:inherit;color:#0757a4;background:#fff;border:1px solid #a8bacb;border-radius:6px;padding:9px 12px;cursor:pointer;text-decoration:none}
+    button:hover,.actions a:hover{background:#f1f6fb}
+    article{break-inside:avoid}.dates{font-size:13px;margin-bottom:5px}
+    @media(max-width:680px){main{margin:0;padding:20px}h1{font-size:23px}}
+    @media print{@page{size:letter;margin:16mm}body{background:#fff;color:#000;font:10pt/1.25 Arial,sans-serif}main{margin:0;max-width:none;padding:0;box-shadow:none}.actions{display:none}h2{break-after:avoid;margin-top:13px}article{break-inside:avoid}a{text-decoration:none;color:#000}}
   </style>
-
-  <!-- JSON-LD : Person + WebPage (utile pour annuaires / bases / SEO) -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Person",
-        "@id": "https://portfolio.freijstack.com/#christophe-freijanes",
-        "name": "Christophe FREIJANES",
-        "alternateName": "Christophe Freijanes",
-        "jobTitle": "Spécialiste senior Cloud & Sécurité (DevSecOps)",
-        "url": "https://portfolio.freijstack.com/",
-        "image": "https://portfolio.freijstack.com/saas/portfolio/images/christophe-profile-400.png",
-        "email": "mailto:cfr.pro@gmx.ca",
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "Montréal",
-          "addressRegion": "QC",
-          "addressCountry": "CA"
-        },
-        "sameAs": [
-          "https://github.com/christophe-freijanes",
-          "https://www.linkedin.com/in/christophe-freijanes/",
-          "https://www.credly.com/users/christophe-freijanes"
-        ],
-        "knowsAbout": [
-          "DevSecOps","Cloud Security","AWS","Terraform","Infrastructure as Code","CI/CD",
-          "Kubernetes","Ansible","Monitoring","Backup","Disaster Recovery"
-        ]
-      },
-      {
-        "@type": "WebPage",
-        "@id": "https://portfolio.freijstack.com/resume.html#webpage",
-        "url": "https://portfolio.freijstack.com/resume.html",
-        "name": "CV – Christophe FREIJANES (DevSecOps / Cloud Security)",
-        "description": "CV ATS-friendly de Christophe FREIJANES – DevSecOps / Cloud Security – Montréal.",
-        "about": { "@id": "https://portfolio.freijstack.com/#christophe-freijanes" },
-        "isPartOf": { "@type": "WebSite", "@id": "https://portfolio.freijstack.com/#website", "url": "https://portfolio.freijstack.com/" }
-      }
-    ]
-  }
-  </script>
 </head>
-
-<body>
-  <div class="wrap">
-    <header>
-      <h1>Christophe FREIJANES</h1>
-      <p class="subtitle">Spécialiste senior Cloud & Sécurité (DevSecOps) — AWS • Terraform • CI/CD • Sécurité cloud • Automatisation</p>
-      <div class="meta" aria-label="Informations de contact">
-        <span>Montréal, QC (Canada)</span>
-        <span><a href="mailto:cfr.pro@gmx.ca">cfr.pro@gmx.ca</a></span>
-        <span><a href="https://portfolio.freijstack.com/">Portfolio</a></span>
-        <span><a href="https://www.linkedin.com/in/christophe-freijanes/" rel="noopener noreferrer" target="_blank" style="font-weight:600; color:#0a66c2;">LinkedIn</a></span>
-        <span><a href="https://github.com/christophe-freijanes" rel="noopener noreferrer" target="_blank" style="font-weight:600; color:#24292f;">GitHub</a></span>
-        <span><a href="https://www.credly.com/users/christophe-freijanes" rel="noopener noreferrer" target="_blank">Certifications (Credly)</a></span>
-      </div>
-      <div style="margin-top:18px; margin-bottom:10px;">
-        <a href="../cv/CV-Christophe-FREIJANES.pdf" target="_blank" rel="noopener noreferrer" style="display:inline-block; background:#0072c6; color:#fff; padding:8px 18px; border-radius:6px; font-weight:500; text-decoration:none; font-size:15px;">
-          <span style="margin-right:8px;">📄</span>Télécharger le CV PDF
-        </a>
-      </div>
-    </header>
-    <section aria-label="Compétences clés" style="margin-bottom:22px;">
-      <h2 style="font-size:16px; text-transform:uppercase; letter-spacing:.06em; margin-bottom:10px;">Compétences clés</h2>
-      <div class="card">
-        <ul style="columns:2; column-gap:32px;">
-          <li>AWS (IAM, KMS, S3, EC2, networking, logging)</li>
-          <li>Terraform (modules, state, multi-env)</li>
-          <li>CI/CD (GitHub Actions, Jenkins)</li>
-          <li>Security hardening, encryption, governance</li>
-          <li>Infrastructure as Code</li>
-          <li>Automatisation</li>
-          <li>Monitoring/observabilité (Grafana, Prometheus)</li>
-          <li>Backup/DR, runbooks</li>
-          <li>DevSecOps</li>
-          <li>Agile, ITIL</li>
-        </ul>
-      </div>
-    </section>
-
-    <main>
-      <!-- Colonne principale -->
-      <div>
-        <section aria-label="Résumé professionnel">
-          <h2>Résumé</h2>
-          <div class="card">
-            <p>
-              Consultant / DevSecOps senior spécialisé en <strong>sécurité cloud</strong>, <strong>Infrastructure as Code</strong> et <strong>automatisation</strong>.<br>
-              Expertise : AWS (KMS/IAM, durcissement, chiffrement), Terraform, CI/CD, observabilité, stratégies <strong>backup / DR</strong>.<br>
-              Approche : standardisation, gouvernance, réduction des risques, amélioration continue.
-            </p>
-            <div class="ats-keywords" style="margin-top:10px; font-size:13px; color:#444; background:#f7f7f7; border-radius:6px; padding:8px 12px;">
-              <strong>Mots-clés :</strong>
-              <span style="display:inline-block; margin-top:4px;">
-                Cloud, Sécurité, DevOps, Montréal, AWS, Terraform, CI/CD, Kubernetes, Ansible, Agile, ITIL, Infrastructure as Code, Monitoring, Virtualisation, France, Canada, Consultant, Senior, Automatisation, Scripting, Linux, Windows
-              </span>
-            </div>
-          </div>
-        </section>
-
-        <section aria-label="Expérience">
-          <h2>Expérience</h2>
-
-          <!-- Exemple de bloc à dupliquer. Remplace le contenu par tes expériences réelles. -->
-          <div class="card" style="margin-bottom:12px;">
-            <div class="row">
-              <div>
-                <h3>Senior DevSecOps & Cloud Consultant</h3>
-                <div class="where">ACENSI Canada (mission long terme – Client Assurance)</div>
-              </div>
-              <div class="when">
-                <time datetime="2023-01">2023-01</time> – <time datetime="2026-01">2026-01</time>
-              </div>
-            </div>
-            <ul>
-              <li>Conception et industrialisation d’infrastructures AWS sécurisées (KMS, IAM, chiffrement, tagging, gouvernance).</li>
-              <li>Développement de modules Terraform réutilisables (S3, KMS, IAM, EC2, policies) et standardisation multi-environnements (dev/lab/prod).</li>
-              <li>Automatisation CI/CD (GitHub Actions / Jenkins) : quality gates, security scanning, contrôles et conformité.</li>
-              <li>Data protection : architectures de sauvegarde et restauration, optimisation coûts/risques, intégrations (ex. Clumio, Commvault).</li>
-            </ul>
-            <div class="tags" aria-label="Technologies clés">
-              <span class="tag">AWS</span><span class="tag">Terraform</span><span class="tag">IAM</span><span class="tag">KMS</span>
-              <span class="tag">CI/CD</span><span class="tag">DevSecOps</span><span class="tag">S3</span><span class="tag">Observabilité</span>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="row">
-              <div>
-                <h3>Ingénierie Systèmes / Cloud / Sécurité</h3>
-                <div class="where">Expériences antérieures (détails sur demande)</div>
-              </div>
-              <div class="when">
-                <time datetime="2006-01">2006-01</time> – <time datetime="2022-12">2022-12</time>
-              </div>
-            </div>
-            <p class="muted">
-              Parcours orienté infrastructure, automatisation, sécurité, virtualisation, et opérations à grande échelle.
-              Une version détaillée (poste par poste) peut être ajoutée ici si tu le souhaites.
-            </p>
-          </div>
-        </section>
-
-        <section aria-label="Projets sélectionnés">
-          <h2>Projets</h2>
-          <div class="card">
-            <ul>
-              <li><strong>Freijstack</strong> — Portefeuille DevSecOps : CI sécurité, gouvernance, automatisation, documentation.</li>
-              <li><strong>IaC Backup/DR</strong> — Modules Terraform (S3/KMS/IAM), patterns multi-env, durcissement et conformité.</li>
-              <li><strong>Automatisation DevOps</strong> — Workflows CI, lint, scans, quality gates, publication et release notes.</li>
-            </ul>
-          </div>
-        </section>
-      </div>
-
-      <!-- Colonne secondaire -->
-      <aside>
-        <section aria-label="Compétences clés">
-          <h2>Compétences</h2>
-          <div class="card">
-            <h3>Cloud & Sécurité</h3>
-            <ul>
-              <li>AWS (IAM, KMS, S3, EC2, networking, logging)</li>
-              <li>Security hardening, encryption, governance, tagging</li>
-            </ul>
-
-            <h3 style="margin-top:12px;">IaC & Automatisation</h3>
-            <ul>
-              <li>Terraform (modules, state, imports, patterns multi-env)</li>
-              <li>CI/CD (GitHub Actions, Jenkins), quality gates</li>
-            </ul>
-
-            <h3 style="margin-top:12px;">Ops & Observabilité</h3>
-            <ul>
-              <li>Monitoring/observabilité (Grafana/Prometheus, alerting)</li>
-              <li>Backup/DR, runbooks, optimisation coûts/risques</li>
-            </ul>
-          </div>
-        </section>
-
-        <section aria-label="Certifications">
-          <h2>Certifications</h2>
-          <div class="card">
-            <ul>
-              <li>AWS Certified (voir Credly)</li>
-              <li>Linux / Cloud / ITIL (selon tes badges)</li>
-            </ul>
-          </div>
-        </section>
-
-        <section aria-label="Langues">
-          <h2>Langues</h2>
-          <div class="card">
-            <ul>
-              <li>Français : natif / courant</li>
-              <li>Anglais : professionnel</li>
-            </ul>
-          </div>
-        </section>
-      </aside>
-    </main>
-
-    <footer style="margin-top: 22px; border-top: 1px solid #e5e5e5; padding-top: 14px; font-size: 13px; color:#444;">
-      © <span id="y"></span> Christophe FREIJANES — <a href="https://portfolio.freijstack.com/">Retour au portfolio</a>
-      <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
-    </footer>
-  </div>
-</body>
-</html>
+<body><main>
+<header>
+  <h1>CHRISTOPHE FREIJANES</h1>
+  <p class="subtitle">Spécialiste principal - Plateforme AWS | SRE · DevSecOps · AIOps</p>
+  <p class="contact">Montréal, QC | (438) 518-3008 | <a href="mailto:cfr.pro@gmx.ca">cfr.pro@gmx.ca</a> | Résident permanent | Hybride / télétravail</p>
+  <p><a href="https://www.linkedin.com/in/christophe-freijanes/">LinkedIn</a> · <a href="https://github.com/christophe-freijanes">GitHub</a> · <a href="https://portfolio.freijstack.com">Portfolio</a></p>
+  <div class="actions"><button type="button" onclick="window.print()">Imprimer / Enregistrer en PDF</button><a href="../cv/CV-Christophe-FREIJANES.pdf" download>Télécharger le CV principal</a><a href="../cv/CV-Christophe-FREIJANES-ATS.pdf" download id="ats-pdf" hidden>Télécharger le CV ATS (PDF)</a></div>
+</header>
+<section><h2>PROFIL</h2><p>Professionnel des infrastructures avec plus de 20 ans d’expérience, spécialisé dans les plateformes AWS, l’automatisation et la fiabilité. Environnements cloud critiques et réglementés ; SRE, DevSecOps, sécurité, FinOps et IA agentique.</p></section>
+<section><h2>COMPÉTENCES CLÉS</h2><p>Cloud et plateforme : AWS, multi-comptes, EC2, S3, IAM, KMS, VPC, Systems Manager (SSM), CloudWatch.</p><p>SRE et opérations : Datadog, SLI/SLO/SLA, RCA, incident management, DR, patch management, haute disponibilité.</p><p>DevSecOps et IaC : CloudFormation, Terraform, Ansible, GitHub Actions, Azure DevOps, CI/CD, Python, Bash, PowerShell.</p><p>Sécurité et FinOps : moindre privilège IAM, CIS Benchmarks, vulnérabilités, gouvernance, optimisation des coûts.</p><p>AIOps et IA agentique : MCP, Amazon Bedrock/AgentCore, Strands Agents SDK, orchestration multi-agents, HITL, context engineering.</p></section>
+<section><h2>EXPÉRIENCE PROFESSIONNELLE</h2><article><h3>Spécialiste principal - Plateforme AWS / Référent technique — La Caisse (CDPQ)</h3><p class="dates">Juin 2026 - aujourd’hui | Montréal | Services financiers</p><ul><li>Plateforme AWS à grande échelle couvrant plusieurs centaines de comptes et environnements de production.</li><li>Opérations standardisées avec CloudFormation et Systems Manager ; inventaire, maintenance Windows/Linux et contrôles post-maintenance.</li><li>FinOps : plusieurs dizaines de milliers de snapshots nettoyés, suivi des coûts et réduction de la dette opérationnelle.</li><li>Observabilité Datadog/CloudWatch, ajustement des alertes et réduction du bruit sur Lambda et Step Functions.</li><li>Sécurité IAM/KMS/IMDSv2 et approches AIOps : MCP, agents spécialisés, HITL, accès read-only gouverné.</li></ul></article><article><h3>Tech Lead DevSecOps / Résilience Cloud — ACENSI (client assurance)</h3><p class="dates">2023 - juin 2026 | Montréal | Assurance</p><ul><li>Infrastructures AWS hybrides hautement disponibles et stratégies RTO/RPO, Commvault/Clumio et failover.</li><li>Commvault IaaS avec Terraform, IAM, KMS et réplication S3 SRR sur plus de 80 To.</li><li>Automatisation Terraform/Ansible : 60 % d’interventions manuelles en moins ; SLO, RCA, runbooks et post-mortems.</li><li>Durcissement CIS, remédiation CVE, analyse TCO post-VMware et dashboard FinOps Python (API Clumio).</li></ul></article><article><h3>Spécialiste Systèmes / DevSecOps — SQUAD (ADSN)</h3><p class="dates">2022 - 2023 | Infrastructure critique / eIDAS</p><ul><li>Plus de 3 000 machines virtuelles VMware en haute disponibilité.</li><li>Durcissement Linux via Ansible : couverture de 100 % du parc, sans intervention manuelle.</li><li>Déploiement conteneurisé de Rocket.Chat en zone de sécurité eIDAS, scripts Bash/Python.</li></ul></article></section>
+<section><h2>EXPÉRIENCES ANTÉRIEURES</h2><p>Spécialiste Infrastructure — ECONOCOM / ITER (2020-2022) : MCO de 200 serveurs sur 3 sites internationaux, Ansible, RHEL, LDAP, IBM Spectrum.</p><p>DevOps / SRE — DIGIMIND (2020) : CI/CD multi-datacenter, Prometheus/Grafana ; performances systèmes améliorées de plus de 30 %.</p><p>Administrateur Systèmes — HARDIS (2019-2020) : environ 80 incidents N2/N3 par mois, Bash/PowerShell, Commvault.</p><p>Administrateur Systèmes — MODIS / Capgemini (2019) : support production financier/luxe, AS/400, BMC Control-M.</p><p>Administrateur Systèmes — SULLY / Geodis (2018-2019) : VMware/Citrix, 80 flux et 250 jobs OpCon.</p><p>Administrateur Systèmes IT — Centre Hospitalier Métropole Savoie (2014-2018) : 800 utilisateurs, 24/7, AD, PowerShell, SSO.</p><p>Administrateur Systèmes / Technicien IT (2003-2014) : support, virtualisation, réseaux, industrie, défense, santé.</p></section>
+<section><h2>CERTIFICATIONS ET FORMATION</h2><p>AWS Certified Cloud Practitioner — AWS, 2026</p><p>Ansible Automation Platform — Red Hat, 2025</p><p>CompTIA Security+ — 2024</p><p>KCNA — CNCF, 2023 ; LFCS — Linux Foundation, 2022 ; ITIL v4 Foundation, 2021</p><p>BTS SIO — Greta du Forez, 2002</p></section>
+<section><h2>RÉFÉRENTIELS ET PRATIQUES</h2><p>AWS Well-Architected Framework ; AWS Prescriptive Guidance ; CIS Benchmarks ; NIST ; FinOps Framework ; pratiques SRE ; ITIL v4.</p></section>
+<section><h2>LANGUES</h2><p>Français : langue maternelle. Anglais : niveau professionnel.</p></section>
+<footer><p><a href="../index.html">Retour au portfolio</a></p></footer>
+</main>
+<script>
+  fetch('../cv/CV-Christophe-FREIJANES-ATS.pdf',{method:'HEAD'}).then(r=>{if(r.ok)document.getElementById('ats-pdf').hidden=false}).catch(()=>{});
+</script>
+</body></html>
