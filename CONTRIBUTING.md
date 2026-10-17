@@ -1,14 +1,21 @@
-# Contributing to SecureVault
+# Contribution
 
-All contributions must comply with SecureVault security guidelines and will be reviewed with security-first criteria.
+FreijStack est maintenu comme un projet d'infrastructure et d'applications conteneurisées.
 
-## Contribution Guidelines
+## Principes
 
-- By contributing, you agree to the terms of the Apache License 2.0 (implicit CLA).
-- Do not introduce any secrets, credentials, or sensitive data in code or documentation.
-- All code must follow secure coding best practices.
-- All changes to cryptography, authentication, or authorization require mandatory review by a security maintainer.
-- Pull requests must pass all security checks (SAST, secrets scanning, dependency audit).
-- Contributions violating these rules will be rejected.
+- Une modification ciblée par demande, avec un périmètre et un objectif explicites.
+- Décrire les risques, les dépendances et les fichiers touchés.
+- Commits en français, au format Conventional Commits (`fix:`, `feat:`, `docs:`, etc.).
+- Ne jamais ajouter de secrets, de données de production ou de fichiers `.env` réels.
+- Ajouter les vérifications utiles et conserver une procédure de retour arrière pour les changements d'exploitation.
 
-Thank you for helping us keep SecureVault secure and high-quality!
+## Revue
+
+Créer une branche de travail depuis `develop` et ouvrir une pull request. Vérifier les différences, les résultats CI et les effets potentiels des workflows avant fusion.
+
+Un changement dans `master` peut affecter les mécanismes historiques de production : ne pas l'utiliser comme simple branche de travail.
+
+## Licence
+
+Les contributions sont soumises aux dispositions applicables du fichier [LICENSE](LICENSE). Aucune cession de droits ou convention de contribution supplémentaire n'est présumée ici.
