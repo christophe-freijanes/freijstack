@@ -47,6 +47,7 @@ def extract(path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--report", action="store_true", help="Afficher les mots-clés présents")
+    parser.add_argument("--write", action="store_true", help="Ajouter les labels constatés")
     args = parser.parse_args()
     knowledge = json.loads(INDEX.read_text(encoding="utf-8"))
     cv, portfolio = extract(CV), extract(PORTFOLIO)
@@ -55,12 +56,16 @@ def main():
         if not (item.get("fr") and item.get("en") and item.get("tags")):
             errors.append(f"{item.get('id', 'sans id')}: réponse ou mots-clés manquants")
         found = [tag for tag in item["tags"] if normalize(tag) in cv or normalize(tag) in portfolio]
+        if args.write:
+            item["observed_labels"] = sorted(set(found), key=str.casefold)
         if args.report:
             print(f"{item['id']}: {len(found)} labels présents dans CV/portfolio")
         if not found:
             errors.append(f"{item['id']}: aucun label retrouvé dans le CV ou portfolio")
     if errors:
         raise SystemExit("\n".join(errors))
+    if args.write:
+        INDEX.write_text(json.dumps(knowledge, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"INDEX OK : {len(knowledge['items'])} domaines vérifiés contre CV ATS et portfolio")
 
 
