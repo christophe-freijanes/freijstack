@@ -13,6 +13,8 @@ PROJECT = "portfolio"
 SERVICE = "portfolio"
 IMAGE = "registry.freijstack.com/portfolio:latest"
 LOCK = Path("/run/lock/freijstack-portfolio.lock")
+APPROVED_DIGEST = "sha256:f2fd2b89c37f859dd3e04c6acb74c61df74029988e6e9142a03ab1a6152f954e"
+APPROVED_IMAGE_ID = "sha256:6d288764c70eb5856938ed772c8f54b36690be5814f5fb0c2230bd9f3a606319"
 
 
 def check():
@@ -26,6 +28,13 @@ def check():
     digest = hashlib.sha256(COMPOSE.read_bytes()).hexdigest()
     if digest != EXPECTED_SHA256:
         raise SystemExit("REFUS : Compose différent du fichier approuvé")
+    digest_image = f"registry.freijstack.com/portfolio@{APPROVED_DIGEST}"
+    image_info = subprocess.run(
+        ["docker", "image", "inspect", "--format", "{{.Id}}", digest_image],
+        capture_output=True, text=True, check=True, timeout=15,
+    )
+    if image_info.stdout.strip() != APPROVED_IMAGE_ID:
+        raise SystemExit("REFUS : image locale différente du digest approuvé")
     result = subprocess.run(
         ["docker", "inspect", "--format",
          '{{index .Config.Labels "com.docker.compose.project"}}|'
@@ -49,6 +58,7 @@ def main():
             print("AUDIT OK : Portfolio, Compose approuvé et conteneur existant")
             print("Aucune commande pull/up exécutée.")
             return
+        raise SystemExit("REFUS : mode --apply suspendu ; Compose latest non verrouillé sur digest")
         command = ["docker", "compose", "--project-name", PROJECT, "-f", str(COMPOSE)]
         subprocess.run(command + ["pull", SERVICE], check=True, timeout=300)
         subprocess.run(
