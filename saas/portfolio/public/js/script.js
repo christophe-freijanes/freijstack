@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Contact
             'contact.title': 'Parlons Ensemble',
             'contact.subtitle': 'Vous avez un projet ? Contactez-moi',
-            'assistant.open': 'Assistant IA',
+            'assistant.open': 'IA',
             'assistant.eyebrow': 'ÉCHANGE RECRUTEMENT',
             'assistant.title': 'Assistant recrutement',
             'assistant.close': 'Fermer',
@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Contact
             'contact.title': 'Let\'s Talk',
             'contact.subtitle': 'Have a project? Contact me',
-            'assistant.open': 'AI assistant',
+            'assistant.open': 'AI',
             'assistant.eyebrow': 'RECRUITMENT CHAT',
             'assistant.title': 'Recruitment assistant',
             'assistant.close': 'Close',
@@ -380,6 +380,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
+        const assistantTrigger = document.getElementById('assistantOpen');
+        if (assistantTrigger) {
+            const label = lang === 'en'
+                ? 'Open recruitment assistant'
+                : "Ouvrir l'assistant de recrutement";
+            assistantTrigger.setAttribute('aria-label', label);
+            assistantTrigger.title = label;
+        }
+
         // Mettre à jour le code block dans hero
         const codeBlock = document.querySelector('.code-block code');
         if (codeBlock && translations[lang]) {
