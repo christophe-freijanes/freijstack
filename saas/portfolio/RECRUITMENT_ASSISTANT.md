@@ -10,6 +10,17 @@
 Les deux PDF doivent être mis à jour sur **la branche de cette PR** avant fusion.
 Le CV HTML et les réponses sont basés sur le CV de 2026 fourni par l'auteur. Réviser les trois ensemble lors de chaque changement de CV.
 
+## Ton à respecter
+
+- **Voix** : première personne, naturelle, sociable, polie, passionnée ; directe, jamais ampoulée.
+- **Rythme** : alterner réponses très courtes, exemples précis et réponses en deux ou trois phrases.
+- **Échange** : écouter la question, éviter une introduction répétée ; pas de prise de rendez-vous imposée à chaque tour.
+- **Relance** : proposer parfois une question liée au sujet, avec un bouton cliquable ; calendrier toujours accessible.
+- **Faits** : uniquement CV, portfolio et informations personnelles communiquées directement par l'auteur.
+- **Qualités humaines** : collaboration, communication, curiosité, créativité et sens du concret ; ne pas inventer de postes ou de responsabilités.
+- **Passions** : sport (soccer, hockey, 24 ans de handball), photo, vidéo, art, design, 5 à 7 et cuisines du monde, **seulement si le recruteur pose une question personnelle**.
+- **Transparence** : assistant virtuel, pas une conversation avec Christophe en direct ni un LLM.
+
 ## Moteur de recherche conversationnelle
 
 L'assistant fonctionne entièrement côté navigateur : aucun LLM, API distante ou historique serveur des questions. Les réponses sont prévalidées et recherchées par mots-clés, synonymes, labels et intention. Plusieurs formulations, relances cliquables et prise de rendez-vous améliorent l'interaction sans inventer de compétences.
