@@ -1,6 +1,7 @@
-# 🤖 GitHub Actions Workflows - FreijStack
+<a id="-github-actions-workflows---freijstack"></a>
+# GitHub Actions Workflows - FreijStack
 
-Documentation complète des workflows CI/CD et automatisations du projet.
+Workflows CI/CD et automatisations du projet.
 
 **Dernière mise à jour**: Janvier 2026  
 **Version**: 2.0.0 - DevSecOps Unified Architecture  
@@ -8,38 +9,40 @@ Documentation complète des workflows CI/CD et automatisations du projet.
 
 ---
 
-## 📋 Liste Complète des Workflows
+<a id="-liste-complète-des-workflows"></a>
+## Workflows
 
-> **Note**: Workflows applicatifs (Portfolio, SecureVault, Registry) utilisent maintenant `00-core-full-deploy.yml` pour une pipeline DevSecOps unifiée. Voir [docs-private/DEVOPS_PIPELINES.md](../docs-private/DEVOPS_PIPELINES.md) pour les détails techniques.
+> **Note**: Workflows applicatifs (Portfolio, SecureVault, Registry) utilisent maintenant `00-core-full-deploy.yml` pour une pipeline DevSecOps unifiée. Voir docs-private/DEVOPS_PIPELINES.md (document interne non publié) pour les détails techniques.
 
 | Workflow | Fichier | Déclencheur | Durée | Description |
 |----------|---------|-------------|-------|-------------|
-| **🏗️ Infrastructure Deploy** | [02-infra-deploy.yml](02-infra-deploy.yml) | Push master/develop (base-infra/*), manuel | ~3-5 min | Déploiement Traefik, n8n, portfolio |
-| **🔐 SecureVault Deploy** | [03-app-securevault-deploy.yml](03-app-securevault-deploy.yml) | Push develop (auto), manuel (prod) | ~5-7 min | Wrapper → 00-core-full-deploy.yml + migrations |
-| **🐳 Registry Build** | [03-app-registry-build.yml](03-app-registry-build.yml) | Push registry/*, manuel | ~2-3 min | Build images Docker Registry |
-| **🐳 Registry Deploy** | [03-app-registry-deploy.yml](03-app-registry-deploy.yml) | Push master (registry/*), manuel | ~3-4 min | Wrapper → 00-core-full-deploy.yml + HAProxy |
-| **🧹 Registry Cleanup** | [03-app-registry-cleanup.yml](03-app-registry-cleanup.yml) | Schedule (weekly), manuel | ~2-3 min | Nettoyage images obsolètes Registry |
-| **🌐 Portfolio Build** | [03-app-portfolio-build.yml](03-app-portfolio-build.yml) | Push portfolio/*, manuel | ~2-3 min | Build frontend Portfolio |
-| **🌐 Portfolio Deploy** | [03-app-portfolio-deploy.yml](03-app-portfolio-deploy.yml) | Push master/develop (portfolio/*), manuel | ~4-6 min | Wrapper → 00-core-full-deploy.yml + frontend build |
-| **🔄 Secret Rotation** | [06-maint-rotate-secrets.yml](06-maint-rotate-secrets.yml) | Schedule (1er du mois), manuel | ~3-5 min | Rotation automatique des secrets |
-| **💾 Backup** | [06-maint-backup.yml](06-maint-backup.yml) | Schedule (daily 2AM), manuel | ~5-10 min | Backup bases + certificats → S3/Azure |
-| **🔍 CodeQL Analysis** | [01-security-codeql.yml](01-security-codeql.yml) | Push, PR, schedule | ~10-15 min | SAST security scanning |
-| **📊 Security Score** | [01-security-publish-score.yml](01-security-publish-score.yml) | Après healthcheck | ~2 min | Gitleaks + Trivy → badge publication |
+| **Infrastructure Deploy**| [02-infra-deploy.yml](02-infra-deploy.yml) | Push master/develop (base-infra/*), manuel | ~3-5 min | Déploiement Traefik, n8n, portfolio |
+| **SecureVault Deploy**| [03-app-securevault-deploy.yml](03-app-securevault-deploy.yml) | Push develop (auto), manuel (prod) | ~5-7 min | Wrapper → 00-core-full-deploy.yml + migrations |
+| **Registry Build**| 03-app-registry-build.yml (absent du dépôt) | Push registry/*, manuel | ~2-3 min | Build images Docker Registry |
+| **Registry Deploy**| [03-app-registry-deploy.yml](03-app-registry-deploy.yml) | Push master (registry/*), manuel | ~3-4 min | Wrapper → 00-core-full-deploy.yml + HAProxy |
+| **Registry Cleanup**| [03-app-registry-cleanup.yml](03-app-registry-cleanup.yml) | Schedule (weekly), manuel | ~2-3 min | Nettoyage images obsolètes Registry |
+| **Portfolio Build**| [03-app-portfolio-build.yml](03-app-portfolio-build.yml) | Push portfolio/*, manuel | ~2-3 min | Build frontend Portfolio |
+| **Portfolio Deploy**| [03-app-portfolio-deploy.yml](03-app-portfolio-deploy.yml) | Push master/develop (portfolio/*), manuel | ~4-6 min | Wrapper → 00-core-full-deploy.yml + frontend build |
+| **Secret Rotation**| [06-maint-rotate-secrets.yml](06-maint-rotate-secrets.yml) | Schedule (1er du mois), manuel | ~3-5 min | Rotation automatique des secrets |
+| **Backup**| [06-maint-backup.yml](06-maint-backup.yml) | Schedule (daily 2AM), manuel | ~5-10 min | Backup bases + certificats → S3/Azure |
+| **CodeQL Analysis**| [01-security-codeql.yml](01-security-codeql.yml) | Push, PR, schedule | ~10-15 min | SAST security scanning |
+| **Security Score**| [01-security-publish-score.yml](01-security-publish-score.yml) | Après healthcheck | ~2 min | Gitleaks + Trivy → badge publication |
 | **✅ Lint** | [01-quality-lint.yml](01-quality-lint.yml) | Push, PR | ~1-2 min | Lint markdown, YAML, code |
-| **❤️ Healthcheck Prod** | [05-health-prod.yml](05-health-prod.yml) | Schedule (30min) | ~30s | Monitoring production 24/7 |
-| **🩺 Healthcheck Post-Deploy** | [04-health-postdeploy.yml](04-health-postdeploy.yml) | Après déploiement | ~1 min | Smart cooldown validation |
-| **📝 Docs Generate** | [08-support-docs-generate.yml](08-support-docs-generate.yml) | Push docs/*, manuel | ~2-3 min | Génération documentation |
-| **🏷️ Release Automation** | [07-release-automation.yml](07-release-automation.yml) | Push master | ~2-3 min | Semantic versioning + changelog |
-| **📋 Release Changelog PR** | [07-release-changelog-pr.yml](07-release-changelog-pr.yml) | Manuel | ~1 min | PR changelog draft |
-| **🤖 PR Title Automation** | [08-support-pr-title.yml](08-support-pr-title.yml) | Ouverture PR | ~10s | Auto-format titre PR (Conventional Commits) |
-| **🧩 Core Full Deploy** | [00-core-full-deploy.yml](00-core-full-deploy.yml) | Déclenché par wrappers | ~8-12 min | Orchestrateur déploiement unifié apps |
-| **🧩 Core Deploy Queue** | [00-core-deploy-queue.yml](00-core-deploy-queue.yml) | Déclenché par wrappers | ~2-3 min | Orchestrateur file d'attente déploiement |
+| **Healthcheck Prod**| [05-health-prod.yml](05-health-prod.yml) | Schedule (30min) | ~30s | Monitoring production 24/7 |
+| **Healthcheck Post-Deploy**| [04-health-postdeploy.yml](04-health-postdeploy.yml) | Après déploiement | ~1 min | Smart cooldown validation |
+| **Docs Generate**| [08-support-docs-generate.yml](08-support-docs-generate.yml) | Push docs/*, manuel | ~2-3 min | Génération documentation |
+| **Release Automation**| [07-release-automation.yml](07-release-automation.yml) | Push master | ~2-3 min | Semantic versioning + changelog |
+| **Release Changelog PR**| [07-release-changelog-pr.yml](07-release-changelog-pr.yml) | Manuel | ~1 min | PR changelog draft |
+| **PR Title Automation**| [08-support-pr-title.yml](08-support-pr-title.yml) | Ouverture PR | ~10s | Auto-format titre PR (Conventional Commits) |
+| **Core Full Deploy**| [00-core-full-deploy.yml](00-core-full-deploy.yml) | Déclenché par wrappers | ~8-12 min | Orchestrateur déploiement unifié apps |
+| **Core Deploy Queue**| [00-core-deploy-queue.yml](00-core-deploy-queue.yml) | Déclenché par wrappers | ~2-3 min | Orchestrateur file d'attente déploiement |
 
 ---
 
-## 🔐 Workflow 1: SecureVault Deployment
+<a id="-workflow-1-securevault-deployment"></a>
+## Workflow 1: SecureVault Deployment
 
-> **Note** : Depuis 2026, les workflows applicatifs (Portfolio, Registry, SecureVault) utilisent des wrappers qui déclenchent `00-core-full-deploy.yml` pour un pipeline DevSecOps unifié. Voir [DEVOPS_PIPELINES.md](../../docs-private/DEVOPS_PIPELINES.md) pour l'architecture détaillée.
+> **Note** : Depuis 2026, les workflows applicatifs (Portfolio, Registry, SecureVault) utilisent des wrappers qui déclenchent `00-core-full-deploy.yml` pour un pipeline DevSecOps unifié. Voir DEVOPS_PIPELINES.md (document interne non publié) pour l'architecture détaillée.
 
 ### Déclencheurs
 
@@ -59,7 +62,7 @@ on:
 
 ### Jobs Pipeline (2 étapes)
 
-#### 1️⃣ **Test & Build** (~2-3 min)
+#### 1 **Test & Build** (~2-3 min)
 
 **Objectif**: Tester backend/frontend, builder images Docker, scanner sécurité
 
@@ -76,7 +79,7 @@ on:
 - ✅ Docker images buildées
 - ✅ Vulnérabilités scannées
 
-#### 2️⃣ **Deploy to VPS** (~1-2 min)
+#### 2 **Deploy to VPS** (~1-2 min)
 
 **Objectif**: Déployer sur le VPS via SSH
 
@@ -93,10 +96,12 @@ on:
 
 ---
 
-## 🚀 Workflow 2: Portfolio Deploy
+<a id="-workflow-2-portfolio-deploy"></a>
+## Workflow 2: Portfolio Deploy
 
 > **Nouveau** : Build et déploiement Portfolio sont séparés (`03-app-portfolio-build.yml` et `03-app-portfolio-deploy.yml`).
-## 🐳 Workflow 3: Registry Build & Deploy
+<a id="-workflow-3-registry-build--deploy"></a>
+## Workflow 3: Registry Build & Deploy
 
 ### Déclencheurs Build
 
@@ -146,7 +151,8 @@ on:
 
 **Secrets requis** :
 - `REGISTRY_SSH_KEY`, `REGISTRY_HOST`, `REGISTRY_USER`
-## 🧩 Workflow 4: Orchestrateurs Core
+<a id="-workflow-4-orchestrateurs-core"></a>
+## Workflow 4: Orchestrateurs Core
 
 ### 00-core-full-deploy.yml
 
@@ -190,7 +196,7 @@ on:
 
 ### Jobs Pipeline (6 étapes)
 
-#### 1️⃣ **Validate & Lint** (~1 min)
+#### 1 **Validate & Lint** (~1 min)
 
 **Objectif** : Valider HTML, CSS, JavaScript
 
@@ -209,7 +215,7 @@ eslint portfolio/script.js
 
 ---
 
-#### 2️⃣ **Build & Optimize** (~1 min)
+#### 2 **Build & Optimize** (~1 min)
 
 **Objectif** : Minifier CSS/JS, optimiser images
 
@@ -226,7 +232,7 @@ terser portfolio/script.js -o portfolio/script.min.js --compress --mangle
 
 ---
 
-#### 3️⃣ **Security Scanning** (~2-3 min)
+#### 3 **Security Scanning** (~2-3 min)
 
 **Objectif** : Détecter secrets, vulnérabilités, failles SAST
 
@@ -256,7 +262,7 @@ docker run aquasec/trivy:latest fs --severity HIGH,CRITICAL .
 
 ---
 
-#### 4️⃣ **Deploy GitHub Pages** (~30s)
+#### 4 **Deploy GitHub Pages** (~30s)
 
 **Objectif** : Déployer version statique sur GitHub Pages
 
@@ -278,7 +284,7 @@ cp -r portfolio/* docs/
 
 ---
 
-#### 5️⃣ **Deploy VPS Production/Staging** (~1-2 min)
+#### 5 **Deploy VPS Production/Staging** (~1-2 min)
 
 **Objectif** : Déployer sur VPS via SSH + rsync
 
@@ -314,7 +320,7 @@ curl -I https://portfolio.freijstack.com
 
 ---
 
-#### 6️⃣ **Post-Deploy Cleanup** (~10s)
+#### 6 **Post-Deploy Cleanup** (~10s)
 
 **Objectif** : Nettoyer artefacts temporaires
 
@@ -326,7 +332,8 @@ rm -rf ~/.ssh/id_rsa
 
 ---
 
-## 🔐 Workflow 5: Secret Rotation
+<a id="-workflow-5-secret-rotation"></a>
+## Workflow 5: Secret Rotation
 
 ### Déclencheurs
 
@@ -367,11 +374,12 @@ on:
 | **JWT_SECRET** | Annuel | Tous les users re-login | ✅ |
 | **ENCRYPTION_KEY** | Annuel | ⚠️ Perte d'accès aux données | ✅ |
 
-Voir [SECRET_ROTATION.md](../docs-private/SECRET_ROTATION.md) pour le guide détaillé.
+Voir SECRET_ROTATION.md (document interne non publié) pour le guide détaillé.
 
 ---
 
-## 🔐 Configuration SecureVault Deployment
+<a id="-configuration-securevault-deployment"></a>
+## Configuration SecureVault Deployment
 
 ### Secrets GitHub Requis
 
@@ -420,11 +428,12 @@ JWT_SECRET=<CHANGEZ_MOI>
 ENCRYPTION_KEY=<CHANGEZ_MOI>
 ```
 
-Voir [SECUREVAULT_DEPLOYMENT.md](../docs/02-deployment/SECUREVAULT_DEPLOYMENT.md) pour le guide complet.
+Voir [SECUREVAULT_DEPLOYMENT.md](../../docs/02-deployment/SECUREVAULT_DEPLOYMENT.md) pour le guide.
 
 ---
 
-## 🤖 Workflow 6: PR Title Automation
+<a id="-workflow-6-pr-title-automation"></a>
+## Workflow 6: PR Title Automation
 
 ### Déclencheurs
 
@@ -507,7 +516,8 @@ Vous pouvez modifier le titre manuellement si nécessaire.
 
 ---
 
-## 📊 Monitoring & Métriques
+<a id="-monitoring--métriques"></a>
+## Monitoring & Métriques
 
 ### GitHub Actions Dashboard
 
@@ -515,8 +525,8 @@ Vous pouvez modifier le titre manuellement si nécessaire.
 
 **Métriques** :
 - ✅ **Success Rate** : Suivi du taux de réussite des workflows
-- ⏱️ **Durée moyenne** : ~5-8 minutes (CI/CD complet)
-- 🔄 **Runs/jour** : Variable selon activité développement
+- **Durée moyenne** : ~5-8 minutes (CI/CD complet)
+- **Runs/jour** : Variable selon activité développement
 
 ### Badges dans README
 
@@ -530,7 +540,8 @@ Vous pouvez modifier le titre manuellement si nécessaire.
 
 ---
 
-## 🔧 Configuration Locale
+<a id="-configuration-locale"></a>
+## Configuration Locale
 
 ### Tester Workflows Localement
 
@@ -559,7 +570,8 @@ yaml-lint .github/workflows/*.yml
 
 ---
 
-## 🔐 Secrets Configuration
+<a id="-secrets-configuration"></a>
+## Secrets Configuration
 
 ### Secrets Requis
 
@@ -580,7 +592,8 @@ yaml-lint .github/workflows/*.yml
 
 ---
 
-## 🐛 Troubleshooting
+<a id="-troubleshooting"></a>
+## Troubleshooting
 
 ### Échec Job "Security Scanning"
 
@@ -624,7 +637,8 @@ jobs:
 
 ---
 
-## 📚 Ressources
+<a id="-ressources"></a>
+## Ressources
 
 - **GitHub Actions Docs** : https://docs.github.com/en/actions
 - **Conventional Commits** : https://www.conventionalcommits.org/
@@ -634,32 +648,34 @@ jobs:
 
 ---
 
-## 📝 Changelog Workflows
+<a id="-changelog-workflows"></a>
+## Changelog Workflows
 
-### Version 2.0.0 (2026-01-03) 🎉
-- ✨ Ajout workflows Docker Registry (deploy + cleanup)
-- ✨ Ajout workflows Portfolio (build + deploy séparés)
-- ✨ Ajout workflows Backup automatisé (S3 + Azure)
-- ✨ Ajout Security Score workflow
-- ✨ Ajout workflows Health checks (prod + dev + post-deploy)
-- ✨ Ajout Docs Generate workflow
-- ✨ Ajout Release workflows (automation + changelog PR)
-- 📊 Documentation complète de tous les workflows (21+)
-- 🔧 Mise à jour vers Janvier 2026
+<a id="version-200-2026-01-03-"></a>
+### Version 2.0.0 (2026-01-03)
+- Ajout workflows Docker Registry (deploy + cleanup)
+- Ajout workflows Portfolio (build + deploy séparés)
+- Ajout workflows Backup automatisé (S3 + Azure)
+- Ajout Security Score workflow
+- Ajout workflows Health checks (prod + dev + post-deploy)
+- Ajout Docs Generate workflow
+- Ajout Release workflows (automation + changelog PR)
+- Documentation de tous les workflows (21+)
+- Mise à jour vers Janvier 2026
 
 ### Version 1.2.0 (2025-12-28)
-- ✨ Ajout workflow PR title automation
-- 🔧 Simplification template PR (10 checks critiques)
+- Ajout workflow PR title automation
+- Simplification template PR (10 checks critiques)
 
 ### Version 1.1.0 (2025-12-20)
-- 🔐 Ajout CodeQL + Trivy scanning
-- 📊 Métriques durée jobs
-- 🚀 Déploiement staging automatique
+- Ajout CodeQL + Trivy scanning
+- Métriques durée jobs
+- Déploiement staging automatique
 
 ### Version 1.0.0 (2025-12-01)
-- 🎉 Pipeline CI/CD initial
-- 🔄 Déploiement production VPS
-- 📄 GitHub Pages déploiement
+- Pipeline CI/CD initial
+- Déploiement production VPS
+- GitHub Pages déploiement
 
 ---
 
@@ -667,14 +683,14 @@ jobs:
 **Dernière mise à jour** : Janvier 2026  
 **Version** : 2.0.0
 
-**📊 Statistiques**:
+**Statistiques**:
 - 21+ workflows actifs
 - ~50 jobs au total
 - Support production + staging
 - Monitoring 24/7 activé
 - Security scanning quotidien
 
-**📚 Documentation Complète**:
+**Documentation Complète**:
 - [Architecture CI/CD](../../docs/01-architecture/CI_CD_ARCHITECTURE.md) - Diagramme Mermaid + détails
-- [Guide Automation](../../docs/03-guides/AUTOMATION_GUIDE.md) - Guide complet automatisation
+- [Guide Automation](../../docs/03-guides/AUTOMATION_GUIDE.md) - Guide automatisation
 - [Deployment Guide](../../docs/02-deployment/DEPLOYMENT.md) - Procédures de déploiement

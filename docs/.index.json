@@ -1,7 +1,7 @@
 {
   "generated_at": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')",
   "docs": [
-    { "file": "docs/00-overview/INDEX.md", "title": "📚 Index Documentation - FreijStack", "size": 11581 },
+    { "file": "docs/00-overview/INDEX.md", "title": "<a id="-index-documentation---freijstack"></a>", "size": 12795 },
     { "file": "docs/00-overview/QUICK_DEPLOY_GUIDE.md", "title": "🚀 Guide de Déploiement Rapide - Staging", "size": 4284 },
     { "file": "docs/00-overview/README.md", "title": "📍 00-overview: Getting Started with FreijStack", "size": 3740 },
     { "file": "docs/00-overview/USER_GUIDE.md", "title": "🔐 SecureVault Professional - Guide Utilisateur", "size": 12266 },
@@ -26,8 +26,8 @@
     { "file": "docs/05-reference/FEATURES_ROADMAP.md", "title": "🚀 SecureVault - Features Roadmap", "size": 7031 },
     { "file": "docs/05-reference/README.md", "title": "📚 05-reference: Detailed Specifications & Checklists", "size": 6922 },
     { "file": "docs/05-reference/RELEASE_WORKFLOW.md", "title": "🚀 Release Workflow - Architecture", "size": 11747 },
-    { "file": "docs/NAVIGATION_GUIDE.md", "title": "🗺️ FreijStack Documentation Navigation Guide", "size": 11536 },
-    { "file": "docs/README.md", "title": "📚 Documentation FreijStack", "size": 8194 },
+    { "file": "docs/NAVIGATION_GUIDE.md", "title": "<a id="-freijstack-documentation-navigation-guide"></a>", "size": 11223 },
+    { "file": "docs/README.md", "title": "<a id="-documentation-freijstack"></a>", "size": 8476 },
     { "file": "docs/STRUCTURE.md", "title": "📖 FreijStack Documentation Structure", "size": 11702 },
     ]
 }
