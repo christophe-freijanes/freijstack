@@ -306,6 +306,45 @@
       "fr": "Quelques repères chiffrés du CV : plusieurs centaines de comptes AWS, plusieurs dizaines de milliers de snapshots nettoyés, 60 % d’interventions manuelles en moins, plus de 80 To répliqués, plus de 3 000 VM et 100 % de couverture du durcissement Linux chez SQUAD.",
       "en": "Selected CV figures: several hundred AWS accounts, tens of thousands of snapshots cleaned, 60% fewer manual interventions, over 80 TB replicated, more than 3,000 VMs, and 100% Linux hardening coverage at SQUAD.",
       "next": "automation"
+    },
+    {
+      "id": "projects",
+      "topic": "Projets AWS et automatisation",
+      "tags": [
+        "projet",
+        "projets",
+        "project",
+        "projects",
+        "realisations",
+        "portfolio",
+        "ssm",
+        "inventaire",
+        "inventory"
+      ],
+      "fr": "Le CV décrit plusieurs chantiers concrets : centralisation des inventaires et maintenances SSM, nettoyage massif de snapshots AWS, observabilité Datadog/CloudWatch et conception d'approches AIOps fondées sur MCP et agents spécialisés. Des exemples de code sont accessibles depuis le portfolio et GitHub.",
+      "en": "The CV describes concrete initiatives: centralized SSM inventory and maintenance, large-scale AWS snapshot cleanup, Datadog/CloudWatch observability, and agentic AIOps approaches with MCP and specialized agents. Code examples are linked from the portfolio and GitHub.",
+      "next": "platform"
+    },
+    {
+      "id": "availability",
+      "topic": "Mobilité et mode de travail",
+      "tags": [
+        "mobilite",
+        "availability",
+        "disponible",
+        "disponibilite",
+        "remote",
+        "teletravail",
+        "hybride",
+        "hybrid",
+        "montreal",
+        "localisation",
+        "location",
+        "canada"
+      ],
+      "fr": "Le CV indique Montréal (Québec), résident permanent, et un intérêt pour un cadre hybride ou en télétravail. Il ne précise pas de date de disponibilité : ce point peut être discuté lors d'un échange.",
+      "en": "The CV states Montréal, Québec, permanent resident, and hybrid or remote working arrangements. It does not specify a start date; availability can be discussed in a conversation.",
+      "next": "experience"
     }
   ]
 }
