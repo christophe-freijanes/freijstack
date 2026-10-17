@@ -160,20 +160,34 @@ document.addEventListener('DOMContentLoaded', function() {
             // Contact
             'contact.title': 'Parlons Ensemble',
             'contact.subtitle': 'Vous avez un projet ? Contactez-moi',
+            'assistant.open': 'Assistant IA',
+            'assistant.eyebrow': 'ÉCHANGE RECRUTEMENT',
+            'assistant.title': 'Assistant recrutement',
+            'assistant.close': 'Fermer',
+            'assistant.notice': 'Réponses prédéfinies fondées uniquement sur le portfolio.',
+            'assistant.greeting': 'Bonjour ! Que souhaitez-vous savoir sur mon parcours, mes compétences ou mes projets ?',
+            'assistant.questions.title': 'Questions fréquentes',
+            'assistant.question.experience': 'Mon parcours',
+            'assistant.question.skills': 'Mes compétences',
+            'assistant.question.projects': 'Mes projets',
+            'assistant.input.label': 'Votre question',
+            'assistant.send': 'Envoyer',
+            'assistant.booking': 'Réserver un échange',
             // Footer
             'footer.home': 'Accueil',
             'footer.projects': 'Projets',
             'footer.rights': 'Tous droits réservés.',
-            // Experience details - ACENSI
-                        // Experience details - La Caisse (CDPQ)
+            // Experience details - La Caisse (CDPQ)
             'exp.caisse.title': 'Spécialiste principal – Plateforme AWS / Référent technique | La Caisse (CDPQ)',
             'exp.caisse.period': 'Juin 2026 – Aujourd’hui · Montréal, Québec',
             'exp.caisse.item1': 'Exploitation, fiabilisation et évolution d’une plateforme AWS multi-comptes dans un environnement financier critique et réglementé.',
-            'exp.caisse.item2': 'Automatisation et standardisation des opérations avec CloudFormation, Systems Manager et Python/Bash/PowerShell ; contribution aux workflows GitHub et Azure DevOps.',
+            'exp.caisse.item2': 'Automatisation et standardisation des opérations avec CloudFormation, Systems Manager et Python/Bash/PowerShell ; contribution aux workflows Azure DevOps et approche SRE axée sur la fiabilité de la plateforme.',
             'exp.caisse.item3': 'Amélioration de l’observabilité avec Datadog et CloudWatch : tableaux de bord, ajustement des alertes et réduction du bruit sur les workflows Lambda et Step Functions.',
             'exp.caisse.item4': 'Centralisation des opérations Systems Manager : inventaire, gestion des correctifs Windows/Linux, contrôles post-maintenance et traçabilité opérationnelle.',
             'exp.caisse.item5': 'Contribution à la gouvernance, à la sécurité et au FinOps : IAM, KMS, IMDSv2, moindre privilège et optimisation des ressources ; accompagnement technique des équipes.',
             'exp.caisse.item6': 'Conception d’approches AIOps et agentiques pour les opérations AWS : MCP, Bedrock/AgentCore, agents spécialisés, validation humaine et accès en lecture seule gouverné.',
+            // Experience details - ACENSI
+
             'exp.acensi.title': 'Spécialiste Cloud & Sécurité – DevSecOps | ACENSI',
             'exp.acensi.period': '2023 – Juin 2026',
             'exp.acensi.item1': 'Conception et déploiement d\'une stratégie de sauvegarde « as-code » (Terraform, AWS S3, Commvault/Clumio), réduction des interventions manuelles et temps d\'exploitation.',
@@ -274,20 +288,34 @@ document.addEventListener('DOMContentLoaded', function() {
             // Contact
             'contact.title': 'Let\'s Talk',
             'contact.subtitle': 'Have a project? Contact me',
+            'assistant.open': 'AI assistant',
+            'assistant.eyebrow': 'RECRUITMENT CHAT',
+            'assistant.title': 'Recruitment assistant',
+            'assistant.close': 'Close',
+            'assistant.notice': 'Predefined answers based only on the portfolio.',
+            'assistant.greeting': 'Hello! What would you like to know about my experience, skills or projects?',
+            'assistant.questions.title': 'Frequently asked questions',
+            'assistant.question.experience': 'My experience',
+            'assistant.question.skills': 'My skills',
+            'assistant.question.projects': 'My projects',
+            'assistant.input.label': 'Your question',
+            'assistant.send': 'Send',
+            'assistant.booking': 'Book a conversation',
             // Footer
             'footer.home': 'Home',
             'footer.projects': 'Projects',
             'footer.rights': 'All rights reserved.',
-            // Experience details - ACENSI
-                        // Experience details - La Caisse (CDPQ)
+            // Experience details - La Caisse (CDPQ)
             'exp.caisse.title': 'Principal Specialist – AWS Platform / Technical Lead | La Caisse (CDPQ)',
             'exp.caisse.period': 'June 2026 – Present · Montreal, Quebec',
             'exp.caisse.item1': 'Operating, improving reliability and evolving a multi-account AWS platform in a critical, regulated financial environment.',
-            'exp.caisse.item2': 'Automating and standardizing operations with CloudFormation, Systems Manager and Python/Bash/PowerShell; contributing to GitHub and Azure DevOps workflows.',
+            'exp.caisse.item2': 'Automating and standardizing operations with CloudFormation, Systems Manager and Python/Bash/PowerShell; contributing to Azure DevOps workflows and applying SRE practices to platform reliability.',
             'exp.caisse.item3': 'Improving observability with Datadog and CloudWatch: dashboards, alert tuning and noise reduction for Lambda and Step Functions workflows.',
             'exp.caisse.item4': 'Centralizing Systems Manager operations: inventory, Windows/Linux patch management, post-maintenance checks and operational traceability.',
             'exp.caisse.item5': 'Contributing to governance, security and FinOps: IAM, KMS, IMDSv2, least privilege and resource optimization; providing technical guidance to teams.',
             'exp.caisse.item6': 'Designing AIOps and agentic approaches for AWS operations: MCP, Bedrock/AgentCore, specialized agents, human approval and governed read-only access.',
+            // Experience details - ACENSI
+
             'exp.acensi.title': 'Cloud & Security Specialist – DevSecOps | ACENSI',
             'exp.acensi.period': '2023 – June 2026',
             'exp.acensi.item1': 'Design and deployment of an "as-code" backup strategy (Terraform, AWS S3, Commvault/Clumio), reducing manual interventions and operational time.',
@@ -752,3 +780,99 @@ const toggleDarkMode = () => {
 if (localStorage.getItem('darkMode') === 'true') {
     document.body.classList.add('dark-mode');
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dialog = document.getElementById('recruitmentAssistant');
+    const openButton = document.getElementById('assistantOpen');
+    const closeButton = document.getElementById('assistantClose');
+    const messages = document.getElementById('assistantMessages');
+    const form = document.getElementById('assistantForm');
+    const input = document.getElementById('assistantInput');
+
+    if (!dialog || !openButton || !closeButton || !messages || !form || !input) return;
+
+    const responses = {
+        fr: {
+            experience: 'Le portfolio présente plus de 20 ans d’expérience en Cloud et sécurité. Depuis juin 2026, Christophe est Spécialiste principal – Plateforme AWS / Référent technique chez La Caisse (CDPQ). Son parcours inclut notamment ACENSI, SQUAD, ECONOCOM (projet ITER), DIGIMIND et HARDIS.',
+            skills: 'Les compétences affichées comprennent AWS, GCP, Kubernetes, Terraform, AWS CDK, CloudFormation, Ansible, Python, Bash/PowerShell, DevSecOps, SRE, FinOps, CloudWatch Logs, Datadog, LLM, MCP et Amazon Bedrock.',
+            projects: 'Le portfolio présente notamment Formation DevOps & CI/CD, ansible-webapp, student-list, freijstack, Docker Applications et Infrastructure as Code. Les liens sont dans la section Projets.',
+            booking: 'Vous pouvez réserver un échange avec le bouton Google Calendar ci-dessous.',
+            unknown: 'Je peux répondre à partir du portfolio sur le parcours, les compétences et les projets. Vous pouvez aussi réserver un échange avec le bouton Google Calendar.'
+        },
+        en: {
+            experience: 'The portfolio shows over 20 years of experience in Cloud and Security. Since June 2026, Christophe has been Principal Specialist – AWS Platform / Technical Lead at La Caisse (CDPQ). His background also includes ACENSI, SQUAD, ECONOCOM (ITER project), DIGIMIND and HARDIS.',
+            skills: 'Listed skills include AWS, GCP, Kubernetes, Terraform, AWS CDK, CloudFormation, Ansible, Python, Bash/PowerShell, DevSecOps, SRE, FinOps, CloudWatch Logs, Datadog, LLMs, MCP and Amazon Bedrock.',
+            projects: 'The portfolio features DevOps & CI/CD Training, ansible-webapp, student-list, freijstack, Docker Applications and Infrastructure as Code. Links are in the Projects section.',
+            booking: 'You can book a conversation using the Google Calendar button below.',
+            unknown: 'I can answer questions based on the portfolio about experience, skills and projects. You can also book a conversation using the Google Calendar button.'
+        }
+    };
+
+    const language = () => localStorage.getItem('preferredLanguage') === 'en' ? 'en' : 'fr';
+    const normalize = text => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    function addMessage(text, isUser) {
+        const message = document.createElement('p');
+        message.className = `assistant-message ${isUser ? 'assistant-user' : 'assistant-reply'}`;
+        message.textContent = text;
+        messages.appendChild(message);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function answerQuestion(question) {
+        const text = normalize(question);
+        const copy = responses[language()];
+
+        if (/(book|booking|calendar|schedule|meeting|interview|rdv|rendez|reservation|reserve)/.test(text)) return copy.booking;
+        if (/(experience|parcours|career|background|caisse|cdpq|acensi|squad|econom|digimind|hardis|years|annee)/.test(text)) return copy.experience;
+        if (/(skill|competence|technical|technologie|aws|gcp|kubernetes|terraform|cloudformation|cdk|sre|finops|bedrock|mcp|datadog|cloudwatch|ansible|druva|devsecops)/.test(text)) return copy.skills;
+        if (/(project|projet|portfolio|ansible-webapp|student-list|freijstack|docker|formation|infrastructure as code)/.test(text)) return copy.projects;
+        return copy.unknown;
+    }
+
+    openButton.addEventListener('click', function() {
+        dialog.showModal();
+        input.focus();
+    });
+
+    closeButton.addEventListener('click', function() {
+        dialog.close();
+    });
+
+    dialog.addEventListener('close', function() {
+        openButton.focus();
+    });
+
+    dialog.addEventListener('click', function(event) {
+        if (event.target === dialog) dialog.close();
+    });
+
+    document.querySelectorAll('[data-assistant-topic]').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const topic = button.dataset.assistantTopic;
+            addMessage(button.textContent.trim(), true);
+            addMessage(responses[language()][topic], false);
+        });
+    });
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const question = input.value.trim();
+        if (!question) return;
+        addMessage(question, true);
+        addMessage(answerQuestion(question), false);
+        form.reset();
+        input.focus();
+    });
+
+    function updatePlaceholder() {
+        input.placeholder = language() === 'en'
+            ? 'Ask about my experience, skills or projects…'
+            : 'Posez une question sur mon parcours, mes compétences ou mes projets…';
+    }
+
+    document.querySelectorAll('.lang-btn').forEach(function(button) {
+        button.addEventListener('click', updatePlaceholder);
+    });
+    updatePlaceholder();
+});

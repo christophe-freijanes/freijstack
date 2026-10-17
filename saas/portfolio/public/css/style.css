@@ -1699,3 +1699,222 @@ section {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--primary-dark);
 }
+
+/* Recruitment assistant */
+.assistant-nav-launch {
+    margin-left: 8px;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.assistant-dialog {
+    box-sizing: border-box;
+    width: min(460px, calc(100vw - 24px));
+    height: min(680px, calc(100vh - 24px));
+    height: min(680px, calc(100dvh - 24px));
+    max-width: none;
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
+    margin: auto;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.4);
+}
+
+.assistant-dialog[open] {
+    display: flex;
+}
+
+.assistant-dialog::backdrop {
+    background: rgba(5, 10, 22, 0.72);
+    backdrop-filter: blur(3px);
+}
+
+.assistant-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    height: 100%;
+    max-height: inherit;
+    padding: 22px;
+    box-sizing: border-box;
+}
+
+.assistant-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.assistant-header h2 {
+    margin: 2px 0 0;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+}
+
+.assistant-eyebrow {
+    margin: 0;
+    color: var(--accent);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.assistant-close {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.assistant-notice {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+}
+
+.assistant-messages {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    flex-basis: 160px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-tertiary);
+}
+
+.assistant-message {
+    max-width: 88%;
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.assistant-reply {
+    align-self: flex-start;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.assistant-user {
+    align-self: flex-end;
+    background: var(--accent);
+    color: var(--bg-primary);
+}
+
+.assistant-questions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.assistant-questions button {
+    padding: 7px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.assistant-questions button:hover,
+.assistant-questions button:focus-visible,
+.assistant-close:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.assistant-form {
+    display: flex;
+    gap: 8px;
+}
+
+.assistant-form input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font: inherit;
+}
+
+.assistant-form input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.assistant-send,
+.assistant-booking {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-md);
+    background: var(--accent);
+    color: var(--bg-primary);
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.assistant-booking {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.assistant-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+@media (max-width: 480px) {
+    .assistant-panel {
+        gap: 11px;
+        padding: 16px;
+    }
+
+    .assistant-messages {
+        max-height: none;
+    }
+
+    .assistant-questions button {
+        flex: 1 1 auto;
+    }
+}
