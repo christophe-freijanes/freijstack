@@ -128,6 +128,10 @@ if ! docker exec portfolio sh -c '
   wget -q -O /dev/null http://127.0.0.1/ &&
   grep -q "id=\"assistantOpen\"" /usr/share/nginx/html/index.html &&
   grep -q "data-assistant-topic=\"teamwork\"" /usr/share/nginx/html/index.html &&
+  test -s /usr/share/nginx/html/js/recruitment-facts.js &&
+  grep -q "const engine = window.RecruitmentFacts" /usr/share/nginx/html/js/script.js &&
+  grep -q "calendar.app.google/" /usr/share/nginx/html/index.html &&
+  ! grep -qi calendly /usr/share/nginx/html/index.html &&
   test -s /usr/share/nginx/html/cv/CV-Christophe-FREIJANES-ATS.pdf
 '; then
   rollback
