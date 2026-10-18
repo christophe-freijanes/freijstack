@@ -7,6 +7,7 @@ import unicodedata
 from html.parser import HTMLParser
 from pathlib import Path
 
+
 PUBLIC = Path(__file__).resolve().parents[1] / "public"
 INDEX = PUBLIC / "data" / "recruitment-knowledge.json"
 CV = PUBLIC / "pages" / "resume.html"
@@ -19,7 +20,7 @@ class VisibleText(HTMLParser):
         self.parts = []
         self.skip = 0
 
-    def handle_starttag(self, tag, attrs):
+    def handle_starttag(self, tag, _attrs):
         if tag in ("script", "style"):
             self.skip += 1
 
@@ -59,14 +60,14 @@ def main():
         if args.write:
             item["observed_labels"] = sorted(set(found), key=str.casefold)
         if args.report:
-            print(f"{item['id']}: {len(found)} labels présents dans CV/portfolio")
+            print(f"{item['id']}: {len(found)} labels présents dans CV/portfolio")  # noqa: T201
         if not found and item.get("source") != "Informations partagées directement par l'auteur":
             errors.append(f"{item['id']}: aucun label retrouvé dans le CV ou portfolio")
     if errors:
         raise SystemExit("\n".join(errors))
     if args.write:
         INDEX.write_text(json.dumps(knowledge, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"INDEX OK : {len(knowledge['items'])} domaines vérifiés contre CV ATS et portfolio")
+    print(f"INDEX OK : {len(knowledge['items'])} domaines vérifiés contre CV ATS et portfolio")  # noqa: T201
 
 
 if __name__ == "__main__":
