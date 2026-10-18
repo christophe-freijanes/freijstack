@@ -1,4 +1,6 @@
-name: 📝 Release PR • Update CHANGELOG
+# Release | Changelog
+# Prépare les propositions de changelog.
+name: "Release | Changelog"
 
 on:
   push:
