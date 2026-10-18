@@ -5,9 +5,11 @@ import re
 import sys
 from pathlib import Path
 
+
 # 1. Variables
 ROOT = Path(__file__).resolve().parents[1]
 MAX_LINES = 200
+CLI_ARG_COUNT = 2
 IMAGE = re.compile(r"!\[[^\]]*\]\([^)]+\)|<img\b", re.IGNORECASE)
 
 
@@ -25,14 +27,14 @@ def check_readme(path):
 
 def main():
     """Contrôle les README puis affiche un résultat exploitable."""
-    root = Path(sys.argv[1]).resolve() if len(sys.argv) == 2 else ROOT
-    if len(sys.argv) > 2 or not root.is_dir():
+    root = Path(sys.argv[1]).resolve() if len(sys.argv) == CLI_ARG_COUNT else ROOT
+    if len(sys.argv) > CLI_ARG_COUNT or not root.is_dir():
         raise SystemExit("Usage : check-code-standards.py [racine-du-depot]")
     readmes = sorted(root.rglob("README.md"))
     issues = [issue for path in readmes for issue in check_readme(path)]
     for issue in issues:
-        print(issue)
-    print(f"README : {len(readmes)} contrôlés, {len(issues)} écart(s)")
+        print(issue)  # noqa: T201
+    print(f"README : {len(readmes)} contrôlés, {len(issues)} écart(s)")  # noqa: T201
     return 1 if issues else 0
 
 
