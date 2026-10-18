@@ -43,6 +43,15 @@ Test de syntaxe JavaScript :
 node --check saas/portfolio/public/js/script.js
 ```
 
+## Questions factuelles sourcées
+
+Le champ `fact_index` du JSON répond d'abord aux questions « depuis quand », « combien », « où », « quand » et « lequel ». La correspondance est dans `public/js/recruitment-facts.js`, avec une source vérifiable sous chaque réponse. Les dates GitHub indiquent la **première trace publique retrouvée**, pas une expérience continue garantie. LinkedIn et Google ne sont pas interrogés en direct : seules les informations confirmées et intégrées à l'index sont utilisées.
+
+```bash
+cd saas/portfolio
+node scripts/test-recruitment-facts.cjs
+```
+
 ## Aperçu Docker sur VPS (sans déploiement)
 
 Depuis la branche de la PR #286 :
