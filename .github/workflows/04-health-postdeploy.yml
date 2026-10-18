@@ -5,10 +5,10 @@ name: "Health | Post-deploy"
 on:
   workflow_run:
     workflows:
-      - "🏗️ Infra • VPS Deploy"
-      - "📄 SaaS • Portfolio Deploy"
-      - "🔐 SaaS • SecureVault Deploy"
-      - "🐳 SaaS • Registry Deploy"
+      - "Infrastructure | Deploy"
+      - "Portfolio | Deploy"
+      - "SecureVault | Deploy"
+      - "Registry | Deploy"
     types:
       - completed
 
