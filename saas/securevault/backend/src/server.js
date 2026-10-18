@@ -24,44 +24,33 @@ const { errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
-/**
- * ==========================================================
- * Core settings
- * ==========================================================
- */
+// Paramètres du service
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const IS_PROD = NODE_ENV === 'production';
 const PORT = Number(process.env.PORT || 3001);
 
 app.set('trust proxy', 1);
 
-/**
- * ==========================================================
- * PostgreSQL readiness (REAL)
- * ==========================================================
- * Use DATABASE_URL if present, else build from POSTGRES_*.
- * Short query: SELECT 1
- * Hard timeout: READINESS_DB_TIMEOUT_MS (default 1500ms)
- */
+// Disponibilité PostgreSQL
 const READINESS_DB_TIMEOUT_MS = Number(process.env.READINESS_DB_TIMEOUT_MS || 1500);
 
 function buildDbConnectionString() {
   if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
 
-  // Optional fallback (if you don't have DATABASE_URL)
+  // Construire la connexion depuis POSTGRES_* si DATABASE_URL manque.
   const host = process.env.POSTGRES_HOST || 'postgres';
   const port = process.env.POSTGRES_PORT || '5432';
   const db = process.env.POSTGRES_DB || 'postgres';
   const user = process.env.POSTGRES_USER || 'postgres';
   const pass = process.env.POSTGRES_PASSWORD || '';
 
-  // Minimal DSN
+  // Encodage explicite des identifiants dans l'URL.
   return `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(pass)}@${host}:${port}/${db}`;
 }
 
 const DB_DSN = buildDbConnectionString();
 
-// Keep pool lean; readiness must be fast and low overhead.
+// Limiter les connexions pour des contrôles de santé légers.
 const pgPool = new Pool({
   connectionString: DB_DSN,
   max: Number(process.env.PG_POOL_MAX || 3),
@@ -83,18 +72,14 @@ async function withTimeout(promise, ms, timeoutMessage) {
 }
 
 async function dbReadyCheck() {
-  // Run a tiny query with timeout protection
+  // Contrôler la connexion sans bloquer le serveur.
   const started = Date.now();
   const queryPromise = pgPool.query('SELECT 1 as ok');
   await withTimeout(queryPromise, READINESS_DB_TIMEOUT_MS, `DB readiness timeout after ${READINESS_DB_TIMEOUT_MS}ms`);
   return { latencyMs: Date.now() - started };
 }
 
-/**
- * ==========================================================
- * Security headers (Helmet)
- * ==========================================================
- */
+// En-têtes de sécurité
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -113,11 +98,7 @@ app.use(
   })
 );
 
-/**
- * ==========================================================
- * CORS
- * ==========================================================
- */
+// Contrôle des origines
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'http://localhost:3000',
@@ -143,11 +124,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
-/**
- * ==========================================================
- * Rate limiting
- * ==========================================================
- */
+// Limitation du trafic
 const limiter = rateLimit({
   windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
   max: Number(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
@@ -158,19 +135,11 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-/**
- * ==========================================================
- * Body parsing
- * ==========================================================
- */
+// Décodage des requêtes
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-/**
- * ==========================================================
- * SAML (Session + Passport)
- * ==========================================================
- */
+// Session et authentification SAML
 if (isSamlEnabled()) {
   const sessionSecret = process.env.SESSION_SECRET || process.env.JWT_SECRET;
   if (!sessionSecret) {
@@ -200,11 +169,7 @@ if (isSamlEnabled()) {
   console.log('✅ SSO/SAML authentication enabled');
 }
 
-/**
- * ==========================================================
- * Health endpoints
- * ==========================================================
- */
+// Endpoints de santé
 const buildHealthPayload = (status, extra = {}) => ({
   status,
   timestamp: new Date().toISOString(),
@@ -218,11 +183,7 @@ app.get(['/healthz', '/health', '/api/health'], (req, res) => {
   res.status(200).json(buildHealthPayload('healthy'));
 });
 
-/**
- * Real readiness:
- * - Checks DB with SELECT 1 (fast)
- * - Returns 200 only if DB reachable within timeout
- */
+// Readiness : SELECT 1 et délai limité pour PostgreSQL.
 app.get('/readyz', async (req, res) => {
   try {
     const { latencyMs } = await dbReadyCheck();
@@ -241,11 +202,7 @@ app.get('/readyz', async (req, res) => {
   }
 });
 
-/**
- * ==========================================================
- * Routes
- * ==========================================================
- */
+// Routes de l'API
 app.use('/api/auth', authRoutes);
 app.use('/api/secrets', secretsRoutes);
 app.use('/api/secrets-pro', secretsEnhancedRoutes);
@@ -258,11 +215,7 @@ if (isSamlEnabled()) {
   app.use('/api/auth/saml', samlRoutes);
 }
 
-/**
- * ==========================================================
- * 404 handler
- * ==========================================================
- */
+// Route inconnue
 app.use((req, res) => {
   res.status(404).json({
     error: 'Route not found',
@@ -270,18 +223,10 @@ app.use((req, res) => {
   });
 });
 
-/**
- * ==========================================================
- * Error handler (must be last)
- * ==========================================================
- */
+// Gestion des erreurs, enregistrée en dernier
 app.use(errorHandler);
 
-/**
- * ==========================================================
- * Process-level safety
- * ==========================================================
- */
+// Gestion des erreurs du processus
 process.on('unhandledRejection', (reason) => {
   console.error('❌ Unhandled Rejection:', reason);
 });
@@ -290,11 +235,7 @@ process.on('uncaughtException', (err) => {
   console.error('❌ Uncaught Exception:', err);
 });
 
-/**
- * ==========================================================
- * Start server
- * ==========================================================
- */
+// Démarrage du serveur
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🔐 SecureVault Backend running on port ${PORT}`);
   console.log(`📊 Environment: ${NODE_ENV}`);
