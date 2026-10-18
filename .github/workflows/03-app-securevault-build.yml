@@ -1,4 +1,6 @@
-name: 🏗️ Build & Push SecureVault
+# SecureVault | Build
+# Construit les images backend et frontend SecureVault.
+name: "SecureVault | Build"
 
 on:
   push:
