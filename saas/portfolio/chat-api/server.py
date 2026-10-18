@@ -81,7 +81,7 @@ def factual_topic(question):
     words = f" {q} "
     ownership = re.search(r"\b(entreprise|societe|company|business|boite)\b", q)
     ownership = ownership and re.search(
-        r"\b(deja|eu|cree|creer|fonde|fondee|possede|own|owned|founded|run)\b", q
+        r"\b(deja|eu|cree|creer|fonde|fondee|possede|own|owned|founded|run)\b", q,
     )
     if ownership:
         intent = "ownership"
