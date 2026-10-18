@@ -7,7 +7,7 @@ if [[ "${EUID}" -ne 0 ]]; then
 fi
 
 REVISION="${1:-}"
-if [[ ! "$REVISION" =~ ^[a-f0-9]{7,40}$ ]]; then
+if [[ ! "$REVISION" =~ ^[a-f0-9]{40}$ ]]; then
   echo "Fournir le SHA du commit GitHub de la PR."
   exit 1
 fi
