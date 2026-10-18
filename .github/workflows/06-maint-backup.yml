@@ -1,4 +1,6 @@
-name: 💾 Scheduled Cloud Backup
+# Maintenance | Backup
+# Orchestre les sauvegardes programmées.
+name: "Maintenance | Backup"
 
 on:
   schedule:
