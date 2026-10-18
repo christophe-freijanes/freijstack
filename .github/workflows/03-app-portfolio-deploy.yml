@@ -4,7 +4,7 @@ name: "Portfolio | Deploy"
 
 on:
   workflow_run:
-    workflows: ["🏗️ Build & Push Portfolio"]
+    workflows: ["Portfolio | Build"]
     types: [completed]
 
   workflow_dispatch: {}
