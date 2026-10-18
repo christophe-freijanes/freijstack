@@ -1871,6 +1871,15 @@ section {
     color: var(--bg-primary);
 }
 
+.assistant-source {
+    align-self: flex-start;
+    margin: -5px 0 3px 8px;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
 .assistant-next {
     align-self: flex-start;
     max-width: 92%;
