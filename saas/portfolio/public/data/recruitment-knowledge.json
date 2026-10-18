@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "source": "CV PDF 2026, portfolio, et faits personnels explicitement communiqués par l'auteur (rubriques identifiées).",
   "items": [
     {
@@ -628,5 +628,258 @@
       "topic_en": "Interests outside work",
       "source": "Informations partagées directement par l'auteur"
     }
-  ]
+  ],
+  "fact_index": {
+    "verified_as_of": "2026-10-17",
+    "skills": [
+      {
+        "id": "terraform",
+        "aliases": [
+          "terraform",
+          "hcl"
+        ],
+        "label": "Terraform",
+        "first_evidence": "2021-12-16",
+        "professional": {
+          "fr": "Je l'ai ensuite utilisé chez ACENSI (2023–juin 2026), notamment pour automatiser des infrastructures AWS.",
+          "en": "I subsequently used it at ACENSI (2023–June 2026), notably to automate AWS infrastructure."
+        },
+        "source": {
+          "label": "GitHub — premier exercice Terraform",
+          "url": "https://github.com/christophe-freijanes/formation/commit/3823f845c0a6d89cc03a8c79248739cb33846e5b"
+        }
+      },
+      {
+        "id": "ansible",
+        "aliases": [
+          "ansible",
+          "playbook",
+          "playbooks"
+        ],
+        "label": "Ansible",
+        "first_evidence": "2021-10-30",
+        "professional": {
+          "fr": "Je l'ai aussi utilisé chez SQUAD pour le durcissement Linux, puis chez ACENSI pour automatiser les opérations.",
+          "en": "I also used it at SQUAD for Linux hardening and at ACENSI for operational automation."
+        },
+        "source": {
+          "label": "GitHub — premiers travaux Ansible",
+          "url": "https://github.com/christophe-freijanes/formation/commit/519208ec5a99ebf12e21ef206e84c86e5e42241e"
+        }
+      },
+      {
+        "id": "bash",
+        "aliases": [
+          "bash",
+          "shell",
+          "scripts shell"
+        ],
+        "label": "Bash",
+        "first_evidence": "2020-08-16",
+        "professional": {
+          "fr": "C'est un outil que j'utilise pour l'administration et l'automatisation Linux, notamment dans mes missions systèmes.",
+          "en": "I use it for Linux administration and automation, including in my systems roles."
+        },
+        "source": {
+          "label": "GitHub — premier script Shell archivé",
+          "url": "https://github.com/christophe-freijanes/scripts/commit/d3c04ea0f4a2d49ee018b09c9edb826524eae776"
+        }
+      },
+      {
+        "id": "python",
+        "aliases": [
+          "python",
+          "py"
+        ],
+        "label": "Python",
+        "first_evidence": "2020-11-23",
+        "professional": {
+          "fr": "Je l'utilise aussi pour écrire des utilitaires, analyser des données et automatiser des tâches d'exploitation.",
+          "en": "I also use it for utilities, data processing and operational automation."
+        },
+        "source": {
+          "label": "GitHub — script Python de conversion",
+          "url": "https://github.com/christophe-freijanes/scripts/commit/151f24c9eb97fcd53796d904e130fc39817ff83f"
+        }
+      },
+      {
+        "id": "powershell",
+        "aliases": [
+          "powershell",
+          "power shell",
+          "ps1"
+        ],
+        "label": "PowerShell",
+        "first_evidence": "2020-08-16",
+        "professional": {
+          "fr": "Mon CV en mentionne aussi l'usage dans l'administration Windows, notamment sur la période 2014–2018.",
+          "en": "My résumé also documents PowerShell in Windows administration, notably during 2014–2018."
+        },
+        "source": {
+          "label": "GitHub — scripts PowerShell",
+          "url": "https://github.com/christophe-freijanes/scripts/commit/a2d5773107abf4aa269b359cdce8d3e6d10d2be4"
+        }
+      }
+    ],
+    "answers": [
+      {
+        "id": "location",
+        "aliases": [
+          "base",
+          "habite",
+          "reside",
+          "localisation",
+          "localise",
+          "localisation geographique",
+          "ville",
+          "location",
+          "located",
+          "live",
+          "based"
+        ],
+        "where": {
+          "fr": "Je suis basé dans la région de Montréal, au Québec.",
+          "en": "I'm based in the Montréal area, Québec."
+        },
+        "source": {
+          "label": "CV 2026",
+          "url": "https://portfolio.freijstack.com/cv/CV-Christophe-FREIJANES.pdf"
+        }
+      },
+      {
+        "id": "current_job",
+        "aliases": [
+          "travaille",
+          "travailles",
+          "employeur",
+          "poste actuel",
+          "caisse",
+          "cdpq",
+          "current job",
+          "employer",
+          "work currently"
+        ],
+        "where": {
+          "fr": "Je travaille à La Caisse (CDPQ), à Montréal, sur une plateforme AWS.",
+          "en": "I work at La Caisse (CDPQ) in Montréal, on its AWS platform."
+        },
+        "when": {
+          "fr": "J'ai rejoint La Caisse (CDPQ) en juin 2026.",
+          "en": "I joined La Caisse (CDPQ) in June 2026."
+        },
+        "since": {
+          "fr": "Je suis à La Caisse (CDPQ) depuis juin 2026.",
+          "en": "I've been at La Caisse (CDPQ) since June 2026."
+        },
+        "source": {
+          "label": "CV 2026",
+          "url": "https://portfolio.freijstack.com/cv/CV-Christophe-FREIJANES.pdf"
+        }
+      },
+      {
+        "id": "aws_accounts",
+        "aliases": [
+          "comptes aws",
+          "nombre de comptes",
+          "comptes",
+          "multi-comptes",
+          "accounts",
+          "aws accounts"
+        ],
+        "count": {
+          "fr": "Je travaille sur une plateforme AWS couvrant plusieurs centaines de comptes. Je préfère ne pas avancer de chiffre plus précis sans source à jour.",
+          "en": "I work on an AWS platform spanning several hundred accounts. I prefer not to give a more precise count without a current source."
+        },
+        "source": {
+          "label": "CV 2026",
+          "url": "https://portfolio.freijstack.com/cv/CV-Christophe-FREIJANES.pdf"
+        }
+      },
+      {
+        "id": "career",
+        "aliases": [
+          "experience professionnelle",
+          "annees d experience",
+          "experience en informatique",
+          "parcours",
+          "carriere",
+          "career",
+          "years in it",
+          "professionnel"
+        ],
+        "duration": {
+          "fr": "J'ai plus de 20 ans d'expérience dans les infrastructures et l'exploitation informatique. Mon activité s'est progressivement concentrée sur AWS, SRE, DevSecOps et l'automatisation.",
+          "en": "I have over 20 years of experience in IT infrastructure and operations, with a more recent focus on AWS, SRE, DevSecOps and automation."
+        },
+        "count": {
+          "fr": "J'ai plus de 20 ans d'expérience dans les infrastructures informatiques.",
+          "en": "I have over 20 years of experience in IT infrastructure."
+        },
+        "source": {
+          "label": "CV 2026",
+          "url": "https://portfolio.freijstack.com/cv/CV-Christophe-FREIJANES.pdf"
+        }
+      },
+      {
+        "id": "certifications",
+        "aliases": [
+          "certification",
+          "certifications",
+          "certifie",
+          "certified",
+          "certificate",
+          "certificates"
+        ],
+        "which": {
+          "fr": "Mon CV mentionne AWS Cloud Practitioner, Ansible Automation Platform, CompTIA Security+, KCNA, LFCS et ITIL v4.",
+          "en": "My résumé lists AWS Cloud Practitioner, Ansible Automation Platform, CompTIA Security+, KCNA, LFCS and ITIL v4."
+        },
+        "source": {
+          "label": "CV 2026",
+          "url": "https://portfolio.freijstack.com/cv/CV-Christophe-FREIJANES.pdf"
+        }
+      },
+      {
+        "id": "toolset",
+        "aliases": [
+          "outils",
+          "technologies",
+          "langages",
+          "language",
+          "languages",
+          "tech stack",
+          "outils d automatisation",
+          "outils utilises"
+        ],
+        "which": {
+          "fr": "J'utilise notamment Terraform, CloudFormation, Ansible, Python, Bash et PowerShell, ainsi que GitHub Actions et les services AWS.",
+          "en": "I work with Terraform, CloudFormation, Ansible, Python, Bash and PowerShell, alongside GitHub Actions and AWS services."
+        },
+        "source": {
+          "label": "CV 2026",
+          "url": "https://portfolio.freijstack.com/cv/CV-Christophe-FREIJANES.pdf"
+        }
+      },
+      {
+        "id": "manual_work",
+        "aliases": [
+          "interventions manuelles",
+          "reduction",
+          "reduire",
+          "economies de temps",
+          "gains",
+          "manual work",
+          "manual interventions"
+        ],
+        "count": {
+          "fr": "Chez ACENSI, l'automatisation avec Terraform et Ansible a réduit les interventions manuelles de 60 %.",
+          "en": "At ACENSI, Terraform and Ansible automation reduced manual interventions by 60%."
+        },
+        "source": {
+          "label": "CV 2026",
+          "url": "https://portfolio.freijstack.com/cv/CV-Christophe-FREIJANES.pdf"
+        }
+      }
+    ]
+  }
 }
