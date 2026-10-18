@@ -1,4 +1,6 @@
-name: 🔐 SaaS • SecureVault Deploy
+# SecureVault | Deploy
+# Déploie SecureVault selon l'environnement choisi.
+name: "SecureVault | Deploy"
 
 on:
   workflow_run:
