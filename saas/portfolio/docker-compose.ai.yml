@@ -1,0 +1,34 @@
+# Bot NVIDIA du Portfolio — ajout isolé au projet Compose existant.
+services:
+  portfolio-chat:
+    image: ${PORTFOLIO_CHAT_IMAGE:?Indiquer l'image CI validée}
+    container_name: portfolio-chat
+    restart: unless-stopped
+    env_file:
+      - /etc/freijstack/portfolio/nvidia.env
+    environment:
+      PYTHONDONTWRITEBYTECODE: "1"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - freijstack
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=freijstack"
+      - "traefik.http.routers.portfolio-chat.rule=Host(`portfolio.freijstack.com`) && PathPrefix(`/api/chat`)"
+      - "traefik.http.routers.portfolio-chat.entrypoints=websecure"
+      - "traefik.http.routers.portfolio-chat.tls=true"
+      - "traefik.http.routers.portfolio-chat.priority=200"
+      - "traefik.http.services.portfolio-chat.loadbalancer.server.port=8080"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=2)"]
+      interval: 30s
+      timeout: 4s
+      retries: 3
+
+networks:
+  freijstack:
+    external: true
