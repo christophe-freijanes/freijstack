@@ -19,7 +19,7 @@ preflight() {
   test -f "$COMPOSE"
   test -f "$AI_COMPOSE"
   test -f "$CREDENTIALS" || {
-    echo "Créer $CREDENTIALS avec une clé NVIDIA renouvelée, mode 600."
+    echo "Créer $CREDENTIALS avec une clé Google ou NVIDIA renouvelée, mode 600."
     exit 1
   }
   test "$(stat -c '%a' "$CREDENTIALS")" = 600 || {
@@ -31,8 +31,8 @@ preflight() {
     exit 1
   fi
   if docker container inspect portfolio-chat >/dev/null 2>&1; then
-    echo "portfolio-chat existe déjà : refus d'écraser l'instance courante."
-    exit 1
+    test "$(docker inspect portfolio-chat --format '{{index .Config.Labels "com.docker.compose.project"}}')" = portfolio
+    test "$(docker inspect portfolio-chat --format '{{index .Config.Labels "com.docker.compose.service"}}')" = portfolio-chat
   fi
   docker network inspect freijstack >/dev/null
   test -n "$(docker inspect portfolio --format '{{.Id}}')"
@@ -69,10 +69,22 @@ main() {
   pull_image
   export PORTFOLIO_CHAT_IMAGE="$IMAGE"
   docker compose -p portfolio -f "$COMPOSE" -f "$AI_COMPOSE" config --quiet
-  docker compose -p portfolio -f "$COMPOSE" -f "$AI_COMPOSE" up -d --no-deps portfolio-chat
-  if ! smoke; then
-    docker compose -p portfolio -f "$COMPOSE" -f "$AI_COMPOSE" stop portfolio-chat || true
-    echo "Échec de validation : API arrêtée ; Portfolio et autres services intacts."
+  BACKUP=""
+  ROLLBACK=""
+  if docker container inspect portfolio-chat >/dev/null 2>&1; then
+    BACKUP="portfolio-chat:rollback-$(date +%Y%m%d-%H%M%S)"
+    docker image tag "$(docker inspect portfolio-chat --format '{{.Image}}')" "$BACKUP"
+    ROLLBACK="/etc/freijstack/portfolio/chat-rollback-$(date +%Y%m%d-%H%M%S).yml"
+    printf 'services:\n  portfolio-chat:\n    image: %s\n' "$BACKUP" > "$ROLLBACK"
+    chmod 600 "$ROLLBACK"
+  fi
+  if ! docker compose -p portfolio -f "$COMPOSE" -f "$AI_COMPOSE" up -d --no-deps portfolio-chat || ! smoke; then
+    if [[ -n "$BACKUP" ]]; then
+      docker compose -p portfolio -f "$COMPOSE" -f "$AI_COMPOSE" -f "$ROLLBACK" up -d --no-deps portfolio-chat
+    else
+      docker compose -p portfolio -f "$COMPOSE" -f "$AI_COMPOSE" stop portfolio-chat || true
+    fi
+    echo "Échec de validation : version précédente restaurée si présente."
     exit 1
   fi
   echo "API du Portfolio activée : Gemini, puis NVIDIA si configuré."
