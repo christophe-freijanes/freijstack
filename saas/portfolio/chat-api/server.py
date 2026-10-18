@@ -79,21 +79,21 @@ def factual_topic(question):
     """Retrouver une réponse factuelle avant le choix du LLM."""
     q = normalize(question)
     words = f" {q} "
-    ownership = re.search(r"\\b(entreprise|societe|company|business|boite)\\b", q)
+    ownership = re.search(r"\b(entreprise|societe|company|business|boite)\b", q)
     ownership = ownership and re.search(
-        r"\\b(deja|eu|cree|creer|fonde|fondee|possede|own|owned|founded|run)\\b", q
+        r"\b(deja|eu|cree|creer|fonde|fondee|possede|own|owned|founded|run)\b", q
     )
     if ownership:
         intent = "ownership"
-    elif re.search(r"\\b(depuis|how long|since when|how many years|years of experience|combien (?:d |de )?(?:annees?|ans?|temps))\\b", q):
+    elif re.search(r"\b(depuis|how long|since when|how many years|years of experience|combien (?:d |de )?(?:annees?|ans?|temps))\b", q):
         intent = "duration"
-    elif re.search(r"\\b(ou|where|based|dans quelle entreprise|chez qui)\\b", q):
+    elif re.search(r"\b(ou|where|based|dans quelle entreprise|chez qui)\b", q):
         intent = "where"
-    elif re.search(r"\\b(combien|how many|how much|number of)\\b", q):
+    elif re.search(r"\b(combien|how many|how much|number of)\b", q):
         intent = "count"
-    elif re.search(r"\\b(quand|when|quelle annee|which year)\\b", q):
+    elif re.search(r"\b(quand|when|quelle annee|which year)\b", q):
         intent = "when"
-    elif re.search(r"\\b(quel|quelle|quels|quelles|lequel|laquelle|which|what)\\b", q):
+    elif re.search(r"\b(quel|quelle|quels|quelles|lequel|laquelle|which|what)\b", q):
         intent = "which"
     else:
         return None
