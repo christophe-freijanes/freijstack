@@ -99,3 +99,46 @@ jobs:
             exit 0
           fi
           markdownlint-cli2 "**/*.md" "#node_modules"
+
+  workflow-syntax:
+    name: Vérifier les workflows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.24'
+      - name: Contrôle actionlint
+        run: |
+          go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.7
+          "$(go env GOPATH)/bin/actionlint"
+
+  iac:
+    name: Vérifier les IaC présents
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Détecter les fichiers
+        id: detect
+        shell: bash
+        run: |
+          if find . -type f -name '*.tf' -print -quit | grep -q .; then
+            echo 'terraform=true' >> "$GITHUB_OUTPUT"
+          fi
+          if find . -type f \( -name '*.cfn.yaml' -o -name '*.cfn.yml' -o -name '*cloudformation*.yaml' -o -name '*cloudformation*.yml' \) -print -quit | grep -q .; then
+            echo 'cloudformation=true' >> "$GITHUB_OUTPUT"
+          fi
+      - uses: hashicorp/setup-terraform@v3
+        if: steps.detect.outputs.terraform == 'true'
+      - name: Terraform fmt
+        if: steps.detect.outputs.terraform == 'true'
+        run: terraform fmt -check -recursive
+      - uses: actions/setup-python@v6
+        if: steps.detect.outputs.cloudformation == 'true'
+        with:
+          python-version: '3.11'
+      - name: CloudFormation lint
+        if: steps.detect.outputs.cloudformation == 'true'
+        run: |
+          python -m pip install cfn-lint
+          find . -type f \( -name '*.cfn.yaml' -o -name '*.cfn.yml' -o -name '*cloudformation*.yaml' -o -name '*cloudformation*.yml' \) -print0 | xargs -0 cfn-lint
