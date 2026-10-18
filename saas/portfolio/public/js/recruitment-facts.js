@@ -15,7 +15,7 @@
 
     function detectIntent(question, previousIntent) {
         const q = normalize(question);
-        if (/\b(depuis|how long|since when|years of experience|combien d annees|combien de temps)\b/.test(q)) return 'duration';
+        if (/\b(depuis|how long|since when|how many years|years of experience|combien (?:d |de )?(?:annees?|ans?|temps))\b/.test(q)) return 'duration';
         if (/\b(ou|where|based|dans quelle entreprise|chez qui)\b/.test(q)) return 'where';
         if (/\b(combien|how many|how much|number of)\b/.test(q)) return 'count';
         if (/\b(quand|when|quelle annee|which year)\b/.test(q)) return 'when';
