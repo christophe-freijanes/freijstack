@@ -1,4 +1,6 @@
-name: 🏗️ Build & Push Portfolio
+# Portfolio | Build
+# Construit et publie l'image nginx du Portfolio.
+name: "Portfolio | Build"
 
 on:
   workflow_dispatch:
