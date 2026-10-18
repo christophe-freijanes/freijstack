@@ -23,7 +23,7 @@ Le CV HTML et les réponses sont basés sur le CV de 2026 fourni par l'auteur. R
 
 ## Moteur de recherche conversationnelle
 
-Les réponses factuelles et les dates restent locales. Pour les sujets professionnels couverts par le CV, une API LLM optionnelle sélectionne une formulation déjà approuvée, sans créer de nouveaux faits ni effectuer de recherche Web. Une réponse non identique à l'une des formulations vérifiées est rejetée. Aucun historique serveur de conversation n'est conservé.
+Les questions libres consultent d'abord l'API LLM, si activée. Le serveur n'autorise que les formulations vérifiées du CV ou du Portfolio, et refuse toute réponse libre inventée. Sans API ou sans réponse valide, le moteur local prend le relais. Aucun historique serveur de conversation n'est conservé.
 
 Test de cohérence de l'index avec les labels du CV/portfolio :
 
@@ -57,7 +57,7 @@ node scripts/test-recruitment-facts.cjs
 
 ## API LLM : Gemini, NVIDIA, puis repli local
 
-L'API Python (`chat-api/server.py`) sélectionne un domaine vérifié du CV avant tout appel externe. Elle essaie **Gemini 3.5 Flash-Lite** (2,5 s), puis **NVIDIA GPT-OSS-20B** et **Mistral Nemotron** (2 s chacun), si leurs clés respectives existent. Si les fournisseurs échouent, le site réutilise les formulations vérifiées. Les questions encyclopédiques sont exclues avant tout appel API ; les chiffres et les dates restent traités localement.
+L'API Python (`chat-api/server.py`) sélectionne un domaine vérifié du CV avant tout appel externe. Elle essaie **Gemini 3.5 Flash-Lite** (2,5 s), puis **NVIDIA GPT-OSS-20B** et **Mistral Nemotron** (2 s chacun), si leurs clés respectives existent. Si les fournisseurs échouent, le site réutilise les formulations vérifiées. Les questions encyclopédiques sont refusées avant tout appel fournisseur. Les durées et chiffres sont contrôlés côté serveur, puis repris localement en cas de panne.
 
 La clé **ne doit jamais figurer dans GitHub ni dans le JavaScript**. Créer `/etc/freijstack/portfolio/llm.env` sur le VPS (mode `600`) avec une nouvelle `GEMINI_API_KEY=...` et, si disponible, `NVIDIA_API_KEY=...`. Les clés déjà partagées dans la conversation doivent être révoquées et renouvelées.
 
