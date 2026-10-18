@@ -7,7 +7,7 @@
 - CV ATS HTML (imprimable) : `public/pages/resume.html`.
 - Index de réponses FR/EN : `public/data/recruitment-knowledge.json`.
 
-Les deux PDF doivent être mis à jour sur **la branche de cette PR** avant fusion.
+Les deux PDF ont été intégrés à la PR #286 et vérifiés par empreintes SHA-256.
 Le CV HTML et les réponses sont basés sur le CV de 2026 fourni par l'auteur. Réviser les trois ensemble lors de chaque changement de CV.
 
 ## Ton à respecter
@@ -45,7 +45,7 @@ node --check saas/portfolio/public/js/script.js
 
 ## Aperçu Docker sur VPS (sans déploiement)
 
-Après avoir ajouté les deux PDF dans la branche PR :
+Depuis la branche de la PR #286 :
 
 ```bash
 cd saas/portfolio
@@ -57,7 +57,7 @@ Le site d'aperçu est lié à `127.0.0.1:18086` sur le VPS. Pour un contrôle vi
 
 ## Publication contrôlée sur VPS
 
-**Préalable :** les deux PDF doivent être ajoutés à la branche PR #286 avec leurs SHA-256 attendus. Ne pas fusionner sur master : les anciens workflows ne sont pas encore sécurisés.
+**Préalable :** vérifier les deux PDF avec leurs SHA-256 attendus. Ne pas fusionner sur `master` tant que les anciens workflows de déploiement ne sont pas sécurisés.
 
 Dans le terminal VPS avec le compte `freijac` :
 
