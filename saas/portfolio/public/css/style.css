@@ -1701,11 +1701,21 @@ section {
 }
 
 /* Recruitment assistant */
-.assistant-nav-launch {
-    margin-left: 8px;
+.nav-menu .assistant-nav-launch {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: 160px;
+    margin: 0;
+    padding: 8px 12px;
     font: inherit;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.nav-menu .assistant-nav-launch i {
+    font-size: 0.9rem;
 }
 
 .assistant-dialog {
