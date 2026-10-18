@@ -1,0 +1,78 @@
+# Publication isolée du Portfolio
+# Valide la PR 286 puis publie une image immuable, sans déploiement VPS.
+name: "Portfolio | Candidate"
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened]
+    paths:
+      - "saas/portfolio/**"
+      - ".github/workflows/portfolio-candidate.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  candidate:
+    name: Tester et publier l'image
+    if: >-
+      github.event.pull_request.number == 286 &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'fix/portfolio-bulle-ia-compacte-20261017'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Vérifier le code et les CV
+        working-directory: saas/portfolio
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check public/js/script.js
+          python3 scripts/check-recruitment-index.py
+          printf '%s  %s\n' \
+            '21e588931f2b4bbfff2ef15955c283ba12e4bfe38deae0b1d6b05309c73cab8b' 'public/cv/CV-Christophe-FREIJANES.pdf' \
+            'dcaaffe3745088ecc13c9176a675288a6650ed5af11d487686a3a99a9aa5b62c' 'public/cv/CV-Christophe-FREIJANES-ATS.pdf' \
+            | sha256sum --check
+
+      - name: Construire et tester HTTP
+        working-directory: saas/portfolio
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="registry.freijstack.com/portfolio:pr286-${GITHUB_HEAD_SHA:0:12}"
+          docker build --label "org.opencontainers.image.revision=${GITHUB_HEAD_SHA}" -t "$TAG" .
+          docker run --rm --entrypoint nginx "$TAG" -t
+          ID="$(docker run -d --rm -p 127.0.0.1::80 "$TAG")"
+          trap 'docker rm -f "$ID" >/dev/null 2>&1 || true' EXIT
+          PORT="$(docker port "$ID" 80/tcp | sed -n 's/.*://p' | head -1)"
+          test -n "$PORT"
+          for attempt in 1 2 3 4 5 6 7 8 9 10; do
+            if curl -fsS "http://127.0.0.1:${PORT}/" >/dev/null; then break; fi
+            sleep 1
+          done
+          for file in / /js/script.js /pages/resume.html /data/recruitment-knowledge.json \
+            /cv/CV-Christophe-FREIJANES.pdf /cv/CV-Christophe-FREIJANES-ATS.pdf; do
+            curl -fsS -o /dev/null "http://127.0.0.1:${PORT}${file}"
+            echo "OK ${file}"
+          done
+          curl -fsSI "http://127.0.0.1:${PORT}/data/recruitment-knowledge.json" | grep -qi 'content-type: application/json'
+          test "$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORT}/data/private.json")" = 403
+          echo "TAG=${TAG}" >> "$GITHUB_ENV"
+        env:
+          GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
+      - name: Connexion au Registry
+        uses: docker/login-action@v3
+        with:
+          registry: registry.freijstack.com
+          username: ${{ secrets.REGISTRY_USER_PROD }}
+          password: ${{ secrets.REGISTRY_PASSWORD_PROD }}
+
+      - name: Publier l'image validée
+        run: docker push "$TAG"
