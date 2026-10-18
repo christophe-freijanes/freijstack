@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Activation isolée du bot NVIDIA de Portfolio.
+# Activation isolée du bot LLM du Portfolio.
 # Vérifie l'image, la clé et l'API sans modifier les autres services.
 set -euo pipefail
 
@@ -26,10 +26,10 @@ preflight() {
     echo "Permissions requises : chmod 600 $CREDENTIALS"
     exit 1
   }
-  grep -q '^NVIDIA_API_KEY=nvapi-' "$CREDENTIALS" || {
-    echo "NVIDIA_API_KEY absente ou invalide dans le fichier d'environnement."
+  if ! grep -Eq '^(GEMINI_API_KEY=.+|NVIDIA_API_KEY=nvapi-.+)' "$CREDENTIALS"; then
+    echo "Ajouter GEMINI_API_KEY ou NVIDIA_API_KEY dans le fichier privé."
     exit 1
-  }
+  fi
   if docker container inspect portfolio-chat >/dev/null 2>&1; then
     echo "portfolio-chat existe déjà : refus d'écraser l'instance courante."
     exit 1
@@ -60,7 +60,7 @@ smoke() {
     -H 'Content-Type: application/json' \
     --data '{"question":"Parle-moi de Terraform et Ansible","language":"fr"}' \
     https://portfolio.freijstack.com/api/chat \
-    | python3 -c 'import json,sys; value=json.load(sys.stdin); assert value.get("mode")=="nvidia" and value.get("answer")'
+    | python3 -c 'import json,sys; value=json.load(sys.stdin); assert value.get("mode")=="llm" and value.get("answer")'
 }
 
 # Publier uniquement l'API, avec arrêt sur échec des tests.
@@ -75,7 +75,7 @@ main() {
     echo "Échec de validation : API arrêtée ; Portfolio et autres services intacts."
     exit 1
   fi
-  echo "API NVIDIA activée. GPT-OSS puis Mistral ; repli local disponible."
+  echo "API du Portfolio activée : Gemini, puis NVIDIA si configuré."
 }
 
 # 3. Point d'entrée
