@@ -1,11 +1,7 @@
 #!/bin/bash
-#
-# 🗄️ SecureVault - Database Migration Runner
-# 
-# Automatically detects PostgreSQL credentials and applies migrations
-#
-# Usage: ./run-migrations.sh [staging|production]
-#
+# Migrations PostgreSQL SecureVault.
+# Vérifier les scripts SQL et la sauvegarde avant exécution.
+# Usage : ./run-migrations.sh [staging|production]
 
 set -euo pipefail
 
