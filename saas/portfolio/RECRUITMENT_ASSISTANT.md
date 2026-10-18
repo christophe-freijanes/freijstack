@@ -23,7 +23,7 @@ Le CV HTML et les réponses sont basés sur le CV de 2026 fourni par l'auteur. R
 
 ## Moteur de recherche conversationnelle
 
-Les réponses factuelles et les dates restent locales. Pour les sujets professionnels couverts par le CV, une API LLM optionnelle reformule les faits sans recherche Web ; en cas d'erreur, le bot utilise les formulations validées. Aucun historique serveur de conversation n'est conservé.
+Les réponses factuelles et les dates restent locales. Pour les sujets professionnels couverts par le CV, une API LLM optionnelle sélectionne une formulation déjà approuvée, sans créer de nouveaux faits ni effectuer de recherche Web. Une réponse non identique à l'une des formulations vérifiées est rejetée. Aucun historique serveur de conversation n'est conservé.
 
 Test de cohérence de l'index avec les labels du CV/portfolio :
 
