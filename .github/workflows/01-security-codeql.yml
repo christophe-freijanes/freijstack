@@ -1,4 +1,6 @@
-name: 🧠 Security • CodeQL
+# Security | CodeQL
+# Analyse statique de sécurité avec CodeQL.
+name: "Security | CodeQL"
 
 on:
   workflow_call:
