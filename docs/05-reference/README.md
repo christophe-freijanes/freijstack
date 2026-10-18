@@ -2,6 +2,7 @@
 
 | Document | Rôle |
 | --- | --- |
+| [Conventions de code](CODE_STANDARDS.md) | Scripts, IaC, workflows, validation |
 | [Workflow de publication](RELEASE_WORKFLOW.md) | Versionnement et livraison |
 | [Checklist automatisation](CHECKLIST_AUTOMATION.md) | Contrôles avant exécution |
 | [Roadmap](FEATURES_ROADMAP.md) | Idées et évolutions envisagées |
