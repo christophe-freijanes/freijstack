@@ -919,7 +919,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!response.ok) return null;
             const data = await response.json();
             return typeof data.answer === 'string' && data.answer.length <= 650
-                ? data.answer.trim() : null;
+                ? { text: data.answer.trim(), source: data.source } : null;
         } catch (_error) {
             return null;
         }
@@ -967,6 +967,16 @@ document.addEventListener('DOMContentLoaded', function() {
             : findTopic(question);
         replyCount += 1;
 
+        // Les modèles sélectionnent d'abord une réponse approuvée côté serveur.
+        if (!topic && result !== 'booking' && result !== 'identity') {
+            const remote = await askNvidia(question, lang);
+            if (remote) {
+                addMessage(remote.text, false);
+                addFactSource(remote.source);
+                return;
+            }
+        }
+
         if (!topic) {
             const engine = window.RecruitmentFacts;
             const verified = engine && facts
@@ -1002,16 +1012,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 ? choose(copy.missing, lang + ':missing')
                 : copy.unavailable, false);
             return;
-        }
-
-        // Les faits chiffrés sont traités au-dessus, sans génération.
-        if (!topic && typeof result === 'object') {
-            const natural = await askNvidia(question, lang);
-            if (natural) {
-                addMessage(natural, false);
-                previousTopic = result;
-                return;
-            }
         }
 
         const options = result.replies[lang];
