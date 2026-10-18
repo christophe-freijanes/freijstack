@@ -132,7 +132,9 @@ def generate(question, language, item):
         if not isinstance(answer, str):
             continue
         answer = answer.strip()
-        if not answer or "INFORMATION_INSUFFISANTE" in answer or len(answer) > 650:
+        if not answer:
+            continue
+        if "INFORMATION_INSUFFISANTE" in answer or len(answer) > 650:
             return None
         if not grounded(answer, evidence, question):
             return None
