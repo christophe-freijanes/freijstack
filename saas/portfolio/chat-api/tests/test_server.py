@@ -40,7 +40,7 @@ class ChatTests(unittest.TestCase):
 
     def test_generation_sans_reseau(self):
         payload = {
-            "choices": [{"message": {"content": "J'utilise Terraform et Ansible pour automatiser AWS."}}],
+            "choices": [{"message": {"content": server.topic_for("Terraform")["replies"]["fr"][0]}}],
         }
         with (
             patch.object(server.request, "urlopen", return_value=io.BytesIO(
@@ -60,7 +60,7 @@ class ChatTests(unittest.TestCase):
     def test_gemini_prioritaire(self):
         """Gemini doit répondre sans interroger NVIDIA."""
         payload = {"candidates": [{"content": {"parts": [
-            {"text": "J'utilise Terraform et Ansible pour automatiser AWS."},
+            {"text": server.topic_for("Terraform")["replies"]["fr"][0]},
         ]}}]}
         calls = []
 
@@ -84,7 +84,7 @@ class ChatTests(unittest.TestCase):
 
     def test_gemini_indisponible_nvidia_prend_le_relais(self):
         """Un refus Gemini doit activer GPT sans perdre les faits."""
-        payload = {"choices": [{"message": {"content": "Terraform automatise mon travail."}}]}
+        payload = {"choices": [{"message": {"content": server.topic_for("Terraform")["replies"]["fr"][0]}}]}
         calls = []
 
         def fake_call(outbound, timeout):  # noqa: ARG001
@@ -130,7 +130,7 @@ class ChatTests(unittest.TestCase):
     def test_bascule_sur_mistral(self):
         """Un échec 503 sur GPT entraîne une tentative sur Mistral."""
         content = json.dumps({
-            "choices": [{"message": {"content": "Terraform et Ansible simplifient mes opérations."}}],
+            "choices": [{"message": {"content": server.topic_for("Terraform")["replies"]["fr"][0]}}],
         }).encode("utf-8")
         models = []
 
@@ -174,6 +174,29 @@ class ChatTests(unittest.TestCase):
         ):
             server.generate("Terraform ?", "fr", server.topic_for("Terraform"))
         self.assertEqual(len(calls), 1)
+
+    def test_hallucination_sans_chiffre(self):
+        """Une affirmation absente du CV est rejetée, même sans statistique."""
+        payload = {"candidates": [{"content": {"parts": [
+            {"text": "Je maîtrise Rust, Go et la programmation quantique."},
+        ]}}]}
+        with (
+            patch.object(server, "GEMINI_KEY", "cle-gemini-fictive"),
+            patch.object(server, "KEY", ""),
+            patch.object(server.request, "urlopen", return_value=io.BytesIO(
+                json.dumps(payload).encode("utf-8"),
+            )),
+        ):
+            self.assertIsNone(server.generate(
+                "Parle-moi de Terraform", "fr", server.topic_for("Terraform"),
+            ))
+
+    def test_reponses_approuvees(self):
+        """Une réponse inventée ou hors sujet ne sort pas de l'API."""
+        item = server.topic_for("Terraform")
+        self.assertIsNone(server.approved_answer("Je maîtrise Kubernetes.", item, "fr"))
+        self.assertIsNone(server.approved_answer("60 % de progrès inventés.", item, "fr"))
+        self.assertIn("Terraform", server.approved_answer(item["replies"]["fr"][0], item, "fr"))
 
     def test_fallback_reponse_inverifiable(self):
         payload = {"choices": [{"message": {"content": "J'ai 42 ans d'expérience."}}]}
