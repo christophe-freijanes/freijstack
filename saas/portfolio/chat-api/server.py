@@ -60,7 +60,7 @@ def topic_for(question):
                "chiffre", "chiffres", "taille", "size", "nombre", "quantite",
                "level", "niveau", "work", "art", "social", "histoire", "history",
                "impact", "metric", "metrics", "echelle", "scale", "experience"}
-    if re.search(r"\b(capitale|population|habitants?|planete|tour eiffel|meteo|weather|inventeur|invented|inventé|installer|install|tutorial)\b", words):
+    if re.search(r"\b(capitale|population|habitants?|planete|tour eiffel|meteo|weather|inventeur|invente|invented|prix|tarifs?|pricing|price|installer|install|tutorial)\b", words):
         return None
     ranked = []
     for item in KNOWLEDGE["items"]:
