@@ -805,7 +805,17 @@
           "carriere",
           "career",
           "years in it",
-          "professionnel"
+          "professionnel",
+          "experience",
+          "experiences",
+          "annee d experience",
+          "annee d experiences",
+          "annees d experiences",
+          "ans d experience",
+          "ans d experiences",
+          "years of experience",
+          "years experience",
+          "it experience"
         ],
         "duration": {
           "fr": "J'ai plus de 20 ans d'expérience dans les infrastructures et l'exploitation informatique. Mon activité s'est progressivement concentrée sur AWS, SRE, DevSecOps et l'automatisation.",
