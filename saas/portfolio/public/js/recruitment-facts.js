@@ -15,6 +15,7 @@
 
     function detectIntent(question, previousIntent) {
         const q = normalize(question);
+        if (/\b(entreprise|societe|business|company|boite)\b/.test(q) && /\b(deja|eu|cree|creer|fonde|fondee|possede|own|owned|founded|run)\b/.test(q)) return 'ownership';
         if (/\b(depuis|how long|since when|how many years|years of experience|combien (?:d |de )?(?:annees?|ans?|temps))\b/.test(q)) return 'duration';
         if (/\b(ou|where|based|dans quelle entreprise|chez qui)\b/.test(q)) return 'where';
         if (/\b(combien|how many|how much|number of)\b/.test(q)) return 'count';
@@ -84,7 +85,9 @@
 
         const entries = (facts.answers || []).filter(entry =>
             match(entry, q) && (entry[intent] || (intent === 'duration' && entry.since)));
-        const result = entries.sort((a, b) =>
+        const specific = entries.filter(entry => entry.id === 'aws_experience' && includesPhrase(q, 'aws'));
+        const ranked = specific.length ? specific : entries;
+        const result = ranked.sort((a, b) =>
             Math.max(...b.aliases.filter(alias => includesPhrase(q, alias)).map(a => a.length))
             - Math.max(...a.aliases.filter(alias => includesPhrase(q, alias)).map(a => a.length)))[0];
         if (!result) return null;
