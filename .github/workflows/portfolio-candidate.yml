@@ -78,3 +78,68 @@ jobs:
 
       - name: Publier l'image validée
         run: docker push "$TAG"
+
+  chat-candidate:
+    name: Tester et publier l'API NVIDIA
+    if: >-
+      github.event.pull_request.number == 286 &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'fix/portfolio-bulle-ia-compacte-20261017'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Tester NVIDIA sans clé ni réseau
+        working-directory: saas/portfolio
+        run: |
+          python3 -m py_compile chat-api/server.py
+          python3 -m unittest discover -s chat-api/tests -v
+
+      - name: Construire et tester l'API Docker
+        working-directory: saas/portfolio
+        env:
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          TAG="registry.freijstack.com/portfolio-chat:pr286-${COMMIT_SHA:0:12}"
+          docker build --label "org.opencontainers.image.revision=${COMMIT_SHA}" \
+            -f chat-api/Dockerfile -t "$TAG" .
+          ID="$(docker run -d --rm -p 127.0.0.1::8080 "$TAG")"
+          trap 'docker rm -f "$ID" >/dev/null 2>&1 || true' EXIT
+          PORT="$(docker port "$ID" 8080/tcp | sed -n 's/.*://p' | head -1)"
+          test -n "$PORT"
+          for attempt in 1 2 3 4 5 6 7 8 9 10; do
+            if curl -fsS "http://127.0.0.1:${PORT}/health" | grep -q '"configured": false'; then break; fi
+            sleep 1
+          done
+          curl -fsS "http://127.0.0.1:${PORT}/health" | grep -q '"status": "ok"'
+          CODE="$(curl -s -o /dev/null -w '%{http_code}' \
+            -H 'Content-Type: application/json' \
+            -d '{"question":"Parle-moi de Terraform", "language":"fr"}' \
+            "http://127.0.0.1:${PORT}/api/chat")"
+          test "$CODE" = 503
+          CODE="$(curl -s -o /dev/null -w '%{http_code}' \
+            -H 'Origin: https://site-non-autorise.example' \
+            -H 'Content-Type: application/json' \
+            -d '{"question":"Parle-moi de Terraform", "language":"fr"}' \
+            "http://127.0.0.1:${PORT}/api/chat")"
+          test "$CODE" = 403
+          echo "CHAT_TAG=$TAG" >> "$GITHUB_ENV"
+
+      - name: Connexion au Registry
+        uses: docker/login-action@v3
+        with:
+          registry: registry.freijstack.com
+          username: ${{ secrets.REGISTRY_USER_PROD }}
+          password: ${{ secrets.REGISTRY_PASSWORD_PROD }}
+
+      - name: Publier l'API validée
+        run: docker push "$CHAT_TAG"
