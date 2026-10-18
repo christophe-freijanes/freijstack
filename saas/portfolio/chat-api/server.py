@@ -192,7 +192,7 @@ def ask_gemini(messages, evidence, question, item, language):
 def generate(question, language, item):  # noqa: C901
     """Essayer Gemini puis NVIDIA ; sinon retour aux réponses locales."""
     original = item["replies"][language][0]
-    evidence = item[language] + "\n" + original
+    evidence = " ".join(item.get(language, [])) + "\n" + original
     system = (
         "Tu es l'assistant du Portfolio professionnel. Choisis uniquement UNE "
         "des réponses approuvées correspondant à la question et recopie-la "
