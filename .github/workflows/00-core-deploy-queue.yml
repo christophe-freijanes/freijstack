@@ -1,4 +1,6 @@
-name: 🎯 Deploy Queue (Orchestrator)
+# Deployment | Queue orchestration
+# Coordonne les appels aux procédures communes de déploiement.
+name: "Deployment | Queue orchestration"
 
 on:
   workflow_call:
