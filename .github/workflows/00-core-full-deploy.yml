@@ -1,4 +1,6 @@
-name: 🎯 Deploy Queue (Orchestrator)
+# Deployment | VPS execution
+# Exécute la procédure VPS historique ; revue de sécurité requise.
+name: "Deployment | VPS execution"
 
 on:
   workflow_call:
