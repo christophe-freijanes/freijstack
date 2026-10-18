@@ -1,4 +1,6 @@
-name: 🤖 PR Title Automation
+# Quality | PR title
+# Vérifie la convention des titres de pull requests.
+name: "Quality | PR title"
 
 on:
   pull_request:
