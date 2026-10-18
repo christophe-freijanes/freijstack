@@ -1,4 +1,6 @@
-name: "🩺 Health Check • Post-Deploy"
+# Health | Post-deploy
+# Contrôle la disponibilité après un workflow de déploiement.
+name: "Health | Post-deploy"
 
 on:
   workflow_run:
