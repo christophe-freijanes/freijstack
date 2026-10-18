@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """API de dialogue NVIDIA pour le Portfolio ; réponses fondées sur le CV."""
 
-# 1. Variables
 import json
 import os
 import re
@@ -13,6 +12,8 @@ from pathlib import Path
 from threading import BoundedSemaphore, Lock
 from urllib import error, request
 
+
+# 1. Variables
 PRIMARY_MODEL = "openai/gpt-oss-20b"
 # Second modèle NVIDIA : activé après les tests mock.
 FALLBACK_MODEL = os.environ.get("NVIDIA_FALLBACK_MODEL", "mistralai/mistral-nemotron")
@@ -26,6 +27,15 @@ RATE_LOCK = Lock()
 PER_CLIENT = defaultdict(deque)
 GLOBAL = deque()
 SLOTS = BoundedSemaphore(2)
+RATE_WINDOW_SECONDS = 60
+RATE_GLOBAL_LIMIT = 40
+RATE_CLIENT_LIMIT = 5
+MAX_CLIENT_ENTRIES = 200
+MAX_ANSWER_LENGTH = 650
+MIN_BODY_LENGTH = 2
+MAX_BODY_LENGTH = 1800
+MIN_QUESTION_LENGTH = 3
+MAX_QUESTION_LENGTH = 350
 
 
 # 2. Fonctions
@@ -57,17 +67,16 @@ def allowed(client):
     """Limiter les demandes par client et sur l'ensemble de l'API."""
     now = time.monotonic()
     with RATE_LOCK:
-        while GLOBAL and now - GLOBAL[0] > 60:
+        while GLOBAL and now - GLOBAL[0] > RATE_WINDOW_SECONDS:
             GLOBAL.popleft()
-        if len(GLOBAL) >= 40:
+        if len(GLOBAL) >= RATE_GLOBAL_LIMIT:
             return False
-        if len(PER_CLIENT) > 200:
+        if len(PER_CLIENT) > MAX_CLIENT_ENTRIES:
             PER_CLIENT.clear()
         local = PER_CLIENT[client]
-        for queue in (local,):
-            while queue and now - queue[0] > 60:
-                queue.popleft()
-        if len(local) >= 5 or len(GLOBAL) >= 40:
+        while local and now - local[0] > RATE_WINDOW_SECONDS:
+            local.popleft()
+        if len(local) >= RATE_CLIENT_LIMIT or len(GLOBAL) >= RATE_GLOBAL_LIMIT:
             return False
         local.append(now)
         GLOBAL.append(now)
@@ -118,7 +127,7 @@ def generate(question, language, item):
             headers={"Authorization": f"Bearer {KEY}", "Content-Type": "application/json"},
         )
         try:
-            with request.urlopen(outgoing, timeout=4) as response:
+            with request.urlopen(outgoing, timeout=4) as response:  # noqa: S310
                 result = json.load(response)
         except error.HTTPError as exc:
             # Une clé invalide bloque les deux modèles : ne pas multiplier les appels.
@@ -136,7 +145,7 @@ def generate(question, language, item):
         answer = answer.strip()
         if not answer:
             continue
-        if "INFORMATION_INSUFFISANTE" in answer or len(answer) > 650:
+        if "INFORMATION_INSUFFISANTE" in answer or len(answer) > MAX_ANSWER_LENGTH:
             return None
         if not grounded(answer, evidence, question):
             return None
@@ -168,9 +177,9 @@ class Handler(BaseHTTPRequestHandler):
         """Exposer uniquement un contrôle de santé sans clé."""
         if self.path != "/health":
             return self.send_json(404, {"error": "not_found"})
-        self.send_json(200, {"status": "ok", "configured": bool(KEY)})
+        return self.send_json(200, {"status": "ok", "configured": bool(KEY)})
 
-    def do_POST(self):
+    def do_POST(self):  # noqa: C901, PLR0911, PLR0912
         """Valider le visiteur, choisir les faits, puis demander une réponse."""
         if self.path != "/api/chat":
             return self.send_json(404, {"error": "not_found"})
@@ -183,7 +192,7 @@ class Handler(BaseHTTPRequestHandler):
             length = int(self.headers.get("Content-Length", "0"))
         except ValueError:
             return self.send_json(400, {"error": "length"})
-        if not 2 <= length <= 1800:
+        if not MIN_BODY_LENGTH <= length <= MAX_BODY_LENGTH:
             return self.send_json(413, {"error": "length"})
         try:
             data = json.loads(self.rfile.read(length))
@@ -193,7 +202,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_json(400, {"error": "json"})
         question = data.get("question")
         language = data.get("language", "fr")
-        if not isinstance(question, str) or not 3 <= len(question.strip()) <= 350:
+        if not isinstance(question, str) or not MIN_QUESTION_LENGTH <= len(question.strip()) <= MAX_QUESTION_LENGTH:
             return self.send_json(400, {"error": "question"})
         if language not in ("fr", "en"):
             return self.send_json(400, {"error": "language"})
@@ -217,13 +226,13 @@ class Handler(BaseHTTPRequestHandler):
             SLOTS.release()
         if answer is None:
             return self.send_json(422, {"error": "unverified"})
-        self.send_json(200, {"answer": answer, "mode": "nvidia", "source": item.get("source")})
+        return self.send_json(200, {"answer": answer, "mode": "nvidia", "source": item.get("source")})
 
 
 # 3. Point d'entrée
 def main():
     """Servir l'API sans exposer de port sur l'hôte."""
-    ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
+    ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()  # noqa: S104
 
 
 if __name__ == "__main__":
