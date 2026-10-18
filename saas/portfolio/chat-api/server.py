@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""API de dialogue NVIDIA pour le Portfolio ; réponses fondées sur le CV."""
+"""API du Portfolio : Gemini, NVIDIA et réponses vérifiées."""
 
 import json
 import os
@@ -14,6 +14,9 @@ from urllib import error, request
 
 
 # 1. Variables
+GEMINI_MODEL = "gemini-3.5-flash-lite"
+GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
+GEMINI_KEY = os.environ.get("GEMINI_API_KEY", "")
 PRIMARY_MODEL = "openai/gpt-oss-20b"
 # Second modèle NVIDIA : activé après les tests mock.
 FALLBACK_MODEL = os.environ.get("NVIDIA_FALLBACK_MODEL", "mistralai/mistral-nemotron")
@@ -36,6 +39,9 @@ MIN_BODY_LENGTH = 2
 MAX_BODY_LENGTH = 1800
 MIN_QUESTION_LENGTH = 3
 MAX_QUESTION_LENGTH = 350
+TIMEOUT_SECONDS = 2.0
+GEMINI_TIMEOUT_SECONDS = 2.5
+MAX_OUTPUT_TOKENS = 160
 
 
 # 2. Fonctions
@@ -50,7 +56,12 @@ def topic_for(question):
     """Choisir un thème vérifié, sans suivre des instructions utilisateur."""
     words = f" {normalize(question)} "
     generic = {"combien", "how many", "where", "quelle", "quelles", "quel",
-               "quels", "quand", "when", "pourquoi", "why", "to", "ia"}
+               "quels", "quand", "when", "pourquoi", "why", "to", "ia", "ai",
+               "chiffre", "chiffres", "taille", "size", "nombre", "quantite",
+               "level", "niveau", "work", "art", "social", "histoire", "history",
+               "impact", "metric", "metrics", "echelle", "scale", "experience"}
+    if re.search(r"\b(capitale|population|habitants?|planete|tour eiffel|meteo|weather|inventeur|invented|inventé|installer|install|tutorial)\b", words):
+        return None
     ranked = []
     for item in KNOWLEDGE["items"]:
         score = sum(
@@ -94,8 +105,40 @@ def grounded(answer, evidence, question):
     return not (extract_numbers(answer) - known)
 
 
+# Gemini n'est sollicité que pour un sujet vérifié du Portfolio.
+def ask_gemini(messages, evidence, question):
+    """Reformuler les faits avec Gemini, sans recherche externe."""
+    payload = json.dumps({
+        "systemInstruction": {"parts": [{"text": messages[0]["content"]}]},
+        "contents": [{"role": "user", "parts": [{"text": messages[1]["content"]}]}],
+        "generationConfig": {
+            "maxOutputTokens": MAX_OUTPUT_TOKENS,
+            "thinkingConfig": {"thinkingLevel": "minimal"},
+        },
+    }).encode("utf-8")
+    outgoing = request.Request(
+        GEMINI_URL, data=payload, method="POST",
+        headers={"x-goog-api-key": GEMINI_KEY, "Content-Type": "application/json"},
+    )
+    try:
+        with request.urlopen(outgoing, timeout=GEMINI_TIMEOUT_SECONDS) as response:  # noqa: S310
+            result = json.load(response)
+        answer = "".join(
+            part.get("text", "")
+            for part in result["candidates"][0]["content"]["parts"]
+            if isinstance(part, dict) and not part.get("thought", False)
+        ).strip()
+    except (error.URLError, TimeoutError, OSError, ValueError, KeyError, IndexError, TypeError):
+        return None
+    if not answer or "INFORMATION_INSUFFISANTE" in answer:
+        return None
+    if len(answer) > MAX_ANSWER_LENGTH or not grounded(answer, evidence, question):
+        return None
+    return answer
+
+
 def generate(question, language, item):
-    """Essayer deux modèles NVIDIA, puis replier sur les faits locaux."""
+    """Essayer Gemini puis NVIDIA ; sinon retour aux réponses locales."""
     original = item["replies"][language][0]
     evidence = item[language] + "\n" + original
     system = (
@@ -112,6 +155,12 @@ def generate(question, language, item):
         {"role": "system", "content": system},
         {"role": "user", "content": f"FAITS VÉRIFIÉS :\n{evidence}\n\nQUESTION :\n{question}"},
     ]
+    if GEMINI_KEY:
+        answer = ask_gemini(messages, evidence, question)
+        if answer:
+            return answer
+    if not KEY:
+        return None
     models = (PRIMARY_MODEL, FALLBACK_MODEL) if FALLBACK_MODEL != PRIMARY_MODEL else (PRIMARY_MODEL,)
     for model in models:
         payload = json.dumps({
@@ -119,7 +168,7 @@ def generate(question, language, item):
             "messages": messages,
             "temperature": 0.2,
             "top_p": 0.8,
-            "max_tokens": 400,
+            "max_tokens": MAX_OUTPUT_TOKENS,
             "stream": False,
         }).encode("utf-8")
         outgoing = request.Request(
@@ -127,7 +176,7 @@ def generate(question, language, item):
             headers={"Authorization": f"Bearer {KEY}", "Content-Type": "application/json"},
         )
         try:
-            with request.urlopen(outgoing, timeout=4) as response:  # noqa: S310
+            with request.urlopen(outgoing, timeout=TIMEOUT_SECONDS) as response:  # noqa: S310
                 result = json.load(response)
         except error.HTTPError as exc:
             # Une clé invalide bloque les deux modèles : ne pas multiplier les appels.
@@ -177,7 +226,7 @@ class Handler(BaseHTTPRequestHandler):
         """Exposer uniquement un contrôle de santé sans clé."""
         if self.path != "/health":
             return self.send_json(404, {"error": "not_found"})
-        return self.send_json(200, {"status": "ok", "configured": bool(KEY)})
+        return self.send_json(200, {"status": "ok", "configured": bool(KEY or GEMINI_KEY)})
 
     def do_POST(self):  # noqa: C901, PLR0911, PLR0912
         """Valider le visiteur, choisir les faits, puis demander une réponse."""
@@ -209,7 +258,7 @@ class Handler(BaseHTTPRequestHandler):
         item = topic_for(question)
         if not item:
             return self.send_json(422, {"error": "no_verified_topic"})
-        if not KEY:
+        if not (KEY or GEMINI_KEY):
             return self.send_json(503, {"error": "not_configured"})
         # Limite globale également active si une IP change souvent.
         client = self.headers.get("X-Forwarded-For", "").split(",")[0].strip()
@@ -226,7 +275,7 @@ class Handler(BaseHTTPRequestHandler):
             SLOTS.release()
         if answer is None:
             return self.send_json(422, {"error": "unverified"})
-        return self.send_json(200, {"answer": answer, "mode": "nvidia", "source": item.get("source")})
+        return self.send_json(200, {"answer": answer, "mode": "llm", "source": item.get("source")})
 
 
 # 3. Point d'entrée
