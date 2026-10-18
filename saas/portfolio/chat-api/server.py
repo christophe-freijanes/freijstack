@@ -74,6 +74,50 @@ def topic_for(question):
     return max(ranked, key=lambda candidate: candidate[0])[1] if ranked else None
 
 
+
+def factual_topic(question):
+    """Retrouver une réponse factuelle avant le choix du LLM."""
+    q = normalize(question)
+    words = f" {q} "
+    ownership = re.search(r"\\b(entreprise|societe|company|business|boite)\\b", q)
+    ownership = ownership and re.search(
+        r"\\b(deja|eu|cree|creer|fonde|fondee|possede|own|owned|founded|run)\\b", q
+    )
+    if ownership:
+        intent = "ownership"
+    elif re.search(r"\\b(depuis|how long|since when|how many years|years of experience|combien (?:d |de )?(?:annees?|ans?|temps))\\b", q):
+        intent = "duration"
+    elif re.search(r"\\b(ou|where|based|dans quelle entreprise|chez qui)\\b", q):
+        intent = "where"
+    elif re.search(r"\\b(combien|how many|how much|number of)\\b", q):
+        intent = "count"
+    elif re.search(r"\\b(quand|when|quelle annee|which year)\\b", q):
+        intent = "when"
+    elif re.search(r"\\b(quel|quelle|quels|quelles|lequel|laquelle|which|what)\\b", q):
+        intent = "which"
+    else:
+        return None
+    matched = [
+        entry for entry in KNOWLEDGE["fact_index"]["answers"]
+        if intent in entry and any(
+            f" {normalize(alias)} " in words for alias in entry["aliases"]
+        )
+    ]
+    if not matched:
+        return None
+    if intent == "duration" and " aws " in words:
+        matched = [e for e in matched if e["id"] == "aws_experience"] or matched
+    entry = max(matched, key=lambda e: max(
+        len(normalize(a)) for a in e["aliases"] if f" {normalize(a)} " in words
+    ))
+    answer = entry[intent]
+    return {
+        "id": entry["id"],
+        "replies": {"fr": [answer["fr"]], "en": [answer["en"]]},
+        "source": entry.get("source"),
+    }
+
+
 def allowed(client):
     """Limiter les demandes par client et sur l'ensemble de l'API."""
     now = time.monotonic()
@@ -261,10 +305,11 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_json(400, {"error": "question"})
         if language not in ("fr", "en"):
             return self.send_json(400, {"error": "language"})
-        item = topic_for(question)
+        fact = factual_topic(question)
+        item = fact or topic_for(question)
         if not item:
             return self.send_json(422, {"error": "no_verified_topic"})
-        if not (KEY or GEMINI_KEY):
+        if not (KEY or GEMINI_KEY) and not fact:
             return self.send_json(503, {"error": "not_configured"})
         # Limite globale également active si une IP change souvent.
         client = self.headers.get("X-Forwarded-For", "").split(",")[0].strip()
@@ -274,14 +319,21 @@ class Handler(BaseHTTPRequestHandler):
         if not SLOTS.acquire(blocking=False):
             return self.send_json(503, {"error": "busy"})
         try:
-            answer = generate(question.strip(), language, item)
+            answer = generate(question.strip(), language, item) if (KEY or GEMINI_KEY) else None
         except (error.URLError, TimeoutError, ValueError, KeyError, IndexError, OSError):
-            return self.send_json(503, {"error": "provider_unavailable"})
+            answer = None
+            if not fact:
+                return self.send_json(503, {"error": "provider_unavailable"})
         finally:
             SLOTS.release()
+        if answer is None and fact:
+            answer = fact["replies"][language][0]
+            mode = "verified"
+        else:
+            mode = "llm"
         if answer is None:
             return self.send_json(422, {"error": "unverified"})
-        return self.send_json(200, {"answer": answer, "mode": "llm", "source": item.get("source")})
+        return self.send_json(200, {"answer": answer, "mode": mode, "source": item.get("source")})
 
 
 # 3. Point d'entrée
