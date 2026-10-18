@@ -9,6 +9,10 @@ const cases = [
     ['Depuis quand fais-tu de l’Ansible ?', 'duration', 'octobre 2021', 'fr'],
     ['Depuis combien de temps pratiques-tu Bash ?', 'duration', 'octobre 2021', 'fr'],
     ['Combien de temps fais-tu du Python ?', 'duration', 'novembre 2021', 'fr'],
+    ["Depuis combien de temps fais-tu du python ?", 'duration', 'novembre 2021', 'fr'],
+    ["Depuis combien de temps fais tu du Python ?", 'duration', 'novembre 2021', 'fr'],
+    ["Depuis combien d'années pratiques-tu Python ?", 'duration', 'novembre 2021', 'fr'],
+
     ['Depuis combien de temps PowerShell ?', 'duration', 'octobre 2021', 'fr'],
     ['Où travailles-tu ?', 'where', 'La Caisse', 'fr'],
     ['Où es-tu basé ?', 'where', 'Montréal', 'fr'],
@@ -48,4 +52,9 @@ assert.ok(followUp && followUp.text.includes('octobre 2021'));
 assert.equal(engine.answer('Pourquoi ce choix d’architecture ?', facts, 'fr', today), null);
 assert.equal(engine.answer('Combien de postes as-tu occupés ?', facts, 'fr', today), null);
 assert.equal(engine.detectIntent("Combien d' année as-tu d' experiences ?"), 'duration');
+// Test du mauvais routage signalé : jamais la statistique ACENSI pour Python.
+const python = engine.answer('Depuis combien de temps fais-tu du python ?', facts, 'fr', today);
+assert.ok(python && python.text.includes('novembre 2021'));
+assert.ok(!python.text.includes('60 %') && !python.text.includes('Ansible'));
+
 console.log('Questions factuelles : ' + (cases.length + 2) + ' scénarios validés.');
