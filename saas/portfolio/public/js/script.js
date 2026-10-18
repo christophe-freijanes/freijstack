@@ -855,14 +855,46 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    form.addEventListener('submit', function(event) {
+    async function askAssistant(question) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000);
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json; charset=utf-8'},
+                body: JSON.stringify({question}),
+                signal: controller.signal
+            });
+            if (!response.ok) throw new Error('Chat API unavailable');
+            const data = await response.json();
+            if (typeof data.answer !== 'string' || !data.answer.trim()) {
+                throw new Error('Empty answer');
+            }
+            return data.answer;
+        } catch (error) {
+            return answerQuestion(question);
+        } finally {
+            clearTimeout(timeout);
+        }
+    }
+
+    let pending = false;
+    form.addEventListener('submit', async function(event) {
         event.preventDefault();
         const question = input.value.trim();
-        if (!question) return;
+        if (!question || pending) return;
+        pending = true;
+        const sendButton = form.querySelector('[type="submit"]');
+        if (sendButton) sendButton.disabled = true;
         addMessage(question, true);
-        addMessage(answerQuestion(question), false);
         form.reset();
-        input.focus();
+        try {
+            addMessage(await askAssistant(question), false);
+        } finally {
+            pending = false;
+            if (sendButton) sendButton.disabled = false;
+            input.focus();
+        }
     });
 
     function updatePlaceholder() {
