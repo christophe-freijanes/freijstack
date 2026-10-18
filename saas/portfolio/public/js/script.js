@@ -967,8 +967,10 @@ document.addEventListener('DOMContentLoaded', function() {
             : findTopic(question);
         replyCount += 1;
 
-        if (!topic && window.RecruitmentFacts && facts) {
-            const verified = window.RecruitmentFacts.answer(question, facts, lang, new Date(), previousFactIntent);
+        if (!topic) {
+            const engine = window.RecruitmentFacts;
+            const verified = engine && facts
+                ? engine.answer(question, facts, lang, new Date(), previousFactIntent) : null;
             if (verified) {
                 addMessage(verified.text, false);
                 addFactSource(verified.source);
@@ -976,9 +978,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 messages.scrollTop = messages.scrollHeight;
                 return;
             }
-            const intent = window.RecruitmentFacts.detectIntent(question, previousFactIntent);
-            if (['duration', 'count', 'when', 'where'].includes(intent)
-                && result !== 'booking' && result !== 'identity') {
+            // Pas d'anecdote de remplacement pour une question factuelle.
+            const intent = engine
+                ? engine.detectIntent(question, previousFactIntent)
+                : /\b(depuis|combien|quand|ou|quel|quelle|how long|how many|when|where|which)\b/
+                    .test(normalize(question));
+            if (intent && result !== 'booking' && result !== 'identity') {
                 addMessage(copy.unverified, false);
                 return;
             }
