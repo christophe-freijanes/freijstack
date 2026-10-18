@@ -45,6 +45,58 @@ class ChatTests(unittest.TestCase):
         self.assertIn("Bearer cle-fictive-de-test", outbound.get_header("Authorization"))
         self.assertEqual(outbound.full_url, server.NVIDIA_URL)
 
+    def test_bascule_sur_mistral(self):
+        """Un échec 503 sur GPT entraîne une tentative sur Mistral."""
+        from urllib.error import HTTPError
+
+        content = json.dumps({
+            "choices": [{"message": {"content": "Terraform et Ansible simplifient mes opérations."}}]
+        }).encode("utf-8")
+        models = []
+
+        def fake_call(outbound, timeout):
+            self.assertEqual(timeout, 4)
+            model = json.loads(outbound.data)["model"]
+            models.append(model)
+            if model == server.PRIMARY_MODEL:
+                raise HTTPError(outbound.full_url, 503, "indisponible", {}, None)
+            return io.BytesIO(content)
+
+        with patch.object(server.request, "urlopen", side_effect=fake_call):
+            answer = server.generate("Terraform et Ansible ?", "fr", server.topic_for("Terraform"))
+        self.assertIn("Terraform", answer)
+        self.assertEqual(models, [server.PRIMARY_MODEL, server.FALLBACK_MODEL])
+
+    def test_double_indisponibilite(self):
+        """Deux échecs rendent None : le navigateur garde le repli local."""
+        from urllib.error import URLError
+
+        calls = []
+
+        def unavailable(outbound, timeout):
+            calls.append(json.loads(outbound.data)["model"])
+            raise URLError("serveur indisponible")
+
+        with patch.object(server.request, "urlopen", side_effect=unavailable):
+            answer = server.generate("Terraform ?", "fr", server.topic_for("Terraform"))
+        self.assertIsNone(answer)
+        self.assertEqual(calls, [server.PRIMARY_MODEL, server.FALLBACK_MODEL])
+
+    def test_cle_invalide(self):
+        """Une authentification refusée n'essaye aucun autre modèle."""
+        from urllib.error import HTTPError
+
+        calls = []
+
+        def bad_key(outbound, timeout):
+            calls.append(outbound)
+            raise HTTPError(outbound.full_url, 401, "clé invalide", {}, None)
+
+        with patch.object(server.request, "urlopen", side_effect=bad_key):
+            with self.assertRaises(HTTPError):
+                server.generate("Terraform ?", "fr", server.topic_for("Terraform"))
+        self.assertEqual(len(calls), 1)
+
     def test_fallback_reponse_inverifiable(self):
         payload = {"choices": [{"message": {"content": "J'ai 42 ans d'expérience."}}]}
         with patch.object(server.request, "urlopen", return_value=io.BytesIO(
