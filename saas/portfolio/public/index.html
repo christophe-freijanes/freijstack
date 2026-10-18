@@ -57,21 +57,14 @@
     default-src 'self';
     script-src 'self' 'unsafe-inline'
       https://cdnjs.cloudflare.com
-      https://www.googletagmanager.com
-      https://assets.calendly.com;
+      https://www.googletagmanager.com;
     style-src 'self' 'unsafe-inline'
       https://fonts.googleapis.com
-      https://cdnjs.cloudflare.com
-      https://assets.calendly.com;
+      https://cdnjs.cloudflare.com;
     img-src 'self' data: https:;
     font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:;
-    connect-src 'self'
-      https://calendly.com
-      https://*.calendly.com
-      https://assets.calendly.com;
-    frame-src
-      https://calendly.com
-      https://*.calendly.com;
+    connect-src 'self';
+    frame-src 'self';
     object-src 'none';
     base-uri 'self';
   ">
@@ -94,8 +87,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
 
-  <!-- Calendly CSS (moved to head) -->
-  <link rel="stylesheet" href="https://assets.calendly.com/assets/external/widget.css">
 </head>
 
 <body>
@@ -171,7 +162,7 @@
               <a href="mailto:cfr.pro@gmx.ca" title="Email" class="social-icon" aria-label="Envoyer un email">
                 <i class="fas fa-envelope"></i>
               </a>
-              <a href="https://calendly.com/christophe-freijanes" target="_blank" rel="noopener noreferrer" title="Prendre rendez-vous" class="social-icon" aria-label="Calendrier">
+              <a href="https://calendar.app.google/SfQR76G2NTX63CyLA" target="_blank" rel="noopener noreferrer" title="Prendre rendez-vous" class="social-icon" aria-label="Calendrier">
                 <i class="fas fa-calendar"></i>
               </a>
               <br>
@@ -663,7 +654,7 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
             <a href="https://app.wisemapping.com/c/maps/1451212/public" target="_blank" rel="noopener noreferrer" title="WiseMapping" aria-label="WiseMapping" class="social-icon">
               <i class="fas fa-sitemap"></i>
             </a>
-            <a href="https://calendly.com/christophe-freijanes" target="_blank" rel="noopener noreferrer" title="Prendre rendez-vous" aria-label="Calendrier" class="social-icon">
+            <a href="https://calendar.app.google/SfQR76G2NTX63CyLA" target="_blank" rel="noopener noreferrer" title="Prendre rendez-vous" aria-label="Calendrier" class="social-icon">
               <i class="fas fa-calendar"></i>
             </a>
           </div>
@@ -891,22 +882,7 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
     });
   </script>
   <script>
-    // Masque le badge Calendly si le bouton retour en haut n'est pas visible
-    function toggleCalendlyBadge() {
-      const backToTop = document.getElementById('backToTop');
-      const calendlyBadge = document.getElementById('calendly-badge-widget');
-      if (backToTop && calendlyBadge) {
-        const isVisible = backToTop.style.opacity === '1' || backToTop.classList.contains('show');
-        calendlyBadge.style.display = isVisible ? '' : 'none';
-      }
-    }
-    // Observe les changements de visibilité du bouton
-    const observer = new MutationObserver(toggleCalendlyBadge);
-    observer.observe(document.getElementById('backToTop'), { attributes: true, attributeFilter: ['style', 'class'] });
-    window.addEventListener('scroll', toggleCalendlyBadge);
-    window.addEventListener('load', toggleCalendlyBadge);
-
-    // Masquer les boutons si la souris n'est pas en hover sur la zone basse droite
+    // Masquer le retour en haut si la souris quitte la zone basse droite
     let hideTimeout;
     function handleMouseMove(e) {
       const x = e.clientX;
@@ -916,16 +892,13 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
       // Zone basse droite (120px du bord)
       const inZone = (x > vw - 120) && (y > vh - 120);
       const backToTop = document.getElementById('backToTop');
-      const calendlyBadge = document.getElementById('calendly-badge-widget');
       if (inZone) {
         if (backToTop) backToTop.style.opacity = '';
-        if (calendlyBadge) calendlyBadge.style.opacity = '';
         if (hideTimeout) clearTimeout(hideTimeout);
       } else {
         if (hideTimeout) clearTimeout(hideTimeout);
         hideTimeout = setTimeout(() => {
           if (backToTop) backToTop.style.opacity = '0';
-          if (calendlyBadge) calendlyBadge.style.opacity = '0';
         }, 600);
       }
     }
