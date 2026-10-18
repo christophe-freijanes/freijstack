@@ -1,8 +1,7 @@
 #!/bin/bash
-# ============================================
-# Portfolio Complete Redeploy Script
-# Destroys and rebuilds portfolio from scratch
-# ============================================
+# Ancien script de redéploiement complet du Portfolio.
+# Non adapté à la production actuelle : suppression de volumes,
+# accès SSH root et retrait d'images sans rollback garanti.
 
 set -e
 
@@ -15,7 +14,7 @@ IMAGE="portfolio"
 
 echo "📡 Connecting to VPS: $VPS_IP"
 
-# Function to run commands on VPS
+# Exécuter une commande distante avec la clé fournie.
 vps_cmd() {
     ssh -i "$SSH_KEY" root@"$VPS_IP" "$@"
 }
