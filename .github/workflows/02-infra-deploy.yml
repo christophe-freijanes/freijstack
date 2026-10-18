@@ -1,4 +1,6 @@
-name: 🏗️ Infra • VPS Deploy
+# Infrastructure | Deploy
+# Déploie l'infrastructure partagée du VPS.
+name: "Infrastructure | Deploy"
 
 on:
   push:
