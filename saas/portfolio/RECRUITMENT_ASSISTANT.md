@@ -19,11 +19,11 @@ Le CV HTML et les réponses sont basés sur le CV de 2026 fourni par l'auteur. R
 - **Faits** : uniquement CV, portfolio et informations personnelles communiquées directement par l'auteur.
 - **Qualités humaines** : collaboration, communication, curiosité, créativité et sens du concret ; ne pas inventer de postes ou de responsabilités.
 - **Passions** : sport (soccer, hockey, 24 ans de handball), photo, vidéo, art, design, 5 à 7 et cuisines du monde, **seulement si le recruteur pose une question personnelle**.
-- **Transparence** : assistant virtuel, pas une conversation avec Christophe en direct ni un LLM.
+- **Transparence** : assistant virtuel, jamais une conversation avec Christophe en direct.
 
 ## Moteur de recherche conversationnelle
 
-L'assistant fonctionne entièrement côté navigateur : aucun LLM, API distante ou historique serveur des questions. Les réponses sont prévalidées et recherchées par mots-clés, synonymes, labels et intention. Plusieurs formulations, relances cliquables et prise de rendez-vous améliorent l'interaction sans inventer de compétences.
+Les réponses factuelles et les dates restent locales. Pour les sujets professionnels couverts par le CV, une API LLM optionnelle reformule les faits sans recherche Web ; en cas d'erreur, le bot utilise les formulations validées. Aucun historique serveur de conversation n'est conservé.
 
 Test de cohérence de l'index avec les labels du CV/portfolio :
 
@@ -43,6 +43,9 @@ Test de syntaxe JavaScript :
 node --check saas/portfolio/public/js/script.js
 ```
 
+
+Les trois liens de prise de rendez-vous (haut de page, bas de page et bot) ouvrent la même page Google Calendar. Calendly n'est plus chargé.
+
 ## Questions factuelles sourcées
 
 Le champ `fact_index` du JSON répond d'abord aux questions « depuis quand », « combien », « où », « quand » et « lequel ». La correspondance est dans `public/js/recruitment-facts.js`, avec une source vérifiable sous chaque réponse. Les dates GitHub indiquent la **première trace publique retrouvée**, pas une expérience continue garantie. LinkedIn et Google ne sont pas interrogés en direct : seules les informations confirmées et intégrées à l'index sont utilisées.
@@ -52,11 +55,11 @@ cd saas/portfolio
 node scripts/test-recruitment-facts.cjs
 ```
 
-## Option NVIDIA : deux modèles, puis repli local
+## API LLM : Gemini, NVIDIA, puis repli local
 
-L'API Python (`chat-api/server.py`) choisit les réponses à partir du JSON du CV, puis interroge `openai/gpt-oss-20b`. Si le fournisseur retourne une erreur, un délai dépassé ou une réponse vide, elle tente **une fois** `mistralai/mistral-nemotron` (endpoint NVIDIA disponible). Une erreur de clé 401/403 n'est pas retentée. Si aucun modèle ne répond, le site réutilise les formulations vérifiées. Les dates et chiffres connus sont traités localement avant tout appel LLM.
+L'API Python (`chat-api/server.py`) sélectionne un domaine vérifié du CV avant tout appel externe. Elle essaie **Gemini 3.5 Flash-Lite** (2,5 s), puis **NVIDIA GPT-OSS-20B** et **Mistral Nemotron** (2 s chacun), si leurs clés respectives existent. Si les fournisseurs échouent, le site réutilise les formulations vérifiées. Les questions encyclopédiques sont exclues avant tout appel API ; les chiffres et les dates restent traités localement.
 
-La clé **ne doit jamais figurer dans GitHub ni dans le JavaScript**. Une nouvelle clé NVIDIA doit être placée dans `/etc/freijstack/portfolio/nvidia.env` sur le VPS, accessible à l'administrateur uniquement, sous la forme `NVIDIA_API_KEY=...`. La clé publiée dans une conversation précédente doit être révoquée.
+La clé **ne doit jamais figurer dans GitHub ni dans le JavaScript**. Créer `/etc/freijstack/portfolio/llm.env` sur le VPS (mode `600`) avec une nouvelle `GEMINI_API_KEY=...` et, si disponible, `NVIDIA_API_KEY=...`. Les clés déjà partagées dans la conversation doivent être révoquées et renouvelées.
 
 `docker-compose.ai.yml` est séparé du Compose applicatif. Il ne crée pas de service lorsqu'aucun fichier de surcharge n'est fourni. Après publication des images CI, extraire le commit GitHub sur le VPS comme pour Portfolio, puis exécuter :
 
@@ -64,7 +67,7 @@ La clé **ne doit jamais figurer dans GitHub ni dans le JavaScript**. Une nouvel
 sudo bash saas/portfolio/scripts/enable-portfolio-ai.sh <SHA-GIT-COMPLET>
 ```
 
-Le script exige la nouvelle clé (`chmod 600`), vérifie l'image par SHA, démarre **seulement** `portfolio-chat` et teste une question NVIDIA via HTTPS. En cas d'échec, il arrête le nouveau service, sans modifier Portfolio, Registry ni SecureVault. Ne jamais passer la clé en argument ni la copier dans GitHub.
+Le script exige au moins une nouvelle clé (`chmod 600`), vérifie l'image par SHA, démarre **seulement** `portfolio-chat` et teste une question liée au CV via HTTPS. En cas d'échec, il arrête le nouveau service, sans modifier Portfolio, Registry ni SecureVault. Ne jamais passer la clé en argument ni la copier dans GitHub.
 
 Vérifications hors réseau :
 
@@ -73,7 +76,7 @@ cd saas/portfolio
 python3 -m unittest discover -s chat-api/tests -v
 ```
 
-Les tests vérifient le premier modèle, le basculement vers Mistral, une double panne et le refus de clé. Ils ne prouvent pas qu'une nouvelle clé dispose actuellement du quota nécessaire.
+Les tests mock vérifient Gemini, le basculement vers NVIDIA puis Mistral, les questions hors Portfolio, une double panne et le refus de clé. Ils ne prouvent pas que les clés disposent actuellement d'un quota actif.
 
 ## Aperçu Docker sur VPS (sans déploiement)
 
