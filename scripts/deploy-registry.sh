@@ -1,14 +1,13 @@
 #!/bin/bash
 set -e
 
-# 🐳 Docker Registry Deployment Script
-# Déploie un registre Docker privé avec UI
+# Déploiement historique du Registry et de son interface.
+# Vérifier les volumes et le Compose local avant utilisation.
 
 # Usage:
 #   ./deploy-registry.sh staging
 #   ./deploy-registry.sh production
-#   Or set environment variables:
-#   TARGET_ENV=staging REGISTRY_DOM=... ./deploy-registry.sh
+#   Paramètres possibles : DEPLOY_DIR, REGISTRY_DOM, REGISTRY_UI_DOM.
 
 ENVIRONMENT="${1:-staging}"
 
