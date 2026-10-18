@@ -825,6 +825,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 "Sur ce point, je ne veux pas inventer. Le plus simple est de poser la question lors d'un échange."
             ],
             unavailable: "Je n'arrive pas à charger les informations pour le moment. Le CV ATS reste disponible, et vous pouvez aussi proposer un échange.",
+            unverified: "Je n'ai pas de donnée vérifiée pour répondre précisément à cette question. Je préfère ne pas avancer de chiffre ou de date sans source.",
             booking: [
                 "Avec plaisir ! Le bouton « Réserver un échange » est juste en dessous.",
                 "Bonne idée. Pour aller plus loin, vous pouvez choisir un créneau avec « Réserver un échange »."
@@ -841,6 +842,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 "I don't want to guess on this one. It's a good question to ask in a conversation."
             ],
             unavailable: "I can't load the information just now. The ATS résumé is available, and you can book a conversation.",
+            unverified: "I don't have a verified figure or date for that specific question, so I'd rather not guess.",
             booking: [
                 "Of course! Use the “Book a conversation” button below.",
                 "Great idea. You can pick a time using the booking button below."
@@ -952,6 +954,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 addFactSource(verified.source);
                 previousFactIntent = verified.intent;
                 messages.scrollTop = messages.scrollHeight;
+                return;
+            }
+            const intent = window.RecruitmentFacts.detectIntent(question, previousFactIntent);
+            if (['duration', 'count', 'when', 'where'].includes(intent)
+                && result !== 'booking' && result !== 'identity') {
+                addMessage(copy.unverified, false);
                 return;
             }
         }
