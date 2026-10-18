@@ -9,6 +9,7 @@ from pathlib import Path
 from unittest.mock import patch
 from urllib.error import HTTPError, URLError
 
+
 ROOT = Path(__file__).resolve().parents[2]
 os.environ["KNOWLEDGE_PATH"] = str(ROOT / "public/data/recruitment-knowledge.json")
 sys.path.insert(0, str(ROOT / "chat-api"))
@@ -72,7 +73,7 @@ class ChatTests(unittest.TestCase):
         """Deux échecs rendent None : le navigateur garde le repli local."""
         calls = []
 
-        def unavailable(outbound, _timeout):
+        def unavailable(outbound, timeout):  # noqa: ARG001
             calls.append(json.loads(outbound.data)["model"])
             raise URLError("serveur indisponible")
 
@@ -85,7 +86,7 @@ class ChatTests(unittest.TestCase):
         """Une authentification refusée n'essaye aucun autre modèle."""
         calls = []
 
-        def bad_key(outbound, _timeout):
+        def bad_key(outbound, timeout):  # noqa: ARG001
             calls.append(outbound)
             raise HTTPError(outbound.full_url, 401, "clé invalide", {}, None)
 
