@@ -8,7 +8,7 @@ name: "Security | Publish assessment"
 on:
   workflow_run:
     workflows:
-      - '🩺 Health Check • Post-Deploy'
+      - 'Health | Post-deploy'
     types: [completed]
 
 permissions:
