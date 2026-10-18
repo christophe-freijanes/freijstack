@@ -1,4 +1,6 @@
-name: 🐳 SaaS • Registry Deploy
+# Registry | Deploy
+# Déploie les services Registry et interface web.
+name: "Registry | Deploy"
 
 on:
   # PROD: auto uniquement sur master quand le code registry change
