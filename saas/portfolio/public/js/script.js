@@ -848,10 +848,17 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.querySelectorAll('[data-assistant-topic]').forEach(function(button) {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', async function() {
             const topic = button.dataset.assistantTopic;
-            addMessage(button.textContent.trim(), true);
-            addMessage(responses[language()][topic], false);
+            const question = button.textContent.trim();
+            if (pending) return;
+            pending = true;
+            addMessage(question, true);
+            try {
+                addMessage(await askAssistant(question), false);
+            } finally {
+                pending = false;
+            }
         });
     });
 
