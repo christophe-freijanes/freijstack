@@ -1,4 +1,6 @@
-name: 🔍 Lint Suite • Quality Check
+# Quality | Static analysis
+# Vérifie la syntaxe et la qualité du code du dépôt.
+name: "Quality | Static analysis"
 
 on:
   push:
