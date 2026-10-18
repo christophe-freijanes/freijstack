@@ -39,12 +39,14 @@ def normalize(value):
 def topic_for(question):
     """Choisir un thème vérifié, sans suivre des instructions utilisateur."""
     words = f" {normalize(question)} "
+    generic = {"combien", "how many", "where", "quelle", "quelles", "quel",
+               "quels", "quand", "when", "pourquoi", "why", "to", "ia"}
     ranked = []
     for item in KNOWLEDGE["items"]:
         score = sum(
             (4 if " " in normalize(tag) else 2)
             for tag in item["tags"]
-            if f" {normalize(tag)} " in words
+            if normalize(tag) not in generic and f" {normalize(tag)} " in words
         )
         if score:
             ranked.append((score, item))
