@@ -1,4 +1,6 @@
-name: 🧪 Health Check • Production
+# Health | Production
+# Surveille les endpoints de production.
+name: "Health | Production"
 
 on:
   workflow_dispatch:
