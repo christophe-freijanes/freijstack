@@ -27,6 +27,42 @@ class ChatTests(unittest.TestCase):
             self.addCleanup(mock.stop)
 
 
+    def test_anciennete_aws(self):
+        """L'expérience AWS vient de l'auteur, sans inventer une date exacte."""
+        for q in (
+            "Depuis combien de temps fait tu du AWS",
+            "Depuis combien de temps fais-tu de l'AWS ?",
+            "Combien d'années d'expérience AWS as-tu ?",
+        ):
+            topic = server.factual_topic(q)
+            self.assertIsNotNone(topic, q)
+            self.assertEqual(topic["id"], "aws_experience")
+            self.assertIn("environ dix ans", topic["replies"]["fr"][0])
+
+    def test_entreprise_non_confirmee(self):
+        """Ne jamais affirmer avoir eu ou non une entreprise sans preuve."""
+        for q in ("As-tu deja eu une entreprise ?", "As-tu fondé une société ?"):
+            topic = server.factual_topic(q)
+            self.assertIsNotNone(topic, q)
+            self.assertEqual(topic["id"], "business_ownership")
+            self.assertIn("ne précise pas", topic["replies"]["fr"][0])
+
+    def test_reponse_factuelle_choisie_par_gemini(self):
+        """Le modèle ne peut choisir qu'une réponse autorisée."""
+        topic = server.factual_topic("Depuis combien de temps fais-tu de l'AWS ?")
+        payload = {"candidates": [{"content": {"parts": [
+            {"text": topic["replies"]["fr"][0]},
+        ]}}]}
+        with (
+            patch.object(server, "GEMINI_KEY", "cle-test-gemini"),
+            patch.object(server, "KEY", ""),
+            patch.object(server.request, "urlopen", return_value=io.BytesIO(
+                json.dumps(payload).encode("utf-8"),
+            )),
+        ):
+            result = server.generate("Depuis combien de temps fais-tu de l'AWS ?", "fr", topic)
+        self.assertEqual(result, topic["replies"]["fr"][0])
+
     def test_theme_reconnu(self):
         item = server.topic_for("Parle-moi de Terraform et Ansible")
         self.assertEqual(item["id"], "automation")
