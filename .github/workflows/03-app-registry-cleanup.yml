@@ -1,4 +1,6 @@
-name: 🧹 Registry Cleanup • Old Images
+# Registry | Cleanup
+# Gère la maintenance des anciennes images du registre.
+name: "Registry | Cleanup"
 
 on:
   schedule:
