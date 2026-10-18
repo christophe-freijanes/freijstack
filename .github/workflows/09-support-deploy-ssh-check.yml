@@ -1,4 +1,6 @@
-name: "🔐 Support • Vérifier SSH deploy"
+# Security | SSH preflight
+# Vérifie l'accès SSH du compte de déploiement sans mutation.
+name: "Security | SSH preflight"
 
 on:
   workflow_dispatch:
