@@ -137,7 +137,7 @@ def ask_gemini(messages, evidence, question):
     return answer
 
 
-def generate(question, language, item):
+def generate(question, language, item):  # noqa: C901
     """Essayer Gemini puis NVIDIA ; sinon retour aux réponses locales."""
     original = item["replies"][language][0]
     evidence = item[language] + "\n" + original
