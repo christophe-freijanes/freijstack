@@ -1,7 +1,7 @@
 {
   "generated_at": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')",
   "docs": [
-    { "file": "docs/00-overview/INDEX.md", "title": "<a id="-index-documentation---freijstack"></a>", "size": 12795 },
+    { "file": "docs/00-overview/INDEX.md", "title": "Index", "size": 1002 },
     { "file": "docs/00-overview/QUICK_DEPLOY_GUIDE.md", "title": "🚀 Guide de Déploiement Rapide - Staging", "size": 4284 },
     { "file": "docs/00-overview/README.md", "title": "📍 00-overview: Getting Started with FreijStack", "size": 3740 },
     { "file": "docs/00-overview/USER_GUIDE.md", "title": "🔐 SecureVault Professional - Guide Utilisateur", "size": 12266 },
@@ -11,7 +11,7 @@
     { "file": "docs/01-architecture/README.md", "title": "🏗️ 01-architecture: Understanding FreijStack Design", "size": 4069 },
     { "file": "docs/02-deployment/DEPLOYMENT.md", "title": "", "size": 14867 },
     { "file": "docs/02-deployment/PRO_DEPLOYMENT.md", "title": "", "size": 21809 },
-    { "file": "docs/02-deployment/README.md", "title": "📦 02-deployment: How to Deploy Applications", "size": 5947 },
+    { "file": "docs/02-deployment/README.md", "title": "Déploiement", "size": 1506 },
     { "file": "docs/02-deployment/SECUREVAULT_DEPLOYMENT.md", "title": "", "size": 6973 },
     { "file": "docs/03-guides/AUTOMATION_GUIDE.md", "title": "🤖 Guide Automatisation - FreijStack", "size": 20541 },
     { "file": "docs/03-guides/CLOUD_BACKUP.md", "title": "☁️ SecureVault - Configuration des Backups Cloud", "size": 16083 },
@@ -27,7 +27,7 @@
     { "file": "docs/05-reference/README.md", "title": "📚 05-reference: Detailed Specifications & Checklists", "size": 6922 },
     { "file": "docs/05-reference/RELEASE_WORKFLOW.md", "title": "🚀 Release Workflow - Architecture", "size": 11747 },
     { "file": "docs/NAVIGATION_GUIDE.md", "title": "<a id="-freijstack-documentation-navigation-guide"></a>", "size": 11223 },
-    { "file": "docs/README.md", "title": "<a id="-documentation-freijstack"></a>", "size": 8476 },
+    { "file": "docs/README.md", "title": "Documentation technique", "size": 1128 },
     { "file": "docs/STRUCTURE.md", "title": "📖 FreijStack Documentation Structure", "size": 11702 },
     ]
 }
