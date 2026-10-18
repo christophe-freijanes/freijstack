@@ -1,11 +1,11 @@
-# Bot NVIDIA du Portfolio — ajout isolé au projet Compose existant.
+# Bot LLM du Portfolio — ajout isolé au projet Compose existant.
 services:
   portfolio-chat:
     image: ${PORTFOLIO_CHAT_IMAGE:?Indiquer l'image CI validée}
     container_name: portfolio-chat
     restart: unless-stopped
     env_file:
-      - /etc/freijstack/portfolio/nvidia.env
+      - /etc/freijstack/portfolio/llm.env
     environment:
       PYTHONDONTWRITEBYTECODE: "1"
     read_only: true
