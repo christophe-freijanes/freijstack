@@ -17,7 +17,8 @@ MODEL = "openai/gpt-oss-20b"
 NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions"
 KEY = os.environ.get("NVIDIA_API_KEY", "")
 ORIGIN = "https://portfolio.freijstack.com"
-KNOWLEDGE = json.loads(Path("/app/data/recruitment-knowledge.json").read_text(encoding="utf-8"))
+KNOWLEDGE_PATH = os.environ.get("KNOWLEDGE_PATH", "/app/data/recruitment-knowledge.json")
+KNOWLEDGE = json.loads(Path(KNOWLEDGE_PATH).read_text(encoding="utf-8"))
 PORT = 8080
 RATE_LOCK = Lock()
 PER_CLIENT = defaultdict(deque)
@@ -52,8 +53,14 @@ def allowed(client):
     """Limiter les demandes par client et sur l'ensemble de l'API."""
     now = time.monotonic()
     with RATE_LOCK:
+        while GLOBAL and now - GLOBAL[0] > 60:
+            GLOBAL.popleft()
+        if len(GLOBAL) >= 40:
+            return False
+        if len(PER_CLIENT) > 200:
+            PER_CLIENT.clear()
         local = PER_CLIENT[client]
-        for queue in (local, GLOBAL):
+        for queue in (local,):
             while queue and now - queue[0] > 60:
                 queue.popleft()
         if len(local) >= 5 or len(GLOBAL) >= 40:
