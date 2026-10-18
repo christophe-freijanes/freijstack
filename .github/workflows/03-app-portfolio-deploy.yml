@@ -1,4 +1,6 @@
-name: 🚀 SaaS • Portfolio Deploy
+# Portfolio | Deploy
+# Déploie Portfolio via la procédure VPS historique.
+name: "Portfolio | Deploy"
 
 on:
   workflow_run:
