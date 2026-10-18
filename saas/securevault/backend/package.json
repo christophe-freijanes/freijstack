@@ -1,7 +1,7 @@
 {
   "name": "securevault-backend",
   "version": "1.0.0",
-  "description": "SecureVault Manager - Backend API",
+  "description": "API SecureVault : authentification, gestion des secrets et audit.",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
