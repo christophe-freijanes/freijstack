@@ -1,4 +1,6 @@
-name: 🛡️ Security CI (Core Orchestrator)
+# Security | Shared checks
+# Centralise les contrôles de sécurité réutilisables.
+name: "Security | Shared checks"
 
 on:
   workflow_call:
