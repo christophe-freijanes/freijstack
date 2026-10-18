@@ -36,6 +36,8 @@ jobs:
           node --check public/js/script.js
           node --check public/js/recruitment-facts.js
           node scripts/test-recruitment-facts.cjs
+          test "$(grep -o 'https://calendar.app.google/SfQR76G2NTX63CyLA' public/index.html | wc -l)" -eq 3
+          ! grep -iq 'calendly' public/index.html
           python3 scripts/check-recruitment-index.py
           printf '%s  %s\n' \
             '21e588931f2b4bbfff2ef15955c283ba12e4bfe38deae0b1d6b05309c73cab8b' 'public/cv/CV-Christophe-FREIJANES.pdf' \
@@ -80,7 +82,7 @@ jobs:
         run: docker push "$TAG"
 
   chat-candidate:
-    name: Tester et publier l'API NVIDIA
+    name: Tester et publier l'API LLM
     if: >-
       github.event.pull_request.number == 286 &&
       github.event.pull_request.head.repo.full_name == github.repository &&
