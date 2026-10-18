@@ -7,9 +7,9 @@ const today = new Date('2026-10-17T16:00:00Z');
 const cases = [
     ['Depuis combien de temps fais-tu du Terraform ?', 'duration', 'décembre 2021', 'fr'],
     ['Depuis quand fais-tu de l’Ansible ?', 'duration', 'octobre 2021', 'fr'],
-    ['Depuis combien de temps pratiques-tu Bash ?', 'duration', 'août 2020', 'fr'],
-    ['Combien de temps fais-tu du Python ?', 'duration', 'novembre 2020', 'fr'],
-    ['Depuis combien de temps PowerShell ?', 'duration', 'août 2020', 'fr'],
+    ['Depuis combien de temps pratiques-tu Bash ?', 'duration', 'octobre 2021', 'fr'],
+    ['Combien de temps fais-tu du Python ?', 'duration', 'novembre 2021', 'fr'],
+    ['Depuis combien de temps PowerShell ?', 'duration', 'octobre 2021', 'fr'],
     ['Où travailles-tu ?', 'where', 'La Caisse', 'fr'],
     ['Où es-tu basé ?', 'where', 'Montréal', 'fr'],
     ['Combien de comptes AWS ?', 'count', 'plusieurs centaines', 'fr'],
@@ -30,6 +30,11 @@ for (const [question, intent, expected, lang] of cases) {
     assert.equal(result.intent, intent, question);
     assert.ok(result.text.includes(expected), question + ': ' + result.text);
     assert.ok(result.source.url.startsWith('https://'), question);
+}
+
+// Ne publier que des preuves accessibles aux recruteurs.
+for (const skill of facts.skills) {
+    assert.match(skill.source.url, /^https:\/\/github\.com\/christophe-freijanes\/(formation|student-list)\/commit\//);
 }
 
 const followUp = engine.answer('Et Ansible ?', facts, 'fr', today, 'duration');
