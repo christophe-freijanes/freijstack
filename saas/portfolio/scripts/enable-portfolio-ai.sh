@@ -8,7 +8,7 @@ REVISION="${1:-}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COMPOSE="/srv/www/portfolio/saas/portfolio/docker-compose.prod.yml"
 AI_COMPOSE="$ROOT/docker-compose.ai.yml"
-CREDENTIALS="/etc/freijstack/portfolio/nvidia.env"
+CREDENTIALS="/etc/freijstack/portfolio/llm.env"
 IMAGE="registry.freijstack.com/portfolio-chat:pr286-${REVISION:0:12}"
 
 # 2. Fonctions
