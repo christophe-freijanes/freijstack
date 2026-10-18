@@ -815,7 +815,11 @@
           "ans d experiences",
           "years of experience",
           "years experience",
-          "it experience"
+          "it experience",
+          "informatique",
+          "metier informatique",
+          "secteur informatique",
+          "it industry"
         ],
         "duration": {
           "fr": "J'ai plus de 20 ans d'expérience dans les infrastructures et l'exploitation informatique. Mon activité s'est progressivement concentrée sur AWS, SRE, DevSecOps et l'automatisation.",
