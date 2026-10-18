@@ -49,6 +49,76 @@ class ChatTests(unittest.TestCase):
         self.assertIn("Bearer cle-fictive-de-test", outbound.get_header("Authorization"))
         self.assertEqual(outbound.full_url, server.NVIDIA_URL)
 
+    def test_gemini_prioritaire(self):
+        """Gemini doit répondre sans interroger NVIDIA."""
+        payload = {"candidates": [{"content": {"parts": [
+            {"text": "J'utilise Terraform et Ansible pour automatiser AWS."},
+        ]}}]}
+        calls = []
+
+        def fake_call(outbound, timeout):
+            calls.append(outbound)
+            self.assertEqual(timeout, server.GEMINI_TIMEOUT_SECONDS)
+            self.assertEqual(outbound.full_url, server.GEMINI_URL)
+            self.assertEqual(outbound.get_header("X-goog-api-key"), "cle-test-gemini")
+            body = json.loads(outbound.data)
+            self.assertEqual(body["generationConfig"]["thinkingConfig"]["thinkingLevel"], "minimal")
+            self.assertNotIn("tools", body)
+            return io.BytesIO(json.dumps(payload).encode("utf-8"))
+
+        with (
+            patch.object(server, "GEMINI_KEY", "cle-test-gemini"),
+            patch.object(server.request, "urlopen", side_effect=fake_call),
+        ):
+            answer = server.generate("Parle-moi de Terraform", "fr", server.topic_for("Terraform"))
+        self.assertIn("Terraform", answer)
+        self.assertEqual(len(calls), 1)
+
+    def test_gemini_indisponible_nvidia_prend_le_relais(self):
+        """Un refus Gemini doit activer GPT sans perdre les faits."""
+        payload = {"choices": [{"message": {"content": "Terraform automatise mon travail."}}]}
+        calls = []
+
+        def fake_call(outbound, timeout):  # noqa: ARG001
+            calls.append(outbound.full_url)
+            if outbound.full_url == server.GEMINI_URL:
+                raise HTTPError(outbound.full_url, 429, "quota", {}, None)
+            return io.BytesIO(json.dumps(payload).encode("utf-8"))
+
+        with (
+            patch.object(server, "GEMINI_KEY", "cle-test-gemini"),
+            patch.object(server, "KEY", "cle-test-nvidia"),
+            patch.object(server.request, "urlopen", side_effect=fake_call),
+        ):
+            answer = server.generate("Terraform", "fr", server.topic_for("Terraform"))
+        self.assertIn("Terraform", answer)
+        self.assertEqual(calls, [server.GEMINI_URL, server.NVIDIA_URL])
+
+    def test_gemini_nombre_invente_refuse(self):
+        """Aucun chiffre inventé ne doit parvenir au visiteur."""
+        payload = {"candidates": [{"content": {"parts": [
+            {"text": "J'ai 45 ans d'expérience sur Terraform."},
+        ]}}]}
+        with (
+            patch.object(server, "GEMINI_KEY", "cle-test-gemini"),
+            patch.object(server, "KEY", ""),
+            patch.object(server.request, "urlopen", return_value=io.BytesIO(
+                json.dumps(payload).encode("utf-8"),
+            )),
+        ):
+            answer = server.generate("Terraform", "fr", server.topic_for("Terraform"))
+        self.assertIsNone(answer)
+
+    def test_hors_portfolio(self):
+        """Une question générale ne peut pas déclencher de modèle."""
+        for question in (
+            "Quelle est la capitale de la France ?",
+            "Combien d'habitants sur la planète ?",
+            "Quel est le prix d'AWS ?",
+            "Qui a inventé Python ?",
+        ):
+            self.assertIsNone(server.topic_for(question), question)
+
     def test_bascule_sur_mistral(self):
         """Un échec 503 sur GPT entraîne une tentative sur Mistral."""
         content = json.dumps({
