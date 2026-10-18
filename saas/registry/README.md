@@ -7,7 +7,7 @@ Registre privé d'images Docker avec une interface web Joxit, publié derrière 
 - [`docker-compose.yml`](docker-compose.yml) : configuration de référence.
 - [`docker-compose.prod.yml`](docker-compose.prod.yml) : configuration de production versionnée.
 - [`config.yml`](config.yml) : configuration du registre.
-- [`generate-htpasswd.sh`](generate-htpasswd.sh) : utilitaire d'authentification.
+- [`generate-htpasswd-dynamic.sh`](generate-htpasswd-dynamic.sh) : utilitaire d'authentification.
 
 ## Points de contrôle
 
