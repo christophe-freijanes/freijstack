@@ -854,6 +854,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const previousAnswers = new Map();
     let knowledge = [];
+    let facts = null;
+    let previousFactIntent = null;
     let previousTopic = null;
     let replyCount = 0;
     const loading = fetch('data/recruitment-knowledge.json')
@@ -865,6 +867,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!data || !Array.isArray(data.items)) throw new Error('Index invalide');
             knowledge = data.items.filter(item => item.id && Array.isArray(item.tags)
                 && item.replies && Array.isArray(item.replies.fr) && Array.isArray(item.replies.en));
+            facts = data.fact_index || null;
         })
         .catch(() => { knowledge = []; });
 
@@ -884,6 +887,20 @@ document.addEventListener('DOMContentLoaded', function() {
         message.textContent = text;
         messages.appendChild(message);
         messages.scrollTop = messages.scrollHeight;
+    }
+
+    // Afficher la preuve sans insérer de HTML provenant des données.
+    function addFactSource(source) {
+        if (!source || !source.url) return;
+        const url = new URL(source.url);
+        if (url.protocol !== 'https:' || !['github.com', 'portfolio.freijstack.com'].includes(url.hostname)) return;
+        const link = document.createElement('a');
+        link.className = 'assistant-source';
+        link.href = url.href;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = 'Source : ' + source.label;
+        messages.appendChild(link);
     }
 
     function matches(question, keyword) {
@@ -927,6 +944,17 @@ document.addEventListener('DOMContentLoaded', function() {
             ? knowledge.find(item => item.id === topic)
             : findTopic(question);
         replyCount += 1;
+
+        if (!topic && window.RecruitmentFacts && facts) {
+            const verified = window.RecruitmentFacts.answer(question, facts, lang, new Date(), previousFactIntent);
+            if (verified) {
+                addMessage(verified.text, false);
+                addFactSource(verified.source);
+                previousFactIntent = verified.intent;
+                messages.scrollTop = messages.scrollHeight;
+                return;
+            }
+        }
 
         if (result === 'booking') {
             addMessage(choose(copy.booking, lang + ':booking'), false);
