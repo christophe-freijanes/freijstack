@@ -7,6 +7,7 @@ import sys
 import unittest
 from pathlib import Path
 from unittest.mock import patch
+from urllib.error import HTTPError, URLError
 
 ROOT = Path(__file__).resolve().parents[2]
 os.environ["KNOWLEDGE_PATH"] = str(ROOT / "public/data/recruitment-knowledge.json")
@@ -30,16 +31,18 @@ class ChatTests(unittest.TestCase):
 
     def test_generation_sans_reseau(self):
         payload = {
-            "choices": [{"message": {"content": "J'utilise Terraform et Ansible pour automatiser AWS."}}]
+            "choices": [{"message": {"content": "J'utilise Terraform et Ansible pour automatiser AWS."}}],
         }
-        with patch.object(server.request, "urlopen", return_value=io.BytesIO(
-            json.dumps(payload).encode("utf-8")
-        )) as call:
-            with patch.object(server, "KEY", "cle-fictive-de-test"):
-                answer = server.generate(
-                    "Pourquoi automatiser avec Terraform ?", "fr",
-                    server.topic_for("Terraform"),
-                )
+        with (
+            patch.object(server.request, "urlopen", return_value=io.BytesIO(
+                json.dumps(payload).encode("utf-8"),
+            )) as call,
+            patch.object(server, "KEY", "cle-fictive-de-test"),
+        ):
+            answer = server.generate(
+                "Pourquoi automatiser avec Terraform ?", "fr",
+                server.topic_for("Terraform"),
+            )
         self.assertIn("Terraform", answer)
         outbound = call.call_args.args[0]
         self.assertIn("Bearer cle-fictive-de-test", outbound.get_header("Authorization"))
@@ -47,10 +50,8 @@ class ChatTests(unittest.TestCase):
 
     def test_bascule_sur_mistral(self):
         """Un échec 503 sur GPT entraîne une tentative sur Mistral."""
-        from urllib.error import HTTPError
-
         content = json.dumps({
-            "choices": [{"message": {"content": "Terraform et Ansible simplifient mes opérations."}}]
+            "choices": [{"message": {"content": "Terraform et Ansible simplifient mes opérations."}}],
         }).encode("utf-8")
         models = []
 
@@ -69,11 +70,9 @@ class ChatTests(unittest.TestCase):
 
     def test_double_indisponibilite(self):
         """Deux échecs rendent None : le navigateur garde le repli local."""
-        from urllib.error import URLError
-
         calls = []
 
-        def unavailable(outbound, timeout):
+        def unavailable(outbound, _timeout):
             calls.append(json.loads(outbound.data)["model"])
             raise URLError("serveur indisponible")
 
@@ -84,23 +83,23 @@ class ChatTests(unittest.TestCase):
 
     def test_cle_invalide(self):
         """Une authentification refusée n'essaye aucun autre modèle."""
-        from urllib.error import HTTPError
-
         calls = []
 
-        def bad_key(outbound, timeout):
+        def bad_key(outbound, _timeout):
             calls.append(outbound)
             raise HTTPError(outbound.full_url, 401, "clé invalide", {}, None)
 
-        with patch.object(server.request, "urlopen", side_effect=bad_key):
-            with self.assertRaises(HTTPError):
-                server.generate("Terraform ?", "fr", server.topic_for("Terraform"))
+        with (
+            patch.object(server.request, "urlopen", side_effect=bad_key),
+            self.assertRaises(HTTPError),
+        ):
+            server.generate("Terraform ?", "fr", server.topic_for("Terraform"))
         self.assertEqual(len(calls), 1)
 
     def test_fallback_reponse_inverifiable(self):
         payload = {"choices": [{"message": {"content": "J'ai 42 ans d'expérience."}}]}
         with patch.object(server.request, "urlopen", return_value=io.BytesIO(
-            json.dumps(payload).encode("utf-8")
+            json.dumps(payload).encode("utf-8"),
         )):
             self.assertIsNone(server.generate("Terraform ?", "fr", server.topic_for("Terraform")))
 
