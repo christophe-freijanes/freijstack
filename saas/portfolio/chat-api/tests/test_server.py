@@ -135,7 +135,7 @@ class ChatTests(unittest.TestCase):
         models = []
 
         def fake_call(outbound, timeout):
-            self.assertEqual(timeout, 4)
+            self.assertEqual(timeout, server.TIMEOUT_SECONDS)
             model = json.loads(outbound.data)["model"]
             models.append(model)
             if model == server.PRIMARY_MODEL:
