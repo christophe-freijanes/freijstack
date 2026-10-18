@@ -1,4 +1,6 @@
-name: 🧩 Core • Healthcheck
+# Health | Shared checks
+# Fournit les vérifications de santé mutualisées.
+name: "Health | Shared checks"
 
 on:
   workflow_call:
