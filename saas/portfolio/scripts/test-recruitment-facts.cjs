@@ -14,6 +14,12 @@ const cases = [
     ['Où es-tu basé ?', 'where', 'Montréal', 'fr'],
     ['Combien de comptes AWS ?', 'count', 'plusieurs centaines', 'fr'],
     ['Combien d’années d’expérience as-tu ?', 'duration', '20 ans', 'fr'],
+    ["Combien d' année as-tu d' experiences ?", 'duration', '20 ans', 'fr'],
+    ["Combien d'années as-tu d'expérience ?", 'duration', '20 ans', 'fr'],
+    ["Combien d'années d'expérience ?", 'duration', '20 ans', 'fr'],
+    ["Depuis combien d'années travailles-tu dans l'informatique ?", 'duration', '20 ans', 'fr'],
+    ['How many years of experience do you have?', 'duration', '20 years', 'en'],
+    ["Combien d'années de Terraform ?", 'duration', 'décembre 2021', 'fr'],
     ['Quelles certifications as-tu ?', 'which', 'CompTIA Security+', 'fr'],
     ['Quels outils utilises-tu ?', 'which', 'Terraform', 'fr'],
     ['Depuis quand es-tu chez La Caisse ?', 'duration', 'juin 2026', 'fr'],
@@ -40,4 +46,6 @@ for (const skill of facts.skills) {
 const followUp = engine.answer('Et Ansible ?', facts, 'fr', today, 'duration');
 assert.ok(followUp && followUp.text.includes('octobre 2021'));
 assert.equal(engine.answer('Pourquoi ce choix d’architecture ?', facts, 'fr', today), null);
+assert.equal(engine.answer('Combien de postes as-tu occupés ?', facts, 'fr', today), null);
+assert.equal(engine.detectIntent("Combien d' année as-tu d' experiences ?"), 'duration');
 console.log('Questions factuelles : ' + (cases.length + 2) + ' scénarios validés.');
