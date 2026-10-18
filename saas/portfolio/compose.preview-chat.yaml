@@ -1,0 +1,23 @@
+services:
+  portfolio-chat-preview:
+    build:
+      context: .
+      dockerfile: Dockerfile.preview-chat
+    container_name: portfolio-chat-preview
+    ports:
+      - "127.0.0.1:18087:80"
+    restart: "no"
+    networks:
+      - chat-test
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
+
+networks:
+  chat-test:
+    external: true
+    name: freijstack-chat_default
