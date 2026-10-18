@@ -905,6 +905,26 @@ document.addEventListener('DOMContentLoaded', function() {
         messages.appendChild(link);
     }
 
+    // API optionnelle : aucun secret dans le navigateur.
+    async function askNvidia(question, lang) {
+        if (question.length > 350) return null;
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                credentials: 'omit',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question, language: lang }),
+                signal: AbortSignal.timeout(8500)
+            });
+            if (!response.ok) return null;
+            const data = await response.json();
+            return typeof data.answer === 'string' && data.answer.length <= 650
+                ? data.answer.trim() : null;
+        } catch (_error) {
+            return null;
+        }
+    }
+
     function matches(question, keyword) {
         const key = normalize(keyword);
         return key && (' ' + question + ' ').includes(' ' + key + ' ');
@@ -977,6 +997,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 ? choose(copy.missing, lang + ':missing')
                 : copy.unavailable, false);
             return;
+        }
+
+        // Les faits chiffrés sont traités au-dessus, sans génération.
+        if (!topic && typeof result === 'object') {
+            const natural = await askNvidia(question, lang);
+            if (natural) {
+                addMessage(natural, false);
+                previousTopic = result;
+                return;
+            }
         }
 
         const options = result.replies[lang];
