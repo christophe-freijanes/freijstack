@@ -675,14 +675,14 @@
           "scripts shell"
         ],
         "label": "Bash",
-        "first_evidence": "2020-08-16",
+        "first_evidence": "2021-10-30",
         "professional": {
-          "fr": "C'est un outil que j'utilise pour l'administration et l'automatisation Linux, notamment dans mes missions systèmes.",
-          "en": "I use it for Linux administration and automation, including in my systems roles."
+          "fr": "Mon CV mentionne également Bash dans mes missions systèmes, notamment chez HARDIS en 2019–2020.",
+          "en": "My résumé also mentions Bash in systems work, including at HARDIS in 2019–2020."
         },
         "source": {
-          "label": "GitHub — premier script Shell archivé",
-          "url": "https://github.com/christophe-freijanes/scripts/commit/d3c04ea0f4a2d49ee018b09c9edb826524eae776"
+          "label": "GitHub public — script Bash",
+          "url": "https://github.com/christophe-freijanes/formation/commit/4b2985311a1ac55565eb31ad4107b797e71c880a"
         }
       },
       {
@@ -692,14 +692,14 @@
           "py"
         ],
         "label": "Python",
-        "first_evidence": "2020-11-23",
+        "first_evidence": "2021-11-08",
         "professional": {
-          "fr": "Je l'utilise aussi pour écrire des utilitaires, analyser des données et automatiser des tâches d'exploitation.",
-          "en": "I also use it for utilities, data processing and operational automation."
+          "fr": "Je l'ai ensuite utilisé dans mes missions pour les scripts et l'automatisation d'exploitation.",
+          "en": "I later used it professionally for scripts and operational automation."
         },
         "source": {
-          "label": "GitHub — script Python de conversion",
-          "url": "https://github.com/christophe-freijanes/scripts/commit/151f24c9eb97fcd53796d904e130fc39817ff83f"
+          "label": "GitHub public — premier exemple Python",
+          "url": "https://github.com/christophe-freijanes/student-list/commit/c2430820397e1d8465e841aff6ea91b369a568f2"
         }
       },
       {
@@ -710,14 +710,14 @@
           "ps1"
         ],
         "label": "PowerShell",
-        "first_evidence": "2020-08-16",
+        "first_evidence": "2021-10-30",
         "professional": {
-          "fr": "Mon CV en mentionne aussi l'usage dans l'administration Windows, notamment sur la période 2014–2018.",
-          "en": "My résumé also documents PowerShell in Windows administration, notably during 2014–2018."
+          "fr": "Le CV documente aussi mon utilisation de PowerShell dans l'administration Windows dès mes missions de 2014–2018.",
+          "en": "My résumé also documents PowerShell in Windows administration during my 2014–2018 roles."
         },
         "source": {
-          "label": "GitHub — scripts PowerShell",
-          "url": "https://github.com/christophe-freijanes/scripts/commit/a2d5773107abf4aa269b359cdce8d3e6d10d2be4"
+          "label": "GitHub public — script PowerShell",
+          "url": "https://github.com/christophe-freijanes/formation/commit/4b2985311a1ac55565eb31ad4107b797e71c880a"
         }
       }
     ],
