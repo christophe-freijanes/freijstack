@@ -52,6 +52,23 @@ cd saas/portfolio
 node scripts/test-recruitment-facts.cjs
 ```
 
+## Option NVIDIA : deux modèles, puis repli local
+
+L'API Python (`chat-api/server.py`) choisit les réponses à partir du JSON du CV, puis interroge `openai/gpt-oss-20b`. Si le fournisseur retourne une erreur, un délai dépassé ou une réponse vide, elle tente **une fois** `mistralai/mistral-nemotron` (endpoint NVIDIA disponible). Une erreur de clé 401/403 n'est pas retentée. Si aucun modèle ne répond, le site réutilise les formulations vérifiées. Les dates et chiffres connus sont traités localement avant tout appel LLM.
+
+La clé **ne doit jamais figurer dans GitHub ni dans le JavaScript**. Une nouvelle clé NVIDIA doit être placée dans `/etc/freijstack/portfolio/nvidia.env` sur le VPS, accessible à l'administrateur uniquement, sous la forme `NVIDIA_API_KEY=...`. La clé publiée dans une conversation précédente doit être révoquée.
+
+`docker-compose.ai.yml` est séparé du Compose applicatif. Il ne crée pas de service lorsqu'aucun fichier de surcharge n'est fourni.
+
+Vérifications hors réseau :
+
+```bash
+cd saas/portfolio
+python3 -m unittest discover -s chat-api/tests -v
+```
+
+Les tests vérifient le premier modèle, le basculement vers Mistral, une double panne et le refus de clé. Ils ne prouvent pas qu'une nouvelle clé dispose actuellement du quota nécessaire.
+
 ## Aperçu Docker sur VPS (sans déploiement)
 
 Depuis la branche de la PR #286 :
