@@ -1,4 +1,6 @@
-name: 📊 Publish Security Score
+# Security | Publish assessment
+# Publie l'évaluation après la vérification post-déploiement.
+name: "Security | Publish assessment"
 
 # Déclenché APRÈS le post-deploy health check pour publier le score de sécurité
 # Respecte le pipeline DevSecOps : Security → Deploy → Score
