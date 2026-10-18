@@ -43,10 +43,10 @@
             .format(new Date(skill.first_evidence + 'T00:00:00Z'));
         const period = elapsed(skill.first_evidence, now, lang);
         if (lang === 'en') {
-            return 'My earliest ' + skill.label + ' work visible on GitHub dates to '
+            return 'My earliest publicly accessible ' + skill.label + ' examples on GitHub date to '
                 + month + ' (about ' + period + ' ago). ' + skill.professional.en;
         }
-        return 'Mes premiers travaux ' + skill.label + ' visibles sur GitHub datent de '
+        return 'Mes premiers exemples ' + skill.label + ' accessibles publiquement sur GitHub datent de '
             + month + ' (il y a environ ' + period + '). ' + skill.professional.fr;
     }
 
