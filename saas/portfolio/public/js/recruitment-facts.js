@@ -82,12 +82,13 @@
             };
         }
 
-        const entries = (facts.answers || []).filter(entry => match(entry, q) && entry[intent]);
+        const entries = (facts.answers || []).filter(entry =>
+            match(entry, q) && (entry[intent] || (intent === 'duration' && entry.since)));
         const result = entries.sort((a, b) =>
             Math.max(...b.aliases.filter(alias => includesPhrase(q, alias)).map(a => a.length))
             - Math.max(...a.aliases.filter(alias => includesPhrase(q, alias)).map(a => a.length)))[0];
         if (!result) return null;
-        return { text: result[intent][language], source: result.source, intent };
+        return { text: (result[intent] || result.since)[language], source: result.source, intent };
     }
 
     const engine = { answer, detectIntent };
