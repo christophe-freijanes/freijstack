@@ -69,7 +69,7 @@ sudo git -C /root/freijstack archive "$REV" saas/portfolio | sudo tar -x -C "$DI
 sudo bash "$DIR/saas/portfolio/scripts/release-portfolio-vps.sh" "$REV"
 ```
 
-Le script vérifie les deux CV, l’index de recrutement et l’image Docker. Il teste les URL HTTP sur un conteneur temporaire lié à localhost, publie une image sous un tag unique dans le Registry, sauvegarde l’image actuelle et remplace **uniquement Portfolio**. Un échec avant la bascule laisse la production inchangée. En cas d’échec après bascule, il tente un retour arrière et affiche une commande de restauration manuelle.
+Le script vérifie les deux CV, l’index de recrutement et l’image Docker. Il teste les URL HTTP sur un conteneur temporaire lié à localhost, récupère l’image validée par GitHub Actions, vérifie le SHA du commit, sauvegarde l’image actuelle et remplace **uniquement Portfolio**. Un échec avant la bascule laisse la production inchangée. En cas d’échec après bascule, il tente un retour arrière et affiche une commande de restauration manuelle.
 
 Ne pas utiliser l’ancien déploiement GitHub Actions avec l’utilisateur SSH non privilégié.
 ## Mise en ligne
