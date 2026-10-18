@@ -34,8 +34,12 @@ test "$(docker inspect portfolio --format '{{index .Config.Labels "com.docker.co
 test "$(docker inspect portfolio --format '{{index .Config.Labels "com.docker.compose.service"}}')" = "portfolio"
 docker network inspect freijstack >/dev/null
 
-echo "=== Construction de l'image ==="
-docker build --label "org.opencontainers.image.revision=${REVISION}" -t "$IMAGE" .
+echo "=== Récupération de l'image validée en CI ==="
+docker pull "$IMAGE"
+test "$(docker image inspect "$IMAGE" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')" = "$REVISION" || {
+  echo "REFUS : image différente du commit GitHub approuvé."
+  exit 1
+}
 
 echo "=== Vérification des fichiers dans l'image ==="
 docker run --rm --entrypoint sh "$IMAGE" -c '
@@ -78,12 +82,6 @@ for url in / /data/recruitment-knowledge.json /js/script.js \
 done
 cleanup
 trap - EXIT
-
-echo "=== Publication Registry (tag unique) ==="
-docker push "$IMAGE" || {
-  echo "Publication impossible : Portfolio production NON modifié."
-  exit 1
-}
 
 echo "=== Sauvegarde de la version actuelle ==="
 OLD_ID="$(docker inspect portfolio --format '{{.Image}}')"
