@@ -1,4 +1,6 @@
-name: 🚀 Release Automation • Semantic Versioning
+# Release | Versioning
+# Gère les versions et les publications automatiques.
+name: "Release | Versioning"
 
 on:
   push:
