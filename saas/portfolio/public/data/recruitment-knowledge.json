@@ -893,6 +893,40 @@
           "label": "CV 2026",
           "url": "https://portfolio.freijstack.com/cv/CV-Christophe-FREIJANES.pdf"
         }
+      },
+      {
+        "id": "aws_experience",
+        "aliases": [
+          "aws",
+          "amazon web services",
+          "cloud aws"
+        ],
+        "duration": {
+          "fr": "J'utilise AWS depuis environ dix ans, autour de 2016. C'est une estimation issue de mon parcours, pas une date de certification.",
+          "en": "I've worked with AWS for about ten years, roughly since 2016. That's an estimate from my experience, not a certified starting date."
+        },
+        "source": {
+          "label": "Indication de l'auteur sur son parcours"
+        }
+      },
+      {
+        "id": "business_ownership",
+        "aliases": [
+          "entreprise",
+          "societe",
+          "company",
+          "business",
+          "creer une boite",
+          "monte une boite",
+          "fonde"
+        ],
+        "ownership": {
+          "fr": "Mon parcours public ne précise pas si j'ai déjà créé ou dirigé une entreprise. Je ne peux pas l'affirmer sans confirmation.",
+          "en": "My public profile doesn't say whether I've founded or run a company. I can't confirm that without further information."
+        },
+        "source": {
+          "label": "CV et Portfolio 2026"
+        }
       }
     ]
   }
