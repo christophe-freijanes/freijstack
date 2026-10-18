@@ -8,7 +8,7 @@ from pathlib import Path
 # 1. Variables
 ROOT = Path(__file__).resolve().parents[1]
 MAX_LINES = 200
-IMAGE = re.compile(r"!\\[[^\\]]*\\]\\([^)]+\\)|<img\\b", re.IGNORECASE)
+IMAGE = re.compile(r"!\[[^\]]*\]\([^)]+\)|<img\b", re.IGNORECASE)
 
 
 # 2. Fonctions
