@@ -17,7 +17,15 @@ import server  # noqa: E402
 
 
 class ChatTests(unittest.TestCase):
-    """Contrôler les réponses sans appeler NVIDIA."""
+    """Contrôler les réponses sans appels externes."""
+
+    def setUp(self):
+        """Démarrer chaque test avec NVIDIA fictif et Gemini désactivé."""
+        for variable, value in (("KEY", "cle-fictive-nvidia"), ("GEMINI_KEY", "")):
+            mock = patch.object(server, variable, value)
+            mock.start()
+            self.addCleanup(mock.stop)
+
 
     def test_theme_reconnu(self):
         item = server.topic_for("Parle-moi de Terraform et Ansible")
