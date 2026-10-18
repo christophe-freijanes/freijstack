@@ -58,7 +58,13 @@ L'API Python (`chat-api/server.py`) choisit les réponses à partir du JSON du C
 
 La clé **ne doit jamais figurer dans GitHub ni dans le JavaScript**. Une nouvelle clé NVIDIA doit être placée dans `/etc/freijstack/portfolio/nvidia.env` sur le VPS, accessible à l'administrateur uniquement, sous la forme `NVIDIA_API_KEY=...`. La clé publiée dans une conversation précédente doit être révoquée.
 
-`docker-compose.ai.yml` est séparé du Compose applicatif. Il ne crée pas de service lorsqu'aucun fichier de surcharge n'est fourni.
+`docker-compose.ai.yml` est séparé du Compose applicatif. Il ne crée pas de service lorsqu'aucun fichier de surcharge n'est fourni. Après publication des images CI, extraire le commit GitHub sur le VPS comme pour Portfolio, puis exécuter :
+
+```bash
+sudo bash saas/portfolio/scripts/enable-portfolio-ai.sh <SHA-GIT-COMPLET>
+```
+
+Le script exige la nouvelle clé (`chmod 600`), vérifie l'image par SHA, démarre **seulement** `portfolio-chat` et teste une question NVIDIA via HTTPS. En cas d'échec, il arrête le nouveau service, sans modifier Portfolio, Registry ni SecureVault. Ne jamais passer la clé en argument ni la copier dans GitHub.
 
 Vérifications hors réseau :
 
