@@ -1,4 +1,6 @@
-name: 📚 Auto-Generate Documentation
+# Docs | Generate
+# Produit et vérifie les artefacts de documentation.
+name: "Docs | Generate"
 
 on:
   push:
