@@ -27,10 +27,10 @@ jobs:
         run: |
           if [ "${{ github.event.workflow_run.conclusion }}" = "success" ]; then
             echo "✅ Post-deploy health check passed"
-            echo "success=true" >> $GITHUB_OUTPUT
+            echo "success=true" >> "$GITHUB_OUTPUT"
           else
             echo "⚠️ Post-deploy health check failed or was skipped"
-            echo "success=false" >> $GITHUB_OUTPUT
+            echo "success=false" >> "$GITHUB_OUTPUT"
           fi
 
   # Publie le score de sécurité global après le déploiement réussi
@@ -96,8 +96,10 @@ jobs:
             GLOBAL_SCORE=100
           fi
 
-          echo "GLOBAL_SCORE=$GLOBAL_SCORE" >> $GITHUB_ENV
-          echo "SECURITY_ISSUES=$ISSUES" >> $GITHUB_ENV
+          {
+            echo "GLOBAL_SCORE=$GLOBAL_SCORE"
+            echo "SECURITY_ISSUES=$ISSUES"
+          } >> "$GITHUB_ENV"
           echo "Global Security Score: $GLOBAL_SCORE/100"
           echo "Total Issues: $ISSUES"
 
@@ -138,8 +140,10 @@ jobs:
             </g>
           </svg>
           EOF
-          echo "BADGE_COLOR=$COLOR" >> $GITHUB_ENV
-          echo "BADGE_STATUS=$STATUS" >> $GITHUB_ENV
+          {
+            echo "BADGE_COLOR=$COLOR"
+            echo "BADGE_STATUS=$STATUS"
+          } >> "$GITHUB_ENV"
 
       - name: Generate Global Security Report
         run: |
@@ -175,15 +179,17 @@ jobs:
 
       - name: Create Summary
         run: |
-          echo "## 📊 Global Security Score Published" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Score**: ${{ env.GLOBAL_SCORE }}/100 (${{ env.BADGE_STATUS }})" >> $GITHUB_STEP_SUMMARY
-          echo "**Issues**: ${{ env.SECURITY_ISSUES }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Timestamp**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📈 Artifacts" >> $GITHUB_STEP_SUMMARY
-          echo "- Badge: global-security-score-badge.svg" >> $GITHUB_STEP_SUMMARY
-          echo "- Report: GLOBAL_SECURITY_REPORT.md" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## 📊 Global Security Score Published"
+            echo ""
+            echo "**Score**: ${{ env.GLOBAL_SCORE }}/100 (${{ env.BADGE_STATUS }})"
+            echo "**Issues**: ${{ env.SECURITY_ISSUES }}"
+            echo "**Timestamp**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+            echo ""
+            echo "### 📈 Artifacts"
+            echo "- Badge: global-security-score-badge.svg"
+            echo "- Report: GLOBAL_SECURITY_REPORT.md"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   # Notification finale
   notify:
@@ -196,9 +202,11 @@ jobs:
         run: |
           if [ "${{ needs.check-deployment.outputs.deployment_success }}" = "true" ]; then
             echo "✅ Security Score published after successful deployment"
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "## ✅ Security Score Published" >> $GITHUB_STEP_SUMMARY
-            echo "Score is maintenant disponible dans les artefacts" >> $GITHUB_STEP_SUMMARY
+            {
+              echo ""
+              echo "## ✅ Security Score Published"
+              echo "Score is maintenant disponible dans les artefacts"
+            } >> "$GITHUB_STEP_SUMMARY"
           else
             echo "⏭️ Skipped: Deployment health check did not pass"
           fi

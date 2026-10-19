@@ -45,9 +45,8 @@ jobs:
       scan_paths: |
         scripts
         .github
+      environment: production
       fail_on_gitleaks: true
-      upload_sarif: false
-      publish_score_artifact: true
 
   backup-production:
     needs: security
@@ -87,7 +86,7 @@ jobs:
             else
               echo "⚠️ Attempt $i/5 failed:"
               cat /tmp/ssh-scan-err || true
-              if [ $i -eq 5 ]; then
+              if [ "$i" -eq 5 ]; then
                 echo "❌ Cannot reach SSH host after 5 attempts"
                 echo "Check: VPS firewall, SSH port 22, VPS_SSH_HOST secret"
                 exit 1
@@ -239,7 +238,7 @@ jobs:
             else
               echo "⚠️ Attempt $i/5 failed:"
               cat /tmp/ssh-scan-err || true
-              if [ $i -eq 5 ]; then
+              if [ "$i" -eq 5 ]; then
                 echo "❌ Cannot reach SSH host after 5 attempts"
                 echo "Check: VPS firewall, SSH port 22, VPS_SSH_HOST secret"
                 exit 1
