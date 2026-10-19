@@ -1,25 +1,7 @@
-# License Strategy – SecureVault
+# Périmètre des licences
 
-## Philosophy
-SecureVault follows an Open Core model.
-Security-critical components are open-source
-to allow transparency, auditability, and trust.
+Le dépôt contient un fichier [LICENSE](LICENSE) correspondant à la licence Apache 2.0 et un fichier [NOTICE](NOTICE) pour SecureVault.
 
-## Open Source Components
-- Vault engine
-- Cryptographic services
-- CLI & SDKs
-- Infrastructure templates
+Les intentions de séparation entre composants publics et fonctionnalités éventuellement propriétaires ne sont pas une preuve qu'une licence distincte s'applique déjà à certains fichiers. Toute exception doit être spécifiée explicitement et vérifiée avant publication.
 
-Licensed under Apache License 2.0.
-
-## Proprietary Components
-- SaaS UI
-- Enterprise features (SSO, SIEM export, compliance packs)
-- Billing & subscription logic
-
-## Rationale
-This approach balances:
-- security transparency
-- community adoption
-- sustainable product development
+En cas de doute sur les droits associés à un composant, s'appuyer sur les fichiers de licence effectivement présents et demander une revue juridique avant d'affirmer une restriction supplémentaire.

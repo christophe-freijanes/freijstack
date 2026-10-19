@@ -43,7 +43,7 @@ jobs:
             @semantic-release/github \
             @semantic-release/git \
             @semantic-release/changelog \
-            conventional-changelog-conventionalcommits
+            conventional-changelog-conventionalcommits@9
 
       - name: 🔧 Configure git identity (for @semantic-release/git)
         run: |
@@ -73,7 +73,7 @@ jobs:
         run: |
           set -euo pipefail
           echo "🚀 Publishing release on develop..."
-          npx semantic-release
+          npx semantic-release --debug
 
       - name: ⚠️ Skip release on master
         if: ${{ github.ref_name == 'master' }}

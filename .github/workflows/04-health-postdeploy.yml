@@ -49,7 +49,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          BRANCH="${{ github.event.workflow_run.head_branch }}"
           WORKFLOW="${{ github.event.workflow_run.name }}"
 
           CHECKS="https://portfolio.freijstack.com|200,301,302|Portfolio"
@@ -89,9 +88,4 @@ jobs:
       - prepare
     uses: ./.github/workflows/00-core-healthcheck.yml
     with:
-      warmup_url: ${{ needs.prepare.outputs.warmup_url }}
       checks: ${{ needs.prepare.outputs.checks }}
-      max_wait_seconds: 90
-      warmup_interval_seconds: 5
-      max_retries: 8
-      sleep_between_retries: 10
