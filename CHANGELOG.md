@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.50.1](https://github.com/christophe-freijanes/freijstack/compare/v1.50.0...v1.50.1) (2026-10-19)
+
+### 🐛 Bug Fixes
+
+* **ci:** désactiver l'export du cache Docker ([1880b2f](https://github.com/christophe-freijanes/freijstack/commit/1880b2f89afd6aa4e98d9fab0ca9f50a2fe9c216))
+
 ## [1.50.0](https://github.com/christophe-freijanes/freijstack/compare/v1.49.1...v1.50.0) (2026-10-19)
 
 ### 🚀 Features
