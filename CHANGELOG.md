@@ -6,6 +6,80 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.50.0](https://github.com/christophe-freijanes/freijstack/compare/v1.49.1...v1.50.0) (2026-10-19)
+
+### 🚀 Features
+
+* Enhance user experience with cookie management and privacy policies  - Implemented a "Back to Top" button functionality for improved navigation. - Added a cookie management button in the footer to open cookie preferences modal. - Created a new cookies policy page detailing cookie usage and consent options. - Introduced a privacy policy page outlining data collection, usage, and user rights. - Updated resume.json to include Calendly link and enhanced description. - Modified robots.txt to allow access to the new sitemap and Calendly link. - Updated sitemap.xml to include the new Calendly link for better SEO. ([#201](https://github.com/christophe-freijanes/freijstack/issues/201)) ([b8440c6](https://github.com/christophe-freijanes/freijstack/commit/b8440c6887ccef3178382fd822d07cec855e5913)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+* **portfolio:** add AI skills ([#279](https://github.com/christophe-freijanes/freijstack/issues/279)) ([da6a4c8](https://github.com/christophe-freijanes/freijstack/commit/da6a4c82190a3c970de5bcd3c6f6a5a6da780976))
+* **portfolio:** add La Caisse AWS platform experience in French and English ([3ad2b49](https://github.com/christophe-freijanes/freijstack/commit/3ad2b49672504c963b1168acf6de9dfe206f52d7))
+* **portfolio:** ajouter un assistant recrutement ([#282](https://github.com/christophe-freijanes/freijstack/issues/282)) ([b0f21bb](https://github.com/christophe-freijanes/freijstack/commit/b0f21bb23c5de8f095625e1be90e2488dc16bb40))
+* **portfolio:** Master ([#257](https://github.com/christophe-freijanes/freijstack/issues/257)) ([8b3da37](https://github.com/christophe-freijanes/freijstack/commit/8b3da3763ac20a63a57d3ada1c12ffd4fc619642)), closes [#201](https://github.com/christophe-freijanes/freijstack/issues/201) [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+* **portfolio:** optimiser et sécuriser le déploiement Docker ([#294](https://github.com/christophe-freijanes/freijstack/issues/294)) ([edbfe98](https://github.com/christophe-freijanes/freijstack/commit/edbfe98628fd47427b9d5945373dd9adde7341d7))
+
+### 🐛 Bug Fixes
+
+* **backup:** fiabiliser les sauvegardes Hermes et SQLite ([#292](https://github.com/christophe-freijanes/freijstack/issues/292)) ([63eb6e5](https://github.com/christophe-freijanes/freijstack/commit/63eb6e503af965c969dc906412329fdcc7bed5c8))
+* **ci:** actualiser les actions GitHub et Ubuntu ([b27c310](https://github.com/christophe-freijanes/freijstack/commit/b27c3108d94ac7eb4a0781a82d80750f19d98ea6))
+* **ci:** corriger la branche du déploiement portfolio ([#284](https://github.com/christophe-freijanes/freijstack/issues/284)) ([715ff5a](https://github.com/christophe-freijanes/freijstack/commit/715ff5ad19dbb28698566fe67408ddec0aa82347))
+* **ci:** corriger la compatibilité du changelog ([f517626](https://github.com/christophe-freijanes/freijstack/commit/f51762639d9a420431199afbe35f73b3a0e658cc))
+* **ci:** détailler les erreurs de publication ([c224772](https://github.com/christophe-freijanes/freijstack/commit/c2247724b412f7aeee996d6702b196e30b741937))
+* **frontend:** patch critical dependencies ([0766a9d](https://github.com/christophe-freijanes/freijstack/commit/0766a9df30a31ac3431c92e47236699f1d51da7a))
+* patch proxy address trust ([8ff2ad9](https://github.com/christophe-freijanes/freijstack/commit/8ff2ad9237ba0edfc55f1a3e2391faa0adc3743d))
+* **portfolio:** séparer les images develop et production ([8c9ebd1](https://github.com/christophe-freijanes/freijstack/commit/8c9ebd1f77a8c8d9ed24cae87a1cfec59b5978f5))
+
+### ♻️ Code Refactoring
+
+* **ci:** alléger les contrôles et centraliser la supervision ([#293](https://github.com/christophe-freijanes/freijstack/issues/293)) ([0fdbe85](https://github.com/christophe-freijanes/freijstack/commit/0fdbe85b892f624df5fe2cbe5a6b41a7a140f40d))
+
+### 📚 Documentation
+
+* auto-generate diagrams and index [skip ci] ([830acef](https://github.com/christophe-freijanes/freijstack/commit/830acef6083d4a10c20be9b35a0fb64cbfaaf0c0))
+* auto-generate diagrams and index [skip ci] ([1e5d73d](https://github.com/christophe-freijanes/freijstack/commit/1e5d73ddb6e1dc82d7bcf0b1e76b2291905bf374))
+* auto-generate diagrams and index [skip ci] ([34a1de4](https://github.com/christophe-freijanes/freijstack/commit/34a1de446ba8e769652b77108ba78e9d9beb3b6e))
+* harmoniser les guides techniques FreijStack ([44d9c74](https://github.com/christophe-freijanes/freijstack/commit/44d9c74dae63a48179d672a04288445ea19bb5b2))
+* professionnaliser la documentation FreijStack ([9158040](https://github.com/christophe-freijanes/freijstack/commit/9158040aa23fdd329a8cc530872a43b1a9fcd901))
+* simplify project guides ([378f925](https://github.com/christophe-freijanes/freijstack/commit/378f9251e9d04436ba94c69104243ef5e960544b))
+
+### ✅ Tests
+
+* **ci:** ajouter le diagnostic SSH sans déploiement ([edfc4f8](https://github.com/christophe-freijanes/freijstack/commit/edfc4f8f304ce1b52b9f511da17e6ed65626beeb))
+
+### 👷 CI/CD
+
+* fix Trivy and remove Terraform checks ([#258](https://github.com/christophe-freijanes/freijstack/issues/258)) ([9fa15ea](https://github.com/christophe-freijanes/freijstack/commit/9fa15eaead081cf5dc791b79424fdacb72817784)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+* fix Trivy setup reference ([#271](https://github.com/christophe-freijanes/freijstack/issues/271)) ([65ff5a0](https://github.com/christophe-freijanes/freijstack/commit/65ff5a03b47e90e464a1b5e1810a3d4ab235f960))
+* fix workflow checks ([5928506](https://github.com/christophe-freijanes/freijstack/commit/5928506554f67a9c307ac1db11c4a1afddef2370))
+* update actions/download-artifact to 8 ([8cd0b7c](https://github.com/christophe-freijanes/freijstack/commit/8cd0b7ccb1062ce5fb9dc7abcc0da7903845f363))
+* update actions/upload-artifact to 7 ([7a46236](https://github.com/christophe-freijanes/freijstack/commit/7a462362d51e2dadfdb1f42c4352f5cc95fed315))
+
+### 🔧 Chores
+
+* **deps-dev:** bump brace-expansion ([#273](https://github.com/christophe-freijanes/freijstack/issues/273)) ([e94eee6](https://github.com/christophe-freijanes/freijstack/commit/e94eee6f905f622098ec48c09a897d83b8df01ff))
+* **deps-dev:** bump eslint from 9.39.2 to 10.2.0 ([#254](https://github.com/christophe-freijanes/freijstack/issues/254)) ([d0b9032](https://github.com/christophe-freijanes/freijstack/commit/d0b9032a1b172ec63844d3d99cbe03852ffa8024))
+* **deps-dev:** bump flatted ([#275](https://github.com/christophe-freijanes/freijstack/issues/275)) ([cc90f2c](https://github.com/christophe-freijanes/freijstack/commit/cc90f2c6c002a5c7779c3275c686c750b1144801))
+* **deps-dev:** bump lodash ([#205](https://github.com/christophe-freijanes/freijstack/issues/205)) ([abd17df](https://github.com/christophe-freijanes/freijstack/commit/abd17df095ff87b6f1be1b2bea1dc8796b09ca73))
+* **deps-dev:** bump nodemon in /saas/securevault/backend ([#225](https://github.com/christophe-freijanes/freijstack/issues/225)) ([9379488](https://github.com/christophe-freijanes/freijstack/commit/93794881abb78376b1b243d9203d0db3e38ebc33))
+* **deps-dev:** bump typescript in /saas/securevault/frontend ([#249](https://github.com/christophe-freijanes/freijstack/issues/249)) ([9fac854](https://github.com/christophe-freijanes/freijstack/commit/9fac8546964402163f407c60da1238a43ed204c8))
+* **deps:** bump actions/checkout from 4 to 6 ([#202](https://github.com/christophe-freijanes/freijstack/issues/202)) ([f9c0697](https://github.com/christophe-freijanes/freijstack/commit/f9c0697971b37e3777a1a2bc10c20c94056b2762))
+* **deps:** bump axios in /saas/securevault/frontend ([#252](https://github.com/christophe-freijanes/freijstack/issues/252)) ([cd39b0c](https://github.com/christophe-freijanes/freijstack/commit/cd39b0c0a9765d8f5a35ed6eee49064a9fda5be1))
+* **deps:** bump express-session in /saas/securevault/backend ([#207](https://github.com/christophe-freijanes/freijstack/issues/207)) ([c6a12c7](https://github.com/christophe-freijanes/freijstack/commit/c6a12c75e3cecb9df2f5a3b222e26924ac84ce2e))
+* **deps:** bump lucide-react in /saas/securevault/frontend ([#253](https://github.com/christophe-freijanes/freijstack/issues/253)) ([a97d01b](https://github.com/christophe-freijanes/freijstack/commit/a97d01b804befb2459a2ed7f2e3eef185d0ba0c2))
+* **deps:** bump nodemailer in /saas/securevault/backend ([#243](https://github.com/christophe-freijanes/freijstack/issues/243)) ([55ee3b5](https://github.com/christophe-freijanes/freijstack/commit/55ee3b589619b9c67f799d054b708a4e0baf27e2))
+* **deps:** bump react in /saas/securevault/frontend ([#213](https://github.com/christophe-freijanes/freijstack/issues/213)) ([97beaca](https://github.com/christophe-freijanes/freijstack/commit/97beacaf8f816db34a206da4c5a58ed21a4a4e64))
+* **deps:** bump react-dom in /saas/securevault/frontend ([#208](https://github.com/christophe-freijanes/freijstack/issues/208)) ([2fbd50a](https://github.com/christophe-freijanes/freijstack/commit/2fbd50a91fd5aa0bb0e158e955c2dc81892c3337))
+* **deps:** bump react-router-dom in /saas/securevault/frontend ([#255](https://github.com/christophe-freijanes/freijstack/issues/255)) ([074dbf9](https://github.com/christophe-freijanes/freijstack/commit/074dbf9ca2bbdeea9205f15d345d266a265622d8))
+* **deps:** bump the npm_and_yarn group across 1 directory with 10 updates ([#270](https://github.com/christophe-freijanes/freijstack/issues/270)) ([908b7d4](https://github.com/christophe-freijanes/freijstack/commit/908b7d428bf692ae30859435638440ba82a2c0d2))
+* **deps:** bump the npm_and_yarn group across 1 directory with 10 updates ([#272](https://github.com/christophe-freijanes/freijstack/issues/272)) ([2c9f896](https://github.com/christophe-freijanes/freijstack/commit/2c9f896cfcccb3e5435e158e54beb6e289f1a076))
+* **deps:** bump the npm_and_yarn group across 1 directory with 13 updates ([#278](https://github.com/christophe-freijanes/freijstack/issues/278)) ([78fdfd5](https://github.com/christophe-freijanes/freijstack/commit/78fdfd58f50f5332ba2a77803ceee29e274a7705))
+* **deps:** bump the npm_and_yarn group across 1 directory with 5 updates ([#276](https://github.com/christophe-freijanes/freijstack/issues/276)) ([a1db440](https://github.com/christophe-freijanes/freijstack/commit/a1db440294d0817ffedc47823797b3c348934967))
+* **deps:** bump the npm_and_yarn group across 1 directory with 9 updates ([#277](https://github.com/christophe-freijanes/freijstack/issues/277)) ([4d748ca](https://github.com/christophe-freijanes/freijstack/commit/4d748ca38b3d74250454cb2acbb816b480ba0413))
+* **deps:** update backend dependencies ([e9d7ce8](https://github.com/christophe-freijanes/freijstack/commit/e9d7ce8ae710532ddba705fa5796218b19790746))
+* **deps:** update eslint-plugin-no-secrets to 2.3.3 ([6edfed1](https://github.com/christophe-freijanes/freijstack/commit/6edfed1cca092beb7beae1db96f7d837524ee986))
+* **deps:** update minimatch to 3.1.5 ([a498f80](https://github.com/christophe-freijanes/freijstack/commit/a498f80c30501fb3b95c4b8355a88d9e0fb0ce71))
+* **deps:** update security plugin ([14fd978](https://github.com/christophe-freijanes/freijstack/commit/14fd978f7fe7ce14797a5520fb596b48ced4ec06))
+* **deps:** update tooling dependencies ([2711db5](https://github.com/christophe-freijanes/freijstack/commit/2711db55b1d54c35125ac9f7766871c9b77338aa))
+
 ## [1.49.1](https://github.com/christophe-freijanes/freijstack/compare/v1.49.0...v1.49.1) (2026-01-11)
 
 ### 🐛 Bug Fixes
