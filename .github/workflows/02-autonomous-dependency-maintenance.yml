@@ -1,0 +1,79 @@
+name: Autonomous dependency maintenance
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+
+concurrency:
+  group: autonomous-dependency-maintenance
+  cancel-in-progress: false
+
+jobs:
+  maintain:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Merge reviewed Dependabot PRs after security validation
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$REPO/pulls?state=open&base=develop&per_page=100" |
+            jq -r '.[] | select(.user.login == "dependabot[bot]" and .draft == false) | [.number, .head.sha] | @tsv' |
+            while IFS=$'\t' read -r number sha; do
+              # All required checks must be present, successful and current.
+              checks="$(gh api "repos/$REPO/commits/$sha/check-runs?per_page=100" --jq '.check_runs | map({name,status,conclusion})')"
+              ready=true
+              for name in 'Lint ciblé' 'auto-title' 'Dependency validation gate'; do
+                if ! jq -e --arg n "$name" 'any(.[]; .name == $n and .status == "completed" and .conclusion == "success")' <<< "$checks" >/dev/null; then
+                  ready=false
+                fi
+              done
+              [[ "$ready" == true ]] || { echo "#$number: checks pending"; continue; }
+              if jq -e 'any(.[]; .status != "completed" or (.conclusion != "success" and .conclusion != "skipped" and .conclusion != "neutral"))' <<< "$checks" >/dev/null; then
+                echo "#$number: check failed or still running"
+                continue
+              fi
+              # All dependency updates require a human approval in this first safe version.
+              reviews="$(gh api "repos/$REPO/pulls/$number/reviews?per_page=100")"
+              if ! jq -e 'map(select(.user.login != "dependabot[bot]")) | group_by(.user.login) | map(.[-1]) | any(.[]; .state == "APPROVED")' <<< "$reviews" >/dev/null; then
+                echo "#$number: pending human approval"
+                continue
+              fi
+              mergeable="$(gh api "repos/$REPO/pulls/$number" --jq '.mergeable')"
+              [[ "$mergeable" == true ]] || { echo "#$number: merge conflicts or pending"; continue; }
+              echo "#$number: merging approved and validated PR"
+              gh api -X PUT "repos/$REPO/pulls/$number/merge" -f sha="$sha" -f merge_method=squash >/dev/null ||
+                echo "#$number: GitHub refused merge, preserving PR"
+            done
+
+      - name: Cleanup unchanged branches after merged PRs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$REPO/pulls?state=closed&sort=updated&direction=desc&per_page=100" |
+            jq -r '.[] | select(.merged_at != null and .head.repo.full_name == .base.repo.full_name) | [.head.ref, .head.sha] | @tsv' |
+            while IFS=$'\t' read -r branch sha; do
+              case "$branch" in master|develop|release/*) continue ;; esac
+              open="$(gh api "repos/$REPO/pulls?state=open&head=${REPO%/*}:$branch&per_page=1" --jq 'length')"
+              [[ "$open" == 0 ]] || continue
+              encoded="$(jq -nr --arg b "$branch" '$b|@uri')"
+              current="$(gh api "repos/$REPO/git/ref/heads/$encoded" --jq '.object.sha' 2>/dev/null)" || continue
+              [[ "$current" == "$sha" ]] || continue
+              if gh api -X DELETE "repos/$REPO/git/refs/heads/$encoded" >/dev/null; then
+                echo "Deleted unchanged merged branch: $branch"
+              else
+                echo "Could not delete branch: $branch"
+              fi
+            done
