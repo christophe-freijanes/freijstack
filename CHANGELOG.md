@@ -6,6 +6,18 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.53.3](https://github.com/christophe-freijanes/freijstack/compare/v1.53.2...v1.53.3) (2026-10-19)
+
+### 🐛 Bug Fixes
+
+* **security:** corriger SAML et dépendances SecureVault ([#323](https://github.com/christophe-freijanes/freijstack/issues/323)) ([080a76f](https://github.com/christophe-freijanes/freijstack/commit/080a76fabb09b0f25c99a036edf01c3ab90abff4))
+
+### 🔧 Chores
+
+* **deps:** bump docker/build-push-action from 6 to 7 ([#298](https://github.com/christophe-freijanes/freijstack/issues/298)) ([9fca436](https://github.com/christophe-freijanes/freijstack/commit/9fca4360f2c2a1c3f828dca77f06b31228eae701))
+* **deps:** bump docker/login-action from 3 to 4 ([#316](https://github.com/christophe-freijanes/freijstack/issues/316)) ([fa47ad4](https://github.com/christophe-freijanes/freijstack/commit/fa47ad4b813d674557d242d3b7e768d45b5a414c))
+* **deps:** bump docker/setup-buildx-action from 3 to 4 ([#299](https://github.com/christophe-freijanes/freijstack/issues/299)) ([e2d2c94](https://github.com/christophe-freijanes/freijstack/commit/e2d2c94ed3f3a4c75ab9122e358b3776a76ea0ae))
+
 ## [1.53.2](https://github.com/christophe-freijanes/freijstack/compare/v1.53.1...v1.53.2) (2026-10-19)
 
 ### ♻️ Code Refactoring
