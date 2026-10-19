@@ -1,4 +1,4 @@
-name: 🏗️ Build & Push Portfolio
+name: "Construction - Portfolio"
 
 on:
   workflow_dispatch:

@@ -1,4 +1,4 @@
-name: 🐳 SaaS • Registry Deploy
+name: "Déploiement - Registre"
 
 on:
   # PROD: auto uniquement sur master quand le code registry change
@@ -20,7 +20,7 @@ on:
 
 jobs:
   security:
-    name: 🛡️ Security Scan (Registry)
+    name: Security Scan (Registry)
     uses: ./.github/workflows/00-core-security-ci.yml
     with:
       environment: ${{ github.event.inputs.environment || 'production' }}
@@ -36,7 +36,7 @@ jobs:
       security-events: write
 
   deploy:
-    name: 🚀 Deploy Registry (${{ github.event.inputs.environment || 'production' }})
+    name: Deploy Registry (${{ github.event.inputs.environment || 'production' }})
     needs: security
     uses: ./.github/workflows/00-core-full-deploy.yml
     with:

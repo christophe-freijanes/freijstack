@@ -1,4 +1,4 @@
-name: 🔐 SaaS • SecureVault Deploy
+name: "Déploiement - SecureVault"
 
 on:
   workflow_run:
@@ -15,7 +15,7 @@ on:
 
 jobs:
   security:
-    name: 🛡️ Security Scan (SecureVault)
+    name: Security Scan (SecureVault)
     uses: ./.github/workflows/00-core-security-ci.yml
     with:
       environment: ${{ github.event.inputs.environment || 'staging' }}
@@ -31,7 +31,7 @@ jobs:
       security-events: write
 
   deploy-staging:
-    name: 🚀 Deploy SecureVault (Staging)
+    name: Deploy SecureVault (Staging)
     needs: security
     if: |
       (github.event_name == 'workflow_run' &&
@@ -55,7 +55,7 @@ jobs:
       REGISTRY_PASSWORD_STAGING: ${{ secrets.REGISTRY_PASSWORD_STAGING }}
 
   deploy-production:
-    name: 🚀 Deploy SecureVault (Production)
+    name: Deploy SecureVault (Production)
     needs: security
     if: |
       (github.event_name == 'workflow_run' &&

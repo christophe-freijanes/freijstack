@@ -1,4 +1,4 @@
-name: Security remediation • Dependabot validation
+name: "Sécurité - Validation des dépendances"
 
 on:
   pull_request:
