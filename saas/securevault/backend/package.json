@@ -8,7 +8,12 @@
     "dev": "nodemon src/server.js",
     "test": "jest --coverage"
   },
-  "keywords": ["security", "vault", "secrets", "encryption"],
+  "keywords": [
+    "security",
+    "vault",
+    "secrets",
+    "encryption"
+  ],
   "author": "Christophe FREIJANES",
   "license": "ISC",
   "dependencies": {
@@ -22,14 +27,14 @@
     "express-rate-limit": "^8.7.1",
     "joi": "^18.3.0",
     "passport": "^0.7.0",
-    "passport-saml": "^3.2.4",
     "express-session": "^1.19.0",
     "speakeasy": "^2.0.0",
     "qrcode": "^1.5.3",
     "nodemailer": "^10.0.9",
     "uuid": "^14.0.0",
     "multer": "^2.4.0",
-    "csv-parser": "^3.2.1"
+    "csv-parser": "^3.2.1",
+    "@node-saml/passport-saml": "^5.1.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.14",

@@ -24,6 +24,8 @@ const samlConfig = {
   
   // Public certificate for encrypting SAML assertions (optional)
   decryptionPvk: process.env.SAML_DECRYPTION_KEY || null,
+  decryptionCert: process.env.SAML_DECRYPTION_CERT || null,
+  signingCert: process.env.SAML_SIGNING_CERT || null,
   
   // Identity provider name (for display)
   identityProviderName: process.env.SAML_IDP_NAME || 'SSO Provider',
@@ -41,7 +43,7 @@ const samlConfig = {
   },
   
   // Validation options
-  validateInResponseTo: true,
+  validateInResponseTo: 'always',
   disableRequestedAuthnContext: false,
   forceAuthn: false,
   
