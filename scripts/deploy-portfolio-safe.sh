@@ -4,8 +4,8 @@ set -euo pipefail
 IMAGE="${1:?Image SHA obligatoire}"
 MODE="${2:---check}"
 
-[[ "$IMAGE" =~ ^registry\.freijstack\.com/portfolio:[a-f0-9]{40}$ ]] ||
-  { echo "ERREUR: SHA Git complet obligatoire"; exit 1; }
+[[ "$IMAGE" =~ ^registry\.freijstack\.com/portfolio@sha256:[a-f0-9]{64}$ ]] ||
+  { echo "ERREUR: digest Docker SHA-256 obligatoire"; exit 1; }
 
 [[ "$MODE" == "--check" || "$MODE" == "--apply" ]] ||
   { echo "ERREUR: mode invalide"; exit 1; }
@@ -16,8 +16,8 @@ MODE="${2:---check}"
 BASE="/srv/www/portfolio/saas/portfolio/docker-compose.prod.yml"
 DIR="/etc/freijstack/portfolio"
 UMAMI="$DIR/umami.compose.yml"
-SHA="${IMAGE##*:}"
-NEW_OVERLAY="$DIR/deploy-$SHA.compose.yml"
+DIGEST="${IMAGE##*:}"
+NEW_OVERLAY="$DIR/deploy-sha256-$DIGEST.compose.yml"
 
 exec 9>/run/lock/freijstack-portfolio-deploy.lock
 flock -n 9 ||
