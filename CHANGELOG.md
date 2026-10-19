@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.52.0](https://github.com/christophe-freijanes/freijstack/compare/v1.51.1...v1.52.0) (2026-10-19)
+
+### 🚀 Features
+
+* **ci:** valider les correctifs Dependabot avant fusion ([#317](https://github.com/christophe-freijanes/freijstack/issues/317)) ([8e899db](https://github.com/christophe-freijanes/freijstack/commit/8e899db97a99dd806d364433a86cbaf6adf25ea7))
+
 ## [1.51.1](https://github.com/christophe-freijanes/freijstack/compare/v1.51.0...v1.51.1) (2026-10-19)
 
 ### 🐛 Bug Fixes
