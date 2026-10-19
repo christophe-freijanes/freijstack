@@ -1,4 +1,4 @@
-name: 🎯 Deploy Queue (Orchestrator)
+name: "Socle - Orchestration des déploiements"
 
 on:
   workflow_call:
@@ -85,24 +85,24 @@ permissions:
 
 jobs:
   deploy:
-    name: 🚀 Deploy ${{ inputs.app_name }} to ${{ inputs.environment }}
+    name: Deploy ${{ inputs.app_name }} to ${{ inputs.environment }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment:
       name: ${{ inputs.environment }}
 
     steps:
-      - name: ⏱️ Staggered Start (avoid SSH collisions)
+      - name: Staggered Start (avoid SSH collisions)
         run: |
           set -euo pipefail
           DELAY=$((5 + RANDOM % 16))
           echo "⏳ Waiting ${DELAY}s"
           sleep "$DELAY"
 
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: 🔐 Setup SSH
+      - name: Setup SSH
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
@@ -111,7 +111,7 @@ jobs:
           ssh-keyscan -H "${{ secrets.VPS_SSH_HOST }}" >> ~/.ssh/known_hosts || true
           echo "SSH_OPTIONS=-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" >> "$GITHUB_ENV"
 
-      - name: 🚀 Deploy ${{ inputs.app_name }}
+      - name: Deploy ${{ inputs.app_name }}
         run: |
           set -euo pipefail
 
@@ -263,7 +263,7 @@ jobs:
           docker volume ls
           DEPLOY_SCRIPT
 
-      - name: 🗄️ Run Migrations
+      - name: Run Migrations
         if: inputs.run_migrations
         run: |
           set -euo pipefail
@@ -271,7 +271,7 @@ jobs:
             ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} \
             "cd ${{ inputs.deploy_dir }}/${{ inputs.project_path }} && docker compose exec -T ${{ inputs.migrate_service }} npm run migrate || true"
 
-      - name: 🩺 Post-deploy Healthcheck
+      - name: Post-deploy Healthcheck
         run: |
           set -euo pipefail
           if [ -n "${{ inputs.healthcheck_url }}" ]; then
@@ -281,7 +281,7 @@ jobs:
             echo "No healthcheck_url provided; skipping."
           fi
 
-      - name: ✅ Deployment Summary
+      - name: Deployment Summary
         if: success()
         run: |
           set -euo pipefail

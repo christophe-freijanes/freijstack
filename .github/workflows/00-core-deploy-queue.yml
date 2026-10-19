@@ -1,4 +1,4 @@
-name: 🎯 Deploy Queue (Orchestrator)
+name: "Socle - Orchestration des déploiements (file d'attente)"
 
 on:
   workflow_call:
@@ -81,14 +81,14 @@ permissions:
 
 jobs:
   deploy:
-    name: 🚀 Deploy ${{ inputs.app_name }} to ${{ inputs.environment }}
+    name: Deploy ${{ inputs.app_name }} to ${{ inputs.environment }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment:
       name: ${{ inputs.environment }}
 
     steps:
-      - name: ✅ Validate required registry secrets (production only)
+      - name: Validate required registry secrets (production only)
         shell: bash
         run: |
           set -euo pipefail
@@ -100,17 +100,17 @@ jobs:
             fi
           fi
 
-      - name: ⏱️ Staggered Start (avoid SSH collisions)
+      - name: Staggered Start (avoid SSH collisions)
         run: |
           set -euo pipefail
           DELAY=$((5 + RANDOM % 16))
           echo "⏳ Waiting ${DELAY}s"
           sleep "$DELAY"
 
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: 🔐 Setup SSH
+      - name: Setup SSH
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
@@ -119,7 +119,7 @@ jobs:
           ssh-keyscan -H "${{ secrets.VPS_SSH_HOST }}" >> ~/.ssh/known_hosts || true
           echo "SSH_OPTIONS=-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" >> "$GITHUB_ENV"
 
-      - name: 🚀 Deploy ${{ inputs.app_name }}
+      - name: Deploy ${{ inputs.app_name }}
         run: |
           set -euo pipefail
 
@@ -336,7 +336,7 @@ jobs:
           docker volume ls
           DEPLOY_SCRIPT
 
-      - name: ✅ Deployment Summary
+      - name: Deployment Summary
         if: success()
         run: |
           set -euo pipefail

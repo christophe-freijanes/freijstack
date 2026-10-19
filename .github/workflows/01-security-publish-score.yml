@@ -1,4 +1,4 @@
-name: 📊 Publish Security Score
+name: "Sécurité - Publication du score"
 
 # Déclenché APRÈS le post-deploy health check pour publier le score de sécurité
 # Respecte le pipeline DevSecOps : Security → Deploy → Score
@@ -17,12 +17,12 @@ permissions:
 jobs:
   # Vérifie que le déploiement a réussi avant de publier le score
   check-deployment:
-    name: ✅ Verify Deployment Success
+    name: Verify Deployment Success
     runs-on: ubuntu-latest
     outputs:
       deployment_success: ${{ steps.check.outputs.success }}
     steps:
-      - name: 📋 Check source workflow status
+      - name: Check source workflow status
         id: check
         run: |
           if [ "${{ github.event.workflow_run.conclusion }}" = "success" ]; then
@@ -35,24 +35,24 @@ jobs:
 
   # Publie le score de sécurité global après le déploiement réussi
   publish-score:
-    name: 📊 Generate & Publish Global Security Score
+    name: Generate & Publish Global Security Score
     needs: check-deployment
     if: needs.check-deployment.outputs.deployment_success == 'true'
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: 🔍 Download all security artifacts
+      - name: Download all security artifacts
         uses: actions/download-artifact@v8
         with:
           path: ./security-artifacts
         continue-on-error: true
 
-      - name: 📊 Compute Global Security Score
+      - name: Compute Global Security Score
         id: compute_score
         run: |
           set -euo pipefail
@@ -101,7 +101,7 @@ jobs:
           echo "Global Security Score: $GLOBAL_SCORE/100"
           echo "Total Issues: $ISSUES"
 
-      - name: 🎨 Create Global Score Badge
+      - name: Create Global Score Badge
         run: |
           set -euo pipefail
           SCORE=${{ env.GLOBAL_SCORE }}
@@ -141,7 +141,7 @@ jobs:
           echo "BADGE_COLOR=$COLOR" >> $GITHUB_ENV
           echo "BADGE_STATUS=$STATUS" >> $GITHUB_ENV
 
-      - name: 📋 Generate Global Security Report
+      - name: Generate Global Security Report
         run: |
           cat > GLOBAL_SECURITY_REPORT.md << 'EOF'
           # 📊 Global Security Score Report
@@ -165,7 +165,7 @@ jobs:
           **Last Updated**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')
           EOF
 
-      - name: 📤 Upload artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
           name: global-security-score-report
@@ -173,7 +173,7 @@ jobs:
             global-security-score-badge.svg
             GLOBAL_SECURITY_REPORT.md
 
-      - name: 📝 Create Summary
+      - name: Create Summary
         run: |
           echo "## 📊 Global Security Score Published" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -187,12 +187,12 @@ jobs:
 
   # Notification finale
   notify:
-    name: 🔔 Notify Security Score
+    name: Notify Security Score
     needs: [check-deployment, publish-score]
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: 📊 Final Status
+      - name: Final Status
         run: |
           if [ "${{ needs.check-deployment.outputs.deployment_success }}" = "true" ]; then
             echo "✅ Security Score published after successful deployment"

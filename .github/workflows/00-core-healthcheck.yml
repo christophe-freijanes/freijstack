@@ -1,4 +1,4 @@
-name: Core Healthcheck
+name: "Socle - Vérification de santé"
 
 on:
   workflow_call:

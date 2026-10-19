@@ -1,4 +1,4 @@
-name: Autonomous dependency maintenance
+name: "Maintenance - Dépendances et branches"
 
 on:
   schedule:
