@@ -26,6 +26,8 @@ jobs:
   build:
     name: Build & Push Portfolio
     runs-on: ubuntu-latest
+    outputs:
+      image_digest: ${{ steps.build.outputs.digest }}
 
     env:
       REGISTRY_HOST: registry.freijstack.com
@@ -36,6 +38,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Login registry
         uses: docker/login-action@v3
         with:
@@ -44,14 +49,21 @@ jobs:
           password: ${{ secrets.REGISTRY_PASSWORD_PROD }}
 
       - name: Build & Push
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: ./saas/portfolio
           file: ./saas/portfolio/Dockerfile
           push: true
+          cache-from: type=gha,scope=portfolio
+          cache-to: type=gha,mode=max,scope=portfolio
           tags: |
             registry.freijstack.com/portfolio:latest
             registry.freijstack.com/portfolio:${{ github.sha }}
+
+      - name: Display image digest
+        run: |
+          echo "Image digest: ${{ steps.build.outputs.digest }}" >> "$GITHUB_STEP_SUMMARY"
 
   security-scan:
     name: Security Scan Portfolio Image
@@ -62,7 +74,6 @@ jobs:
       run_trivy_image: true
       trivy_images: |
         registry.freijstack.com/portfolio:${{ github.sha }}
-        registry.freijstack.com/portfolio:latest
       registry_host: registry.freijstack.com
     secrets:
       REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
