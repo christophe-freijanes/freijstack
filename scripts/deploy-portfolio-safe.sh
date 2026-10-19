@@ -134,6 +134,12 @@ if [[ "$CURRENT" == "$IMAGE" ]]; then
   exit 0
 fi
 
+echo "Vérification de l'image de rollback..."
+docker image inspect "$CURRENT" >/dev/null || {
+  echo "ERREUR: image de rollback absente"
+  exit 1
+}
+
 echo "Téléchargement de l'image..."
 docker pull "$IMAGE"
 
@@ -176,13 +182,21 @@ rollback() {
 echo "Déploiement de $IMAGE"
 
 if ! compose_new up -d --no-deps --no-build --pull never portfolio; then
-  rollback || true
+  if ! rollback; then
+    echo "CRITIQUE: rollback échoué, intervention nécessaire" >&2
+    exit 2
+  fi
+  echo "Surcharge conservée pour traçabilité : $NEW_OVERLAY"
   exit 1
 fi
 
 if ! check_health; then
   echo "ERREUR: healthcheck du nouveau conteneur"
-  rollback || true
+  if ! rollback; then
+    echo "CRITIQUE: rollback échoué, intervention nécessaire" >&2
+    exit 2
+  fi
+  echo "Surcharge conservée pour traçabilité : $NEW_OVERLAY"
   exit 1
 fi
 
