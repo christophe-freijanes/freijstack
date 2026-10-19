@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.52.1](https://github.com/christophe-freijanes/freijstack/compare/v1.52.0...v1.52.1) (2026-10-19)
+
+### 🐛 Bug Fixes
+
+* **ci:** rendre le contrôle sécurité obligatoire pour toutes les PR ([#318](https://github.com/christophe-freijanes/freijstack/issues/318)) ([31aa586](https://github.com/christophe-freijanes/freijstack/commit/31aa586e73a9e50f4a4259014d285cd87a631402))
+
 ## [1.52.0](https://github.com/christophe-freijanes/freijstack/compare/v1.51.1...v1.52.0) (2026-10-19)
 
 ### 🚀 Features
