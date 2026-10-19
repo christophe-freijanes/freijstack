@@ -118,7 +118,7 @@ jobs:
     steps:
       - name: Configure verified SSH connection
         env:
-          SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          SSH_KEY: ${{ secrets.PORTFOLIO_SSH_KEY }}
           SSH_KNOWN_HOSTS: ${{ secrets.VPS_SSH_KNOWN_HOSTS }}
         run: |
           set -euo pipefail
@@ -137,7 +137,7 @@ jobs:
         env:
           SHA: ${{ needs.validate.outputs.sha }}
           VPS_HOST: ${{ secrets.VPS_SSH_HOST }}
-          VPS_USER: ${{ secrets.VPS_SSH_USER }}
+          VPS_USER: ${{ vars.PORTFOLIO_SSH_USER }}
         run: |
           set -euo pipefail
 
