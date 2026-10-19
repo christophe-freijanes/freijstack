@@ -48,7 +48,7 @@ def open_https(request, timeout):
                 or target.password is not None
             ):
                 raise ValueError("Redirection HTTPS non autorisée")
-            return super().redirect_request(
+            return super().redirect_request(  # noqa: PLR0917, RUF100
                 req, fp, code, msg, headers, newurl,
             )
 
