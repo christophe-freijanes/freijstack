@@ -1,0 +1,35 @@
+name: Génération temporaire des fichiers de dépendances
+
+on:
+  push:
+    branches: [fix/securevault-dependencies-security]
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Actualiser les fichiers de verrouillage
+        run: |
+          set -euo pipefail
+          (cd saas/securevault/backend && npm install --package-lock-only --ignore-scripts --no-audit --no-fund)
+          (cd saas/securevault/frontend && npm install --package-lock-only --ignore-scripts --no-audit --no-fund)
+      - name: Publier les verrous calculés
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add saas/securevault/backend/package-lock.json saas/securevault/frontend/package-lock.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'fix(deps): régénérer les verrous SecureVault'
+          git push origin "HEAD:${GITHUB_REF_NAME}"

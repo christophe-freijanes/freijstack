@@ -5,7 +5,7 @@
 
 const express = require('express');
 const passport = require('passport');
-const SamlStrategy = require('passport-saml').Strategy;
+const { Strategy: SamlStrategy } = require('@node-saml/passport-saml');
 const jwt = require('jsonwebtoken');
 const { samlConfig, isSamlEnabled } = require('../config/saml');
 const pool = require('../config/database');
@@ -22,7 +22,7 @@ if (isSamlEnabled()) {
       entryPoint: samlConfig.entryPoint,
       callbackUrl: samlConfig.callbackUrl,
       issuer: samlConfig.issuer,
-      cert: samlConfig.cert,
+      idpCert: samlConfig.cert,
       privateKey: samlConfig.privateKey,
       decryptionPvk: samlConfig.decryptionPvk,
       signatureAlgorithm: samlConfig.signatureAlgorithm,
@@ -82,6 +82,19 @@ if (isSamlEnabled()) {
         console.error('SAML authentication error:', error);
         return done(error);
       }
+    },
+    async (profile, done) => {
+      try {
+        const email = profile[samlConfig.attributeMapping.email] || profile.email;
+        if (!email) return done(null, false);
+        const result = await pool.query(
+          'SELECT id, username, email, is_sso_user, sso_provider FROM users WHERE email = $1',
+          [email]
+        );
+        return done(null, result.rows[0] || false);
+      } catch (error) {
+        return done(error);
+      }
     }
   );
 
@@ -124,17 +137,11 @@ router.get('/metadata', (req, res) => {
 
   try {
     const strategy = passport._strategy('saml');
-    strategy.generateServiceProviderMetadata(
-      samlConfig.decryptionPvk,
-      samlConfig.cert,
-      (err, metadata) => {
-        if (err) {
-          return res.status(500).json({ error: 'Failed to generate metadata' });
-        }
-        res.type('application/xml');
-        res.send(metadata);
-      }
+    const metadata = strategy.generateServiceProviderMetadata(
+      samlConfig.decryptionCert,
+      samlConfig.signingCert
     );
+    res.type('application/xml').send(metadata);
   } catch (error) {
     res.status(500).json({ error: 'Metadata generation failed' });
   }
