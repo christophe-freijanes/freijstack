@@ -6,6 +6,22 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.53.4](https://github.com/christophe-freijanes/freijstack/compare/v1.53.3...v1.53.4) (2026-10-19)
+
+### 🐛 Bug Fixes
+
+* **ci:** autoriser la fusion après rebase sans ignorer la CI ([#324](https://github.com/christophe-freijanes/freijstack/issues/324)) ([413bce9](https://github.com/christophe-freijanes/freijstack/commit/413bce9455840efdfedbeca54b2c804bec748992))
+
+### 🔧 Chores
+
+* **deps-dev:** bump jest in /saas/securevault/backend ([#307](https://github.com/christophe-freijanes/freijstack/issues/307)) ([5c7a4d7](https://github.com/christophe-freijanes/freijstack/commit/5c7a4d7130938571d50c6e810c9de074dff29a50))
+* **deps:** bump dotenv in /saas/securevault/backend ([#315](https://github.com/christophe-freijanes/freijstack/issues/315)) ([3272dce](https://github.com/christophe-freijanes/freijstack/commit/3272dcea002df1b14216dc415479fff1fb921729))
+* **deps:** bump express in /saas/securevault/backend ([#303](https://github.com/christophe-freijanes/freijstack/issues/303)) ([cb6f1ea](https://github.com/christophe-freijanes/freijstack/commit/cb6f1eaf8b52bd2053499cc695f182de563622c3))
+* **deps:** bump helmet in /saas/securevault/backend ([#310](https://github.com/christophe-freijanes/freijstack/issues/310)) ([44402bd](https://github.com/christophe-freijanes/freijstack/commit/44402bdec902ebdcd1fd276e6feb2f7893b6ff3c))
+* **deps:** bump nodemailer in /saas/securevault/backend ([#308](https://github.com/christophe-freijanes/freijstack/issues/308)) ([6e87f93](https://github.com/christophe-freijanes/freijstack/commit/6e87f93a0e201a7e9800387260916489778c10c9))
+* **deps:** bump pg from 8.20.0 to 8.23.1 in /saas/securevault/backend ([#311](https://github.com/christophe-freijanes/freijstack/issues/311)) ([0a15235](https://github.com/christophe-freijanes/freijstack/commit/0a15235e88e8a9aa6db910d6695ad3ebfb5ba923))
+* **deps:** bump uuid in /saas/securevault/backend ([#312](https://github.com/christophe-freijanes/freijstack/issues/312)) ([e69b9fb](https://github.com/christophe-freijanes/freijstack/commit/e69b9fbcba2f985f8ec4736a1e13f7345b084fc3))
+
 ## [1.53.3](https://github.com/christophe-freijanes/freijstack/compare/v1.53.2...v1.53.3) (2026-10-19)
 
 ### 🐛 Bug Fixes
