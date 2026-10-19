@@ -73,7 +73,7 @@ jobs:
         run: |
           set -euo pipefail
           echo "🚀 Publishing release on develop..."
-          npx semantic-release
+          npx semantic-release --debug
 
       - name: ⚠️ Skip release on master
         if: ${{ github.ref_name == 'master' }}
