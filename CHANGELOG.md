@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.54.0](https://github.com/christophe-freijanes/freijstack/compare/v1.53.6...v1.54.0) (2026-10-19)
+
+### 🚀 Features
+
+* **ci:** fusion automatique des PR validées et nettoyage Git ([#320](https://github.com/christophe-freijanes/freijstack/issues/320)) ([3e2985a](https://github.com/christophe-freijanes/freijstack/commit/3e2985a050862ebf2efecaa8137750264f7be441))
+
 ## [1.53.6](https://github.com/christophe-freijanes/freijstack/compare/v1.53.5...v1.53.6) (2026-10-19)
 
 ### 🐛 Bug Fixes
