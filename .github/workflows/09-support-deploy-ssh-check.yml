@@ -1,4 +1,4 @@
-name: "🔐 Support • Vérifier SSH deploy"
+name: "Support - Vérification SSH"
 
 on:
   workflow_dispatch:

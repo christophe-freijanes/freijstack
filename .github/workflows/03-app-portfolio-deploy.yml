@@ -1,4 +1,4 @@
-name: 🚀 SaaS • Portfolio Deploy
+name: "Déploiement - Portfolio"
 
 on:
   workflow_dispatch:

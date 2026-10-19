@@ -1,4 +1,4 @@
-name: 🛡️ Security CI (Core Orchestrator)
+name: "Socle - Contrôles de sécurité"
 
 on:
   workflow_call:
@@ -112,7 +112,7 @@ concurrency:
 
 jobs:
   gate:
-    name: 🧭 Resolve gating mode
+    name: Resolve gating mode
     runs-on: ubuntu-latest
     outputs:
       gate_active: ${{ steps.gate.outputs.gate_active }}
@@ -134,7 +134,7 @@ jobs:
           echo "Gate active: $gate_active (env=$env, gate_prod_only=$gate_prod_only)" >> "$GITHUB_STEP_SUMMARY"
 
   codeql:
-    name: 🧠 CodeQL
+    name: CodeQL
     needs: [gate]
     if: ${{ inputs.run_codeql }}
     uses: ./.github/workflows/01-security-codeql.yml
@@ -143,7 +143,7 @@ jobs:
     secrets: inherit
 
   gitleaks:
-    name: 🧪 Gitleaks (CLI, no external action)
+    name: Gitleaks (CLI, no external action)
     needs: [gate]
     runs-on: ubuntu-latest
     permissions:
@@ -154,7 +154,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: 📦 Install gitleaks
+      - name: Install gitleaks
         run: |
           set -euo pipefail
           VERSION="8.21.2"
@@ -163,7 +163,7 @@ jobs:
           sudo install -m 0755 gitleaks /usr/local/bin/gitleaks
           gitleaks version
 
-      - name: 🔍 Run gitleaks (SARIF)
+      - name: Run gitleaks (SARIF)
         id: scan
         continue-on-error: true
         run: |
@@ -175,14 +175,14 @@ jobs:
             --report-path gitleaks.sarif \
             --exit-code 1
 
-      - name: 📤 Upload SARIF to GitHub Security
+      - name: Upload SARIF to GitHub Security
         if: always()
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: gitleaks.sarif
           category: gitleaks
 
-      - name: ✅ Enforce gitleaks gate (optional)
+      - name: Enforce gitleaks gate (optional)
         if: ${{ needs.gate.outputs.gate_active == 'true' && inputs.fail_on_gitleaks == true }}
         run: |
           set -euo pipefail
@@ -194,16 +194,16 @@ jobs:
           echo "Gitleaks gate passed." >> "$GITHUB_STEP_SUMMARY"
 
   snyk:
-    name: 🧪 Snyk (optional)
+    name: Snyk (optional)
     needs: [gate]
     if: ${{ inputs.run_snyk }}
     runs-on: ubuntu-latest
     steps:
-      - name: 📥 Checkout
+      - name: Checkout
         uses: actions/checkout@v6
 
       # NOTE: If your Actions allowlist does not include "snyk/*", this will be blocked.
-      - name: 🧪 Snyk test
+      - name: Snyk test
         uses: snyk/actions@master
         with:
           command: test
@@ -211,7 +211,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         continue-on-error: true
 
-      - name: 📤 Upload Snyk results (artifact)
+      - name: Upload Snyk results (artifact)
         if: always()
         uses: actions/upload-artifact@v7
         with:
@@ -220,14 +220,14 @@ jobs:
         continue-on-error: true
 
   trivy-image-list:
-    name: 🐳 Build Trivy image list
+    name: Build Trivy image list
     needs: [gate]
     if: ${{ inputs.run_trivy_image && inputs.trivy_images != '' }}
     runs-on: ubuntu-latest
     outputs:
       images_json: ${{ steps.images.outputs.images_json }}
     steps:
-      - name: 🧾 Build image list (newline → JSON array)
+      - name: Build image list (newline → JSON array)
         id: images
         run: |
           set -euo pipefail
@@ -240,7 +240,7 @@ jobs:
           echo "Images: $json" >> "$GITHUB_STEP_SUMMARY"
 
   trivy-image:
-    name: 🐳 Trivy • Image scan (private registry)
+    name: Trivy • Image scan (private registry)
     needs: [gate, trivy-image-list]
     if: ${{ inputs.run_trivy_image && inputs.trivy_images != '' }}
     runs-on: ubuntu-latest
@@ -250,10 +250,10 @@ jobs:
         image: ${{ fromJSON(needs.trivy-image-list.outputs.images_json) }}
 
     steps:
-      - name: 📥 Checkout
+      - name: Checkout
         uses: actions/checkout@v6
 
-      - name: 🧾 Derive registry host from image
+      - name: Derive registry host from image
         id: reg
         run: |
           set -euo pipefail
@@ -262,7 +262,7 @@ jobs:
           echo "host=$host" >> "$GITHUB_OUTPUT"
           echo "Derived registry host: $host" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: 🔐 Docker login (private registry) - required
+      - name: Docker login (private registry) - required
         run: |
           set -euo pipefail
           host="${{ steps.reg.outputs.host }}"
@@ -284,14 +284,14 @@ jobs:
           echo "$pass" | docker login "$host" -u "$user" --password-stdin
           echo "✅ Logged in to $host for env=$env" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: 🧪 Pull image (verify tag exists)
+      - name: Pull image (verify tag exists)
         run: |
           set -euo pipefail
           echo "Pulling ${{ matrix.image }}"
           docker pull "${{ matrix.image }}"
 
       # IMPORTANT: Never fail here. We always want SARIF, even if findings exist.
-      - name: 🛡️ Trivy image scan → SARIF (non-blocking)
+      - name: Trivy image scan → SARIF (non-blocking)
         id: trivy
         continue-on-error: true
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
@@ -309,7 +309,7 @@ jobs:
           TRIVY_USERNAME: ${{ inputs.environment == 'staging' && secrets.REGISTRY_USER_STAGING || secrets.REGISTRY_USER_PROD }}
           TRIVY_PASSWORD: ${{ inputs.environment == 'staging' && secrets.REGISTRY_PASSWORD_STAGING || secrets.REGISTRY_PASSWORD_PROD }}
 
-      - name: 🔎 Verify SARIF file
+      - name: Verify SARIF file
         id: sarif
         if: always()
         run: |
@@ -325,7 +325,7 @@ jobs:
             ls -lah >> "$GITHUB_STEP_SUMMARY" || true
           fi
 
-      - name: 🧾 Build safe SARIF category
+      - name: Build safe SARIF category
         if: ${{ always() && steps.sarif.outputs.exists == 'true' }}
         id: cat
         run: |
@@ -336,7 +336,7 @@ jobs:
           echo "category=trivy-image-$safe" >> "$GITHUB_OUTPUT"
           echo "Category: trivy-image-$safe" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: 📤 Upload SARIF (Code Scanning)
+      - name: Upload SARIF (Code Scanning)
         if: ${{ always() && steps.sarif.outputs.exists == 'true' }}
         uses: github/codeql-action/upload-sarif@v4
         with:
@@ -346,7 +346,7 @@ jobs:
 
       # OPTIONAL: Controlled gate, only when gate_active=true (usually production)
       # This avoids blocking on "small stuff" in staging, but still allows you to enforce in prod.
-      - name: ✅ Trivy gate (production only, controlled)
+      - name: Trivy gate (production only, controlled)
         if: ${{ needs.gate.outputs.gate_active == 'true' }}
         run: |
           set -euo pipefail
@@ -360,19 +360,19 @@ jobs:
           echo "✅ Trivy gate passed (non-blocking findings policy)." >> "$GITHUB_STEP_SUMMARY"
 
   zap-dast:
-    name: 🌐 OWASP ZAP (DAST)
+    name: OWASP ZAP (DAST)
     needs: [gate]
     if: ${{ inputs.run_zap && inputs.dast_url != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - name: 🧾 Plan
+      - name: Plan
         run: |
           set -euo pipefail
           echo "Target: ${{ inputs.dast_url }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Gate active: ${{ needs.gate.outputs.gate_active }}" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: 🕷️ ZAP baseline scan (non-blocking)
+      - name: ZAP baseline scan (non-blocking)
         if: ${{ needs.gate.outputs.gate_active != 'true' }}
         uses: zaproxy/action-baseline@v0.15.0
         with:
@@ -381,7 +381,7 @@ jobs:
           fail_action: false
           cmd_options: "-a"
 
-      - name: 🕷️ ZAP baseline scan (blocking - gate)
+      - name: ZAP baseline scan (blocking - gate)
         if: ${{ needs.gate.outputs.gate_active == 'true' }}
         uses: zaproxy/action-baseline@v0.15.0
         with:
@@ -390,7 +390,7 @@ jobs:
           fail_action: false
           cmd_options: "-a"
 
-      - name: 📎 Upload ZAP reports
+      - name: Upload ZAP reports
         if: always()
         uses: actions/upload-artifact@v7
         with:

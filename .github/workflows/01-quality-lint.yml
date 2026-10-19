@@ -1,4 +1,4 @@
-name: 🔍 Lint Suite • Quality Check
+name: "Qualité - Analyse du code"
 
 on:
   pull_request:

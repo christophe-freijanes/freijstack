@@ -1,4 +1,4 @@
-name: Cleanup merged PR branches
+name: "Maintenance - Nettoyage des branches fusionnées"
 
 on:
   pull_request:
