@@ -1,4 +1,4 @@
-name: 🚀 SaaS • Portfolio Deploy
+name: "Déploiement - Portfolio"
 
 on:
   workflow_dispatch:
@@ -67,10 +67,10 @@ jobs:
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
 
       - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Login registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: registry.freijstack.com
           username: ${{ secrets.REGISTRY_USER_PROD }}
@@ -117,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Login registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: registry.freijstack.com
           username: ${{ secrets.REGISTRY_USER_PROD }}

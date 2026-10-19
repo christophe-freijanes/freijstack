@@ -1,4 +1,4 @@
-name: 🤖 PR Title Automation
+name: "Qualité - Titres des demandes de fusion"
 
 on:
   pull_request:
@@ -12,12 +12,12 @@ jobs:
   auto-title:
     runs-on: ubuntu-latest
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: 🔧 Auto-generate PR title
+      - name: Auto-generate PR title
         uses: actions/github-script@v8
         with:
           script: |

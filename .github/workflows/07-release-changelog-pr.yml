@@ -1,4 +1,4 @@
-name: 📝 Release PR • Update CHANGELOG
+name: "Livraison - Mise à jour du journal des changements"
 
 on:
   push:
@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   changelog-pr:
-    name: 📝 Generate CHANGELOG PR
+    name: Generate CHANGELOG PR
     runs-on: ubuntu-latest
 
     # Évite boucle infinie (commits auto)
@@ -25,20 +25,20 @@ jobs:
       github.actor != 'github-actions[bot]'
 
     steps:
-      - name: 📥 Checkout (full history required)
+      - name: Checkout (full history required)
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
           # Important: utiliser le PAT pour pouvoir push une branche
           token: ${{ secrets.RELEASE_TOKEN }}
 
-      - name: 🟢 Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
 
-      - name: 🧠 Compute next version + update CHANGELOG (dry-run)
+      - name: Compute next version + update CHANGELOG (dry-run)
         id: sr
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
@@ -72,7 +72,7 @@ jobs:
           echo "version=${version}" >> "$GITHUB_OUTPUT"
           echo "✅ Next version: ${version}"
 
-      - name: 🔍 Detect CHANGELOG changes
+      - name: Detect CHANGELOG changes
         id: diff
         if: ${{ steps.sr.outputs.next_release == 'true' }}
         run: |
@@ -85,7 +85,7 @@ jobs:
             echo "✅ CHANGELOG.md updated."
           fi
 
-      - name: 🧾 Add summary
+      - name: Add summary
         if: ${{ steps.sr.outputs.next_release == 'true' }}
         run: |
           # shellcheck disable=SC2129
@@ -94,7 +94,7 @@ jobs:
           echo "- 🔢 Next version: **${{ steps.sr.outputs.version }}**" >> "$GITHUB_STEP_SUMMARY"
           echo "- 📄 CHANGELOG updated: **${{ steps.diff.outputs.changed }}**" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: 🌿 Create branch + commit CHANGELOG
+      - name: Create branch + commit CHANGELOG
         if: ${{ steps.sr.outputs.next_release == 'true' && steps.diff.outputs.changed == 'true' }}
         env:
           VERSION: ${{ steps.sr.outputs.version }}
@@ -111,7 +111,7 @@ jobs:
           git commit -m "chore(release): update CHANGELOG for v${VERSION} [skip ci]"
           git push origin "$BRANCH"
 
-      - name: 🧷 Create Pull Request (via gh)
+      - name: Create Pull Request (via gh)
         if: ${{ steps.sr.outputs.next_release == 'true' && steps.diff.outputs.changed == 'true' }}
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
@@ -142,5 +142,5 @@ jobs:
             --label "release" \
             --label "changelog"
 
-      - name: ✅ Done
+      - name: Done
         run: echo "✅ Release changelog PR pipeline finished."

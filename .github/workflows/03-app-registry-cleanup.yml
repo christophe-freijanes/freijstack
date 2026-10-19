@@ -1,4 +1,4 @@
-name: 🧹 Registry Cleanup • Old Images
+name: "Maintenance - Nettoyage du registre"
 
 on:
   schedule:
@@ -20,15 +20,15 @@ permissions:
 
 jobs:
   cleanup:
-    name: 🧹 Cleanup Old Images
+    name: Cleanup Old Images
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
-      - name: 📥 Checkout
+      - name: Checkout
         uses: actions/checkout@v6
 
-      - name: 🔐 Setup SSH
+      - name: Setup SSH
         run: |
           set -euo pipefail
 
@@ -56,7 +56,7 @@ jobs:
             else
               echo "⚠️ Attempt $i/5 failed:"
               cat /tmp/ssh-scan-err || true
-              if [ $i -eq 5 ]; then
+              if [ "$i" -eq 5 ]; then
                 echo "❌ Cannot reach SSH host after 5 attempts"
                 echo "Check: VPS firewall, SSH port 22, VPS_SSH_HOST secret"
                 exit 1
@@ -65,7 +65,7 @@ jobs:
             fi
           done
 
-      - name: 🧹 Run cleanup script
+      - name: Run cleanup script
         run: |
           MAX_AGE="${{ github.event.inputs.max_age_days || '90' }}"
           DRY_RUN="${{ github.event.inputs.dry_run || 'false' }}"
@@ -81,7 +81,7 @@ jobs:
             ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}:/tmp/cleanup-registry.sh
 
           # Execute cleanup on VPS
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }} << 'CLEANUP'
+          ssh -i ~/.ssh/deploy_key "${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}" << 'CLEANUP'
             set -e
 
             chmod +x /tmp/cleanup-registry.sh
@@ -104,12 +104,12 @@ jobs:
             rm -f /tmp/cleanup-registry.sh
           CLEANUP
 
-      - name: 🧹 Cleanup SSH key
+      - name: Cleanup SSH key
         if: always()
         run: |
           rm -f ~/.ssh/deploy_key || true
 
-      - name: 📊 Summary
+      - name: Summary
         run: |
           {
             echo "## 🧹 Registry Cleanup Summary"

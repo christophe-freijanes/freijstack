@@ -1,4 +1,4 @@
-name: 🧠 Security • CodeQL
+name: "Sécurité - Analyse CodeQL"
 
 on:
   workflow_call:
@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   analyze:
-    name: 🧠 CodeQL Analyze
+    name: CodeQL Analyze
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -25,16 +25,16 @@ jobs:
         language: [javascript-typescript]
 
     steps:
-      - name: 📥 Checkout
+      - name: Checkout
         uses: actions/checkout@v6
 
-      - name: 🧰 Initialize CodeQL
+      - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
           build-mode: none
 
-      - name: 🔍 Analyze
+      - name: Analyze
         uses: github/codeql-action/analyze@v4
         with:
           category: "/language:${{ matrix.language }}"

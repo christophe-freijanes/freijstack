@@ -6,6 +6,106 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.54.0](https://github.com/christophe-freijanes/freijstack/compare/v1.53.6...v1.54.0) (2026-10-19)
+
+### 🚀 Features
+
+* **ci:** fusion automatique des PR validées et nettoyage Git ([#320](https://github.com/christophe-freijanes/freijstack/issues/320)) ([3e2985a](https://github.com/christophe-freijanes/freijstack/commit/3e2985a050862ebf2efecaa8137750264f7be441))
+
+## [1.53.6](https://github.com/christophe-freijanes/freijstack/compare/v1.53.5...v1.53.6) (2026-10-19)
+
+### 🐛 Bug Fixes
+
+* **ci:** autoriser Git dans les répertoires de déploiement ([#326](https://github.com/christophe-freijanes/freijstack/issues/326)) ([a5ecde8](https://github.com/christophe-freijanes/freijstack/commit/a5ecde877fc029110d5f5244f778b55bc06a5966))
+
+## [1.53.5](https://github.com/christophe-freijanes/freijstack/compare/v1.53.4...v1.53.5) (2026-10-19)
+
+### 🐛 Bug Fixes
+
+* **ci:** diagnostiquer la connectivité avant ZAP ([#325](https://github.com/christophe-freijanes/freijstack/issues/325)) ([0d856c6](https://github.com/christophe-freijanes/freijstack/commit/0d856c63702a8d0bb94575710a8571b710cbcf3f))
+
+### 🔧 Chores
+
+* **deps:** bump lucide-react from 0.562.0 to 1.58.0 in /saas/securevault/frontend ([#304](https://github.com/christophe-freijanes/freijstack/issues/304)) ([b7a15f6](https://github.com/christophe-freijanes/freijstack/commit/b7a15f63e5eb8b95d67905d2980db495c74644ac))
+
+## [1.53.4](https://github.com/christophe-freijanes/freijstack/compare/v1.53.3...v1.53.4) (2026-10-19)
+
+### 🐛 Bug Fixes
+
+* **ci:** autoriser la fusion après rebase sans ignorer la CI ([#324](https://github.com/christophe-freijanes/freijstack/issues/324)) ([413bce9](https://github.com/christophe-freijanes/freijstack/commit/413bce9455840efdfedbeca54b2c804bec748992))
+
+### 🔧 Chores
+
+* **deps-dev:** bump jest in /saas/securevault/backend ([#307](https://github.com/christophe-freijanes/freijstack/issues/307)) ([5c7a4d7](https://github.com/christophe-freijanes/freijstack/commit/5c7a4d7130938571d50c6e810c9de074dff29a50))
+* **deps:** bump dotenv in /saas/securevault/backend ([#315](https://github.com/christophe-freijanes/freijstack/issues/315)) ([3272dce](https://github.com/christophe-freijanes/freijstack/commit/3272dcea002df1b14216dc415479fff1fb921729))
+* **deps:** bump express in /saas/securevault/backend ([#303](https://github.com/christophe-freijanes/freijstack/issues/303)) ([cb6f1ea](https://github.com/christophe-freijanes/freijstack/commit/cb6f1eaf8b52bd2053499cc695f182de563622c3))
+* **deps:** bump helmet in /saas/securevault/backend ([#310](https://github.com/christophe-freijanes/freijstack/issues/310)) ([44402bd](https://github.com/christophe-freijanes/freijstack/commit/44402bdec902ebdcd1fd276e6feb2f7893b6ff3c))
+* **deps:** bump nodemailer in /saas/securevault/backend ([#308](https://github.com/christophe-freijanes/freijstack/issues/308)) ([6e87f93](https://github.com/christophe-freijanes/freijstack/commit/6e87f93a0e201a7e9800387260916489778c10c9))
+* **deps:** bump pg from 8.20.0 to 8.23.1 in /saas/securevault/backend ([#311](https://github.com/christophe-freijanes/freijstack/issues/311)) ([0a15235](https://github.com/christophe-freijanes/freijstack/commit/0a15235e88e8a9aa6db910d6695ad3ebfb5ba923))
+* **deps:** bump uuid in /saas/securevault/backend ([#312](https://github.com/christophe-freijanes/freijstack/issues/312)) ([e69b9fb](https://github.com/christophe-freijanes/freijstack/commit/e69b9fbcba2f985f8ec4736a1e13f7345b084fc3))
+
+## [1.53.3](https://github.com/christophe-freijanes/freijstack/compare/v1.53.2...v1.53.3) (2026-10-19)
+
+### 🐛 Bug Fixes
+
+* **security:** corriger SAML et dépendances SecureVault ([#323](https://github.com/christophe-freijanes/freijstack/issues/323)) ([080a76f](https://github.com/christophe-freijanes/freijstack/commit/080a76fabb09b0f25c99a036edf01c3ab90abff4))
+
+### 🔧 Chores
+
+* **deps:** bump docker/build-push-action from 6 to 7 ([#298](https://github.com/christophe-freijanes/freijstack/issues/298)) ([9fca436](https://github.com/christophe-freijanes/freijstack/commit/9fca4360f2c2a1c3f828dca77f06b31228eae701))
+* **deps:** bump docker/login-action from 3 to 4 ([#316](https://github.com/christophe-freijanes/freijstack/issues/316)) ([fa47ad4](https://github.com/christophe-freijanes/freijstack/commit/fa47ad4b813d674557d242d3b7e768d45b5a414c))
+* **deps:** bump docker/setup-buildx-action from 3 to 4 ([#299](https://github.com/christophe-freijanes/freijstack/issues/299)) ([e2d2c94](https://github.com/christophe-freijanes/freijstack/commit/e2d2c94ed3f3a4c75ab9122e358b3776a76ea0ae))
+
+## [1.53.2](https://github.com/christophe-freijanes/freijstack/compare/v1.53.1...v1.53.2) (2026-10-19)
+
+### ♻️ Code Refactoring
+
+* **ci:** harmoniser les workflows en français ([#322](https://github.com/christophe-freijanes/freijstack/issues/322)) ([aa379c2](https://github.com/christophe-freijanes/freijstack/commit/aa379c276dda553d6cd5613399dd09100b12e6ca))
+
+## [1.53.1](https://github.com/christophe-freijanes/freijstack/compare/v1.53.0...v1.53.1) (2026-10-19)
+
+### 🐛 Bug Fixes
+
+* **ci:** activer la maintenance sur la branche par défaut ([#321](https://github.com/christophe-freijanes/freijstack/issues/321)) ([0a7e6f9](https://github.com/christophe-freijanes/freijstack/commit/0a7e6f9147ed1ef925c407f46f7e69f7aea53ba8))
+
+### 🔧 Chores
+
+* **deps-dev:** bump eslint from 10.2.0 to 10.13.0 ([#305](https://github.com/christophe-freijanes/freijstack/issues/305)) ([8dbd8db](https://github.com/christophe-freijanes/freijstack/commit/8dbd8db30a48ab092b86e4142d22991869754b58))
+* **deps-dev:** bump eslint-plugin-security from 3.0.1 to 4.2.0 ([#302](https://github.com/christophe-freijanes/freijstack/issues/302)) ([47c93df](https://github.com/christophe-freijanes/freijstack/commit/47c93df35cd0493be5c7abf5dec4ccd7f9a389d1))
+* **deps:** bump actions/deploy-pages from 4 to 5 ([#313](https://github.com/christophe-freijanes/freijstack/issues/313)) ([2204e2a](https://github.com/christophe-freijanes/freijstack/commit/2204e2a1050ee7f363d546545116033230ab43ba))
+* **deps:** bump react-dom in /saas/securevault/frontend ([#309](https://github.com/christophe-freijanes/freijstack/issues/309)) ([a9379cb](https://github.com/christophe-freijanes/freijstack/commit/a9379cb9dca4d094e837e249e17e34c8ac03c74d))
+
+## [1.53.0](https://github.com/christophe-freijanes/freijstack/compare/v1.52.1...v1.53.0) (2026-10-19)
+
+### 🚀 Features
+
+* **ci:** nettoyer les branches des PR fusionnées ([#319](https://github.com/christophe-freijanes/freijstack/issues/319)) ([b25383d](https://github.com/christophe-freijanes/freijstack/commit/b25383d2b50d833906a9d78a1202568a0c1d777c))
+
+### 🔧 Chores
+
+* **deps-dev:** bump typescript in /saas/securevault/frontend ([#301](https://github.com/christophe-freijanes/freijstack/issues/301)) ([6938299](https://github.com/christophe-freijanes/freijstack/commit/693829983a2f9819ea72b57613f7311d12ca06c1))
+* **deps:** bump actions/setup-python from 6 to 7 ([#297](https://github.com/christophe-freijanes/freijstack/issues/297)) ([b4b467b](https://github.com/christophe-freijanes/freijstack/commit/b4b467b13241be81354f625e2236b55eff7fd0d5))
+* **deps:** bump csv-parser in /saas/securevault/backend ([#300](https://github.com/christophe-freijanes/freijstack/issues/300)) ([84df7db](https://github.com/christophe-freijanes/freijstack/commit/84df7db4c3d6c117ed76466d57fd1b5317ef3e5f))
+* **deps:** bump joi from 18.2.9 to 18.3.0 in /saas/securevault/backend ([#314](https://github.com/christophe-freijanes/freijstack/issues/314)) ([df7d03d](https://github.com/christophe-freijanes/freijstack/commit/df7d03d104682f20ac72e82656e7bc3f4d4de91d))
+
+## [1.52.1](https://github.com/christophe-freijanes/freijstack/compare/v1.52.0...v1.52.1) (2026-10-19)
+
+### 🐛 Bug Fixes
+
+* **ci:** rendre le contrôle sécurité obligatoire pour toutes les PR ([#318](https://github.com/christophe-freijanes/freijstack/issues/318)) ([31aa586](https://github.com/christophe-freijanes/freijstack/commit/31aa586e73a9e50f4a4259014d285cd87a631402))
+
+## [1.52.0](https://github.com/christophe-freijanes/freijstack/compare/v1.51.1...v1.52.0) (2026-10-19)
+
+### 🚀 Features
+
+* **ci:** valider les correctifs Dependabot avant fusion ([#317](https://github.com/christophe-freijanes/freijstack/issues/317)) ([8e899db](https://github.com/christophe-freijanes/freijstack/commit/8e899db97a99dd806d364433a86cbaf6adf25ea7))
+
+## [1.51.1](https://github.com/christophe-freijanes/freijstack/compare/v1.51.0...v1.51.1) (2026-10-19)
+
+### 🐛 Bug Fixes
+
+* **security:** actualiser nginx et les dépendances Docker ([7f35e1c](https://github.com/christophe-freijanes/freijstack/commit/7f35e1c874d4698329c5adfd35b75b8bbbb91df8))
+
 ## [1.51.0](https://github.com/christophe-freijanes/freijstack/compare/v1.50.1...v1.51.0) (2026-10-19)
 
 ### 🚀 Features

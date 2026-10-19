@@ -1,12 +1,12 @@
-name: "🩺 Health Check • Post-Deploy"
+name: "Supervision - Contrôle après déploiement"
 
 on:
   workflow_run:
     workflows:
-      - "🏗️ Infra • VPS Deploy"
-      - "📄 SaaS • Portfolio Deploy"
-      - "🔐 SaaS • SecureVault Deploy"
-      - "🐳 SaaS • Registry Deploy"
+      - "Déploiement - Infrastructure VPS"
+      - "Déploiement - Portfolio"
+      - "Déploiement - SecureVault"
+      - "Déploiement - Registre"
     types:
       - completed
 
@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   prepare:
-    name: "🧾 Prepare targets"
+    name: "Prepare targets"
     if: >
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'master'
@@ -31,7 +31,7 @@ jobs:
       checks: ${{ steps.compute.outputs.checks }}
 
     steps:
-      - name: "🧾 Summary (source workflow)"
+      - name: "Summary (source workflow)"
         run: |
           {
             echo "## 🩺 Post-Deploy Health Check"
@@ -44,7 +44,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - id: compute
-        name: "🎯 Compute URLs"
+        name: "Compute URLs"
         shell: bash
         run: |
           set -euo pipefail
@@ -83,7 +83,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
   healthcheck:
-    name: "🩺 Run checks"
+    name: "Run checks"
     needs:
       - prepare
     uses: ./.github/workflows/00-core-healthcheck.yml
