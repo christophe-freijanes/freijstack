@@ -1,53 +1,125 @@
 name: 🚀 SaaS • Portfolio Deploy
 
 on:
-  workflow_run:
-    workflows: ["🏗️ Build & Push Portfolio"]
-    types: [completed]
+  workflow_dispatch:
+    inputs:
+      image_sha:
+        description: "SHA Git complet (40 caractères) du build validé"
+        required: true
+        type: string
 
-  workflow_dispatch: {}
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: portfolio-production-deploy
+  cancel-in-progress: false
 
 jobs:
+  validate:
+    name: Validate Portfolio image
+    runs-on: ubuntu-latest
+    if: >-
+      ${{
+        github.ref == 'refs/heads/master' &&
+        vars.PORTFOLIO_DEPLOY_ENABLED == 'true'
+      }}
+    outputs:
+      sha: ${{ steps.verify.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Verify successful master build
+        id: verify
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ inputs.image_sha }}
+        run: |
+          set -euo pipefail
+
+          [[ "$SHA" =~ ^[a-f0-9]{40}$ ]] || {
+            echo "Invalid Git SHA"
+            exit 1
+          }
+
+          git merge-base --is-ancestor "$SHA" origin/master || {
+            echo "SHA not reachable from master"
+            exit 1
+          }
+
+          runs="$(gh api -X GET \
+            "repos/$GITHUB_REPOSITORY/actions/workflows/03-app-portfolio-build.yml/runs" \
+            -f head_sha="$SHA" \
+            -f branch=master \
+            -f status=success \
+            --jq '.workflow_runs | length')"
+
+          [[ "$runs" -gt 0 ]] || {
+            echo "No successful Portfolio build for this SHA"
+            exit 1
+          }
+
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
   security:
-    name: 🛡️ Security Scan (Portfolio)
+    name: Validate Portfolio security
+    needs: validate
     uses: ./.github/workflows/00-core-security-ci.yml
     with:
-      environment: 'production'
-      scan_paths: |
-        saas/portfolio
+      environment: production
+      scan_paths: saas/portfolio
+      run_codeql: false
+      run_trivy_image: true
+      trivy_images: registry.freijstack.com/portfolio:${{ needs.validate.outputs.sha }}
+      registry_host: registry.freijstack.com
       gate_prod_only: true
       fail_on_gitleaks: true
       run_zap: true
-      dast_url: "https://portfolio.freijstack.com"
-    permissions:
-      contents: read
-      actions: read
-      security-events: write
-
-  deploy-production:
-    name: 🚀 Deploy Portfolio (Production)
-    needs: security
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (
-        github.event_name == 'workflow_run' &&
-        github.event.workflow_run.conclusion == 'success' &&
-        github.event.workflow_run.head_branch == 'master'
-      )
-
-    uses: ./.github/workflows/00-core-full-deploy.yml
-
-    with:
-      app_name: "portfolio"
-      environment: "production"
-      deploy_dir: "/srv/www/portfolio"
-      project_path: "saas/portfolio"
-      docker_compose_file: "docker-compose.prod.yml"
-      run_migrations: false
-
+      dast_url: https://portfolio.freijstack.com
     secrets:
-      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-      VPS_SSH_HOST: ${{ secrets.VPS_SSH_HOST }}
-      VPS_SSH_USER: ${{ secrets.VPS_SSH_USER }}
       REGISTRY_USER_PROD: ${{ secrets.REGISTRY_USER_PROD }}
       REGISTRY_PASSWORD_PROD: ${{ secrets.REGISTRY_PASSWORD_PROD }}
+
+  deploy-production:
+    name: Deploy Portfolio production
+    needs: [validate, security]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure verified SSH connection
+        env:
+          SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.VPS_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          test -n "$SSH_KEY"
+          test -n "$SSH_KNOWN_HOSTS"
+
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+          chmod 600 ~/.ssh/deploy_key ~/.ssh/known_hosts
+
+      - name: Deploy validated image
+        env:
+          SHA: ${{ needs.validate.outputs.sha }}
+          VPS_HOST: ${{ secrets.VPS_SSH_HOST }}
+          VPS_USER: ${{ secrets.VPS_SSH_USER }}
+        run: |
+          set -euo pipefail
+
+          [[ "$SHA" =~ ^[a-f0-9]{40}$ ]]
+          IMAGE="registry.freijstack.com/portfolio:$SHA"
+
+          ssh -i ~/.ssh/deploy_key \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            "$VPS_USER@$VPS_HOST" \
+            "sudo -n /usr/local/sbin/deploy-portfolio-safe '$IMAGE' --check &&
+             sudo -n /usr/local/sbin/deploy-portfolio-safe '$IMAGE' --apply"
