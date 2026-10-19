@@ -58,8 +58,8 @@ jobs:
           cache-from: type=gha,scope=portfolio
           cache-to: type=gha,mode=max,scope=portfolio
           tags: |
-            registry.freijstack.com/portfolio:latest
             registry.freijstack.com/portfolio:${{ github.sha }}
+            registry.freijstack.com/portfolio:${{ github.ref_name == 'master' && 'latest' || 'develop' }}
 
       - name: Display image digest
         run: |
