@@ -71,6 +71,9 @@ jobs:
               encoded="$(jq -nr --arg b "$branch" '$b|@uri')"
               current="$(gh api "repos/$REPO/git/ref/heads/$encoded" --jq '.object.sha' 2>/dev/null)" || continue
               [[ "$current" == "$sha" ]] || continue
-              gh api -X DELETE "repos/$REPO/git/refs/heads/$encoded" >/dev/null &&
-                echo "Deleted unchanged merged branch: $branch" || true
+              if gh api -X DELETE "repos/$REPO/git/refs/heads/$encoded" >/dev/null; then
+                echo "Deleted unchanged merged branch: $branch"
+              else
+                echo "Could not delete branch: $branch"
+              fi
             done
