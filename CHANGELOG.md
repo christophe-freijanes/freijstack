@@ -6,6 +6,19 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.53.0](https://github.com/christophe-freijanes/freijstack/compare/v1.52.1...v1.53.0) (2026-10-19)
+
+### 🚀 Features
+
+* **ci:** nettoyer les branches des PR fusionnées ([#319](https://github.com/christophe-freijanes/freijstack/issues/319)) ([b25383d](https://github.com/christophe-freijanes/freijstack/commit/b25383d2b50d833906a9d78a1202568a0c1d777c))
+
+### 🔧 Chores
+
+* **deps-dev:** bump typescript in /saas/securevault/frontend ([#301](https://github.com/christophe-freijanes/freijstack/issues/301)) ([6938299](https://github.com/christophe-freijanes/freijstack/commit/693829983a2f9819ea72b57613f7311d12ca06c1))
+* **deps:** bump actions/setup-python from 6 to 7 ([#297](https://github.com/christophe-freijanes/freijstack/issues/297)) ([b4b467b](https://github.com/christophe-freijanes/freijstack/commit/b4b467b13241be81354f625e2236b55eff7fd0d5))
+* **deps:** bump csv-parser in /saas/securevault/backend ([#300](https://github.com/christophe-freijanes/freijstack/issues/300)) ([84df7db](https://github.com/christophe-freijanes/freijstack/commit/84df7db4c3d6c117ed76466d57fd1b5317ef3e5f))
+* **deps:** bump joi from 18.2.9 to 18.3.0 in /saas/securevault/backend ([#314](https://github.com/christophe-freijanes/freijstack/issues/314)) ([df7d03d](https://github.com/christophe-freijanes/freijstack/commit/df7d03d104682f20ac72e82656e7bc3f4d4de91d))
+
 ## [1.52.1](https://github.com/christophe-freijanes/freijstack/compare/v1.52.0...v1.52.1) (2026-10-19)
 
 ### 🐛 Bug Fixes
