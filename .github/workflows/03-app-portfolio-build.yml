@@ -55,6 +55,7 @@ jobs:
           context: ./saas/portfolio
           file: ./saas/portfolio/Dockerfile
           push: true
+          pull: true
           cache-from: type=gha,scope=portfolio
           tags: |
             registry.freijstack.com/portfolio:${{ github.sha }}

@@ -23,3 +23,10 @@ updates:
     schedule:
       interval: "weekly"
     labels: ["dependencies"]
+  - package-ecosystem: "docker"
+    directory: "/saas/portfolio"
+    target-branch: "develop"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    labels: ["dependencies"]
