@@ -4,7 +4,6 @@ on:
   pull_request:
     branches: [develop]
     types: [opened, synchronize, reopened, ready_for_review]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -16,7 +15,6 @@ concurrency:
 jobs:
   scope:
     name: Identify changed components
-    if: github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]'
     runs-on: ubuntu-24.04
     outputs:
       backend: ${{ steps.paths.outputs.backend }}
@@ -110,20 +108,30 @@ jobs:
 
   gate:
     name: Dependency validation gate
-    if: always() && github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]'
+    if: always()
     needs: [scope, backend, frontend, portfolio]
     runs-on: ubuntu-24.04
     steps:
       - name: Require applicable security checks
         env:
           SCOPE: ${{ needs.scope.result }}
+          NEED_BACKEND: ${{ needs.scope.outputs.backend }}
           BACKEND: ${{ needs.backend.result }}
+          NEED_FRONTEND: ${{ needs.scope.outputs.frontend }}
           FRONTEND: ${{ needs.frontend.result }}
+          NEED_PORTFOLIO: ${{ needs.scope.outputs.docker }}
           PORTFOLIO: ${{ needs.portfolio.result }}
         run: |
           set -euo pipefail
           [[ "$SCOPE" == success ]]
-          for result in "$BACKEND" "$FRONTEND" "$PORTFOLIO"; do
-            [[ "$result" == success || "$result" == skipped ]] || exit 1
+          for component in BACKEND FRONTEND PORTFOLIO; do
+            required_var="NEED_$component"
+            required="${!required_var}"
+            result="${!component}"
+            if [[ "$required" == true ]]; then
+              [[ "$result" == success ]] || exit 1
+            else
+              [[ "$result" == skipped ]] || exit 1
+            fi
           done
-          echo "Dependabot validation passed. Manual approval still required."
+          echo "Dependency validation passed. Manual review still required."
