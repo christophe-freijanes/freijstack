@@ -372,6 +372,27 @@ jobs:
           echo "Target: ${{ inputs.dast_url }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Gate active: ${{ needs.gate.outputs.gate_active }}" >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Vérifier l'accès à la cible DAST
+        env:
+          DAST_URL: ${{ inputs.dast_url }}
+        run: |
+          set -euo pipefail
+          host="$(python3 -c 'import os,urllib.parse; print(urllib.parse.urlparse(os.environ["DAST_URL"]).hostname or "")')"
+          if [ -z "$host" ]; then
+            echo "::error::URL DAST invalide"
+            exit 1
+          fi
+          if ! getent ahosts "$host" >/dev/null; then
+            echo "::error::DNS inaccessible pour $host depuis GitHub Actions"
+            exit 1
+          fi
+          if ! curl --silent --show-error --location --output /dev/null \
+              --connect-timeout 10 --max-time 30 --retry 2 --retry-delay 3 \
+              "$DAST_URL"; then
+            echo "::error::Cible DAST inaccessible : vérifier DNS, port 443, pare-feu, Traefik et service"
+            exit 1
+          fi
+
       - name: ZAP baseline scan (non-blocking)
         if: ${{ needs.gate.outputs.gate_active != 'true' }}
         uses: zaproxy/action-baseline@v0.15.0
