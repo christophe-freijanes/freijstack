@@ -6,6 +6,19 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.53.1](https://github.com/christophe-freijanes/freijstack/compare/v1.53.0...v1.53.1) (2026-10-19)
+
+### 🐛 Bug Fixes
+
+* **ci:** activer la maintenance sur la branche par défaut ([#321](https://github.com/christophe-freijanes/freijstack/issues/321)) ([0a7e6f9](https://github.com/christophe-freijanes/freijstack/commit/0a7e6f9147ed1ef925c407f46f7e69f7aea53ba8))
+
+### 🔧 Chores
+
+* **deps-dev:** bump eslint from 10.2.0 to 10.13.0 ([#305](https://github.com/christophe-freijanes/freijstack/issues/305)) ([8dbd8db](https://github.com/christophe-freijanes/freijstack/commit/8dbd8db30a48ab092b86e4142d22991869754b58))
+* **deps-dev:** bump eslint-plugin-security from 3.0.1 to 4.2.0 ([#302](https://github.com/christophe-freijanes/freijstack/issues/302)) ([47c93df](https://github.com/christophe-freijanes/freijstack/commit/47c93df35cd0493be5c7abf5dec4ccd7f9a389d1))
+* **deps:** bump actions/deploy-pages from 4 to 5 ([#313](https://github.com/christophe-freijanes/freijstack/issues/313)) ([2204e2a](https://github.com/christophe-freijanes/freijstack/commit/2204e2a1050ee7f363d546545116033230ab43ba))
+* **deps:** bump react-dom in /saas/securevault/frontend ([#309](https://github.com/christophe-freijanes/freijstack/issues/309)) ([a9379cb](https://github.com/christophe-freijanes/freijstack/commit/a9379cb9dca4d094e837e249e17e34c8ac03c74d))
+
 ## [1.53.0](https://github.com/christophe-freijanes/freijstack/compare/v1.52.1...v1.53.0) (2026-10-19)
 
 ### 🚀 Features
