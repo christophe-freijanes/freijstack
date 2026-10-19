@@ -6,6 +6,16 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.53.5](https://github.com/christophe-freijanes/freijstack/compare/v1.53.4...v1.53.5) (2026-10-19)
+
+### 🐛 Bug Fixes
+
+* **ci:** diagnostiquer la connectivité avant ZAP ([#325](https://github.com/christophe-freijanes/freijstack/issues/325)) ([0d856c6](https://github.com/christophe-freijanes/freijstack/commit/0d856c63702a8d0bb94575710a8571b710cbcf3f))
+
+### 🔧 Chores
+
+* **deps:** bump lucide-react from 0.562.0 to 1.58.0 in /saas/securevault/frontend ([#304](https://github.com/christophe-freijanes/freijstack/issues/304)) ([b7a15f6](https://github.com/christophe-freijanes/freijstack/commit/b7a15f63e5eb8b95d67905d2980db495c74644ac))
+
 ## [1.53.4](https://github.com/christophe-freijanes/freijstack/compare/v1.53.3...v1.53.4) (2026-10-19)
 
 ### 🐛 Bug Fixes
