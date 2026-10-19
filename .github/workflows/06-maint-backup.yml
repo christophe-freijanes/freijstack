@@ -1,4 +1,4 @@
-name: 💾 Scheduled Cloud Backup
+name: "Maintenance - Sauvegardes"
 
 on:
   schedule:
@@ -35,7 +35,7 @@ env:
 
 jobs:
   security:
-    name: 🛡️ Shield • Guardian
+    name: Shield • Guardian
     uses: ./.github/workflows/00-core-security-ci.yml
     permissions:
       contents: read
@@ -51,15 +51,15 @@ jobs:
 
   backup-production:
     needs: security
-    name: 💾 Backup Production to Cloud
+    name: Backup Production to Cloud
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'production')
 
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: 🔐 Setup SSH
+      - name: Setup SSH
         run: |
           set -euo pipefail
 
@@ -96,7 +96,7 @@ jobs:
             fi
           done
 
-      - name: 🔒 Hardening logs (anti-leak)
+      - name: Hardening logs (anti-leak)
         run: |
           set -euo pipefail
           echo "::add-mask::${{ secrets.AWS_ACCESS_KEY_ID }}"
@@ -116,7 +116,7 @@ jobs:
           echo "::add-mask::${{ secrets.VPS_SSH_HOST }}"
           echo "::add-mask::${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
 
-      - name: 💾 Run Cloud Backup (hardened env-file)
+      - name: Run Cloud Backup (hardened env-file)
         env:
           PROVIDER: ${{ env.PROVIDER }}
 
@@ -187,7 +187,7 @@ jobs:
           # Local cleanup
           rm -f backup.env
 
-      - name: ✅ Backup Success
+      - name: Backup Success
         if: success()
         run: |
           echo "✅ Production backup completed successfully!"
@@ -195,7 +195,7 @@ jobs:
           echo "Provider: ${{ env.PROVIDER || 'all configured providers' }}"
           echo "Timestamp: $(date)"
 
-      - name: ❌ Backup Failed
+      - name: Backup Failed
         if: failure()
         run: |
           echo "❌ Production backup failed!"
@@ -203,15 +203,15 @@ jobs:
 
   backup-staging:
     needs: security
-    name: 💾 Backup Staging to Cloud
+    name: Backup Staging to Cloud
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && inputs.environment == 'staging'
 
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: 🔐 Setup SSH
+      - name: Setup SSH
         run: |
           set -euo pipefail
 
@@ -248,7 +248,7 @@ jobs:
             fi
           done
 
-      - name: 🔒 Hardening logs (anti-leak)
+      - name: Hardening logs (anti-leak)
         run: |
           set -euo pipefail
           echo "::add-mask::${{ secrets.AWS_ACCESS_KEY_ID }}"
@@ -259,7 +259,7 @@ jobs:
           echo "::add-mask::${{ secrets.VPS_SSH_HOST }}"
           echo "::add-mask::${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_SSH_HOST }}"
 
-      - name: 💾 Run Cloud Backup (hardened env-file)
+      - name: Run Cloud Backup (hardened env-file)
         env:
           PROVIDER: ${{ env.PROVIDER }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -298,14 +298,14 @@ jobs:
 
           rm -f backup.env
 
-      - name: ✅ Backup Success
+      - name: Backup Success
         if: success()
         run: |
           echo "✅ Staging backup completed successfully!"
 
   notify:
     needs: [security, backup-production, backup-staging]
-    name: 📢 Notify Backup Status
+    name: Notify Backup Status
     runs-on: ubuntu-latest
     if: always()
 

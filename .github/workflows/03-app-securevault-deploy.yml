@@ -2,7 +2,7 @@ name: "Déploiement - SecureVault"
 
 on:
   workflow_run:
-    workflows: ["🏗️ Build & Push SecureVault"]
+    workflows: ["Construction - SecureVault"]
     types: [completed]
   workflow_dispatch:
     inputs:

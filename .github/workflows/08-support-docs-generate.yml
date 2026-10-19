@@ -1,4 +1,4 @@
-name: 📚 Auto-Generate Documentation
+name: "Documentation - Publication"
 
 on:
   push:

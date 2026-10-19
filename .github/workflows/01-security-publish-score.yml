@@ -6,7 +6,7 @@ name: "Sécurité - Publication du score"
 on:
   workflow_run:
     workflows:
-      - '🩺 Health Check • Post-Deploy'
+      - 'Supervision - Contrôle après déploiement'
     types: [completed]
 
 permissions:
