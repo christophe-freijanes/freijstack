@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.51.1](https://github.com/christophe-freijanes/freijstack/compare/v1.51.0...v1.51.1) (2026-10-19)
+
+### 🐛 Bug Fixes
+
+* **security:** actualiser nginx et les dépendances Docker ([7f35e1c](https://github.com/christophe-freijanes/freijstack/commit/7f35e1c874d4698329c5adfd35b75b8bbbb91df8))
+
 ## [1.51.0](https://github.com/christophe-freijanes/freijstack/compare/v1.50.1...v1.51.0) (2026-10-19)
 
 ### 🚀 Features
