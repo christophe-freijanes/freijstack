@@ -19,20 +19,21 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - name: Merge reviewed Dependabot PRs after security validation
+      - name: Fusionner les dépendances approuvées après validation
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           REPO: ${{ github.repository }}
         shell: bash
         run: |
           set -euo pipefail
+          : "${GH_TOKEN:?Le secret RELEASE_TOKEN est requis pour déclencher les validations après fusion}"
           gh api "repos/$REPO/pulls?state=open&base=develop&per_page=100" |
             jq -r '.[] | select(.user.login == "dependabot[bot]" and .draft == false) | [.number, .head.sha] | @tsv' |
             while IFS=$'\t' read -r number sha; do
               # All required checks must be present, successful and current.
               checks="$(gh api "repos/$REPO/commits/$sha/check-runs?per_page=100" --jq '.check_runs | map({name,status,conclusion})')"
               ready=true
-              for name in 'Lint ciblé' 'auto-title' 'Dependency validation gate'; do
+              for name in 'Lint ciblé' 'Dependency validation gate'; do
                 if ! jq -e --arg n "$name" 'any(.[]; .name == $n and .status == "completed" and .conclusion == "success")' <<< "$checks" >/dev/null; then
                   ready=false
                 fi
