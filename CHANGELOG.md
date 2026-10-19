@@ -6,6 +6,13 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.51.0](https://github.com/christophe-freijanes/freijstack/compare/v1.50.1...v1.51.0) (2026-10-19)
+
+### 🚀 Features
+
+* **portfolio:** Merge Develop into Master Branch ([#283](https://github.com/christophe-freijanes/freijstack/issues/283)) ([f8b843c](https://github.com/christophe-freijanes/freijstack/commit/f8b843c7f9b0f7c4bef9e49d7f534d5e8ae12437)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+* **saas:** Merge Develop into Master Branch ([#280](https://github.com/christophe-freijanes/freijstack/issues/280)) ([#281](https://github.com/christophe-freijanes/freijstack/issues/281)) ([5648810](https://github.com/christophe-freijanes/freijstack/commit/5648810f203b64c9d10b6a8836de9b82599e0f53)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
 ## [1.50.1](https://github.com/christophe-freijanes/freijstack/compare/v1.50.0...v1.50.1) (2026-10-19)
 
 ### 🐛 Bug Fixes
