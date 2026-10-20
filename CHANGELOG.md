@@ -6,6 +6,49 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.54.5](https://github.com/christophe-freijanes/freijstack/compare/v1.54.4...v1.54.5) (2026-10-20)
+
+### 🐛 Bug Fixes
+
+* **ci:** éviter les relances sur le changelog seul ([78a5e9d](https://github.com/christophe-freijanes/freijstack/commit/78a5e9d1bf2fbab2301ff405bf3995a0a3cf6dc2))
+* **ci:** publier les contrôles sur les commits release ([a2c60b4](https://github.com/christophe-freijanes/freijstack/commit/a2c60b4546d1c8a84643b176935e11cb2134637c))
+
+## [1.54.4](https://github.com/christophe-freijanes/freijstack/compare/v1.54.3...v1.54.4) (2026-10-20)
+
+### 🐛 Bug Fixes
+
+* **ci:** exécuter CodeQL avant fusion en production ([c2b12a7](https://github.com/christophe-freijanes/freijstack/commit/c2b12a7296082d2018aab7c6c9ce0359f571b855))
+
+## [1.54.3](https://github.com/christophe-freijanes/freijstack/compare/v1.54.2...v1.54.3) (2026-10-20)
+
+### 🐛 Bug Fixes
+
+* **ci:** respecter les espaces des imports Ruff ([c3ca7c2](https://github.com/christophe-freijanes/freijstack/commit/c3ca7c28f84b63d1ae9d23e23cf8831ba3c56229))
+
+## [1.54.2](https://github.com/christophe-freijanes/freijstack/compare/v1.54.1...v1.54.2) (2026-10-20)
+
+### 🐛 Bug Fixes
+
+* **ci:** corriger Ruff pour la fusion en production ([c1ae42f](https://github.com/christophe-freijanes/freijstack/commit/c1ae42f2f678a0fe273c5e535ffd6c2bab37d4ea))
+
+### 👷 CI/CD
+
+* **github-actions:** Merge ([#329](https://github.com/christophe-freijanes/freijstack/issues/329)) ([6475331](https://github.com/christophe-freijanes/freijstack/commit/64753317aa7f2eec2705d48fab4cff667459f257)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
+## [1.54.1](https://github.com/christophe-freijanes/freijstack/compare/v1.54.0...v1.54.1) (2026-10-20)
+
+### 🐛 Bug Fixes
+
+* **seo:** rétablir l'indexabilité du portfolio ([#332](https://github.com/christophe-freijanes/freijstack/issues/332)) ([4de2059](https://github.com/christophe-freijanes/freijstack/commit/4de20593c9e0da6384730f2d7d123541eeddef4c))
+
+### 📚 Documentation
+
+* simplifier le modèle de description des PR ([#328](https://github.com/christophe-freijanes/freijstack/issues/328)) ([8d38794](https://github.com/christophe-freijanes/freijstack/commit/8d387944617c2a6e2a4458c52e5b09fe67911213))
+
+### 👷 CI/CD
+
+* **github-actions:** security: inventaire automatique des alertes Code Scanning ([#331](https://github.com/christophe-freijanes/freijstack/issues/331)) ([8c0e811](https://github.com/christophe-freijanes/freijstack/commit/8c0e811662b931d40f26ad76b6d18a456e2e0d1e))
+
 ## [1.54.0](https://github.com/christophe-freijanes/freijstack/compare/v1.53.6...v1.54.0) (2026-10-19)
 
 ### 🚀 Features

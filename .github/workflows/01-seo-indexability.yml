@@ -1,0 +1,30 @@
+name: "SEO - Contrôle d'indexabilité"
+
+on:
+  pull_request:
+    branches: [develop, master]
+    paths:
+      - "saas/portfolio/public/**"
+      - "scripts/seo/check_indexability.py"
+      - ".github/workflows/01-seo-indexability.yml"
+  push:
+    branches: [develop, master]
+    paths:
+      - "saas/portfolio/public/**"
+      - "scripts/seo/check_indexability.py"
+      - ".github/workflows/01-seo-indexability.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  indexability:
+    name: Valider robots, sitemap et canoniques
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - name: Installer le parseur XML sécurisé
+        run: python3 -m pip install --disable-pip-version-check defusedxml==0.7.1
+      - name: Contrôle SEO hors ligne
+        run: python3 scripts/seo/check_indexability.py

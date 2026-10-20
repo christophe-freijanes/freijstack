@@ -1,6 +1,9 @@
 
 FROM nginx:stable-alpine
 
+# Appliquer les correctifs de sécurité Alpine disponibles
+RUN apk upgrade --no-cache
+
 # Copy nginx configuration
 COPY public/config/nginx.conf /etc/nginx/conf.d/default.conf
 
