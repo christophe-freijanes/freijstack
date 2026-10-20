@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.54.4](https://github.com/christophe-freijanes/freijstack/compare/v1.54.3...v1.54.4) (2026-10-20)
+
+### 🐛 Bug Fixes
+
+* **ci:** exécuter CodeQL avant fusion en production ([c2b12a7](https://github.com/christophe-freijanes/freijstack/commit/c2b12a7296082d2018aab7c6c9ce0359f571b855))
+
 ## [1.54.3](https://github.com/christophe-freijanes/freijstack/compare/v1.54.2...v1.54.3) (2026-10-20)
 
 ### 🐛 Bug Fixes
