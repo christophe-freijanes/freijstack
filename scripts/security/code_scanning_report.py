@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Résumer les alertes Code Scanning ouvertes sans divulguer les messages."""
+
 import json
 import sys
 from collections import Counter
 from pathlib import Path
+
+ARGUMENT_COUNT = 3
 
 SEVERITY_ORDER = {"critical": 0, "high": 1, "error": 2, "medium": 3,
                   "warning": 4, "low": 5, "note": 6, "unknown": 7}
@@ -60,10 +63,10 @@ def main(raw, destination):
               "Les alertes ne sont pas automatiquement supprimées ou reclassées.", ""]
     text = "\n".join(report)
     (destination / "summary.md").write_text(text, encoding="utf-8")
-    print(text)
+    sys.stdout.write(text + "\n")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if len(sys.argv) != ARGUMENT_COUNT:
         raise SystemExit("Utilisation : code_scanning_report.py pages.json repertoire")
     main(sys.argv[1], sys.argv[2])
