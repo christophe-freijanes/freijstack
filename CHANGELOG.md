@@ -6,6 +6,13 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.54.5](https://github.com/christophe-freijanes/freijstack/compare/v1.54.4...v1.54.5) (2026-10-20)
+
+### 🐛 Bug Fixes
+
+* **ci:** éviter les relances sur le changelog seul ([78a5e9d](https://github.com/christophe-freijanes/freijstack/commit/78a5e9d1bf2fbab2301ff405bf3995a0a3cf6dc2))
+* **ci:** publier les contrôles sur les commits release ([a2c60b4](https://github.com/christophe-freijanes/freijstack/commit/a2c60b4546d1c8a84643b176935e11cb2134637c))
+
 ## [1.54.4](https://github.com/christophe-freijanes/freijstack/compare/v1.54.3...v1.54.4) (2026-10-20)
 
 ### 🐛 Bug Fixes
