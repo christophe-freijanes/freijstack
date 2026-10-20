@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.54.3](https://github.com/christophe-freijanes/freijstack/compare/v1.54.2...v1.54.3) (2026-10-20)
+
+### 🐛 Bug Fixes
+
+* **ci:** respecter les espaces des imports Ruff ([c3ca7c2](https://github.com/christophe-freijanes/freijstack/commit/c3ca7c28f84b63d1ae9d23e23cf8831ba3c56229))
+
 ## [1.54.2](https://github.com/christophe-freijanes/freijstack/compare/v1.54.1...v1.54.2) (2026-10-20)
 
 ### 🐛 Bug Fixes
