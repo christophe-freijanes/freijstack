@@ -6,6 +6,16 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.54.2](https://github.com/christophe-freijanes/freijstack/compare/v1.54.1...v1.54.2) (2026-10-20)
+
+### 🐛 Bug Fixes
+
+* **ci:** corriger Ruff pour la fusion en production ([c1ae42f](https://github.com/christophe-freijanes/freijstack/commit/c1ae42f2f678a0fe273c5e535ffd6c2bab37d4ea))
+
+### 👷 CI/CD
+
+* **github-actions:** Merge ([#329](https://github.com/christophe-freijanes/freijstack/issues/329)) ([6475331](https://github.com/christophe-freijanes/freijstack/commit/64753317aa7f2eec2705d48fab4cff667459f257)), closes [#181](https://github.com/christophe-freijanes/freijstack/issues/181) [#182](https://github.com/christophe-freijanes/freijstack/issues/182) [#150](https://github.com/christophe-freijanes/freijstack/issues/150)
+
 ## [1.54.1](https://github.com/christophe-freijanes/freijstack/compare/v1.54.0...v1.54.1) (2026-10-20)
 
 ### 🐛 Bug Fixes
