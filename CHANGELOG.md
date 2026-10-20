@@ -6,6 +6,20 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.54.1](https://github.com/christophe-freijanes/freijstack/compare/v1.54.0...v1.54.1) (2026-10-20)
+
+### 🐛 Bug Fixes
+
+* **seo:** rétablir l'indexabilité du portfolio ([#332](https://github.com/christophe-freijanes/freijstack/issues/332)) ([4de2059](https://github.com/christophe-freijanes/freijstack/commit/4de20593c9e0da6384730f2d7d123541eeddef4c))
+
+### 📚 Documentation
+
+* simplifier le modèle de description des PR ([#328](https://github.com/christophe-freijanes/freijstack/issues/328)) ([8d38794](https://github.com/christophe-freijanes/freijstack/commit/8d387944617c2a6e2a4458c52e5b09fe67911213))
+
+### 👷 CI/CD
+
+* **github-actions:** security: inventaire automatique des alertes Code Scanning ([#331](https://github.com/christophe-freijanes/freijstack/issues/331)) ([8c0e811](https://github.com/christophe-freijanes/freijstack/commit/8c0e811662b931d40f26ad76b6d18a456e2e0d1e))
+
 ## [1.54.0](https://github.com/christophe-freijanes/freijstack/compare/v1.53.6...v1.54.0) (2026-10-19)
 
 ### 🚀 Features
