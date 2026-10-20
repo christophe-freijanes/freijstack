@@ -24,5 +24,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
+      - name: Installer le parseur XML sécurisé
+        run: python3 -m pip install --disable-pip-version-check defusedxml==0.7.1
       - name: Contrôle SEO hors ligne
         run: python3 scripts/seo/check_indexability.py
