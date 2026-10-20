@@ -6,7 +6,8 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlsplit
 from urllib.robotparser import RobotFileParser
-from xml.etree import ElementTree
+
+from defusedxml import ElementTree as ET
 
 BASE = "https://portfolio.freijstack.com"
 ROOT = Path(__file__).resolve().parents[2] / "saas/portfolio/public"
@@ -46,64 +47,73 @@ class Metadata(HTMLParser):
             self.in_jsonld = False
 
 
-def check():
-    errors = []
+def require(errors, condition, message):
+    if not condition:
+        errors.append(message)
 
-    def require(condition, message):
-        if not condition:
-            errors.append(message)
 
+def check_robots(errors):
     robots = (ROOT / "robots.txt").read_text(encoding="utf-8")
     parser = RobotFileParser()
     parser.parse(robots.splitlines())
-    require(f"Sitemap: {BASE}/sitemap.xml" in robots, "Sitemap absent de robots.txt")
+    require(errors, f"Sitemap: {BASE}/sitemap.xml" in robots, "Sitemap absent de robots.txt")
     for bot in ("Googlebot", "Bingbot", "OAI-SearchBot"):
         for path in ("/", "/index.html", "/pages/resume.html", "/css/style.css", "/js/script.js"):
-            require(parser.can_fetch(bot, f"{BASE}{path}"), f"robots.txt bloque {bot}: {path}")
+            require(errors, parser.can_fetch(bot, f"{BASE}{path}"), f"robots.txt bloque {bot}: {path}")
 
-    tree = ElementTree.parse(ROOT / "sitemap.xml")
+
+def check_sitemap(errors):
+    tree = ET.parse(ROOT / "sitemap.xml")
     urls = [node.text for node in tree.findall("s:url/s:loc", NAMESPACE)]
-    require(len(urls) == len(set(urls)), "URL en double dans sitemap.xml")
-    require(REQUIRED.issubset(urls), "Page d'accueil ou CV absente du sitemap")
-    require(f"{BASE}/index.html" not in urls, "Index dupliqué (/index.html)")
-    require(bool(urls), "Sitemap vide")
+    require(errors, len(urls) == len(set(urls)), "URL en double dans sitemap.xml")
+    require(errors, REQUIRED.issubset(urls), "Page d'accueil ou CV absente du sitemap")
+    require(errors, f"{BASE}/index.html" not in urls, "Index dupliqué (/index.html)")
+    require(errors, bool(urls), "Sitemap vide")
+    return urls
 
+
+def check_page(errors, url):
+    parts = urlsplit(url or "")
+    correct = (parts.scheme == "https" and parts.netloc == "portfolio.freijstack.com"
+               and not parts.query and not parts.fragment)
+    require(errors, correct, f"URL externe/invalide : {url}")
+    if not correct:
+        return
+    path = parts.path or "/"
+    file = ROOT / ("index.html" if path == "/" else path.lstrip("/"))
+    require(errors, file.is_file(), f"Page du sitemap absente : {url}")
+    require(errors, file.suffix == ".html", f"URL non HTML dans le sitemap : {url}")
+    if not file.is_file() or file.suffix != ".html":
+        return
+    metadata = Metadata()
+    try:
+        metadata.feed(file.read_text(encoding="utf-8"))
+    except ValueError as exc:
+        errors.append(f"Métadonnées illisibles {url}: {exc}")
+        return
+    require(errors, metadata.canonicals == [url], f"URL canonique incorrecte : {url}")
+    require(errors, metadata.og_urls == [url], f"og:url incohérent : {url}")
+    require(errors, not metadata.noindex, f"Page marquée noindex : {url}")
+    for block in metadata.jsonld:
+        pages = block.get("@graph", []) if isinstance(block, dict) else []
+        if isinstance(pages, dict):
+            pages = [pages]
+        for page in pages:
+            if page.get("@type") == "WebPage":
+                require(errors, page.get("url") == url, f"WebPage JSON-LD incohérent : {url}")
+                require(errors, page.get("@id") == f"{url}#webpage", f"@id WebPage incohérent : {url}")
+
+
+def check():
+    errors = []
+    check_robots(errors)
+    urls = check_sitemap(errors)
     for url in urls:
-        parts = urlsplit(url or "")
-        require(parts.scheme == "https" and parts.netloc == "portfolio.freijstack.com"
-                and not parts.query and not parts.fragment, f"URL externe/invalide : {url}")
-        if parts.scheme != "https" or parts.netloc != "portfolio.freijstack.com":
-            continue
-        path = parts.path or "/"
-        file = ROOT / ("index.html" if path == "/" else path.lstrip("/"))
-        require(file.is_file(), f"Page du sitemap absente : {url}")
-        require(file.suffix == ".html", f"URL non HTML dans le sitemap : {url}")
-        if not file.is_file() or file.suffix != ".html":
-            continue
-
-        metadata = Metadata()
-        try:
-            metadata.feed(file.read_text(encoding="utf-8"))
-        except (ValueError, json.JSONDecodeError) as exc:
-            errors.append(f"Métadonnées illisibles {url}: {exc}")
-            continue
-        require(metadata.canonicals == [url], f"URL canonique incorrecte : {url}: {metadata.canonicals}")
-        require(metadata.og_urls == [url], f"og:url incohérent : {url}: {metadata.og_urls}")
-        require(not metadata.noindex, f"Page marquée noindex : {url}")
-        for block in metadata.jsonld:
-            pages = block.get("@graph", []) if isinstance(block, dict) else []
-            if isinstance(pages, dict):
-                pages = [pages]
-            for page in pages:
-                if page.get("@type") == "WebPage":
-                    require(page.get("url") == url, f"WebPage JSON-LD incohérent : {url}")
-                    require(page.get("@id") == f"{url}#webpage", f"@id WebPage incohérent : {url}")
-
+        check_page(errors, url)
     if errors:
-        print("SEO: ECHEC", file=sys.stderr)
-        print("\n".join(f"- {error}" for error in errors), file=sys.stderr)
+        sys.stderr.write("SEO: ECHEC\n" + "\n".join(f"- {error}" for error in errors) + "\n")
         raise SystemExit(1)
-    print(f"SEO: OK ({len(urls)} pages canoniques, robots et sitemap valides)")
+    sys.stdout.write(f"SEO: OK ({len(urls)} pages canoniques, robots et sitemap valides)\n")
 
 
 if __name__ == "__main__":
