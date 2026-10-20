@@ -3,6 +3,8 @@ name: "Livraison - Versionnement automatique"
 on:
   push:
     branches: [master, develop]
+    paths-ignore:
+      - "CHANGELOG.md"
   workflow_dispatch:
 
 permissions:
