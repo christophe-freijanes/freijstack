@@ -7,7 +7,8 @@ from pathlib import Path
 from urllib.parse import urlsplit
 from urllib.robotparser import RobotFileParser
 
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree
+
 
 BASE = "https://portfolio.freijstack.com"
 ROOT = Path(__file__).resolve().parents[2] / "saas/portfolio/public"
@@ -63,7 +64,7 @@ def check_robots(errors):
 
 
 def check_sitemap(errors):
-    tree = ET.parse(ROOT / "sitemap.xml")
+    tree = ElementTree.parse(ROOT / "sitemap.xml")
     urls = [node.text for node in tree.findall("s:url/s:loc", NAMESPACE)]
     require(errors, len(urls) == len(set(urls)), "URL en double dans sitemap.xml")
     require(errors, REQUIRED.issubset(urls), "Page d'accueil ou CV absente du sitemap")
