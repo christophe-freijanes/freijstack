@@ -6,6 +6,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+
 ARGUMENT_COUNT = 3
 
 SEVERITY_ORDER = {"critical": 0, "high": 1, "error": 2, "medium": 3,
