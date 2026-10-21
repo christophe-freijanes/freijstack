@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.55.1](https://github.com/christophe-freijanes/freijstack/compare/v1.55.0...v1.55.1) (2026-10-21)
+
+### 🐛 Bug Fixes
+
+* **portfolio:** contrat RAG et voix neutre de l'assistant ([#337](https://github.com/christophe-freijanes/freijstack/issues/337)) ([9327720](https://github.com/christophe-freijanes/freijstack/commit/93277200d0d71504837f35ff0b1bc66d3177545d))
+
 ## [1.55.0](https://github.com/christophe-freijanes/freijstack/compare/v1.54.5...v1.55.0) (2026-10-21)
 
 ### 🚀 Features
