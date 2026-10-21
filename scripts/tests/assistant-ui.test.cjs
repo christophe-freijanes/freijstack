@@ -3,33 +3,35 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-const publicDir = 'saas/portfolio/public';
-const html = fs.readFileSync(publicDir + '/index.html', 'utf8');
-const css = fs.readFileSync(publicDir + '/css/style.css', 'utf8');
-const nginx = fs.readFileSync(publicDir + '/config/nginx.conf', 'utf8');
-const assistantCode = fs.readFileSync(publicDir + '/js/assistant.js', 'utf8');
+const dir = 'saas/portfolio/public';
+const html = fs.readFileSync(dir + '/index.html', 'utf8');
+const css = fs.readFileSync(dir + '/css/style.css', 'utf8');
+const nginx = fs.readFileSync(dir + '/config/nginx.conf', 'utf8');
+const assistant = fs.readFileSync(dir + '/js/assistant.js', 'utf8');
 
-test('la bulle ne montre que IA et possède un nom accessible', () => {
-    const button = html.match(/<button[^>]*id="assistantOpen"[^>]*>[\\s\\S]*?<\\/button>/);
-    assert.ok(button, 'Bouton IA présent');
-    assert.match(button[0], /aria-label="Ouvrir l'assistant IA"/);
-    assert.match(button[0], />\\s*IA\\s*<\\/button>/);
-    assert.doesNotMatch(button[0], /data-i18n/);
-    assert.equal((html.match(/id="assistantOpen"/g) || []).length, 1);
-    assert.match(html, /<dialog id="recruitmentAssistant"/);
+test('la bulle affiche uniquement IA avec un nom accessible', () => {
+    const start = html.indexOf('id="assistantOpen"');
+    const end = html.indexOf('</button>', start);
+    assert.ok(start >= 0 && end > start, 'Bouton IA présent');
+    const button = html.slice(start, end + 9);
+    assert.match(button, /aria-label="Ouvrir l'assistant IA"/);
+    assert.match(button, />\s*IA\s*<\/button>/);
+    assert.doesNotMatch(button, /data-i18n/);
+    assert.equal(html.split('id="assistantOpen"').length - 1, 1);
+    assert.ok(html.includes('<dialog id="recruitmentAssistant"'));
 });
 
-test('scripts et CSS utilisent une version de cache cohérente', () => {
-    for (const file of ['css/style.css', 'js/script.js', 'js/assistant.js']) {
-        assert.ok(html.includes(file + '?v=20261021-bulle-ia'), file);
+test('les ressources statiques évitent le cache immutable', () => {
+    for (const asset of ['css/style.css', 'js/script.js', 'js/assistant.js']) {
+        assert.ok(html.includes(asset + '?v=20261021-bulle-ia'), asset);
     }
-    assert.match(nginx, /location ~\\* \\\\?\\.\\(js\\|css\\)\\$/);
-    assert.match(nginx, /try_files \\$uri =404/);
-    assert.doesNotMatch(nginx, /location ~\\* \\\\?\\.\\(js\\|css\\|svg/);
-    assert.match(css, /\\.hamburger span \\{[^}]*\\}\\s*\\.footer-legal-sep/);
+    assert.ok(nginx.includes('location ~* \\.(js|css)$'));
+    assert.ok(nginx.includes('try_files $uri =404;'));
+    assert.ok(!nginx.includes('(js|css|svg|png'));
+    assert.ok(css.includes('transition: all var(--transition-fast);\n}\n\n.footer-legal-sep'));
 });
 
-test('la bulle ouvre le dialogue après DOMContentLoaded et le referme', () => {
+test('un clic après DOMContentLoaded ouvre le chat et la fermeture fonctionne', () => {
     const nodes = new Map();
     const make = () => ({
         listeners: {}, children: [], value: '', textContent: '',
@@ -52,12 +54,11 @@ test('la bulle ouvre le dialogue après DOMContentLoaded et le referme', () => {
         querySelector() { return null; },
         createElement: make
     };
-    const context = {
+    vm.runInNewContext(assistant, {
         document, localStorage: { getItem: () => 'fr' },
-        fetch: async () => { throw new Error('Ne doit pas appeler le RAG'); },
+        fetch: async () => { throw new Error('No API call expected'); },
         AbortController, setTimeout, clearTimeout
-    };
-    vm.runInNewContext(assistantCode, context);
+    });
     assert.equal(typeof initialized, 'function');
     initialized();
     nodes.get('assistantOpen').listeners.click();
