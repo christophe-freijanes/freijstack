@@ -7,7 +7,10 @@ on:
       - "saas/portfolio/public/index.html"
       - "saas/portfolio/public/js/assistant.js"
       - "saas/portfolio/public/js/script.js"
+      - "saas/portfolio/public/css/style.css"
+      - "saas/portfolio/public/config/nginx.conf"
       - "scripts/tests/assistant.test.cjs"
+      - "scripts/tests/assistant-ui.test.cjs"
       - ".github/workflows/01-assistant-check.yml"
   push:
     branches: [develop, master]
@@ -36,5 +39,5 @@ jobs:
           node --check saas/portfolio/public/js/script.js
           node --check saas/portfolio/public/js/assistant.js
       - name: Tester les réponses
-        run: node --test scripts/tests/assistant.test.cjs
+        run: node --test scripts/tests/assistant*.test.cjs
 
