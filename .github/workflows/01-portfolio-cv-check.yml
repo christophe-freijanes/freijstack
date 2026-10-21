@@ -1,0 +1,33 @@
+name: "Qualité - CV Portfolio"
+
+on:
+  pull_request:
+    branches: [develop, master]
+    paths:
+      - "saas/portfolio/public/index.html"
+      - "saas/portfolio/public/cv/**"
+      - "scripts/tests/portfolio-cv.test.cjs"
+      - ".github/workflows/01-portfolio-cv-check.yml"
+  push:
+    branches: [develop, master]
+    paths:
+      - "saas/portfolio/public/index.html"
+      - "saas/portfolio/public/cv/**"
+      - "scripts/tests/portfolio-cv.test.cjs"
+      - ".github/workflows/01-portfolio-cv-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify-pdfs:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+      - name: Vérifier les PDF et les liens
+        run: node --test scripts/tests/portfolio-cv.test.cjs
+
