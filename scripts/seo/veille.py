@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Proposer une veille technique à partir de sources officielles."""
+
 import html
 import json
 import sys
@@ -10,6 +11,7 @@ from urllib.parse import urlsplit, urlunsplit
 from urllib.request import Request, urlopen
 
 from defusedxml import ElementTree
+
 
 BASE = "https://portfolio.freijstack.com"
 ROOT = Path(__file__).resolve().parents[2]
@@ -36,6 +38,11 @@ QUESTIONS = {
     "AIOps": "Vérifier les garde-fous, la supervision humaine, les accès read-only et l'évaluation des agents.",
 }
 ATOM = "{http://www.w3.org/2005/Atom}"
+TITLE_SCORE = 3
+MIN_NEW = 2
+MAX_PER_TOPIC = 2
+MAX_NEW = 4
+MAX_FEED_BYTES = 1_000_000
 
 
 def trusted_url(url):
@@ -66,7 +73,7 @@ def classify(title, summary):
         for category, words in TOPICS.items()
     }
     topic = max(points, key=points.get)
-    return topic if points[topic] >= 3 else None
+    return topic if points[topic] >= TITLE_SCORE else None
 
 
 def parse_items(xml, source, now):
@@ -108,12 +115,14 @@ def parse_items(xml, source, now):
 
 
 def fetch(source, url, now):
-    request = Request(url, headers={"User-Agent": "FreijStack-SEO-Veille/1.0"})
-    with urlopen(request, timeout=15) as response:
+    if not trusted_url(url):
+        raise ValueError("Source non autorisée")
+    request = Request(url, headers={"User-Agent": "FreijStack-SEO-Veille/1.0"})  # noqa: S310
+    with urlopen(request, timeout=15) as response:  # noqa: S310
         if urlsplit(response.geturl()).hostname not in HOSTS:
             raise ValueError("Redirection hors source officielle")
-        xml = response.read(1_000_001)
-        if len(xml) > 1_000_000:
+        xml = response.read(MAX_FEED_BYTES + 1)
+        if len(xml) > MAX_FEED_BYTES:
             raise ValueError("Flux trop volumineux")
     return parse_items(xml, source, now)
 
@@ -129,7 +138,7 @@ def render(items):
                 source = html.escape(item["source"], quote=True)
                 links.append(
                     f'<li><a href="{url}" rel="noopener noreferrer">{label}</a>'
-                    f' <small>— {source} · {item["date"]}</small></li>'
+                    f' <small>— {source} · {item["date"]}</small></li>',
                 )
         listing = "<ul>" + "\n".join(links) + "</ul>" if links else "<p>Aucune annonce retenue pour ce domaine.</p>"
         groups.append(f"<section><h2>{topic}</h2><p>{html.escape(question)}</p>{listing}</section>")
@@ -185,13 +194,13 @@ def update(now):
     selected = []
     counts = {}
     for item in sorted(candidates.values(), key=lambda i: (i["date"], i["title"]), reverse=True):
-        if counts.get(item["category"], 0) >= 2:
+        if counts.get(item["category"], 0) >= MAX_PER_TOPIC:
             continue
         selected.append(item)
         counts[item["category"]] = counts.get(item["category"], 0) + 1
-        if len(selected) == 4:
+        if len(selected) == MAX_NEW:
             break
-    if len(selected) < 2:
+    if len(selected) < MIN_NEW:
         sys.stdout.write("Aucune sélection nouvelle suffisante : pas de modification.\n")
         return
     merged = selected + [item for item in state["items"] if item["url"] not in {i["url"] for i in selected}]
