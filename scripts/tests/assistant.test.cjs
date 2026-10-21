@@ -120,3 +120,26 @@ test('une réponse à la première personne utilise le secours identifié', asyn
     assert.match(messages[1].textContent, /^Mode secours :/);
     assert.doesNotMatch(messages[1].textContent, /\bj['’]|\bje\b/i);
 });
+
+test('une question non documentée donne un repli neutre sans inventer de non', async () => {
+    const messages = await interact(async () => ({
+        ok: false, status: 503,
+        headers: { get() { return 'application/json'; } }
+    }), 'Christophe a-t-il fondé une entreprise ?');
+    assert.match(messages[1].textContent, /sources publiques du portfolio ne permettent pas/);
+    assert.doesNotMatch(messages[1].textContent, /\b(?:Oui|Non),?\b/);
+    assert.doesNotMatch(messages[1].textContent, /déclaré|déclaration/i);
+});
+
+test('une réponse affirmative sourcée du RAG reste intacte', async () => {
+    const messages = await interact(async () => ({
+        ok: true, status: 200,
+        headers: { get() { return 'application/json'; } },
+        json: async () => ({
+            answer: 'Oui. Christophe utilise CloudFormation pour standardiser les environnements AWS.',
+            sources: ['cv-public.txt']
+        })
+    }), 'Christophe utilise-t-il CloudFormation ?');
+    assert.match(messages[1].textContent, /^Oui\. Christophe utilise CloudFormation/);
+    assert.match(messages[1].children[0].textContent, /CV public/);
+});
