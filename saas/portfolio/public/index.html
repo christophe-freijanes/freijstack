@@ -92,7 +92,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Fira+Code:wght@400;500&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=20261021-bulle-ia">
 
   <!-- Calendly CSS (moved to head) -->
   <link rel="stylesheet" href="https://assets.calendly.com/assets/external/widget.css">
@@ -778,9 +778,9 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
 
   <!-- Assistant flottant : un seul déclencheur relié à la fenêtre -->
   <button type="button" class="assistant-launch" id="assistantOpen"
-          aria-haspopup="dialog" aria-controls="recruitmentAssistant">
-    <span aria-hidden="true">IA</span>
-    <span class="assistant-sr-only" data-i18n="assistant.open">Assistant IA</span>
+          aria-haspopup="dialog" aria-controls="recruitmentAssistant"
+          aria-label="Ouvrir l'assistant IA" title="Ouvrir l'assistant IA">
+    IA
   </button>
 
   <!-- Bouton retour en haut -->
@@ -789,8 +789,8 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
   </button>
 
   <!-- Your JS -->
-  <script src="js/script.js"></script>
-  <script src="js/assistant.js"></script>
+  <script src="js/script.js?v=20261021-bulle-ia"></script>
+  <script src="js/assistant.js?v=20261021-bulle-ia"></script>
   <script>
     // Ouvre la modal Privacy Policy et charge le contenu
     function closeAllModals() {
