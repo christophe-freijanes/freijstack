@@ -6,6 +6,16 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.56.0](https://github.com/christophe-freijanes/freijstack/compare/v1.55.1...v1.56.0) (2026-10-21)
+
+### 🚀 Features
+
+* **portfolio:** guider les recruteurs vers un rendez-vous ([#338](https://github.com/christophe-freijanes/freijstack/issues/338)) ([ab6a918](https://github.com/christophe-freijanes/freijstack/commit/ab6a9186608f99d4c6b2d39ee314653a06bb29f9))
+
+### 📚 Documentation
+
+* auto-generate diagrams and index [skip ci] ([e25124e](https://github.com/christophe-freijanes/freijstack/commit/e25124ebc64d329c816aef9dd7baa23ea89501c3))
+
 ## [1.55.1](https://github.com/christophe-freijanes/freijstack/compare/v1.55.0...v1.55.1) (2026-10-21)
 
 ### 🐛 Bug Fixes
