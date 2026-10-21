@@ -6,6 +6,16 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.56.2](https://github.com/christophe-freijanes/freijstack/compare/v1.56.1...v1.56.2) (2026-10-21)
+
+### 🐛 Bug Fixes
+
+* **portfolio:** rétablir les CV général et ATS ([#341](https://github.com/christophe-freijanes/freijstack/issues/341)) ([d30bab2](https://github.com/christophe-freijanes/freijstack/commit/d30bab270dd9ceb3b252b7509baf69dc8eb8e4f8))
+
+### 📚 Documentation
+
+* auto-generate diagrams and index [skip ci] ([df82d41](https://github.com/christophe-freijanes/freijstack/commit/df82d41c669f1e1eb4db10b6a54e343267b8f34a))
+
 ## [1.56.1](https://github.com/christophe-freijanes/freijstack/compare/v1.56.0...v1.56.1) (2026-10-21)
 
 ### 🐛 Bug Fixes
