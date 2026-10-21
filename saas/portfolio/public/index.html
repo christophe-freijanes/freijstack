@@ -114,10 +114,7 @@
         <a href="cv/CV-Christophe-FREIJANES.pdf" target="_blank" rel="noopener noreferrer" class="btn-cv" id="downloadCV">
           <i class="fas fa-download"></i> CV
         </a>
-        <button type="button" class="btn-cv assistant-nav-launch" id="assistantOpen" aria-haspopup="dialog" aria-controls="recruitmentAssistant">
-          <i class="fas fa-comment-dots" aria-hidden="true"></i>
-          <span data-i18n="assistant.open">Assistant IA</span>
-        </button>
+        
         <div class="language-selector">
           <button type="button" class="lang-btn active" data-lang="fr" title="Français">
             <i class="fas fa-globe"></i> FR
@@ -688,15 +685,16 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
           <span class="assistant-sr-only" data-i18n="assistant.close">Fermer</span>
         </button>
       </header>
-      <p class="assistant-notice" data-i18n="assistant.notice">Réponses prédéfinies fondées uniquement sur le portfolio.</p>
+      <p class="assistant-notice" data-i18n="assistant.notice">Questions limitées au profil public. Ne transmettez aucune donnée personnelle. Mode secours si le service IA est indisponible.</p>
       <div id="assistantMessages" class="assistant-messages" role="log" aria-live="polite" aria-relevant="additions text">
-        <p class="assistant-message assistant-reply" data-i18n="assistant.greeting">Bonjour ! Que souhaitez-vous savoir sur mon parcours, mes compétences ou mes projets ?</p>
+        <p class="assistant-message assistant-reply" data-i18n="assistant.greeting">Bonjour. Cet assistant présente le parcours, les compétences et les projets de Christophe Freijanes.</p>
       </div>
       <p id="assistantQuestionsTitle" class="assistant-sr-only" data-i18n="assistant.questions.title">Questions fréquentes</p>
       <div class="assistant-questions" aria-labelledby="assistantQuestionsTitle">
-        <button type="button" data-assistant-topic="experience" data-i18n="assistant.question.experience">Mon parcours</button>
-        <button type="button" data-assistant-topic="skills" data-i18n="assistant.question.skills">Mes compétences</button>
-        <button type="button" data-assistant-topic="projects" data-i18n="assistant.question.projects">Mes projets</button>
+        <button type="button" data-assistant-topic="experience" data-i18n="assistant.question.experience">Parcours</button>
+        <button type="button" data-assistant-topic="skills" data-i18n="assistant.question.skills">Compétences</button>
+        <button type="button" data-assistant-topic="projects" data-i18n="assistant.question.projects">Projets</button>
+        <button type="button" data-assistant-topic="booking" data-i18n="assistant.question.booking">Rendez-vous</button>
       </div>
       <form id="assistantForm" class="assistant-form">
         <label for="assistantInput" class="assistant-sr-only" data-i18n="assistant.input.label">Votre question</label>
@@ -724,6 +722,7 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
           <a href="index.html#projets" data-i18n="footer.projects">Projets</a>
           <a href="cv/CV-Christophe-FREIJANES.pdf" target="_blank" rel="noopener noreferrer">CV</a>
           <a href="pages/resume.html" target="_blank" rel="noopener noreferrer">ATS</a>
+          <a href="veille/index.html">Veille technique</a>
         </nav>
 
         <!-- Les liens sociaux sont déjà présents dans la section contact, pas de redondance dans le footer -->
@@ -777,6 +776,13 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
   </div>
   </div>
 
+  <!-- Assistant flottant : un seul déclencheur relié à la fenêtre -->
+  <button type="button" class="assistant-launch" id="assistantOpen"
+          aria-haspopup="dialog" aria-controls="recruitmentAssistant">
+    <span aria-hidden="true">IA</span>
+    <span class="assistant-sr-only" data-i18n="assistant.open">Assistant IA</span>
+  </button>
+
   <!-- Bouton retour en haut -->
   <button id="backToTop" title="Remonter en haut" aria-label="Remonter en haut">
     <i class="fas fa-arrow-up"></i>
@@ -784,6 +790,7 @@ $ echo "Security-by-design • Zero Trust • Automation-first"</code></pre>
 
   <!-- Your JS -->
   <script src="js/script.js"></script>
+  <script src="js/assistant.js"></script>
   <script>
     // Ouvre la modal Privacy Policy et charge le contenu
     function closeAllModals() {
