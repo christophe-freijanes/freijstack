@@ -24,7 +24,7 @@ function element() {
     };
 }
 
-async function interact(fakeFetch, question, topic = null) {
+async function interact(fakeFetch, question, topic = null, lang = 'fr') {
     const ids = Object.fromEntries(
         ['recruitmentAssistant', 'assistantOpen', 'assistantClose',
             'assistantMessages', 'assistantForm', 'assistantInput']
@@ -33,9 +33,12 @@ async function interact(fakeFetch, question, topic = null) {
     const chip = element();
     chip.dataset.assistantTopic = topic;
     chip.textContent = topic || '';
+    const booking = element();
+    booking.href = 'https://calendar.app.google/SfQR76G2NTX63CyLA';
     const document = {
         readyState: 'complete',
         getElementById(id) { return ids[id] || null; },
+        querySelector(selector) { return selector === '.assistant-booking' ? booking : null; },
         createElement() { return element(); },
         querySelectorAll(selector) {
             return selector === '[data-assistant-topic]' && topic ? [chip] : [];
@@ -43,7 +46,7 @@ async function interact(fakeFetch, question, topic = null) {
     };
     const context = {
         document,
-        localStorage: { getItem() { return 'fr'; } },
+        localStorage: { getItem() { return lang; } },
         fetch: fakeFetch,
         AbortController,
         setTimeout,
@@ -142,4 +145,55 @@ test('une réponse affirmative sourcée du RAG reste intacte', async () => {
     }), 'Christophe utilise-t-il CloudFormation ?');
     assert.match(messages[1].textContent, /^Oui\. Christophe utilise CloudFormation/);
     assert.match(messages[1].children[0].textContent, /CV public/);
+});
+
+test('une demande de plusieurs créneaux ouvre le calendrier sans inventer des horaires', async () => {
+    let apiCalled = false;
+    const messages = await interact(async () => {
+        apiCalled = true;
+        throw new Error('Le RAG ne doit pas choisir les horaires');
+    }, 'Pouvez-vous proposer deux ou trois créneaux pour un entretien ?');
+    assert.equal(apiCalled, false);
+    assert.match(messages[1].textContent, /calendrier de réservation/);
+    assert.doesNotMatch(messages[1].textContent, /(?:10|14|16) h/);
+    assert.equal(messages[1].children[0].href, 'https://calendar.app.google/SfQR76G2NTX63CyLA');
+    assert.equal(messages[1].children[0].rel, 'noopener noreferrer');
+});
+
+test('une demande de contact permet la réservation immédiate', async () => {
+    const messages = await interact(async () => {
+        throw new Error('Pas d’appel nécessaire');
+    }, 'Comment contacter Christophe pour un appel ?');
+    assert.match(messages[1].children[0].textContent, /Voir les créneaux et réserver/);
+});
+
+test('le bouton rendez-vous est une action de réservation et non une réponse RAG', async () => {
+    const messages = await interact(async () => {
+        throw new Error('Pas d’appel nécessaire');
+    }, '', 'booking');
+    assert.equal(messages[0].textContent, 'booking');
+    assert.match(messages[1].textContent, /horaire qui vous convient/);
+});
+
+test('la proposition de réservation existe en anglais', async () => {
+    const messages = await interact(async () => {
+        throw new Error('Pas d’appel nécessaire');
+    }, 'Are there any available time slots to speak with Christophe?', null, 'en');
+    assert.match(messages[1].textContent, /booking calendar/);
+    assert.equal(messages[1].children[0].textContent, 'View appointment options');
+});
+
+test('une question sur les compétences reste transmise au RAG', async () => {
+    let called = false;
+    const messages = await interact(async (_url, options) => {
+        called = true;
+        assert.equal(JSON.parse(options.body).question, 'Christophe maîtrise-t-il AWS ?');
+        return {
+            ok: true, status: 200,
+            headers: { get() { return 'application/json'; } },
+            json: async () => ({ answer: 'Oui. Christophe travaille sur AWS.', sources: [] })
+        };
+    }, 'Christophe maîtrise-t-il AWS ?');
+    assert.equal(called, true);
+    assert.match(messages[1].textContent, /^Oui\./);
 });
