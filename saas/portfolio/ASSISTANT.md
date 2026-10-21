@@ -31,3 +31,7 @@ L'assistant présente **Christophe Freijanes à la troisième personne** en fran
 Une réponse qui prétend être Christophe est refusée côté navigateur, sans réécriture des faits, et remplacée par un secours local **explicitement signalé**.
 
 La même règle doit être implémentée dans le prompt système et les tests du backend RAG du VPS ; cette PR ne modifie pas le serveur.
+
+## Réponses Oui / Non
+
+Le contrat éditorial et ses cas de test sont définis dans [RESPONSE_POLICY.md](RESPONSE_POLICY.md). Le frontend ne déduit jamais un oui ou un non à partir d'une absence d'information. Pour appliquer ce style aux réponses du véritable RAG, intégrer les règles au **prompt système du backend sur le VPS** et valider les cas d'acceptation.
