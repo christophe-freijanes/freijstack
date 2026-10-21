@@ -1,7 +1,7 @@
 # Assistant recrutement RAG — intégration front-end
 
 Le portfolio est un conteneur nginx statique. Le navigateur ne possède **aucune clé LLM**.
-La page envoie \`POST /api/chat\` avec \`{"message":"..."}\` et attend
+La page envoie \`POST /api/chat\` avec \`{"question":"..."}\` et attend
 \`{"answer":"..."}\`, uniquement lorsque le backend public est routé.
 Une erreur, un timeout ou une réponse HTML entraîne un **secours local explicitement signalé**.
 
@@ -15,7 +15,7 @@ Une erreur, un timeout ou une réponse HTML entraîne un **secours local explici
    curl -sS -o /dev/null -w '%{http_code} %{content_type}\n' https://portfolio.freijstack.com/api/chat/health
    curl -i -X POST https://portfolio.freijstack.com/api/chat \
      -H 'Content-Type: application/json' \
-     --data '{"message":"Quelles sont les compétences AWS publiques de Christophe ?"}'
+     --data '{"question":"Quelles sont les compétences AWS publiques de Christophe ?"}'
    \`\`\`
 
 4. Confirmer que les réponses ont \`Content-Type: application/json\` et ne renvoient aucune information confidentielle.
@@ -23,3 +23,11 @@ Une erreur, un timeout ou une réponse HTML entraîne un **secours local explici
 
 **Aucune route Traefik, configuration VPS ou backend LLM n'est créée par cette PR.**
 L'intégration de l'API doit être testée sur le VPS avant la publication en production.
+
+## Voix et sources
+
+L'assistant présente **Christophe Freijanes à la troisième personne** en français et en anglais. Il n'usurpe pas son identité. Les questions libres comme les boutons thématiques interrogent la même API RAG `/api/chat`. Les sources affichées sont des libellés autorisés.
+
+Une réponse qui prétend être Christophe est refusée côté navigateur, sans réécriture des faits, et remplacée par un secours local **explicitement signalé**.
+
+La même règle doit être implémentée dans le prompt système et les tests du backend RAG du VPS ; cette PR ne modifie pas le serveur.
