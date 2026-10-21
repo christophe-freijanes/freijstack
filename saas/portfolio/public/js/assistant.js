@@ -15,14 +15,14 @@ function initializeAssistant() {
             skills: 'Les compétences affichées comprennent AWS, GCP, Kubernetes, Terraform, AWS CDK, CloudFormation, Ansible, Python, Bash/PowerShell, DevSecOps, SRE, FinOps, CloudWatch Logs, Datadog, LLM, MCP et Amazon Bedrock.',
             projects: 'Le portfolio présente notamment Formation DevOps & CI/CD, ansible-webapp, student-list, freijstack, Docker Applications et Infrastructure as Code. Les liens sont dans la section Projets.',
             booking: 'Vous pouvez réserver un échange avec le bouton Google Calendar ci-dessous.',
-            unknown: 'Cet assistant présente les informations publiques du portfolio de Christophe Freijanes. Un rendez-vous peut également être réservé via le calendrier.'
+            unknown: 'Les sources publiques du portfolio ne permettent pas de répondre précisément à cette question. Pour une confirmation, un échange avec Christophe peut être réservé via le calendrier.'
         },
         en: {
             experience: 'The portfolio shows over 20 years of experience in Cloud and Security. Since June 2026, Christophe has been Principal Specialist – AWS Platform / Technical Lead at La Caisse (CDPQ). His background also includes ACENSI, SQUAD, ECONOCOM (ITER project), DIGIMIND and HARDIS.',
             skills: 'Listed skills include AWS, GCP, Kubernetes, Terraform, AWS CDK, CloudFormation, Ansible, Python, Bash/PowerShell, DevSecOps, SRE, FinOps, CloudWatch Logs, Datadog, LLMs, MCP and Amazon Bedrock.',
             projects: 'The portfolio features DevOps & CI/CD Training, ansible-webapp, student-list, freijstack, Docker Applications and Infrastructure as Code. Links are in the Projects section.',
             booking: 'You can book a conversation using the Google Calendar button below.',
-            unknown: 'This assistant presents Christophe Freijanes’s public portfolio information. A meeting can also be booked using the calendar.'
+            unknown: 'The public portfolio does not contain enough information to answer this question accurately. A conversation with Christophe can be booked using the calendar for confirmation.'
         }
     };
 
