@@ -1,0 +1,69 @@
+name: "SEO - Veille technique automatisée"
+
+on:
+  schedule:
+    - cron: "17 13 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: seo-veille-develop
+  cancel-in-progress: false
+
+jobs:
+  veille:
+    name: Proposer les nouveautés officielles
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: develop
+          token: ${{ secrets.SEO_PR_TOKEN || secrets.RELEASE_TOKEN || github.token }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Dépendances sécurisées
+        run: python -m pip install --disable-pip-version-check defusedxml==0.7.1
+      - name: Tests unitaires hors réseau
+        run: python -m unittest discover -s scripts/seo -p "test_veille.py"
+      - name: Sélection des annonces
+        run: python scripts/seo/veille.py
+      - name: Vérifier les URL publiques
+        run: python scripts/seo/check_indexability.py
+      - name: Proposer une PR en brouillon
+        env:
+          GH_TOKEN: ${{ secrets.SEO_PR_TOKEN || secrets.RELEASE_TOKEN || github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- saas/portfolio/editorial/veille.json saas/portfolio/public/veille/index.html; then
+            echo "Aucune nouveauté à publier." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          pending=$(gh pr list --head "automation/seo-veille" --base develop --state open --json number --jq "length")
+          if [[ "$pending" -gt 0 ]]; then
+            echo "Une proposition de veille attend déjà une revue humaine." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          branch="automation/seo-veille-$(date -u +%Y%m%d)"
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null; then
+            echo "La branche du jour existe déjà : $branch" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add saas/portfolio/editorial/veille.json saas/portfolio/public/veille/index.html
+          git commit -m "docs(seo): proposer une veille technique"
+          git push origin "HEAD:refs/heads/$branch"
+          gh pr create --draft --base develop --head "$branch" \
+            --title "docs(seo): revue de la veille technique" \
+            --body "Sélection automatique de sources officielles. Vérifier chaque lien, la pertinence et le contexte avant publication. Aucun déploiement automatique."
+          echo "PR de veille créée en brouillon : $branch" >> "$GITHUB_STEP_SUMMARY"
