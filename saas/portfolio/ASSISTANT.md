@@ -45,3 +45,5 @@ Lorsqu'un visiteur demande à joindre Christophe, à organiser un entretien, à 
 - Cette action fonctionne même si le service RAG est indisponible et en français comme en anglais.
 - Le bouton « Rendez-vous » offre un raccourci explicite. Les questions techniques restent traitées par le RAG.
 - **Phase ultérieure facultative** : proposer plusieurs créneaux précis dans le chat nécessiterait une API d'agenda côté serveur avec autorisations minimales et contrôle du consentement ; aucune telle intégration n'est revendiquée ici.
+
+**Vérification avant publication** : ouvrir le lien de réservation en navigation privée et confirmer qu’il affiche les disponibilités attendues, dans le bon fuseau horaire. Ce contrôle est distinct des tests unitaires du chatbot.
