@@ -15,6 +15,15 @@ function initializeAssistant() {
             skills: 'Les compétences affichées comprennent AWS, GCP, Kubernetes, Terraform, AWS CDK, CloudFormation, Ansible, Python, Bash/PowerShell, DevSecOps, SRE, FinOps, CloudWatch Logs, Datadog, LLM, MCP et Amazon Bedrock.',
             projects: 'Le portfolio présente notamment Formation DevOps & CI/CD, ansible-webapp, student-list, freijstack, Docker Applications et Infrastructure as Code. Les liens sont dans la section Projets.',
             booking: 'Pour échanger avec Christophe au sujet d’une opportunité, le calendrier de réservation ci-dessous présente les créneaux proposés. Sélectionnez l’horaire qui vous convient pour réserver directement un rendez-vous.',
+            certifications: 'Le CV public mentionne ITIL et renvoie vers le profil Credly pour consulter les certifications. La liste exacte des badges doit être vérifiée sur Credly.',
+            languages: 'Le CV public indique le français et l’anglais. Il décrit le français comme langue maternelle et l’anglais comme langue professionnelle.',
+            teamwork: 'Le parcours public décrit des missions de conseil, de standardisation, de gouvernance et d’amélioration continue. Il ne détaille pas suffisamment le rôle précis de Christophe dans chaque équipe.',
+            achievements: 'Ses réalisations publiques comprennent l’industrialisation d’infrastructures AWS, des modules Terraform réutilisables, l’automatisation CI/CD et des pratiques de sauvegarde et de restauration.',
+            backup: 'Le CV public mentionne Commvault et Clumio dans des projets de protection des données et de restauration.',
+            linux: 'Oui. Linux figure parmi les compétences de Christophe dans son CV public. La date exacte de début de pratique n’y est pas précisée.',
+            agentic: 'Le portfolio présente des compétences liées aux LLM, MCP et Amazon Bedrock. Le détail des réalisations en IA agentique doit être confirmé à partir de projets documentés.',
+            strengths: 'Son parcours met en avant la standardisation, l’automatisation, la gouvernance et la réduction des risques. Les points faibles personnels ne sont pas documentés publiquement.',
+            cloudTenure: 'Christophe a une expérience confirmée des environnements AWS et de la sécurité cloud. Les sources publiques ne permettent pas de dater précisément ses débuts dans le cloud.',
             unknown: 'Les sources publiques du portfolio ne permettent pas de répondre précisément à cette question. Pour une confirmation, un échange avec Christophe peut être réservé via le calendrier.'
         },
         en: {
@@ -22,6 +31,15 @@ function initializeAssistant() {
             skills: 'Listed skills include AWS, GCP, Kubernetes, Terraform, AWS CDK, CloudFormation, Ansible, Python, Bash/PowerShell, DevSecOps, SRE, FinOps, CloudWatch Logs, Datadog, LLMs, MCP and Amazon Bedrock.',
             projects: 'The portfolio features DevOps & CI/CD Training, ansible-webapp, student-list, freijstack, Docker Applications and Infrastructure as Code. Links are in the Projects section.',
             booking: 'To discuss an opportunity with Christophe, the booking calendar below shows the available appointment options. Select a suitable time to book a conversation directly.',
+            certifications: 'The public CV mentions ITIL and links to Credly for certifications. The exact badge list should be checked on Credly.',
+            languages: 'The public CV lists French as a native language and English as a professional language.',
+            teamwork: 'His public background includes consulting, standardization, governance and continuous improvement. Individual team responsibilities are not fully documented.',
+            achievements: 'Documented achievements include AWS infrastructure standardization, reusable Terraform modules, CI/CD automation and backup/recovery practices.',
+            backup: 'The public CV mentions Commvault and Clumio in data protection and recovery work.',
+            linux: 'Yes. Linux is listed among his technical skills. The public CV does not establish an exact start date.',
+            agentic: 'The portfolio lists LLM, MCP and Amazon Bedrock skills. Specific agentic AI achievements require documented project evidence.',
+            strengths: 'His public background highlights automation, standardization, governance and risk reduction. Personal weaknesses are not documented publicly.',
+            cloudTenure: 'Christophe has documented AWS and cloud security experience, but the public sources do not establish when he started working in cloud.',
             unknown: 'The public portfolio does not contain enough information to answer this question accurately. A conversation with Christophe can be booked using the calendar for confirmation.'
         }
     };
@@ -76,10 +94,25 @@ function initializeAssistant() {
         return message;
     }
 
+    function factualTopic(question) {
+        const text = normalize(question);
+        if (/\b(certification|certifications|certifie|credly|badge)\b/.test(text)) return 'certifications';
+        if (/\b(langue|langues|language|languages|anglais|english|francais|french)\b/.test(text)) return 'languages';
+        if (/\b(travail en equipe|equipe|collaboration|teamwork|team work|collaborat)\b/.test(text)) return 'teamwork';
+        if (/\b(realisation|realisations|achievement|achievements|accomplishment)\b/.test(text)) return 'achievements';
+        if (/\b(sauvegarde|backup|commvault|clumio|restore|recovery)\b/.test(text)) return 'backup';
+        if (/\b(linux|rhel|red hat)\b/.test(text)) return 'linux';
+        if (/\b(ia agentique|agentic ai|agentic|agents? ia)\b/.test(text)) return 'agentic';
+        if (/\b(points? (?:forts?|faibles?)|forces? et faiblesses?|strengths?|weaknesses?)\b/.test(text)) return 'strengths';
+        if (/(depuis combien de temps|how long|combien d.annees?).*\b(cloud|aws)\b/.test(text)) return 'cloudTenure';
+        return null;
+    }
+
     function answerQuestion(question) {
         const text = normalize(question);
         const copy = responses[language()];
-
+        const topic = factualTopic(question);
+        if (topic) return copy[topic];
         if (/(book|booking|calendar|schedule|meeting|interview|rdv|rendez|reservation|reserve)/.test(text)) return copy.booking;
         if (/(experience|parcours|career|background|caisse|cdpq|acensi|squad|econom|digimind|hardis|years|annee)/.test(text)) return copy.experience;
         if (/(skill|competence|technical|technologie|aws|gcp|kubernetes|terraform|cloudformation|cdk|sre|finops|bedrock|mcp|datadog|cloudwatch|ansible|druva|devsecops)/.test(text)) return copy.skills;
@@ -160,6 +193,13 @@ function initializeAssistant() {
             addMessage(label, true);
             const reply = addMessage(responses[language()].booking, false);
             showBookingLink(reply);
+            input.focus();
+            return;
+        }
+        const verified = factualTopic(question);
+        if (verified) {
+            addMessage(label, true);
+            addMessage(responses[language()][verified], false);
             input.focus();
             return;
         }
