@@ -6,6 +6,21 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.55.0](https://github.com/christophe-freijanes/freijstack/compare/v1.54.5...v1.55.0) (2026-10-21)
+
+### 🚀 Features
+
+* **seo:** automatiser la veille technique du portfolio ([#334](https://github.com/christophe-freijanes/freijstack/issues/334)) ([f317a40](https://github.com/christophe-freijanes/freijstack/commit/f317a4028ba180f7b7c840c96076834e8430cf97))
+
+### 🐛 Bug Fixes
+
+* **portfolio:** restaurer la bulle IA flottante ([#336](https://github.com/christophe-freijanes/freijstack/issues/336)) ([e0f4467](https://github.com/christophe-freijanes/freijstack/commit/e0f4467294c1299473e9eca21170f7e2c1a6e930))
+* **portfolio:** rétablir l'appel au RAG public avec secours ([#335](https://github.com/christophe-freijanes/freijstack/issues/335)) ([31c5bb2](https://github.com/christophe-freijanes/freijstack/commit/31c5bb2cd1a6a49b8e6f2ab8edd300da592b6d47))
+
+### 📚 Documentation
+
+* auto-generate diagrams and index [skip ci] ([1be4df5](https://github.com/christophe-freijanes/freijstack/commit/1be4df542d70d8208a695522a23d9b5002a083eb))
+
 ## [1.54.5](https://github.com/christophe-freijanes/freijstack/compare/v1.54.4...v1.54.5) (2026-10-20)
 
 ### 🐛 Bug Fixes
