@@ -15,14 +15,27 @@ function initializeAssistant() {
             skills: 'Les compétences affichées comprennent AWS, GCP, Kubernetes, Terraform, AWS CDK, CloudFormation, Ansible, Python, Bash/PowerShell, DevSecOps, SRE, FinOps, CloudWatch Logs, Datadog, LLM, MCP et Amazon Bedrock.',
             projects: 'Le portfolio présente notamment Formation DevOps & CI/CD, ansible-webapp, student-list, freijstack, Docker Applications et Infrastructure as Code. Les liens sont dans la section Projets.',
             booking: 'Vous pouvez réserver un échange avec le bouton Google Calendar ci-dessous.',
-            unknown: 'Je peux répondre à partir du portfolio sur le parcours, les compétences et les projets. Vous pouvez aussi réserver un échange avec le bouton Google Calendar.'
+            unknown: 'Cet assistant présente les informations publiques du portfolio de Christophe Freijanes. Un rendez-vous peut également être réservé via le calendrier.'
         },
         en: {
             experience: 'The portfolio shows over 20 years of experience in Cloud and Security. Since June 2026, Christophe has been Principal Specialist – AWS Platform / Technical Lead at La Caisse (CDPQ). His background also includes ACENSI, SQUAD, ECONOCOM (ITER project), DIGIMIND and HARDIS.',
             skills: 'Listed skills include AWS, GCP, Kubernetes, Terraform, AWS CDK, CloudFormation, Ansible, Python, Bash/PowerShell, DevSecOps, SRE, FinOps, CloudWatch Logs, Datadog, LLMs, MCP and Amazon Bedrock.',
             projects: 'The portfolio features DevOps & CI/CD Training, ansible-webapp, student-list, freijstack, Docker Applications and Infrastructure as Code. Links are in the Projects section.',
             booking: 'You can book a conversation using the Google Calendar button below.',
-            unknown: 'I can answer questions based on the portfolio about experience, skills and projects. You can also book a conversation using the Google Calendar button.'
+            unknown: 'This assistant presents Christophe Freijanes’s public portfolio information. A meeting can also be booked using the calendar.'
+        }
+    };
+
+    const topics = {
+        fr: {
+            experience: 'Quel est le parcours professionnel de Christophe Freijanes ?',
+            skills: 'Quelles sont les compétences techniques de Christophe Freijanes ?',
+            projects: 'Quels projets techniques présente le portfolio de Christophe Freijanes ?'
+        },
+        en: {
+            experience: 'What is Christophe Freijanes’s professional background?',
+            skills: 'What are Christophe Freijanes’s technical skills?',
+            projects: 'Which projects appear in Christophe Freijanes’s portfolio?'
         }
     };
 
@@ -73,10 +86,9 @@ function initializeAssistant() {
     });
 
     document.querySelectorAll('[data-assistant-topic]').forEach(function(button) {
-        button.addEventListener('click', function() {
-            const topic = button.dataset.assistantTopic;
-            addMessage(button.textContent.trim(), true);
-            addMessage(responses[language()][topic], false);
+        button.addEventListener('click', async function() {
+            const question = topics[language()][button.dataset.assistantTopic];
+            if (question) await sendQuestion(question, button.textContent.trim());
         });
     });
 
@@ -90,7 +102,7 @@ function initializeAssistant() {
             const result = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-                body: JSON.stringify({ message: question }),
+                body: JSON.stringify({ question }),
                 cache: 'no-store',
                 signal: controller.signal
             });
@@ -100,9 +112,22 @@ function initializeAssistant() {
                 return null;
             }
             const data = await result.json();
-            return typeof data.answer === 'string' && data.answer.trim()
-                ? data.answer.trim().slice(0, 1800)
-                : null;
+            if (typeof data.answer !== 'string') return null;
+            const answer = data.answer.trim().slice(0, 1800);
+            // Un assistant n'usurpe jamais la voix de Christophe.
+            if (!answer || /(?:^|[\s(«"“])(?:je\b|j['’]|moi\b|mon\b|ma\b|mes\b|i\b|i['’]|my\b|mine\b)/i.test(answer)) {
+                return null;
+            }
+            const sources = Array.isArray(data.sources) ? data.sources : [];
+            const labels = {
+                'cv-public.txt': language() === 'en' ? 'Public CV' : 'CV public',
+                'recruiter-knowledge-rag.txt': language() === 'en'
+                    ? 'Public portfolio knowledge' : 'Connaissances publiques du portfolio'
+            };
+            return {
+                answer,
+                sources: [...new Set(sources.filter(source => Object.hasOwn(labels, source)).map(source => labels[source]))]
+            };
         } catch {
             return null;
         } finally {
@@ -110,24 +135,42 @@ function initializeAssistant() {
         }
     }
 
-    form.addEventListener('submit', async function(event) {
-        event.preventDefault();
-        const question = input.value.trim();
+    async function sendQuestion(question, label = question) {
         if (!question || sending) return;
         sending = true;
         const button = form.querySelector('button[type="submit"]');
         if (button) button.disabled = true;
-        addMessage(question, true);
-        const pending = addMessage(language() === 'en' ? 'Checking the public profile…' : 'Recherche dans le profil public…', false);
-        form.reset();
+        addMessage(label, true);
+        const pending = addMessage(language() === 'en'
+            ? 'Searching public sources…' : 'Recherche dans les sources publiques…', false);
         try {
-            const answer = await queryApi(question);
-            pending.textContent = answer || (language() === 'en' ? 'Offline mode: ' : 'Mode secours : ') + answerQuestion(question);
+            const reply = await queryApi(question);
+            if (reply) {
+                pending.textContent = reply.answer;
+                if (reply.sources.length) {
+                    const sources = document.createElement('small');
+                    sources.className = 'assistant-sources';
+                    sources.textContent = (language() === 'en' ? 'Sources: ' : 'Sources : ')
+                        + reply.sources.join(' · ');
+                    pending.appendChild(sources);
+                }
+            } else {
+                pending.textContent = (language() === 'en' ? 'Offline mode: ' : 'Mode secours : ')
+                    + answerQuestion(question);
+            }
         } finally {
             sending = false;
             if (button) button.disabled = false;
             input.focus();
         }
+    }
+
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const question = input.value.trim();
+        if (!question || sending) return;
+        form.reset();
+        await sendQuestion(question);
     });
 
     function updatePlaceholder() {
