@@ -695,13 +695,13 @@ section {
     background: var(--text-primary);
     border-radius: 2px;
     transition: all var(--transition-fast);
+}
 
 .footer-legal-sep {
   color: var(--text-secondary, #b7c3d6);
   font-size: 1.1em;
   margin: 0 2px;
   user-select: none;
-}
 }
 
 @media (max-width: 768px) {
