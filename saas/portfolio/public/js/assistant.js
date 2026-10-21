@@ -14,14 +14,14 @@ function initializeAssistant() {
             experience: 'Le portfolio présente plus de 20 ans d’expérience en Cloud et sécurité. Depuis juin 2026, Christophe est Spécialiste principal – Plateforme AWS / Référent technique chez La Caisse (CDPQ). Son parcours inclut notamment ACENSI, SQUAD, ECONOCOM (projet ITER), DIGIMIND et HARDIS.',
             skills: 'Les compétences affichées comprennent AWS, GCP, Kubernetes, Terraform, AWS CDK, CloudFormation, Ansible, Python, Bash/PowerShell, DevSecOps, SRE, FinOps, CloudWatch Logs, Datadog, LLM, MCP et Amazon Bedrock.',
             projects: 'Le portfolio présente notamment Formation DevOps & CI/CD, ansible-webapp, student-list, freijstack, Docker Applications et Infrastructure as Code. Les liens sont dans la section Projets.',
-            booking: 'Vous pouvez réserver un échange avec le bouton Google Calendar ci-dessous.',
+            booking: 'Pour échanger avec Christophe au sujet d’une opportunité, le calendrier de réservation ci-dessous présente les créneaux proposés. Sélectionnez l’horaire qui vous convient pour réserver directement un rendez-vous.',
             unknown: 'Les sources publiques du portfolio ne permettent pas de répondre précisément à cette question. Pour une confirmation, un échange avec Christophe peut être réservé via le calendrier.'
         },
         en: {
             experience: 'The portfolio shows over 20 years of experience in Cloud and Security. Since June 2026, Christophe has been Principal Specialist – AWS Platform / Technical Lead at La Caisse (CDPQ). His background also includes ACENSI, SQUAD, ECONOCOM (ITER project), DIGIMIND and HARDIS.',
             skills: 'Listed skills include AWS, GCP, Kubernetes, Terraform, AWS CDK, CloudFormation, Ansible, Python, Bash/PowerShell, DevSecOps, SRE, FinOps, CloudWatch Logs, Datadog, LLMs, MCP and Amazon Bedrock.',
             projects: 'The portfolio features DevOps & CI/CD Training, ansible-webapp, student-list, freijstack, Docker Applications and Infrastructure as Code. Links are in the Projects section.',
-            booking: 'You can book a conversation using the Google Calendar button below.',
+            booking: 'To discuss an opportunity with Christophe, the booking calendar below shows the available appointment options. Select a suitable time to book a conversation directly.',
             unknown: 'The public portfolio does not contain enough information to answer this question accurately. A conversation with Christophe can be booked using the calendar for confirmation.'
         }
     };
@@ -30,12 +30,14 @@ function initializeAssistant() {
         fr: {
             experience: 'Quel est le parcours professionnel de Christophe Freijanes ?',
             skills: 'Quelles sont les compétences techniques de Christophe Freijanes ?',
-            projects: 'Quels projets techniques présente le portfolio de Christophe Freijanes ?'
+            projects: 'Quels projets techniques présente le portfolio de Christophe Freijanes ?',
+            booking: 'Comment prendre rendez-vous avec Christophe Freijanes ?'
         },
         en: {
             experience: 'What is Christophe Freijanes’s professional background?',
             skills: 'What are Christophe Freijanes’s technical skills?',
-            projects: 'Which projects appear in Christophe Freijanes’s portfolio?'
+            projects: 'Which projects appear in Christophe Freijanes’s portfolio?',
+            booking: 'How can I book a meeting with Christophe Freijanes?'
         }
     };
 
@@ -47,6 +49,23 @@ function initializeAssistant() {
         }
     };
     const normalize = text => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    function asksForMeeting(question) {
+        const text = normalize(question);
+        return /\b(rendez[ -]?vous|rdv|creneaux?|disponibilite?s?|dispos?|plages? horaires?|calendrier|agenda|reserver|reservation|contact(?:er)?|joindre|appel|visio|entretien|rencontrer|meeting|appointment|book(?:ing)?|schedule|availability|available|time slots?|calendar|interview|contact|reach|call|speak|connect)\b/.test(text);
+    }
+
+    function showBookingLink(message) {
+        const booking = document.querySelector('.assistant-booking');
+        if (!booking || !booking.href) return;
+        const link = document.createElement('a');
+        link.className = 'assistant-booking-link';
+        link.href = booking.href;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = language() === 'en' ? 'View appointment options' : 'Voir les créneaux et réserver';
+        message.appendChild(link);
+    }
 
     function addMessage(text, isUser) {
         const message = document.createElement('p');
@@ -137,6 +156,13 @@ function initializeAssistant() {
 
     async function sendQuestion(question, label = question) {
         if (!question || sending) return;
+        if (asksForMeeting(question)) {
+            addMessage(label, true);
+            const reply = addMessage(responses[language()].booking, false);
+            showBookingLink(reply);
+            input.focus();
+            return;
+        }
         sending = true;
         const button = form.querySelector('button[type="submit"]');
         if (button) button.disabled = true;

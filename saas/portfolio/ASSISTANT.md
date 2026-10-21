@@ -35,3 +35,15 @@ La même règle doit être implémentée dans le prompt système et les tests du
 ## Réponses Oui / Non
 
 Le contrat éditorial et ses cas de test sont définis dans [RESPONSE_POLICY.md](RESPONSE_POLICY.md). Le frontend ne déduit jamais un oui ou un non à partir d'une absence d'information. Pour appliquer ce style aux réponses du véritable RAG, intégrer les règles au **prompt système du backend sur le VPS** et valider les cas d'acceptation.
+
+## Parcours recruteur : disponibilités et prise de rendez-vous
+
+Lorsqu'un visiteur demande à joindre Christophe, à organiser un entretien, à réserver ou à obtenir un ou plusieurs créneaux, **l'interface répond sans invoquer le LLM** : elle présente une courte invitation à réserver et un lien vers la page Google Calendar déjà présente sur le portfolio.
+
+- La page de réservation est la source des horaires proposés ; aucune plage horaire n'est inventée, et le chatbot n'a pas accès à l'agenda privé.
+- Le recruteur choisit l'horaire et confirme le rendez-vous dans Google Calendar, pas dans le chat.
+- Cette action fonctionne même si le service RAG est indisponible et en français comme en anglais.
+- Le bouton « Rendez-vous » offre un raccourci explicite. Les questions techniques restent traitées par le RAG.
+- **Phase ultérieure facultative** : proposer plusieurs créneaux précis dans le chat nécessiterait une API d'agenda côté serveur avec autorisations minimales et contrôle du consentement ; aucune telle intégration n'est revendiquée ici.
+
+**Vérification avant publication** : ouvrir le lien de réservation en navigation privée et confirmer qu’il affiche les disponibilités attendues, dans le bon fuseau horaire. Ce contrôle est distinct des tests unitaires du chatbot.

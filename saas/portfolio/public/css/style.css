@@ -1871,6 +1871,14 @@ section {
     color: var(--text-primary);
 }
 
+.assistant-booking-link {
+    display: block;
+    margin-top: 10px;
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: underline;
+}
+
 .assistant-sources {
     display: block;
     margin-top: 6px;
