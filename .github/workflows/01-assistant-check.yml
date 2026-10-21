@@ -1,0 +1,40 @@
+name: "Qualité - Assistant Portfolio"
+
+on:
+  pull_request:
+    branches: [develop, master]
+    paths:
+      - "saas/portfolio/public/index.html"
+      - "saas/portfolio/public/js/assistant.js"
+      - "saas/portfolio/public/js/script.js"
+      - "scripts/tests/assistant.test.cjs"
+      - ".github/workflows/01-assistant-check.yml"
+  push:
+    branches: [develop, master]
+    paths:
+      - "saas/portfolio/public/index.html"
+      - "saas/portfolio/public/js/assistant.js"
+      - "saas/portfolio/public/js/script.js"
+      - "scripts/tests/assistant.test.cjs"
+      - ".github/workflows/01-assistant-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Tester l’assistant RAG et son secours
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+      - name: Vérifier la syntaxe
+        run: |
+          node --check saas/portfolio/public/js/script.js
+          node --check saas/portfolio/public/js/assistant.js
+      - name: Tester les réponses
+        run: node --test scripts/tests/assistant.test.cjs
+
