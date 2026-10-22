@@ -6,6 +6,16 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.57.3](https://github.com/christophe-freijanes/freijstack/compare/v1.57.2...v1.57.3) (2026-10-22)
+
+### 🐛 Bug Fixes
+
+* **ci:** transmettre les secrets au scan SecureVault ([#353](https://github.com/christophe-freijanes/freijstack/issues/353)) ([f96bc70](https://github.com/christophe-freijanes/freijstack/commit/f96bc70a55770012230fbddaffd8af4900615dbd))
+
+### 📚 Documentation
+
+* auto-generate diagrams and index [skip ci] ([c05fbe2](https://github.com/christophe-freijanes/freijstack/commit/c05fbe2f7764d4b04ee5b3bb29e0bf5fe7caf40d))
+
 ## [1.57.2](https://github.com/christophe-freijanes/freijstack/compare/v1.57.1...v1.57.2) (2026-10-22)
 
 ### 🐛 Bug Fixes
