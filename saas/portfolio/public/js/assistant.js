@@ -112,7 +112,7 @@ function initializeAssistant() {
 
     function factualTopic(question) {
         const text = normalize(question);
-        if (/\b(vulnerabilit(?:e|es)?|vulnerability|vulnerabilities|cve|remediation|correctifs? de securite|gestion des failles)\b/.test(text)) return 'vulnerabilities';
+        if (/\b(vulnerabilit[a-z]*|vulnerability|vulnerabilities|cve|remediation|correctifs? de securite|gestion des failles)\b/.test(text)) return 'vulnerabilities';
         if (/\b(nom de famille|last name|family name|surname|comment (?:tu|vous|il) (?:t.appelles?|s.appelle)|quel est (?:ton|son|votre) nom)\b/.test(text)) return 'identity';
         if (/\b(sre|site reliability|fiabilite|observabilite)\b/.test(text)) return 'sre';
         if (/\b(devsecops)\b/.test(text)) return 'devsecops';
