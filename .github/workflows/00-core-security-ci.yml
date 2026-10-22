@@ -281,8 +281,20 @@ jobs:
             exit 1
           fi
 
-          echo "$pass" | docker login "$host" -u "$user" --password-stdin
-          echo "✅ Logged in to $host for env=$env" >> "$GITHUB_STEP_SUMMARY"
+          for attempt in 1 2 3; do
+            if printf '%s' "$pass" | docker login "$host" -u "$user" --password-stdin; then
+              echo "✅ Connexion au registre $host (env=$env)" >> "$GITHUB_STEP_SUMMARY"
+              break
+            fi
+
+            if [ "$attempt" -eq 3 ]; then
+              echo "❌ Connexion au registre $host impossible après 3 tentatives." >&2
+              exit 1
+            fi
+
+            echo "⚠️ Connexion au registre échouée (tentative $attempt/3). Nouvel essai." >&2
+            sleep "$((attempt * 5))"
+          done
 
       - name: Pull image (verify tag exists)
         run: |
