@@ -6,6 +6,7 @@ import re
 import unicodedata
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+
 MAX_QUESTION_LENGTH = 500
 MIN_BODY_BYTES = 2
 MAX_BODY_BYTES = 2048
@@ -91,10 +92,10 @@ class Handler(BaseHTTPRequestHandler):
             return self.respond(413, {"error": "invalid body size"})
         try:
             data = json.loads(self.rfile.read(length))
-            if not isinstance(data, dict):
-                return self.respond(400, {"error": "invalid request"})
-            result = answer(data.get("question"), data.get("language", "fr"))
-        except (ValueError, UnicodeDecodeError, json.JSONDecodeError):
+            result = answer(data.get("question"), data.get("language", "fr")) if isinstance(data, dict) else None
+        except (ValueError, UnicodeDecodeError):
+            result = None
+        if result is None:
             return self.respond(400, {"error": "invalid request"})
         return self.respond(200, result)
 
