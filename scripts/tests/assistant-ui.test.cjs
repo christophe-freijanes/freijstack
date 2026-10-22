@@ -8,6 +8,7 @@ const html = fs.readFileSync(dir + '/index.html', 'utf8');
 const css = fs.readFileSync(dir + '/css/style.css', 'utf8');
 const nginx = fs.readFileSync(dir + '/config/nginx.conf', 'utf8');
 const assistant = fs.readFileSync(dir + '/js/assistant.js', 'utf8');
+const translations = fs.readFileSync(dir + '/js/script.js', 'utf8');
 
 test('la bulle affiche uniquement IA avec un nom accessible', () => {
     const start = html.indexOf('id="assistantOpen"');
@@ -17,6 +18,7 @@ test('la bulle affiche uniquement IA avec un nom accessible', () => {
     assert.match(button, /aria-label="Ouvrir l'assistant IA"/);
     assert.match(button, />\s*IA\s*<\/button>/);
     assert.doesNotMatch(button, /data-i18n/);
+    assert.equal((translations.match(/'assistant\.open': 'IA'/g) || []).length, 2);
     assert.equal(html.split('id="assistantOpen"').length - 1, 1);
     assert.ok(html.includes('<dialog id="recruitmentAssistant"'));
 });
