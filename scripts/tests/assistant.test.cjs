@@ -197,3 +197,44 @@ test('une question sur les compétences reste transmise au RAG', async () => {
     assert.equal(called, true);
     assert.match(messages[1].textContent, /^Oui\./);
 });
+
+test('les questions recruteur courtes reçoivent une réponse factuelle même sans RAG', async () => {
+    const cases = [
+        ['Certifications', /ITIL.*Credly/],
+        ['Langues', /français.*anglais/i],
+        ['IA agentique', /MCP.*Amazon Bedrock/],
+        ['Travail en équipe', /gouvernance/],
+        ['Réalisations', /Terraform/],
+        ['Avec quelle solution de sauvegarde as-tu travaillé ?', /Commvault.*Clumio/],
+        ['As tu déjà fait du Linux ?', /Linux.*date exacte/],
+        ['Quels sont tes points forts et faibles ?', /points faibles personnels/],
+        ['Depuis combien de temps fais-tu du cloud ?', /ne permettent pas de dater précisément/]
+    ];
+    for (const [question, expected] of cases) {
+        let apiCalled = false;
+        const messages = await interact(async () => {
+            apiCalled = true;
+            throw new Error('API indisponible');
+        }, question);
+        assert.equal(apiCalled, false, question);
+        assert.match(messages[1].textContent, expected, question);
+        assert.doesNotMatch(messages[1].textContent, /Je n.arrive pas à charger|25 ans|1999|depuis 2016/, question);
+    }
+});
+
+test('la FAQ documentée résiste à une réponse RAG inventée', async () => {
+    const messages = await interact(async () => ({
+        ok: true, status: 200,
+        headers: { get() { return 'application/json'; } },
+        json: async () => ({ answer: 'Christophe travaille sur Linux depuis 1999.', sources: [] })
+    }), 'Depuis quand Christophe utilise Linux ?');
+    assert.doesNotMatch(messages[1].textContent, /1999/);
+    assert.match(messages[1].textContent, /date exacte/);
+});
+
+test('les langues sont disponibles en anglais sans appel au RAG', async () => {
+    const messages = await interact(async () => {
+        throw new Error('Ne pas appeler le RAG');
+    }, 'Languages', null, 'en');
+    assert.match(messages[1].textContent, /French.*English/);
+});

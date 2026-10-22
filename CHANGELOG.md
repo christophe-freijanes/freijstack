@@ -6,6 +6,18 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.57.0](https://github.com/christophe-freijanes/freijstack/compare/v1.56.2...v1.57.0) (2026-10-22)
+
+### 🚀 Features
+
+* **portfolio:** chatbot recruteur et API publique fiable ([#344](https://github.com/christophe-freijanes/freijstack/issues/344)) ([d5ebdb1](https://github.com/christophe-freijanes/freijstack/commit/d5ebdb1b928556f5fc087d74c4733c07de023258))
+
+### 🔧 Chores
+
+* **deps:** bump actions/github-script from 8 to 9 ([#348](https://github.com/christophe-freijanes/freijstack/issues/348)) ([e944944](https://github.com/christophe-freijanes/freijstack/commit/e9449444de1ac0aef3a6520defbbf68863a8da90))
+* **deps:** bump actions/setup-node from 6 to 7 ([#346](https://github.com/christophe-freijanes/freijstack/issues/346)) ([3c7f710](https://github.com/christophe-freijanes/freijstack/commit/3c7f710beb9bf15fe364d96cc4cff8507704fb78))
+* **deps:** bump actions/upload-pages-artifact from 4 to 5 ([#347](https://github.com/christophe-freijanes/freijstack/issues/347)) ([89c4563](https://github.com/christophe-freijanes/freijstack/commit/89c456329a8f353bf2384a5cf99d1f19b9aacbea))
+
 ## [1.56.2](https://github.com/christophe-freijanes/freijstack/compare/v1.56.1...v1.56.2) (2026-10-21)
 
 ### 🐛 Bug Fixes
