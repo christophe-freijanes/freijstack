@@ -6,6 +6,56 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.57.4](https://github.com/christophe-freijanes/freijstack/compare/v1.57.3...v1.57.4) (2026-10-22)
+
+### 🐛 Bug Fixes
+
+* **portfolio:** corriger les erreurs Ruff du chatbot ([#355](https://github.com/christophe-freijanes/freijstack/issues/355)) ([30a73b3](https://github.com/christophe-freijanes/freijstack/commit/30a73b3f3ec70e80c1959d5efc1a65b528e72bb0))
+
+## [1.57.3](https://github.com/christophe-freijanes/freijstack/compare/v1.57.2...v1.57.3) (2026-10-22)
+
+### 🐛 Bug Fixes
+
+* **ci:** transmettre les secrets au scan SecureVault ([#353](https://github.com/christophe-freijanes/freijstack/issues/353)) ([f96bc70](https://github.com/christophe-freijanes/freijstack/commit/f96bc70a55770012230fbddaffd8af4900615dbd))
+
+### 📚 Documentation
+
+* auto-generate diagrams and index [skip ci] ([c05fbe2](https://github.com/christophe-freijanes/freijstack/commit/c05fbe2f7764d4b04ee5b3bb29e0bf5fe7caf40d))
+
+## [1.57.2](https://github.com/christophe-freijanes/freijstack/compare/v1.57.1...v1.57.2) (2026-10-22)
+
+### 🐛 Bug Fixes
+
+* **ci:** vérifier le propriétaire des dépôts déployés ([#352](https://github.com/christophe-freijanes/freijstack/issues/352)) ([1be9c54](https://github.com/christophe-freijanes/freijstack/commit/1be9c5484b08ccec18d40519fe26d210b1fc98fa))
+
+## [1.57.1](https://github.com/christophe-freijanes/freijstack/compare/v1.57.0...v1.57.1) (2026-10-22)
+
+### 🐛 Bug Fixes
+
+* **ci:** diagnostiquer les permissions Git du déploiement ([#351](https://github.com/christophe-freijanes/freijstack/issues/351)) ([232f58d](https://github.com/christophe-freijanes/freijstack/commit/232f58deba3429ef25b1cf5936f593eb92d2c6a0))
+
+### 📚 Documentation
+
+* auto-generate diagrams and index [skip ci] ([967c97b](https://github.com/christophe-freijanes/freijstack/commit/967c97b402191bdd78ebbc7bfb82c14052f7af59))
+
+### 🔧 Chores
+
+* **deps:** bump actions/checkout from 6 to 7 ([#349](https://github.com/christophe-freijanes/freijstack/issues/349)) ([65d6022](https://github.com/christophe-freijanes/freijstack/commit/65d6022cabfb9f29c6fd70407449d990dbe04487))
+* **deps:** bump actions/configure-pages from 5 to 6 ([#350](https://github.com/christophe-freijanes/freijstack/issues/350)) ([4db0a1b](https://github.com/christophe-freijanes/freijstack/commit/4db0a1b8c8ddc0834b1a4bb8afe6f761e0a303f1))
+* **deps:** bump lucide-react from 1.58.0 to 1.59.0 in /saas/securevault/frontend ([#345](https://github.com/christophe-freijanes/freijstack/issues/345)) ([37c7e5b](https://github.com/christophe-freijanes/freijstack/commit/37c7e5bb40f3e1acc3b5a3e281cfb14ce93617b2))
+
+## [1.57.0](https://github.com/christophe-freijanes/freijstack/compare/v1.56.2...v1.57.0) (2026-10-22)
+
+### 🚀 Features
+
+* **portfolio:** chatbot recruteur et API publique fiable ([#344](https://github.com/christophe-freijanes/freijstack/issues/344)) ([d5ebdb1](https://github.com/christophe-freijanes/freijstack/commit/d5ebdb1b928556f5fc087d74c4733c07de023258))
+
+### 🔧 Chores
+
+* **deps:** bump actions/github-script from 8 to 9 ([#348](https://github.com/christophe-freijanes/freijstack/issues/348)) ([e944944](https://github.com/christophe-freijanes/freijstack/commit/e9449444de1ac0aef3a6520defbbf68863a8da90))
+* **deps:** bump actions/setup-node from 6 to 7 ([#346](https://github.com/christophe-freijanes/freijstack/issues/346)) ([3c7f710](https://github.com/christophe-freijanes/freijstack/commit/3c7f710beb9bf15fe364d96cc4cff8507704fb78))
+* **deps:** bump actions/upload-pages-artifact from 4 to 5 ([#347](https://github.com/christophe-freijanes/freijstack/issues/347)) ([89c4563](https://github.com/christophe-freijanes/freijstack/commit/89c456329a8f353bf2384a5cf99d1f19b9aacbea))
+
 ## [1.56.2](https://github.com/christophe-freijanes/freijstack/compare/v1.56.1...v1.56.2) (2026-10-21)
 
 ### 🐛 Bug Fixes

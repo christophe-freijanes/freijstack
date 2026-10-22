@@ -100,7 +100,7 @@ jobs:
           sleep "$DELAY"
 
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup SSH
         run: |
@@ -175,6 +175,29 @@ jobs:
           cd "$DEPLOY_DIR"
 
           if [ -d ".git" ]; then
+            # Verifier le proprietaire du depot, pas seulement de .git.
+            DEPLOY_UID="$(id -u)"
+            REPO_UID="$(stat -c '%u' .)"
+            GIT_UID="$(stat -c '%u' .git)"
+            if [ "$REPO_UID" != "$DEPLOY_UID" ] || [ "$GIT_UID" != "$DEPLOY_UID" ]; then
+              echo "❌ Proprietaire Git incoherent pour $DEPLOY_DIR"
+              stat -c '  %U:%G %A %n' . .git .git/FETCH_HEAD 2>/dev/null || true
+              echo "Correctif administrateur (cible staging uniquement) :"
+              echo "sudo chown $(id -un):$(id -gn) '$DEPLOY_DIR'"
+              echo "sudo chown -R $(id -un):$(id -gn) '$DEPLOY_DIR/.git'"
+              echo "Aucun chmod 777 ni changement des volumes Docker."
+              exit 1
+            fi
+            # Git doit pouvoir ecrire FETCH_HEAD et ses fichiers de verrouillage.
+            if [ ! -w ".git" ] || { [ -e ".git/FETCH_HEAD" ] && [ ! -w ".git/FETCH_HEAD" ]; }; then
+              echo "❌ Permissions Git insuffisantes dans $DEPLOY_DIR"
+              echo "Compte SSH : $(id -un)"
+              stat -c '  %U:%G %A %n' .git .git/FETCH_HEAD 2>/dev/null || true
+              echo "Sur le VPS, faire corriger la propriete du depot par un administrateur."
+              echo "Verifier : sudo stat -c '%U:%G %A %n' '$DEPLOY_DIR/.git' '$DEPLOY_DIR/.git/FETCH_HEAD'"
+              echo "Ne pas utiliser chmod 777 et ne pas modifier les volumes Docker."
+              exit 1
+            fi
             git -c safe.directory="$DEPLOY_DIR" fetch origin --tags
             git -c safe.directory="$DEPLOY_DIR" reset --hard "origin/${GH_BRANCH}"
             git -c safe.directory="$DEPLOY_DIR" clean -fd

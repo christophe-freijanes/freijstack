@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Installer le parseur XML sécurisé
         run: python3 -m pip install --disable-pip-version-check defusedxml==0.7.1
       - name: Contrôle SEO hors ligne
