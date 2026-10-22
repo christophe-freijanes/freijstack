@@ -6,6 +6,22 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.57.1](https://github.com/christophe-freijanes/freijstack/compare/v1.57.0...v1.57.1) (2026-10-22)
+
+### 🐛 Bug Fixes
+
+* **ci:** diagnostiquer les permissions Git du déploiement ([#351](https://github.com/christophe-freijanes/freijstack/issues/351)) ([232f58d](https://github.com/christophe-freijanes/freijstack/commit/232f58deba3429ef25b1cf5936f593eb92d2c6a0))
+
+### 📚 Documentation
+
+* auto-generate diagrams and index [skip ci] ([967c97b](https://github.com/christophe-freijanes/freijstack/commit/967c97b402191bdd78ebbc7bfb82c14052f7af59))
+
+### 🔧 Chores
+
+* **deps:** bump actions/checkout from 6 to 7 ([#349](https://github.com/christophe-freijanes/freijstack/issues/349)) ([65d6022](https://github.com/christophe-freijanes/freijstack/commit/65d6022cabfb9f29c6fd70407449d990dbe04487))
+* **deps:** bump actions/configure-pages from 5 to 6 ([#350](https://github.com/christophe-freijanes/freijstack/issues/350)) ([4db0a1b](https://github.com/christophe-freijanes/freijstack/commit/4db0a1b8c8ddc0834b1a4bb8afe6f761e0a303f1))
+* **deps:** bump lucide-react from 1.58.0 to 1.59.0 in /saas/securevault/frontend ([#345](https://github.com/christophe-freijanes/freijstack/issues/345)) ([37c7e5b](https://github.com/christophe-freijanes/freijstack/commit/37c7e5bb40f3e1acc3b5a3e281cfb14ce93617b2))
+
 ## [1.57.0](https://github.com/christophe-freijanes/freijstack/compare/v1.56.2...v1.57.0) (2026-10-22)
 
 ### 🚀 Features
