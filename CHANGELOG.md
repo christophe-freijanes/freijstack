@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.57.4](https://github.com/christophe-freijanes/freijstack/compare/v1.57.3...v1.57.4) (2026-10-22)
+
+### 🐛 Bug Fixes
+
+* **portfolio:** corriger les erreurs Ruff du chatbot ([#355](https://github.com/christophe-freijanes/freijstack/issues/355)) ([30a73b3](https://github.com/christophe-freijanes/freijstack/commit/30a73b3f3ec70e80c1959d5efc1a65b528e72bb0))
+
 ## [1.57.3](https://github.com/christophe-freijanes/freijstack/compare/v1.57.2...v1.57.3) (2026-10-22)
 
 ### 🐛 Bug Fixes
