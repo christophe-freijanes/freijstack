@@ -112,7 +112,7 @@ function initializeAssistant() {
 
     function factualTopic(question) {
         const text = normalize(question);
-        if (/\b(vulnerabilit|vulnerability|vulnerabilities|cve|remediation|correctifs? de securite|gestion des failles)\b/.test(text)) return 'vulnerabilities';
+        if (/\b(vulnerabilit(?:e|es)?|vulnerability|vulnerabilities|cve|remediation|correctifs? de securite|gestion des failles)\b/.test(text)) return 'vulnerabilities';
         if (/\b(nom de famille|last name|family name|surname|comment (?:tu|vous|il) (?:t.appelles?|s.appelle)|quel est (?:ton|son|votre) nom)\b/.test(text)) return 'identity';
         if (/\b(sre|site reliability|fiabilite|observabilite)\b/.test(text)) return 'sre';
         if (/\b(devsecops)\b/.test(text)) return 'devsecops';
@@ -192,12 +192,6 @@ function initializeAssistant() {
             if (!answer || /(?:^|[\s(«"“])(?:je\b|j['’]|moi\b|mon\b|ma\b|mes\b|i\b|i['’]|my\b|mine\b)/i.test(answer)) {
                 return null;
             }
-            const sources = Array.isArray(data.sources) ? data.sources : [];
-            const labels = {
-                'cv-public.txt': language() === 'en' ? 'Public CV' : 'CV public',
-                'recruiter-knowledge-rag.txt': language() === 'en'
-                    ? 'Public portfolio knowledge' : 'Connaissances publiques du portfolio'
-            };
             return { answer };
         } catch {
             return null;
@@ -234,13 +228,6 @@ function initializeAssistant() {
             const reply = await queryApi(question);
             if (reply) {
                 pending.textContent = reply.answer;
-                if (false && reply.sources.length) {
-                    const sources = document.createElement('small');
-                    sources.className = 'assistant-sources';
-                    sources.textContent = (language() === 'en' ? 'Sources: ' : 'Sources : ')
-                        + reply.sources.join(' · ');
-                    pending.appendChild(sources);
-                }
             } else {
                 pending.textContent = answerQuestion(question);
             }
