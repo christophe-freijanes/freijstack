@@ -6,6 +6,22 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.57.6](https://github.com/christophe-freijanes/freijstack/compare/v1.57.5...v1.57.6) (2026-10-22)
+
+### 🐛 Bug Fixes
+
+* **portfolio:** stabiliser la bulle IA et le SEO ([#357](https://github.com/christophe-freijanes/freijstack/issues/357)) ([d0c9e98](https://github.com/christophe-freijanes/freijstack/commit/d0c9e9829408a3a117a6027c0c4866c520b36130))
+
+## [1.57.5](https://github.com/christophe-freijanes/freijstack/compare/v1.57.4...v1.57.5) (2026-10-22)
+
+### 🐛 Bug Fixes
+
+* **ci:** retenter la connexion au registre privé (3 essais) ([#356](https://github.com/christophe-freijanes/freijstack/issues/356)) ([e76bd74](https://github.com/christophe-freijanes/freijstack/commit/e76bd742895e1260f3d75f9c5ca78f1574bd803b))
+
+### 📚 Documentation
+
+* auto-generate diagrams and index [skip ci] ([c226ec3](https://github.com/christophe-freijanes/freijstack/commit/c226ec3819eae8e194a6c0920fe14cab40a196bf))
+
 ## [1.57.4](https://github.com/christophe-freijanes/freijstack/compare/v1.57.3...v1.57.4) (2026-10-22)
 
 ### 🐛 Bug Fixes
