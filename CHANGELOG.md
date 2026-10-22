@@ -6,6 +6,12 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.57.6](https://github.com/christophe-freijanes/freijstack/compare/v1.57.5...v1.57.6) (2026-10-22)
+
+### 🐛 Bug Fixes
+
+* **portfolio:** stabiliser la bulle IA et le SEO ([#357](https://github.com/christophe-freijanes/freijstack/issues/357)) ([d0c9e98](https://github.com/christophe-freijanes/freijstack/commit/d0c9e9829408a3a117a6027c0c4866c520b36130))
+
 ## [1.57.5](https://github.com/christophe-freijanes/freijstack/compare/v1.57.4...v1.57.5) (2026-10-22)
 
 ### 🐛 Bug Fixes
