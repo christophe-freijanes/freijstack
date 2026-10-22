@@ -238,3 +238,19 @@ test('les langues sont disponibles en anglais sans appel au RAG', async () => {
     }, 'Languages', null, 'en');
     assert.match(messages[1].textContent, /French.*English/);
 });
+
+test('le nom de famille est connu sans API', async () => {
+    const messages = await interact(async () => {
+        throw new Error('API non nécessaire');
+    }, 'Quel est ton nom de famille ?');
+    assert.match(messages[1].textContent, /Freijanes/);
+});
+
+for (const topic of ['aws', 'sre', 'devsecops']) {
+    test('la bulle ' + topic + ' répond sans API', async () => {
+        const messages = await interact(async () => {
+            throw new Error('API non nécessaire');
+        }, '', topic);
+        assert.match(messages[1].textContent, /AWS|SRE|DevSecOps|fiabilité|sécurité cloud/i);
+    });
+}
