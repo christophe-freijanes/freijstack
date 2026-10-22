@@ -11,6 +11,10 @@ function initializeAssistant() {
 
     const responses = {
         fr: {
+            identity: 'Son nom de famille est Freijanes. Son nom complet est Christophe Freijanes.',
+            aws: 'Christophe travaille sur la plateforme AWS, notamment IAM, EC2, S3, CloudFormation et l’automatisation des opérations.',
+            sre: 'Son expérience SRE concerne la fiabilité des services, la surveillance, les alertes et l’observabilité avec notamment Datadog et CloudWatch.',
+            devsecops: 'Son parcours DevSecOps couvre la sécurité cloud, les contrôles CI/CD, la gestion des accès et l’automatisation.',
             experience: 'Le portfolio présente plus de 20 ans d’expérience en Cloud et sécurité. Depuis juin 2026, Christophe est Spécialiste principal – Plateforme AWS / Référent technique chez La Caisse (CDPQ). Son parcours inclut notamment ACENSI, SQUAD, ECONOCOM (projet ITER), DIGIMIND et HARDIS.',
             skills: 'Les compétences affichées comprennent AWS, GCP, Kubernetes, Terraform, AWS CDK, CloudFormation, Ansible, Python, Bash/PowerShell, DevSecOps, SRE, FinOps, CloudWatch Logs, Datadog, LLM, MCP et Amazon Bedrock.',
             projects: 'Le portfolio présente notamment Formation DevOps & CI/CD, ansible-webapp, student-list, freijstack, Docker Applications et Infrastructure as Code. Les liens sont dans la section Projets.',
@@ -27,6 +31,10 @@ function initializeAssistant() {
             unknown: 'Les sources publiques du portfolio ne permettent pas de répondre précisément à cette question. Pour une confirmation, un échange avec Christophe peut être réservé via le calendrier.'
         },
         en: {
+            identity: 'His family name is Freijanes. His full name is Christophe Freijanes.',
+            aws: 'Christophe works with AWS platforms, including IAM, EC2, S3, CloudFormation and operations automation.',
+            sre: 'His SRE experience covers service reliability, monitoring, alerting and observability, including Datadog and CloudWatch.',
+            devsecops: 'His DevSecOps background covers cloud security, CI/CD controls, access management and automation.',
             experience: 'The portfolio shows over 20 years of experience in Cloud and Security. Since June 2026, Christophe has been Principal Specialist – AWS Platform / Technical Lead at La Caisse (CDPQ). His background also includes ACENSI, SQUAD, ECONOCOM (ITER project), DIGIMIND and HARDIS.',
             skills: 'Listed skills include AWS, GCP, Kubernetes, Terraform, AWS CDK, CloudFormation, Ansible, Python, Bash/PowerShell, DevSecOps, SRE, FinOps, CloudWatch Logs, Datadog, LLMs, MCP and Amazon Bedrock.',
             projects: 'The portfolio features DevOps & CI/CD Training, ansible-webapp, student-list, freijstack, Docker Applications and Infrastructure as Code. Links are in the Projects section.',
@@ -46,12 +54,18 @@ function initializeAssistant() {
 
     const topics = {
         fr: {
+            aws: 'Quelles sont les compétences AWS de Christophe Freijanes ?',
+            sre: 'Quelle est son expérience SRE ?',
+            devsecops: 'Quelle est son expérience DevSecOps ?',
             experience: 'Quel est le parcours professionnel de Christophe Freijanes ?',
             skills: 'Quelles sont les compétences techniques de Christophe Freijanes ?',
             projects: 'Quels projets techniques présente le portfolio de Christophe Freijanes ?',
             booking: 'Comment prendre rendez-vous avec Christophe Freijanes ?'
         },
         en: {
+            aws: 'What AWS skills does Christophe Freijanes have?',
+            sre: 'What is his SRE experience?',
+            devsecops: 'What is his DevSecOps experience?',
             experience: 'What is Christophe Freijanes’s professional background?',
             skills: 'What are Christophe Freijanes’s technical skills?',
             projects: 'Which projects appear in Christophe Freijanes’s portfolio?',
@@ -96,6 +110,10 @@ function initializeAssistant() {
 
     function factualTopic(question) {
         const text = normalize(question);
+        if (/\b(nom de famille|last name|family name|surname|comment (?:tu|vous|il) (?:t.appelles?|s.appelle)|quel est (?:ton|son|votre) nom)\b/.test(text)) return 'identity';
+        if (/\b(sre|site reliability|fiabilite|observabilite)\b/.test(text)) return 'sre';
+        if (/\b(devsecops)\b/.test(text)) return 'devsecops';
+        if (/\b(aws|amazon web services)\b/.test(text) && /\b(competence|expertise|maitris|experience|skill|know|work|cloud)\b/.test(text)) return 'aws';
         if (/\b(certification|certifications|certifie|credly|badge)\b/.test(text)) return 'certifications';
         if (/\b(langue|langues|language|languages|anglais|english|francais|french)\b/.test(text)) return 'languages';
         if (/\b(travail en equipe|equipe|collaboration|teamwork|team work|collaborat)\b/.test(text)) return 'teamwork';
@@ -139,7 +157,8 @@ function initializeAssistant() {
 
     document.querySelectorAll('[data-assistant-topic]').forEach(function(button) {
         button.addEventListener('click', async function() {
-            const question = topics[language()][button.dataset.assistantTopic];
+            const key = button.dataset.assistantTopic;
+            const question = topics[language()][key];
             if (question) await sendQuestion(question, button.textContent.trim());
         });
     });
@@ -197,9 +216,11 @@ function initializeAssistant() {
             return;
         }
         const verified = factualTopic(question);
-        if (verified) {
+        const selectedTopic = Object.keys(topics[language()]).find(key => topics[language()][key] === question);
+        const localTopic = ['aws', 'sre', 'devsecops'].includes(selectedTopic) ? selectedTopic : verified;
+        if (localTopic) {
             addMessage(label, true);
-            addMessage(responses[language()][verified], false);
+            addMessage(responses[language()][localTopic], false);
             input.focus();
             return;
         }

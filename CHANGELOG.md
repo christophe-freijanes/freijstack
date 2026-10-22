@@ -6,6 +6,16 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 
+## [1.57.7](https://github.com/christophe-freijanes/freijstack/compare/v1.57.6...v1.57.7) (2026-10-22)
+
+### 🐛 Bug Fixes
+
+* **portfolio:** répondre aux questions et bulles du chat IA ([#359](https://github.com/christophe-freijanes/freijstack/issues/359)) ([0c45c88](https://github.com/christophe-freijanes/freijstack/commit/0c45c88cccd5c2113410981b58217f1be6f89ba8))
+
+### 📚 Documentation
+
+* auto-generate diagrams and index [skip ci] ([55a5e91](https://github.com/christophe-freijanes/freijstack/commit/55a5e9143c5a621cfb12a52925378d99deae2e06))
+
 ## [1.57.6](https://github.com/christophe-freijanes/freijstack/compare/v1.57.5...v1.57.6) (2026-10-22)
 
 ### 🐛 Bug Fixes
