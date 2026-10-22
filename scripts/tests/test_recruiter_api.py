@@ -4,6 +4,7 @@ import importlib.util
 import pathlib
 import unittest
 
+
 MODULE = pathlib.Path(__file__).resolve().parents[2] / "saas/portfolio/recruiter-api/app.py"
 spec = importlib.util.spec_from_file_location("recruiter_api", MODULE)
 api = importlib.util.module_from_spec(spec)
