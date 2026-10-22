@@ -1,7 +1,9 @@
 """Tests contractuels de l'API recruteur publique."""
+
 import importlib.util
 import pathlib
 import unittest
+
 
 MODULE = pathlib.Path(__file__).resolve().parents[2] / "saas/portfolio/recruiter-api/app.py"
 spec = importlib.util.spec_from_file_location("recruiter_api", MODULE)
@@ -42,9 +44,8 @@ class RecruiterApiTests(unittest.TestCase):
 
     def test_input_validation(self):
         for value in ("", " " * 5, None, "x" * 501, ["question"]):
-            with self.subTest(value=str(value)[:20]):
-                with self.assertRaises(ValueError):
-                    api.answer(value)
+            with self.subTest(value=str(value)[:20]), self.assertRaises(ValueError):
+                api.answer(value)
 
     def test_english(self):
         result = api.answer("Languages", "en")

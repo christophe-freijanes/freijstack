@@ -1,22 +1,26 @@
 """API publique de recrutement, sans accès à Hermes ni aux données privées."""
+
 import json
 import os
 import re
-import time
 import unicodedata
-from collections import defaultdict, deque
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+
+MAX_QUESTION_LENGTH = 500
+MIN_BODY_BYTES = 2
+MAX_BODY_BYTES = 2048
 
 FACTS = {
     "certifications": ("ITIL figure dans le CV public. Pour les badges à jour, consultez le profil Credly indiqué sur le portfolio.", "ITIL appears in the public CV. Check the Credly profile linked from the portfolio for current badges."),
-    "languages": ("Le CV public indique le français (langue maternelle) et l’anglais (niveau professionnel).", "The public CV lists native French and professional English."),
-    "linux": ("Oui. Linux fait partie des compétences présentées dans le CV public. La date exacte de début n’est pas documentée.", "Yes. Linux is listed in the public CV; the exact start date is not documented."),
+    "languages": ("Le CV public indique le français (langue maternelle) et l'anglais (niveau professionnel).", "The public CV lists native French and professional English."),
+    "linux": ("Oui. Linux fait partie des compétences présentées dans le CV public. La date exacte de début n'est pas documentée.", "Yes. Linux is listed in the public CV; the exact start date is not documented."),
     "backup": ("Le CV public mentionne Commvault et Clumio pour la protection et la restauration des données.", "The public CV mentions Commvault and Clumio for data protection and recovery."),
-    "cloud": ("Christophe travaille sur AWS, l’automatisation et la sécurité cloud. Le CV public ne précise pas depuis quelle année il pratique le cloud.", "Christophe works on AWS, automation and cloud security. His public CV does not establish a cloud start year."),
+    "cloud": ("Christophe travaille sur AWS, l'automatisation et la sécurité cloud. Le CV public ne précise pas depuis quelle année il pratique le cloud.", "Christophe works on AWS, automation and cloud security. His public CV does not establish a cloud start year."),
     "agents": ("Le portfolio présente des compétences en LLM, MCP et Amazon Bedrock. Les réalisations précises en IA agentique nécessitent des preuves de projet supplémentaires.", "The portfolio lists LLM, MCP and Amazon Bedrock skills. Specific agentic AI accomplishments require additional project evidence."),
-    "team": ("Son parcours comprend des missions de conseil, la standardisation et la gouvernance des plateformes. Le détail de ses responsabilités d’équipe n’est pas entièrement public.", "His experience includes consulting, platform standardization and governance. Detailed team responsibilities are not fully public."),
-    "achievements": ("Le CV public décrit des modules Terraform réutilisables, l’automatisation CI/CD et l’industrialisation d’infrastructures AWS.", "The public CV describes reusable Terraform modules, CI/CD automation and AWS infrastructure standardization."),
-    "strengths": ("Ses réalisations illustrent l’automatisation, la standardisation et la gestion des risques. Ses points faibles personnels ne sont pas documentés.", "His work highlights automation, standardization and risk management. Personal weaknesses are not documented."),
+    "team": ("Son parcours comprend des missions de conseil, la standardisation et la gouvernance des plateformes. Le détail de ses responsabilités d'équipe n'est pas entièrement public.", "His experience includes consulting, platform standardization and governance. Detailed team responsibilities are not fully public."),
+    "achievements": ("Le CV public décrit des modules Terraform réutilisables, l'automatisation CI/CD et l'industrialisation d'infrastructures AWS.", "The public CV describes reusable Terraform modules, CI/CD automation and AWS infrastructure standardization."),
+    "strengths": ("Ses réalisations illustrent l'automatisation, la standardisation et la gestion des risques. Ses points faibles personnels ne sont pas documentés.", "His work highlights automation, standardization and risk management. Personal weaknesses are not documented."),
     "unknown": ("Les sources publiques disponibles ne permettent pas de confirmer ce point. Le CV et un échange peuvent apporter davantage de précisions.", "The public sources do not establish this point. The CV and a direct conversation can provide more details."),
 }
 PATTERNS = (
@@ -45,7 +49,7 @@ SOURCES = {
 
 
 def answer(question, language="fr"):
-    if not isinstance(question, str) or not question.strip() or len(question) > 500:
+    if not isinstance(question, str) or not question.strip() or len(question) > MAX_QUESTION_LENGTH:
         raise ValueError("invalid question")
     cleaned = "".join(ch for ch in unicodedata.normalize("NFD", question.lower()) if unicodedata.category(ch) != "Mn")
     topic = next((name for name, pattern in PATTERNS if re.search(pattern, cleaned)), "unknown")
@@ -54,7 +58,6 @@ def answer(question, language="fr"):
 
 
 class Handler(BaseHTTPRequestHandler):
-    _requests = defaultdict(deque)
 
     def log_message(self, fmt, *args):
         # Aucune question ni donnée personnelle dans les journaux.
@@ -73,7 +76,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/health":
             return self.respond(200, {"status": "ok"})
-        self.respond(404, {"error": "not found"})
+        return self.respond(404, {"error": "not found"})
 
     def do_POST(self):
         if self.path != "/api/chat":
@@ -85,16 +88,16 @@ class Handler(BaseHTTPRequestHandler):
             length = int(self.headers.get("Content-Length", "0"))
         except ValueError:
             return self.respond(400, {"error": "invalid length"})
-        if length < 2 or length > 2048:
+        if length < MIN_BODY_BYTES or length > MAX_BODY_BYTES:
             return self.respond(413, {"error": "invalid body size"})
         try:
             data = json.loads(self.rfile.read(length))
-            if not isinstance(data, dict):
-                raise ValueError("invalid payload")
-            result = answer(data.get("question"), data.get("language", "fr"))
-        except (ValueError, UnicodeDecodeError, json.JSONDecodeError):
+            result = answer(data.get("question"), data.get("language", "fr")) if isinstance(data, dict) else None
+        except (ValueError, UnicodeDecodeError):
+            result = None
+        if result is None:
             return self.respond(400, {"error": "invalid request"})
-        self.respond(200, result)
+        return self.respond(200, result)
 
 
 if __name__ == "__main__":
