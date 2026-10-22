@@ -68,3 +68,14 @@ test('un clic après DOMContentLoaded ouvre le chat et la fermeture fonctionne',
     nodes.get('assistantClose').listeners.click();
     assert.equal(nodes.get('recruitmentAssistant').open, false);
 });
+
+test('SEO canonique et partage social restent configurés', () => {
+    assert.match(html, /<link rel="canonical" href="https:\/\/portfolio\.freijstack\.com\/"/);
+    assert.match(html, /<meta name="robots" content="index, follow, max-image-preview:large">/);
+    assert.match(html, /<meta name="twitter:card" content="summary_large_image">/);
+    assert.match(html, /<meta name="twitter:image" content="https:\/\/portfolio\.freijstack\.com\/images\/og-1200x630\.webp">/);
+    const robots = fs.readFileSync(dir + '/robots.txt', 'utf8');
+    const sitemap = fs.readFileSync(dir + '/sitemap.xml', 'utf8');
+    assert.match(robots, /Sitemap: https:\/\/portfolio\.freijstack\.com\/sitemap\.xml/);
+    assert.match(sitemap, /https:\/\/portfolio\.freijstack\.com\/pages\/resume\.html/);
+});
