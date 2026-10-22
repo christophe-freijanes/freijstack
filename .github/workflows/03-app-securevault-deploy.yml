@@ -25,6 +25,7 @@ jobs:
       fail_on_gitleaks: true
       run_zap: true
       dast_url: "https://vault.freijstack.com"
+    secrets: inherit
     permissions:
       contents: read
       actions: read
