@@ -11,6 +11,7 @@ function initializeAssistant() {
 
     const responses = {
         fr: {
+            vulnerabilities: 'Oui. Christophe gère des vulnérabilités de sécurité depuis au moins 12 ans. Son travail comprend l’analyse des risques, la priorisation des correctifs, la remédiation sur les systèmes et les infrastructures cloud, puis la vérification des résultats.',
             identity: 'Son nom de famille est Freijanes. Son nom complet est Christophe Freijanes.',
             aws: 'Christophe travaille sur la plateforme AWS, notamment IAM, EC2, S3, CloudFormation et l’automatisation des opérations.',
             sre: 'Son expérience SRE concerne la fiabilité des services, la surveillance, les alertes et l’observabilité avec notamment Datadog et CloudWatch.',
@@ -31,6 +32,7 @@ function initializeAssistant() {
             unknown: 'Les sources publiques du portfolio ne permettent pas de répondre précisément à cette question. Pour une confirmation, un échange avec Christophe peut être réservé via le calendrier.'
         },
         en: {
+            vulnerabilities: 'Yes. Christophe has managed security vulnerabilities for at least 12 years. His work includes risk assessment, prioritizing fixes, remediation across systems and cloud infrastructure, and validating the results.',
             identity: 'His family name is Freijanes. His full name is Christophe Freijanes.',
             aws: 'Christophe works with AWS platforms, including IAM, EC2, S3, CloudFormation and operations automation.',
             sre: 'His SRE experience covers service reliability, monitoring, alerting and observability, including Datadog and CloudWatch.',
@@ -110,6 +112,7 @@ function initializeAssistant() {
 
     function factualTopic(question) {
         const text = normalize(question);
+        if (/\b(vulnerabilit[a-z]*|vulnerability|vulnerabilities|cve|remediation|correctifs? de securite|gestion des failles)\b/.test(text)) return 'vulnerabilities';
         if (/\b(nom de famille|last name|family name|surname|comment (?:tu|vous|il) (?:t.appelles?|s.appelle)|quel est (?:ton|son|votre) nom)\b/.test(text)) return 'identity';
         if (/\b(sre|site reliability|fiabilite|observabilite)\b/.test(text)) return 'sre';
         if (/\b(devsecops)\b/.test(text)) return 'devsecops';
@@ -189,16 +192,7 @@ function initializeAssistant() {
             if (!answer || /(?:^|[\s(«"“])(?:je\b|j['’]|moi\b|mon\b|ma\b|mes\b|i\b|i['’]|my\b|mine\b)/i.test(answer)) {
                 return null;
             }
-            const sources = Array.isArray(data.sources) ? data.sources : [];
-            const labels = {
-                'cv-public.txt': language() === 'en' ? 'Public CV' : 'CV public',
-                'recruiter-knowledge-rag.txt': language() === 'en'
-                    ? 'Public portfolio knowledge' : 'Connaissances publiques du portfolio'
-            };
-            return {
-                answer,
-                sources: [...new Set(sources.filter(source => Object.hasOwn(labels, source)).map(source => labels[source]))]
-            };
+            return { answer };
         } catch {
             return null;
         } finally {
@@ -234,16 +228,8 @@ function initializeAssistant() {
             const reply = await queryApi(question);
             if (reply) {
                 pending.textContent = reply.answer;
-                if (reply.sources.length) {
-                    const sources = document.createElement('small');
-                    sources.className = 'assistant-sources';
-                    sources.textContent = (language() === 'en' ? 'Sources: ' : 'Sources : ')
-                        + reply.sources.join(' · ');
-                    pending.appendChild(sources);
-                }
             } else {
-                pending.textContent = (language() === 'en' ? 'Offline mode: ' : 'Mode secours : ')
-                    + answerQuestion(question);
+                pending.textContent = answerQuestion(question);
             }
         } finally {
             sending = false;
