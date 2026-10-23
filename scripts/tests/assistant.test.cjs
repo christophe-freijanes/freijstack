@@ -80,8 +80,7 @@ test('une réponse JSON /api/chat remplace le secours local', async () => {
     }, 'Quel est son parcours ?');
     assert.ok(called);
     assert.equal(messages[1].textContent, 'Christophe travaille sur AWS.');
-    assert.match(messages[1].children[0].textContent, /CV public/);
-    assert.match(messages[1].children[0].textContent, /Connaissances publiques/);
+    assert.equal(messages[1].children.length, 0);
 });
 
 test('la route absente revient aux réponses prédéfinies', async () => {
@@ -90,13 +89,13 @@ test('la route absente revient aux réponses prédéfinies', async () => {
         status: 200,
         headers: { get() { return 'text/html'; } }
     }), 'Quel est son parcours ?');
-    assert.match(messages[1].textContent, /^Mode secours :/);
+    assert.doesNotMatch(messages[1].textContent, /Mode secours|Offline mode/);
     assert.match(messages[1].textContent, /20 ans/);
 });
 
 test('une erreur réseau ne bloque pas la conversation', async () => {
     const messages = await interact(async () => { throw new Error('Network unavailable'); }, 'AWS');
-    assert.match(messages[1].textContent, /^Mode secours :/);
+    assert.doesNotMatch(messages[1].textContent, /Mode secours|Offline mode/);
     assert.match(messages[1].textContent, /AWS/);
 });
 
@@ -120,7 +119,7 @@ test('une réponse à la première personne utilise le secours identifié', asyn
         headers: { get() { return 'application/json'; } },
         json: async () => ({ answer: "J'ai travaillé sur AWS.", sources: [] })
     }), 'AWS');
-    assert.match(messages[1].textContent, /^Mode secours :/);
+    assert.doesNotMatch(messages[1].textContent, /Mode secours|Offline mode/);
     assert.doesNotMatch(messages[1].textContent, /\bj['’]|\bje\b/i);
 });
 
@@ -144,7 +143,7 @@ test('une réponse affirmative sourcée du RAG reste intacte', async () => {
         })
     }), 'Christophe utilise-t-il CloudFormation ?');
     assert.match(messages[1].textContent, /^Oui\. Christophe utilise CloudFormation/);
-    assert.match(messages[1].children[0].textContent, /CV public/);
+    assert.equal(messages[1].children.length, 0);
 });
 
 test('une demande de plusieurs créneaux ouvre le calendrier sans inventer des horaires', async () => {
@@ -254,3 +253,18 @@ for (const topic of ['aws', 'sre', 'devsecops']) {
         assert.match(messages[1].textContent, /AWS|SRE|DevSecOps|fiabilité|sécurité cloud/i);
     });
 }
+
+test('répond précisément à la gestion des vulnérabilités sans API', async () => {
+    for (const question of [
+        'Est-ce qu il a deja gerer des vulnerabilitees ?',
+        'A-t-il géré des vulnérabilités ?',
+        'Avez-vous fait de la remédiation de CVE ?'
+    ]) {
+        const messages = await interact(async () => {
+            throw new Error('API inutile');
+        }, question);
+        assert.match(messages[1].textContent, /12 ans/);
+        assert.match(messages[1].textContent, /remédiation/);
+        assert.doesNotMatch(messages[1].textContent, /Mode secours|Sources :/);
+    }
+});
