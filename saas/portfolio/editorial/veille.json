@@ -1,1 +1,38 @@
-{"seen":[],"items":[]}
+{
+  "seen": [
+    "https://aws.amazon.com/about-aws/whats-new/2026/10/openai-gpt-6-1-terra-on-amazon-bedrock/",
+    "https://aws.amazon.com/about-aws/whats-new/2026/10/kms-ml-kem-post-quantum/",
+    "https://aws.amazon.com/about-aws/whats-new/2026/10/aws-iam-identity-center-cross-region-tip/",
+    "https://aws.amazon.com/about-aws/whats-new/2026/10/bedrock-web-search-domain-user-location/"
+  ],
+  "items": [
+    {
+      "title": "OpenAI GPT-6.1 Terra is now generally available on Amazon Bedrock",
+      "url": "https://aws.amazon.com/about-aws/whats-new/2026/10/openai-gpt-6-1-terra-on-amazon-bedrock/",
+      "date": "2026-10-26",
+      "source": "AWS News",
+      "category": "AIOps"
+    },
+    {
+      "title": "AWS Key Management Service now supports ML-KEM for post-quantum key encapsulation",
+      "url": "https://aws.amazon.com/about-aws/whats-new/2026/10/kms-ml-kem-post-quantum/",
+      "date": "2026-10-26",
+      "source": "AWS News",
+      "category": "AWS"
+    },
+    {
+      "title": "AWS IAM Identity Center now supports cross-Region trusted identity propagation",
+      "url": "https://aws.amazon.com/about-aws/whats-new/2026/10/aws-iam-identity-center-cross-region-tip/",
+      "date": "2026-10-26",
+      "source": "AWS News",
+      "category": "AWS"
+    },
+    {
+      "title": "Web Search on Amazon Bedrock now supports domain filtering and user location controls",
+      "url": "https://aws.amazon.com/about-aws/whats-new/2026/10/bedrock-web-search-domain-user-location/",
+      "date": "2026-10-23",
+      "source": "AWS News",
+      "category": "AIOps"
+    }
+  ]
+}
