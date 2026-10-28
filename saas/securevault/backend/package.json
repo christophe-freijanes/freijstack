@@ -30,7 +30,7 @@
     "express-session": "^1.19.0",
     "speakeasy": "^2.0.0",
     "qrcode": "^1.5.3",
-    "nodemailer": "^10.0.9",
+    "nodemailer": "^10.2.1",
     "uuid": "^14.0.3",
     "multer": "^2.4.0",
     "csv-parser": "^3.2.1",
