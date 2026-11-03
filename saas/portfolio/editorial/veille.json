@@ -1,1 +1,38 @@
-{"seen":[],"items":[]}
+{
+  "seen": [
+    "https://www.cncf.io/blog/2026/11/03/openkruise-agents-v0-6-0-leaping-ahead-in-agent-sandbox-security-and-automation/",
+    "https://aws.amazon.com/about-aws/whats-new/2026/11/rds-oracle-m8i-r8i-instances-new-regions/",
+    "https://aws.amazon.com/blogs/security/inside-a-successful-aws-european-sovereign-cloud-exercise-to-demonstrate-independent-operation/",
+    "https://aws.amazon.com/about-aws/whats-new/2026/11/ec2-amis-scanned-through-inspector/"
+  ],
+  "items": [
+    {
+      "title": "OpenKruise Agents v0.6.0: Leaping ahead in agent Sandbox security and automation",
+      "url": "https://www.cncf.io/blog/2026/11/03/openkruise-agents-v0-6-0-leaping-ahead-in-agent-sandbox-security-and-automation/",
+      "date": "2026-11-03",
+      "source": "CNCF",
+      "category": "AIOps"
+    },
+    {
+      "title": "Amazon RDS for Oracle now supports M8i and R8i instances in additional AWS Regions",
+      "url": "https://aws.amazon.com/about-aws/whats-new/2026/11/rds-oracle-m8i-r8i-instances-new-regions/",
+      "date": "2026-11-03",
+      "source": "AWS News",
+      "category": "AWS"
+    },
+    {
+      "title": "Inside a successful AWS European Sovereign Cloud exercise to demonstrate independent operation",
+      "url": "https://aws.amazon.com/blogs/security/inside-a-successful-aws-european-sovereign-cloud-exercise-to-demonstrate-independent-operation/",
+      "date": "2026-11-02",
+      "source": "AWS Security",
+      "category": "AWS"
+    },
+    {
+      "title": "EC2 Amazon Machine Images can now be scanned for vulnerabilities through Amazon Inspector",
+      "url": "https://aws.amazon.com/about-aws/whats-new/2026/11/ec2-amis-scanned-through-inspector/",
+      "date": "2026-11-02",
+      "source": "AWS News",
+      "category": "DevSecOps"
+    }
+  ]
+}
