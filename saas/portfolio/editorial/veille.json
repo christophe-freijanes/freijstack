@@ -1,1 +1,38 @@
-{"seen":[],"items":[]}
+{
+  "seen": [
+    "https://www.cncf.io/blog/2026/11/10/one-flag-many-guardrails-making-a-platform-safe-enough-to-delegate/",
+    "https://aws.amazon.com/about-aws/whats-new/2026/11/amazon-bedrock-agentcore-web-search-api/",
+    "https://aws.amazon.com/blogs/security/simplify-cross-partition-access-with-aws-iam-outbound-identity-federation/",
+    "https://aws.amazon.com/about-aws/whats-new/2026/11/nitro-sandboxes-eks-ecs-ec2/"
+  ],
+  "items": [
+    {
+      "title": "One flag, many guardrails: Making a platform safe enough to delegate",
+      "url": "https://www.cncf.io/blog/2026/11/10/one-flag-many-guardrails-making-a-platform-safe-enough-to-delegate/",
+      "date": "2026-11-10",
+      "source": "CNCF",
+      "category": "AIOps"
+    },
+    {
+      "title": "Amazon Bedrock AgentCore now offers a Web Search API",
+      "url": "https://aws.amazon.com/about-aws/whats-new/2026/11/amazon-bedrock-agentcore-web-search-api/",
+      "date": "2026-11-10",
+      "source": "AWS News",
+      "category": "AIOps"
+    },
+    {
+      "title": "Simplify cross-partition access with AWS IAM outbound identity federation",
+      "url": "https://aws.amazon.com/blogs/security/simplify-cross-partition-access-with-aws-iam-outbound-identity-federation/",
+      "date": "2026-11-09",
+      "source": "AWS Security",
+      "category": "AWS"
+    },
+    {
+      "title": "Introducing AWS Nitro Sandboxes on Amazon EKS, ECS and EC2 for hardware isolated pods, tasks and VMs",
+      "url": "https://aws.amazon.com/about-aws/whats-new/2026/11/nitro-sandboxes-eks-ecs-ec2/",
+      "date": "2026-11-09",
+      "source": "AWS News",
+      "category": "AWS"
+    }
+  ]
+}
