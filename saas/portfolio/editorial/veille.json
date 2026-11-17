@@ -1,1 +1,38 @@
-{"seen":[],"items":[]}
+{
+  "seen": [
+    "https://www.cncf.io/blog/2026/11/17/is-your-opentelemetry-pipeline-becoming-a-performance-bottleneck/",
+    "https://aws.amazon.com/about-aws/whats-new/2026/11/amazon-workspaces-AI-agents-connect-govern",
+    "https://aws.amazon.com/about-aws/whats-new/2026/11/iam-identity-center-vpc-endpoints/",
+    "https://aws.amazon.com/about-aws/whats-new/2026/11/s3-vectors-hybrid-search/"
+  ],
+  "items": [
+    {
+      "title": "Is your OpenTelemetry pipeline becoming a performance bottleneck?",
+      "url": "https://www.cncf.io/blog/2026/11/17/is-your-opentelemetry-pipeline-becoming-a-performance-bottleneck/",
+      "date": "2026-11-17",
+      "source": "CNCF",
+      "category": "SRE"
+    },
+    {
+      "title": "Set up, connect, and govern AI agents faster with Amazon WorkSpaces",
+      "url": "https://aws.amazon.com/about-aws/whats-new/2026/11/amazon-workspaces-AI-agents-connect-govern",
+      "date": "2026-11-16",
+      "source": "AWS News",
+      "category": "AIOps"
+    },
+    {
+      "title": "IAM Identity Center now supports VPC endpoints and network access controls",
+      "url": "https://aws.amazon.com/about-aws/whats-new/2026/11/iam-identity-center-vpc-endpoints/",
+      "date": "2026-11-16",
+      "source": "AWS News",
+      "category": "AWS"
+    },
+    {
+      "title": "Amazon S3 Vectors now supports hybrid search combining vector and full text for more relevant search results",
+      "url": "https://aws.amazon.com/about-aws/whats-new/2026/11/s3-vectors-hybrid-search/",
+      "date": "2026-11-16",
+      "source": "AWS News",
+      "category": "AWS"
+    }
+  ]
+}
