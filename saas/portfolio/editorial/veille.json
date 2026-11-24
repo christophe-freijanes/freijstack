@@ -1,1 +1,38 @@
-{"seen":[],"items":[]}
+{
+  "seen": [
+    "https://aws.amazon.com/blogs/security/introducing-aws-waf-simplified-pricing/",
+    "https://aws.amazon.com/blogs/security/introducing-api-and-ai-security-on-aws-from-discovery-to-protection/",
+    "https://aws.amazon.com/about-aws/whats-new/2026/11/sagemaker-hyperpod-extensions/",
+    "https://aws.amazon.com/about-aws/whats-new/2026/11/amazon-opensearch-opensearch-3-9"
+  ],
+  "items": [
+    {
+      "title": "Introducing AWS WAF simplified pricing",
+      "url": "https://aws.amazon.com/blogs/security/introducing-aws-waf-simplified-pricing/",
+      "date": "2026-11-23",
+      "source": "AWS Security",
+      "category": "AWS"
+    },
+    {
+      "title": "Introducing API and AI security on AWS, from discovery to protection",
+      "url": "https://aws.amazon.com/blogs/security/introducing-api-and-ai-security-on-aws-from-discovery-to-protection/",
+      "date": "2026-11-23",
+      "source": "AWS Security",
+      "category": "AWS"
+    },
+    {
+      "title": "Amazon SageMaker HyperPod now supports managed observability and user management extensions for Slurm clusters",
+      "url": "https://aws.amazon.com/about-aws/whats-new/2026/11/sagemaker-hyperpod-extensions/",
+      "date": "2026-11-23",
+      "source": "AWS News",
+      "category": "SRE"
+    },
+    {
+      "title": "Amazon OpenSearch Service now supports OpenSearch version 3.9",
+      "url": "https://aws.amazon.com/about-aws/whats-new/2026/11/amazon-opensearch-opensearch-3-9",
+      "date": "2026-11-23",
+      "source": "AWS News",
+      "category": "AIOps"
+    }
+  ]
+}
